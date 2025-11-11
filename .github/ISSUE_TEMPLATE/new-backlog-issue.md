@@ -1,7 +1,7 @@
 ---
 name: New backlog issue
 about: New feature added to backlog
-title: "[feat]  Feature"
+title: "US Issue or TT Issue"
 labels: ''
 assignees: ''
 
@@ -9,7 +9,7 @@ assignees: ''
 
 # Description
 
-**user story** : AS a [role], I want [feature] so that [benefit]
+**user story** : As a [role], I want [feature] so that [benefit]
 
 ## Acceptance criteria
 
@@ -17,7 +17,13 @@ assignees: ''
 ---
 # Priority and estimates
 
-**priority** : low medium high critical
+<!-- Select one priority by marking [x] and leave the others blank -->
+**priority** :
+- [ ] low (not planned)
+- [ ] medium (add in next sprint)
+- [ ] high (add in current sprint)
+- [ ] critical (add in current sprint top priority)
+
 **estimate** : X story points
 
 cf [resource](https://teamhood.com/agile/story-point-estimation-table/) for story points
