@@ -1,121 +1,248 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transcendence</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-	<script src="/tailwind.config.js"></script>
-    <style>
-        .rotate-180 {
-            transform: rotate(180deg);
-            transition: transform 0.5s ease;
-        }
-    </style>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Auth - Connexion / Inscription</title>
+	<style>
+		:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0}
+		body{display:flex;align-items:center;justify-content:center;height:100vh;background:#f3f6fb;color:#111}
+		.container{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:900px;max-width:96%;padding:28px}
+		.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 6px 18px rgba(20,30,60,0.08)}
+		h2{margin:0 0 12px;font-size:18px}
+		label{display:block;font-size:13px;margin-top:10px}
+		input[type="text"],input[type="password"]{width:100%;padding:10px;margin-top:6px;border:1px solid #d4dce6;border-radius:6px;box-sizing:border-box}
+		button{margin-top:16px;padding:10px 14px;border:none;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer}
+		button:disabled{opacity:.6;cursor:default}
+		.msg{margin-top:12px;font-size:13px}
+		.success{color:green}
+		.error{color:#b91c1c}
+		.small{font-size:12px;color:#666;margin-top:8px}
+		@media (max-width:720px){.container{grid-template-columns:1fr;}}
+	</style>
 </head>
-<body class="bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 min-h-screen">
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-        <div id="particles" class="absolute inset-0"></div>
-    </div>
+<body>
 
-    <div class="relative z-10 flex flex-col items-center justify-center min-h-screen px-4">
+	<div class="container">
+		<div class="card" id="loginCard">
+			<h2>Connexion</h2>
+			<form id="loginForm">
+				<label for="loginUsername">Nom d'utilisateur</label>
+				<input id="loginUsername" name="username" type="text" required autocomplete="username" />
+				<label for="loginPassword">Mot de passe</label>
+				<input id="loginPassword" name="password" type="password" required autocomplete="current-password" />
+				<button type="submit" id="loginBtn">Connexion</button>
+				<div class="msg" id="loginMsg"></div>
+				<div class="small">Envoi POST vers: <code>/api/auth/login</code></div>
+			</form>
+		</div>
 
-			
-        <div class="text-center space-y-8 animate-float">
-            <div class="inline-block">
-                <h1 class="text-7xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 animate-glow">
-                    🎮
-                </h1>
-            </div>
-            
-            <h2 class="text-5xl md:text-7xl font-bold text-white">
-                Transcendence
-            </h2>
-            
-            <p class="text-xl md:text-2xl text-purple-200 max-w-2xl mx-auto">
-                Your gaming platform is initializing...
-            </p>
+		<div class="card" id="registerCard">
+			<h2>Inscription</h2>
+			<form id="registerForm">
+				<label for="regUsername">Nom d'utilisateur</label>
+				<input id="regUsername" name="username" type="text" required autocomplete="username" />
+				<label for="regEmail">Email</label>
+				<input id="regEmail" name="email" type="text" required autocomplete="email" />
+				<label for="regPassword">Mot de passe</label>
+				<input id="regPassword" name="password" type="password" required autocomplete="new-password" />
+				<button type="submit" id="regBtn">S'inscrire</button>
+				<div class="msg" id="regMsg"></div>
+				<div class="small">Envoi POST vers: <code>/api/auth/register</code></div>
+			</form>
+		</div>
 
-            <div id="box-status"; class="bg-white/10 backdrop-blur-lg rounded-2xl p-8 max-w-2xl mx-auto border border-white/20 shadow-2xl">
+		<div class="card" id="logoutCard">
+			<h2>Logout</h2>
+			<button id="logoutBtn">Se déconnecter</button>
+			<div class="msg" id="logoutMsg"></div>
+		</div>
+		<script>
+			document.getElementById('logoutBtn').addEventListener('click', async () => {
+				const logoutMsg = document.getElementById('logoutMsg');
+				logoutMsg.textContent = ''; logoutMsg.className = 'msg';
+				try {
+					const res = await fetch('/api/auth/logout', {
+						method: 'POST',
+						credentials: 'include',
+					});
+					if (res.ok) {
+						logoutMsg.textContent = 'Déconnexion réussie';
+						logoutMsg.classList.add('success');
+					} else {
+						logoutMsg.textContent = `Erreur (${res.status}) lors de la déconnexion`;
+						logoutMsg.classList.add('error');
+					}
+				} catch (err) {
+					logoutMsg.textContent = 'Requête impossible: ' + err.message;
+					logoutMsg.classList.add('error');
+				}
+			});
+		</script>
 
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-white font-medium">System Status</span>
-                        <span id="status" class="px-3 py-1 rounded-full text-sm font-semibold bg-green-500 text-white">
-                            ✓ Online
-                        </span>
-                    </div>
-                    
-                    <div class="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                    
-                    <div class="space-y-3 text-left">
-						<div class="flex items-center opacity-50">
+		<div class="card"><strong>Statut:</strong>
+			<span id="healthStatus">Chargement...</span>
+		<script>
+			fetch('/health')
+				.then(res => {
+					const statusElem = document.getElementById('healthStatus');
+					if (res.ok) {
+						statusElem.textContent = 'OK';
+						statusElem.style.color = 'green';
+					} else {
+						statusElem.textContent = `Erreur (${res.status})`;
+						statusElem.style.color = 'red';
+					}
+				})
+				.catch(() => {
+					const statusElem = document.getElementById('healthStatus');
+					statusElem.textContent = 'Inaccessible';
+					statusElem.style.color = 'red';
+				});
+		</script>
 
-						  <div class="flex items-center space-x-3">
-							<div id="nginx-status" class="w-3 h-3 rounded-full bg-gray-400"></div>
-							<span class="text-purple-200">Nginx Service</span>
-							<span class="text-gray-400 text-sm font-mono">Pending</span>
-						  </div>
-						  <button class="ml-auto text-gray-400 text-sm font-mono">test</button>
-						</div>
+		<div class="card" id="token">
+			<h2>Get Token in cookies</h2>
+			<span id="tokenValue">Chargement...</span>
+			<button id="refreshTokenBtn">Rafraîchir</button>
+		<script>
+			function getCookie(name) {
+				const value = `; ${document.cookie}`;
+				const parts = value.split(`; ${name}=`);
+				if (parts.length === 2) return parts.pop().split(';').shift();
+			}
+			const tokenElem = document.getElementById('tokenValue');
+			const token = getCookie('token');
+			if (token) {
+				tokenElem.textContent = token;
+				tokenElem.style.color = 'green';
+			} else {
+				tokenElem.textContent = 'Aucun token trouvé';
+				tokenElem.style.color = 'red';
+			}
 
-						<div class="flex items-center opacity-50">
-						  <div class="flex items-center space-x-3">
-							<div id="api-status" class="w-3 h-3 rounded-full bg-gray-400"></div>
-							<span class="text-purple-200">API Service</span>
-							<span class="text-gray-400 text-sm font-mono">Pending</span>
-						  </div>
-						  <button class="ml-auto text-gray-400 text-sm font-mono">test</button>
-						</div>
+			document.getElementById('refreshTokenBtn').addEventListener('click', () => {
+				console.log(document.cookie);
+				const token = getCookie('token');
+				if (token) {
+					tokenElem.textContent = token;
+					tokenElem.style.color = 'green';
+				} else {
+					tokenElem.textContent = 'Aucun token trouvé';
+					tokenElem.style.color = 'red';
+				}
+			});
+		</script>
+		</div>
+	</div>
 
-						<div class="flex items-center opacity-50">
-						  <div class="flex items-center space-x-3">
-							<div class="w-3 h-3 rounded-full bg-gray-400"></div>
-							<span class="text-purple-200">Game Service</span>
-							<span class="text-gray-400 text-sm font-mono">Pending</span>
-						  </div>
-						  <button class="ml-auto text-gray-400 text-sm font-mono">test</button>
-						</div>
-                        
-						<div class="flex items-center opacity-50">
-						  <div class="flex items-center space-x-3">
-							<div id="users-status" class="w-3 h-3 rounded-full bg-gray-400"></div>
-							<span class="text-purple-200">User management</span>
-							<span class="text-gray-400 text-sm font-mono">Pending</span>
-						  </div>
-						  <button class="ml-auto text-gray-400 text-sm font-mono">test</button>
-						</div>
+		<div class="card" id="me">
+			<h2>Me</h2>
+			<button id="meBtn">Obtenir les informations de l'utilisateur connecté</button>
+			<div class="msg" id="meMsg"></div>
+		</div>
 
-						<div class="flex items-center opacity-50">
-						  <!-- Left side: status dot + labels -->
-						  <div class="flex items-center space-x-3">
-							<div id="redis-status" class="w-3 h-3 rounded-full bg-gray-400"></div>
-							<span class="text-purple-200">Redis BROKER</span>
-							<span class="text-gray-400 text-sm font-mono">Pending</span>
-						  </div>
-						  <button class="ml-auto text-gray-400 text-sm font-mono">test</button>
-						</div>
-	
-                    </div>
-                </div>
-            </div>
 
-            <div class="flex flex-wrap gap-4 justify-center">
-                <a href="/health" class="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-purple-500/50">
-                    Health Check
-                </a>
-                <button id="refresh-btn" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-blue-500/50">
-                    Refresh Status
-                </button>
-            </div>
+	</div>
 
-            <div class="text-sm text-purple-300">
-                <p>Server Time: <span id="server-time" class="font-mono"></span></p>
-                <p class="mt-2">Uptime: <span id="uptime" class="font-mono">00:00:00</span></p>
-            </div>
-        </div>
-    </div>
+	<script>
+		const loginForm = document.getElementById('loginForm');
+		const registerForm = document.getElementById('registerForm');
+		const loginMsg = document.getElementById('loginMsg');
+		const regMsg = document.getElementById('regMsg');
+		const loginBtn = document.getElementById('loginBtn');
+		const regBtn = document.getElementById('regBtn');
+		const meBtn = document.getElementById('meBtn');
+		const meMsg = document.getElementById('meMsg');
 
-    <script src="app.js"></script>
+		async function postJson(url, body) {
+			const res = await fetch(url, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				// include credentials so cookies set by the gateway/auth are accepted by the browser
+				credentials: 'include',
+				body: JSON.stringify(body),
+			});
+			const text = await res.text();
+			// try parse json, fallback to text
+			try { return { ok: res.ok, status: res.status, data: JSON.parse(text) }; }
+			catch { return { ok: res.ok, status: res.status, data: text }; }
+		}
+
+		loginForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			loginMsg.textContent = ''; loginMsg.className = 'msg';
+			loginBtn.disabled = true;
+			const username = document.getElementById('loginUsername').value.trim();
+			const password = document.getElementById('loginPassword').value;
+			try {
+				const result = await postJson('/api/auth/login', { username, password });
+				if (result.ok) {
+					loginMsg.textContent = 'Connexion réussie';
+					loginMsg.classList.add('success');
+					console.log('Données reçues:', result.data);
+				} else {
+					loginMsg.textContent = `Erreur (${result.status}): ${JSON.stringify(result.data)}`;
+					loginMsg.classList.add('error');
+				}
+			} catch (err) {
+				loginMsg.textContent = 'Connexion impossible: ' + err.message;
+				loginMsg.classList.add('error');
+			} finally {
+				loginBtn.disabled = false;
+			}
+		});
+
+		registerForm.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			regMsg.textContent = ''; regMsg.className = 'msg';
+			regBtn.disabled = true;
+			const username = document.getElementById('regUsername').value.trim();
+			const email = document.getElementById('regEmail').value.trim();
+			const password = document.getElementById('regPassword').value;
+			try {
+				const result = await postJson('/api/auth/register', { username, email, password });
+				if (result.ok) {
+					regMsg.textContent = 'Inscription réussie';
+					regMsg.classList.add('success');
+					console.log('Données reçues:', result.data);
+				} else {
+					regMsg.textContent = `Erreur (${result.status}): ${JSON.stringify(result.data)}`;
+					regMsg.classList.add('error');
+				}
+			} catch (err) {
+				regMsg.textContent = 'Requête impossible: ' + err.message;
+				regMsg.classList.add('error');
+			} finally {
+				regBtn.disabled = false;
+			}
+		});
+
+		meBtn.addEventListener('click', async () => {
+			meMsg.textContent = ''; meMsg.className = 'msg';
+			meBtn.disabled = true;
+			try {
+				const res = await fetch('/api/auth/me', {
+					method: 'GET',
+					credentials: 'include',
+				});
+				const text = await res.text();
+				let data;
+				try { data = JSON.parse(text); } catch { data = text; }
+				if (res.ok) {
+					meMsg.textContent = 'Données reçues: ' + JSON.stringify(data);
+					meMsg.classList.add('success');
+				} else {
+					meMsg.textContent = `Erreur (${res.status}): ${JSON.stringify(data)}`;
+					meMsg.classList.add('error');
+				}
+			} catch (err) {
+				meMsg.textContent = 'Requête impossible: ' + err.message;
+				meMsg.classList.add('error');
+			} finally {
+				meBtn.disabled = false;
+			}
+		});
+	</script>
 </body>
 </html>

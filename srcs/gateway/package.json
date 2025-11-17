@@ -1,0 +1,22 @@
+{
+  "name": "transcendance",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"tsc -p tsconfig.json -w\" \"nodemon --watch dist --exec node dist/index.js\"",
+    "build": "tsc -p tsconfig.json",
+    "start": "tsc -p tsconfig.json && node dist/index.js"
+  },
+  "devDependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "@fastify/cors": "^11.1.0",
+    "@types/node": "^24.10.1",
+    "@fastify/jwt": "^10.0.0",
+    "concurrently": "^9.2.1",
+    "fastify": "^5.6.2",
+    "nodemon": "^3.1.11",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}

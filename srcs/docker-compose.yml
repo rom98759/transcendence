@@ -17,41 +17,39 @@ services:
   # Main Fastify API
   api-gateway:
     build:
-      context: ./api
+      context: ./gateway
       dockerfile: Dockerfile
     container_name: api-gateway
     environment:
       - NODE_ENV=production
-      - REDIS_URL=redis://redis:6379
-      - DB_PATH=/data/app.db
     networks:
       - app-network
     restart: unless-stopped
 
   # Redis message broker
-  redis-broker:
-    build:
-      context: ./redis
-      dockerfile: Dockerfile
-    container_name: redis-broker
-    networks:
-      - app-network
-    restart: unless-stopped
+  # redis-broker:
+  #   build:
+  #     context: ./redis
+  #     dockerfile: Dockerfile
+  #   container_name: redis-broker
+  #   networks:
+  #     - app-network
+  #   restart: unless-stopped
 
-  users-management:
-    build:
-      context: ./usersdb
-      dockerfile: Dockerfile
-    container_name: users-management
-    environment:
-      - NODE_ENV=production
-      - REDIS_URL=redis://redis-broker:6379
-      - DB_PATH=/data/app.db
-    volumes:
-      - ${HOST_VOLUME_PATH}:/data
-    networks:
-      - app-network
-    restart: unless-stopped
+  # users-management:
+  #   build:
+  #     context: ./usersdb
+  #     dockerfile: Dockerfile
+  #   container_name: users-management
+  #   environment:
+  #     - NODE_ENV=production
+  #     - REDIS_URL=redis://redis-broker:6379
+  #     - DB_PATH=/data/app.db
+  #   volumes:
+  #     - ${HOST_VOLUME_PATH}:/data
+  #   networks:
+  #     - app-network
+  #   restart: unless-stopped
 
 networks:
   app-network:
