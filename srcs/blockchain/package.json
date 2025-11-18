@@ -1,0 +1,27 @@
+{
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/node": "^24.10.1",
+    "typescript": "^5.9.3"
+  },
+  "name": "blockchain",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsc -w & node --watch dist/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/formbody": "^8.0.2",
+    "@fastify/static": "^8.3.0",
+    "@fastify/view": "^11.1.1",
+    "better-sqlite3": "^12.4.1",
+    "ejs": "^3.1.10",
+    "fastify": "^5.6.2"
+  }
+}
