@@ -52,18 +52,6 @@ stop :
 down :
 	$(COMPOSE_CMD) -f srcs/docker-compose.yml down
 
-logs:
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml logs -f
-
-logs-nginx:
-	$(CONTAINER_CMD) logs -f nginx-proxy
-
-logs-api:
-	$(CONTAINER_CMD) logs -f api-gateway
-
-logs-auth:
-	$(CONTAINER_CMD) logs -f auth-service
-
 re : fclean all
 
 show:
