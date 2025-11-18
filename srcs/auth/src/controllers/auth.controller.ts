@@ -7,28 +7,6 @@ interface User {
   password: string;
 }
 
-export function registerRoutes(app: FastifyInstance) {
-  app.get("/me", async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      return meHandler.call(this, request, reply);
-    }
-  );
-
-  app.post("/register", async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      return registerHandler.call(this, request, reply);
-    }
-  );
-
-  app.post("/login", async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      return loginHandler.call(this, request, reply);
-    }
-  );
-
-  app.post("/logout", async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      return logoutHandler.call(this, request, reply);
-    }
-  );
-}
-
 export async function registerHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
   const { username, email, password } = request.body as User;
   this.log.info({ event: 'register_attempt', username, email });
@@ -63,7 +41,7 @@ export async function registerHandler(this: FastifyInstance, request: FastifyReq
     return reply.code(201).send({ result: { message: 'User registered successfully', id } });
   } catch (err: any) {
     this.log.error({ event: 'register_error', username, email, err: err?.message || err });
-    // Map DB/service error codes to HTTP responses
+    // Add errors handling
     if (err && err.code === 'USER_EXISTS') {
       return reply.code(400).send({ error: { message: err.message || 'User already exists', code: 'USER_EXISTS' } });
     }
@@ -77,7 +55,7 @@ export async function registerHandler(this: FastifyInstance, request: FastifyReq
       return reply.code(400).send({ error: { message: 'Data conflicts with uniqueness constraints', code: 'UNIQUE_VIOLATION' } });
     }
 
-    // Fallback: internal server error
+    // Else internal server error
     return reply.code(500).send({ error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' } });
   }
 }

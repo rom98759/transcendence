@@ -5,7 +5,7 @@
 
 set -e
 
-BASE_URL="http://localhost"
+BASE_URL="http://localhost:8080"
 API_URL="$BASE_URL/api"
 GATEWAY_URL="$BASE_URL/gateway"
 
