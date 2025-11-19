@@ -7,9 +7,10 @@ export async function buildApp() {
   const app = Fastify({
     logger: true,
   });
-
-  await registerRoutes(app);
+  
   await registerPlugins(app);
+  await registerRoutes(app);
+
   // registerErrorHandler(app);
 
   return app;

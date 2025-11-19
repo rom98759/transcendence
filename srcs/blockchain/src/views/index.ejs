@@ -1,7 +1,9 @@
 <%- include('header.ejs', {title}) %>
 
+  <h1><%= message %></h1>
 <div class="container">
   
+  <div class="card">
   <form action="" method="post">
     <div class="mb-2">
       <label for="id">Id</label>
@@ -17,10 +19,10 @@
     </div>
     <button class="btn btn-primary">New data</button>
   </form>
+  </div> 
 
-  <h1><%= message %></h1>
 
-  <div>
+  <div class="card">
   <% for (const row of datadb) { %>
       <li>
         ID: <%= row.id %> —
@@ -29,6 +31,57 @@
       </li>
     <% } %>
   </div> 
+
+		<!-- Carte Me -->
+		<div class="card" id="me">
+			<h2>Me</h2>
+			<button id="meBtn">Obtenir les informations de l'utilisateur connecté</button>
+			<div class="msg" id="meMsg"></div>
+		</div>
+		<script>
+			// Code de la carte Me
+			const meBtn = document.getElementById('meBtn');
+			const meMsg = document.getElementById('meMsg');
+
+			meBtn.addEventListener('click', async () => {
+				meMsg.textContent = ''; meMsg.className = 'msg';
+				meBtn.disabled = true;
+				try {
+					const res = await fetch('/me', {
+						method: 'GET',
+						credentials: 'include',
+					});
+					const text = await res.text();
+					let data;
+					try { data = JSON.parse(text); } catch { data = text; }
+					if (res.ok) {
+                    if (Array.isArray(data)) {
+                        // Construire une liste <ul> propre
+                        const ul = document.createElement('ul');
+
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = `ID: ${item.id} — ${item.first_name} ${item.last_name}`;
+                            ul.appendChild(li);
+                        });
+
+                        meMsg.innerHTML = '';   // on vide le contenu
+                        meMsg.appendChild(ul);  // on insère la liste
+                    } else {
+                        // Pour un simple objet
+                        meMsg.textContent = 'Données: ' + JSON.stringify(data);
+                    }
+
+                    meMsg.classList.add('success');
+                    }				
+                } catch (err) {
+					meMsg.textContent = 'Requête impossible: ' + err.message;
+					meMsg.classList.add('error');
+				} finally {
+					meBtn.disabled = false;
+				}
+			});
+		</script>
 </div>
 
 <%- include('footer.ejs') %>

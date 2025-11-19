@@ -4,6 +4,22 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><%= title %></title>
-    <link rel="stylesheet" href="/style.css">
+	<style>
+		:root{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0}
+		body{display:flex;align-items:center;justify-content:center;height:100vh;background:#f3f6fb;color:#111}
+		.container{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:900px;max-width:96%;padding:28px}
+		.card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 6px 18px rgba(20,30,60,0.08)}
+		h2{margin:0 0 12px;font-size:18px}
+		label{display:block;font-size:13px;margin-top:10px}
+		input[type="text"],input[type="password"]{width:100%;padding:10px;margin-top:6px;border:1px solid #d4dce6;border-radius:6px;box-sizing:border-box}
+		button{margin-top:16px;padding:10px 14px;border:none;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer}
+		button:disabled{opacity:.6;cursor:default}
+		.msg{margin-top:12px;font-size:13px}
+		.success{color:green}
+		.error{color:#b91c1c}
+		.small{font-size:12px;color:#666;margin-top:8px}
+		@media (max-width:720px){.container{grid-template-columns:1fr;}}
+	</style>
+    <!-- <link rel="stylesheet" href="/style.css"> -->
   </head>
   <body>

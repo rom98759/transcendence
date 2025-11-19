@@ -11,6 +11,11 @@ export async function listRows(_request: FastifyRequest, reply: FastifyReply) {
   });
 }
 
+export async function listRowsJSON(_request: FastifyRequest, reply: FastifyReply) {
+  const datadb = db.prepare("SELECT * FROM snapshot").all();
+  return reply.code(200).send(datadb);
+}
+
 export async function showRow(
   request: FastifyRequest<{ Params: { id: number } }>,
   reply: FastifyReply,
