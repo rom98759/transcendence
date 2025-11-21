@@ -63,18 +63,6 @@ app.addHook("onRequest", async (request: any, reply: any) => {
   }
 });
 
-// preHandler ajouter header interne : x-user-name (username dans DB) + x-user-id (id dans DB)
-app.addHook("preHandler", async (request: any, reply: any) => {
-  if (request.user) {
-    const username = request.user.username || null;
-    const id = request.user.sub || request.user.id || null;
-    if (username)
-       reply.header("x-user-name", username);
-    if (id !== null && id !== undefined)
-      reply.header("x-user-id", String(id));
-  }
-});
-
 // Décorateur requêtes internes : ajoute automatiquement
 // header `x-user-name` + `x-user-id` + cookies de fetchInternal dans proxyRequest
 app.decorate("fetchInternal", async (request: any, url: string, init: any = {}) => {
