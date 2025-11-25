@@ -31,6 +31,13 @@ export const ValidationSchemas = {
     message: "Either username or email must be provided",
     path: ["username"]
   }),
+
+  verify2FA: z.object({
+    identifier: z.string().min(1, "Username or email required"),
+    code: z.string()
+      .length(6, "Code must be exactly 6 digits")
+      .regex(/^\d{6}$/, "Code must contain only digits")
+  }),
 };
 
 // Helper pour validation avec log d'erreurs
@@ -55,3 +62,4 @@ export function validateRequest<T>(schema: z.ZodSchema<T>, data: unknown): {
 // Types dérivés automatiquement
 export type RegisterInput = z.infer<typeof ValidationSchemas.register>;
 export type LoginInput = z.infer<typeof ValidationSchemas.login>;
+export type Verify2FAInput = z.infer<typeof ValidationSchemas.verify2FA>;

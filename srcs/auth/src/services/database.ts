@@ -24,7 +24,10 @@ try {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT UNIQUE,
       email TEXT UNIQUE,
-      password TEXT
+      password TEXT,
+      twofa_enabled INTEGER DEFAULT 0,
+      twofa_code TEXT,
+      twofa_code_expires INTEGER
     );
   `);
 } catch (err) {
@@ -37,6 +40,9 @@ export interface DBUser {
   username: string;
   email?: string | null;
   password: string;
+  twofa_enabled?: number;
+  twofa_code?: string | null;
+  twofa_code_expires?: number | null;
 }
 
 // Prepare statements
@@ -44,6 +50,9 @@ const findByUsernameStmt = db.prepare('SELECT * FROM users WHERE username = ?');
 const findByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?');
 const findByIdentifierStmt = db.prepare('SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1');
 const insertUserStmt = db.prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
+const update2FACodeStmt = db.prepare('UPDATE users SET twofa_code = ?, twofa_code_expires = ? WHERE id = ?');
+const clear2FACodeStmt = db.prepare('UPDATE users SET twofa_code = NULL, twofa_code_expires = NULL WHERE id = ?');
+const toggle2FAStmt = db.prepare('UPDATE users SET twofa_enabled = ? WHERE id = ?');
 
 export function findUserByUsername(username: string): DBUser | null {
   try {
@@ -118,6 +127,39 @@ export function closeDatabase() {
 
 export function getDatabasePath() {
   return DB_PATH;
+}
+
+// Update 2FA code
+export function update2FACode(userId: number, code: string, expiresAt: number) {
+  try {
+    update2FACodeStmt.run(code, expiresAt, userId);
+  } catch (err) {
+    const error: any = new Error(`Error updating 2FA code: ${((err as any)?.message) || String(err)}`);
+    error.code = 'DB_UPDATE_2FA_CODE_ERROR';
+    throw error;
+  }
+}
+
+// Clear 2FA code
+export function clear2FACode(userId: number) {
+  try {
+    clear2FACodeStmt.run(userId);
+  } catch (err) {
+    const error: any = new Error(`Error clearing 2FA code: ${((err as any)?.message) || String(err)}`);
+    error.code = 'DB_CLEAR_2FA_CODE_ERROR';
+    throw error;
+  }
+}
+
+// Toggle 2FA enabled/disabled
+export function toggle2FA(userId: number, enabled: boolean) {
+  try {
+    toggle2FAStmt.run(enabled ? 1 : 0, userId);
+  } catch (err) {
+    const error: any = new Error(`Error toggling 2FA: ${((err as any)?.message) || String(err)}`);
+    error.code = 'DB_TOGGLE_2FA_ERROR';
+    throw error;
+  }
 }
 
 // DEV ONLY - À supprimer en production
