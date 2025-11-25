@@ -53,6 +53,8 @@ user:
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build users-management
 game:
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build game-service
+block:
+	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build blockchain-service
 build:
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml build
 
@@ -83,17 +85,40 @@ show:
 	$(CONTAINER_CMD) ps
 	$(CONTAINER_CMD) network ls
 
-clean : stop
-	$(CONTAINER_CMD) system prune -f
+# clean : stop
+# 	$(CONTAINER_CMD) system prune -f
+# 	@if [ -n "$$($(CONTAINER_CMD) ps -q)" ]; then $(CONTAINER_CMD) stop $$($(CONTAINER_CMD) ps -q); else echo "No running containers to stop."; fi
+# 	@if [ -n "$$($(CONTAINER_CMD) ps -aq)" ]; then $(CONTAINER_CMD) rm -f $$($(CONTAINER_CMD) ps -aq); else echo "No running containers to remove."; fi
+# 	@if [ -n "$$($(CONTAINER_CMD) -q)" ]; then $(CONTAINER_CMD) rmi -f $$($(CONTAINER_CMD) images -q); else echo "No images to remove."; fi
+# 	@if [ -n "$$($(CONTAINER_CMD) volume ls -q)" ]; then $(CONTAINER_CMD) volume rm $$($(CONTAINER_CMD) volume ls -q); else echo "No volumes to remove."; fi
+#
+# fclean: clean
+# 	$(CONTAINER_CMD) system prune -a --volumes --force
+# 	$(CONTAINER_CMD) network prune
+# 	rm -fr $(VOLUMES_PATH)
+
+# Clean WITHOUT deleting images → SAFE
+clean:
+	@echo "Stopping and removing containers…"
 	@if [ -n "$$($(CONTAINER_CMD) ps -q)" ]; then $(CONTAINER_CMD) stop $$($(CONTAINER_CMD) ps -q); else echo "No running containers to stop."; fi
 	@if [ -n "$$($(CONTAINER_CMD) ps -aq)" ]; then $(CONTAINER_CMD) rm -f $$($(CONTAINER_CMD) ps -aq); else echo "No running containers to remove."; fi
-	@if [ -n "$$($(CONTAINER_CMD) -q)" ]; then $(CONTAINER_CMD) rmi -f $$($(CONTAINER_CMD) images -q); else echo "No images to remove."; fi
-	@if [ -n "$$($(CONTAINER_CMD) volume ls -q)" ]; then $(CONTAINER_CMD) volume rm $$($(CONTAINER_CMD) volume ls -q); else echo "No volumes to remove."; fi
+	@echo "Pruning unused resources (SAFE)…"
+	$(CONTAINER_CMD) system prune -f
 
+# Full clean WITH volumes, but NOT images
 fclean: clean
+	@echo "Removing volumes and networks…"
+	-$(CONTAINER_CMD) volume prune -f
+	-$(CONTAINER_CMD) network prune -f
+	rm -rf $(VOLUMES_PATH)
+
+# Dangerous full reset
+reset-hard:
+	@echo "WARNING: This will delete ALL images, ALL volumes and ALL networks"
+	sleep 3
 	$(CONTAINER_CMD) system prune -a --volumes --force
-	$(CONTAINER_CMD) network prune
-	rm -fr $(VOLUMES_PATH)
+	rm -rf $(VOLUMES_PATH)
+
 # ifeq ($(OS), Darwin)
 # 	colima stop && colima delete
 # endif

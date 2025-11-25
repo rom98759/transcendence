@@ -68,11 +68,11 @@ services:
       start_period: 10s
 
   # Blockchain service
-  blockchain:
+  blockchain-service:
     build:
       context: ./blockchain
       dockerfile: Dockerfile
-    container_name: blockchain
+    container_name: blockchain-service
     expose:
       - "3005"
     environment:
