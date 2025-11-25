@@ -8,14 +8,14 @@ export function registerBlockRoutes(app: FastifyInstance) {
   // Regular HTTP routes
   app.get("/health", async (request: FastifyRequest, reply: FastifyReply) => {
     app.log.info({ event: 'blockchain_health', remote: 'blockchain', url: '/health' });
-    const res = await proxyRequest(app, request, reply, "http://blockchain:3005/health");
+    const res = await proxyRequest(app, request, reply, "http://blockchain-service:3005/health");
     return res;
   });
 
   app.all("/*", async (request: FastifyRequest, reply: FastifyReply) => {
     const rawPath = (request.params as any)['*'];
     const cleanPath = rawPath.replace(/^api\/block\//, ""); // 🔥 FIX
-    const url = `http://blockchain:3005/${cleanPath}`;
+    const url = `http://blockchain-service:3005/${cleanPath}`;
     const queryString = new URL(request.url, 'http://localhost').search;
     const fullUrl = `${url}${queryString}`;
 
