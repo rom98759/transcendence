@@ -1,7 +1,9 @@
 import { config } from 'dotenv';
 import { bool, cleanEnv, num, str } from "envalid";
 
-config();
+config({path: "../.env"});
+
+console.log(process.env);
 export const appenv = cleanEnv(process.env, {
   NODE_ENV: str({ choices: ['development', 'test', 'production', 'staging'] }),
   LOG_ENABLED: bool( {default: true}),

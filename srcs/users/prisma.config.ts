@@ -1,4 +1,4 @@
-import { appenv } from "src/config";
+import { appenv } from "../users/src/config";
 
 import { defineConfig } from "prisma/config";
 
