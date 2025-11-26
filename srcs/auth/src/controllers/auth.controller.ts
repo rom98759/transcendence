@@ -2,6 +2,33 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
 import * as authService from "../services/auth.service.js";
 import { logger } from "../utils/logger.js";
 import { ValidationSchemas } from "../utils/validation.js";
+import type { DBUser } from "../services/database.js";
+
+// Fonction helper pour générer et envoyer le JWT
+function generateAndSendJWT(
+  fastify: FastifyInstance,
+  reply: FastifyReply,
+  user: DBUser,
+  eventName: string
+) {
+  const payload = {
+    sub: user.id || 0,
+    username: user.username,
+  };
+
+  const token = fastify.jwt.sign(payload, { expiresIn: '1h' });
+  logger.info({ event: eventName, userId: user.id, username: user.username });
+
+  return reply.setCookie("token", token, {
+    httpOnly: true,
+    secure: (globalThis as any).process?.env?.NODE_ENV === 'production',
+    sameSite: "strict",
+    path: "/",
+    maxAge: 60 * 60,        // 1h comme le JWT
+  })
+    .code(200)
+    .send({ result: { message: 'Login successful'} });
+}
 
 export async function registerHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
   // Validation Zod
@@ -93,48 +120,16 @@ export async function loginHandler(this: FastifyInstance, request: FastifyReques
   try {
     const user = authService.findUser(identifier);
     const valid = user && authService.validateUser(identifier, password);
-    if (!valid) {
+    if (!valid || !user) {
       logger.warn({ event: 'login_failed', identifier, reason: 'invalid_credentials' });
       return reply.code(401).send({ error: { message: 'Invalid credentials', code: 'INVALID_CREDENTIALS' } });
     }
 
-	// const payload = {
-    //   sub: user.id || 0,
-    //   username: user.username,
-    // };
-
-    // const token = this.jwt.sign(payload, { expiresIn: '1h' });
-    // logger.info({ event: 'login_success', identifier });
-    // reply.setCookie("token", token, {
-    //   httpOnly: true,
-    //   secure: (globalThis as any).process?.env?.NODE_ENV === 'production',
-    //   sameSite: "strict",
-    //   path: "/",
-    //   maxAge: 60 * 60,        // 1h comme le JWT
-    // })
-    //   .code(200)
-    //   .send({ result: { message: 'Login successful' } });
-
     // Vérifier si le 2FA est activé pour cet utilisateur
-    if (!user.twofa_enabled) {
+    if (!user.twofa_enabled || user.twofa_enabled === 0) {
       // 2FA désactivé → Connexion directe avec JWT
-      const payload = {
-        sub: user.id || 0,
-        username: user.username,
-      };
-
-      const token = this.jwt.sign(payload, { expiresIn: '1h' });
-      logger.info({ event: 'login_success_no_2fa', identifier, userId: user.id });
-
-      return reply.setCookie("token", token, {
-        httpOnly: true,
-        secure: (globalThis as any).process?.env?.NODE_ENV === 'production',
-        sameSite: "strict",
-        path: "/",
-        maxAge: 60 * 60,        // 1h comme le JWT
-      })
-        .code(200)
-        .send({ result: { message: 'Login successful', token } });
+      logger.info({ event: 'login_no_2fa_required', identifier, userId: user.id });
+      return generateAndSendJWT(this, reply, user, 'login_success_no_2fa');
     }
 
     // 2FA activé → Vérifier que l'utilisateur a un email
@@ -204,24 +199,8 @@ export async function verify2FAHandler(this: FastifyInstance, request: FastifyRe
       return reply.code(401).send({ error: { message: 'Invalid or expired 2FA code', code: 'INVALID_2FA_CODE' } });
     }
 
-    // Générer le token JWT
-    const payload = {
-      sub: user.id || 0,
-      username: user.username,
-    };
-
-    const token = this.jwt.sign(payload, { expiresIn: '1h' });
-    logger.info({ event: 'verify_2fa_success', identifier, userId: user.id });
-
-    reply.setCookie("token", token, {
-      httpOnly: true,
-      secure: (globalThis as any).process?.env?.NODE_ENV === 'production',
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60,        // 1h comme le JWT
-    })
-      .code(200)
-      .send({ result: { message: 'Login successful', token } });
+    // Code 2FA valide → Générer et envoyer le JWT
+    return generateAndSendJWT(this, reply, user, 'verify_2fa_success');
   } catch (err: any) {
     logger.error({ event: 'verify_2fa_error', identifier, err: err?.message || err });
     return reply.code(500).send({ error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' } });
@@ -230,11 +209,14 @@ export async function verify2FAHandler(this: FastifyInstance, request: FastifyRe
 
 // DEV ONLY - À supprimer
 export async function meHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-  const username = (request.headers as any)["x-user-name"] || null;
-  const idHeader = (request.headers as any)["x-user-id"] || null;
-  const id = idHeader ? Number(idHeader) : null;
+  const user = authService.findByUsername((request.headers as any)["x-user-name"] || null);
+  const username = user?.username || null;
+  const id = user?.id || null;
+  const email = user?.email || null;
+  const is2FAEnabled = user?.twofa_enabled || null;
   logger.info({ event: 'me_request_dev_only', user: username, id });
-  return reply.code(200).send({ data: { user: username ? { id, username } : null } });
+
+  return reply.code(200).send({ data: { user: username ? { id, username, email, is2FAEnabled } : null } });
 }
 
 export async function listAllUsers(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {

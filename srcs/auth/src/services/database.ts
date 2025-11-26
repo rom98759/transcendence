@@ -49,7 +49,7 @@ export interface DBUser {
 const findByUsernameStmt = db.prepare('SELECT * FROM users WHERE username = ?');
 const findByEmailStmt = db.prepare('SELECT * FROM users WHERE email = ?');
 const findByIdentifierStmt = db.prepare('SELECT * FROM users WHERE username = ? OR email = ? LIMIT 1');
-const insertUserStmt = db.prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
+const insertUserStmt = db.prepare('INSERT INTO users (username, email, password, twofa_enabled) VALUES (?, ?, ?, 0)');
 const update2FACodeStmt = db.prepare('UPDATE users SET twofa_code = ?, twofa_code_expires = ? WHERE id = ?');
 const clear2FACodeStmt = db.prepare('UPDATE users SET twofa_code = NULL, twofa_code_expires = NULL WHERE id = ?');
 const toggle2FAStmt = db.prepare('UPDATE users SET twofa_enabled = ? WHERE id = ?');

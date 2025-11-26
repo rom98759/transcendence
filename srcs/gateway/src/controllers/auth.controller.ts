@@ -71,6 +71,34 @@ export async function registerHandler(this: FastifyInstance, request: FastifyReq
   return res;
 }
 
+export async function verify2FAHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+  const startTime = Date.now();
+  const identifier = (request.body as any)?.identifier || 'unknown';
+  const sanitizedBody = logUtils.sanitizeForLog(request.body);
+
+  logger.info({
+    event: 'auth_verify_2fa_attempt',
+    identifier,
+    body: sanitizedBody
+  });
+
+  const res = await proxyRequest(this, request, reply, `${AUTH_SERVICE_URL}/verify-2fa`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(request.body),
+  });
+
+  logger.info({
+    event: 'auth_verify_2fa_result',
+    status: reply.statusCode,
+    identifier,
+    success: reply.statusCode === 200,
+    duration: Date.now() - startTime
+  });
+
+  return res;
+}
+
 export async function logoutHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
   const user = (request.headers as any)['x-user-name'] || null;
 
@@ -93,7 +121,101 @@ export async function logoutHandler(this: FastifyInstance, request: FastifyReque
   return res;
 }
 
+// ============================================
+// Handlers de gestion 2FA
+// ============================================
+
+export async function enable2FAHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+  const user = (request.headers as any)['x-user-name'] || null;
+  const userId = (request.headers as any)['x-user-id'] || null;
+
+  logger.info({
+    event: 'auth_enable_2fa_attempt',
+    user,
+    userId
+  });
+
+  const res = await proxyRequest(this, request, reply, `${AUTH_SERVICE_URL}/2fa/enable`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-user-name": user || '',
+      "x-user-id": userId || ''
+    },
+    body: JSON.stringify({})
+  });
+
+  logger.info({
+    event: 'auth_enable_2fa_result',
+    status: reply.statusCode,
+    user,
+    success: reply.statusCode === 200
+  });
+
+  return res;
+}
+
+export async function disable2FAHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+  const user = (request.headers as any)['x-user-name'] || null;
+  const userId = (request.headers as any)['x-user-id'] || null;
+
+  logger.info({
+    event: 'auth_disable_2fa_attempt',
+    user,
+    userId
+  });
+
+  const res = await proxyRequest(this, request, reply, `${AUTH_SERVICE_URL}/2fa/disable`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-user-name": user || '',
+      "x-user-id": userId || ''
+    },
+    body: JSON.stringify({})
+  });
+
+  logger.info({
+    event: 'auth_disable_2fa_result',
+    status: reply.statusCode,
+    user,
+    success: reply.statusCode === 200
+  });
+
+  return res;
+}
+
+export async function get2FAStatusHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+  const user = (request.headers as any)['x-user-name'] || null;
+  const userId = (request.headers as any)['x-user-id'] || null;
+
+  logger.info({
+    event: 'auth_get_2fa_status',
+    user,
+    userId
+  });
+
+  const res = await proxyRequest(this, request, reply, `${AUTH_SERVICE_URL}/2fa/status`, {
+    method: "GET",
+    headers: {
+      "x-user-name": user || '',
+      "x-user-id": userId || ''
+    }
+  });
+
+  logger.info({
+    event: 'auth_get_2fa_status_result',
+    status: reply.statusCode,
+    user,
+    success: reply.statusCode === 200
+  });
+
+  return res;
+}
+
+// ============================================
 // DEV ONLY - À supprimer en production
+// ============================================
 export async function meHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
   // Route DEV ONLY - À supprimer en production
   logger.warn({

@@ -1,36 +1,10 @@
 import nodemailer from 'nodemailer';
 import * as db from './database.js';
 import { logger } from '../utils/logger.js';
+import { sendRealEmail } from '../utils/sendMail.js';
 
 const CODE_LENGTH = 6;
 const CODE_EXPIRATION_MINUTES = 5;
-
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
-// Fonction pour envoyer un email réel
-export async function sendRealEmail(to: string, code: string) {
-  const info = await transporter.sendMail({
-    from: `Transcendance <${process.env.EMAIL_FROM}>`,
-    to,
-    subject: "Code de connexion",
-    html: `
-      <h2>Connexion sécurisée</h2>
-      <p>Ton code 2FA :</p>
-      <h1 style="letter-spacing:5px">${code}</h1>
-      <p>Valable 5 minutes.</p>
-    `,
-  });
-
-  console.log("Email envoyé ✅ :", info.messageId);
-}
 
 /**
  * Génère un code 2FA aléatoire de 6 chiffres
