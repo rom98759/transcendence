@@ -7,7 +7,7 @@ import { apiRoutes, publicRoutes } from "./routes/gateway.routes.js";
 import { logger, optimizeErrorHandler } from "./utils/logger.js";
 
 const PUBLIC_HEALTH_ROUTES = ["/api/auth/health", "/api/game/health", "/api/block/health"];
-const PUBLIC_ROUTES = ["/api/auth/login", "/api/auth/register", "/api/game/sessions", ...PUBLIC_HEALTH_ROUTES];
+const PUBLIC_ROUTES = ["/api/auth/login", "/api/auth/register", "/api/game/sessions", "/api/auth/verify-2fa", ...PUBLIC_HEALTH_ROUTES];
 
 const app = fastify({
   logger: false, // Utiliser notre logger
