@@ -43,6 +43,9 @@ export function registerGameRoutes(app: FastifyInstance) {
 
     const init: RequestInit = {
       method: request.method,
+      headers: {
+        'content-type': request.headers['content-type'] || 'application/json',
+      },
     };
 
     if (request.method !== "GET" && request.method !== "HEAD") {
