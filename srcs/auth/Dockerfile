@@ -27,7 +27,7 @@ WORKDIR /app
 
 # Installer wget pour health check
 RUN apk add --no-cache wget
-
+RUN apk add --no-cache python3 make g++
 # Copier uniquement package.json pour installer deps prod
 COPY package.json package-lock.json ./
 

@@ -1,0 +1,17 @@
+  export async function newGameSession(request: FastifyRequest, reply: FastifyReply) {
+    const sessionId = randomUUID();
+    const game = new PongGame(sessionId);
+
+    gameSessions.set(sessionId, game);
+    playerConnections.set(sessionId, new Set());
+    
+    request.log.info(`[${sessionId}] New game session created`);
+
+    return {
+      status: 'success',
+      message: 'Game session created',
+      sessionId,
+      wsUrl: `/game/${sessionId}`
+    };
+  }
+

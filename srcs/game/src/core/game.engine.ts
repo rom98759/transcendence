@@ -28,7 +28,7 @@ class Ball {
     this.acc = new Vector2(0, 0);
     this.radius = radius;
     this.speedLimit = maxSpeed;
-    this.mass = 10;
+    this.mass = mass;
   }
 
   apply(force: Vector2) {
@@ -131,7 +131,7 @@ export class PongGame {
       clearInterval(this.gameLoopInterval);
       this.gameLoopInterval = null;
     }
-    this.status = "waiting";
+    this.status = "finished";
     console.log(`[${this.sessionId}] Game stopped`);
   }
 

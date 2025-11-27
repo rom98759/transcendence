@@ -1,3 +1,4 @@
+
 // Message types
 export interface ClientMessage {
   type: 'paddle' | 'start' | 'stop' | 'ping';

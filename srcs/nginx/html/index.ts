@@ -229,7 +229,37 @@ private createGameContainer(): void {
                     </button>
                 </div>
             </div>
-
+            <!-- Game Over dial box -->
+            <div id="game-over-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border-2 border-blue-500">
+                    <h2 class="text-3xl font-bold text-center mb-6 text-white">Game Over!</h2>
+                    
+                    <!-- Score Display -->
+                    <div class="mb-6 space-y-3">
+                        <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+                            <span class="text-lg text-gray-300">Player 1:</span>
+                            <span id="final-score-p1" class="text-2xl font-bold text-blue-400">0</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+                            <span class="text-lg text-gray-300">Player 2:</span>
+                            <span id="final-score-p2" class="text-2xl font-bold text-red-400">0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Winner Message -->
+                    <p id="winner-message" class="text-center text-xl mb-6 text-yellow-400"></p>
+                    
+                    <!-- Buttons -->
+                    <div class="flex gap-4">
+                        <button id="new-game-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
+                            New Game
+                        </button>
+                        <button id="close-dialog-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
             <!-- Game Canvas Area -->
             <div class="flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 py-8"> <!-- Removed flex-1, added py-8 -->
                 <div class="text-center space-y-6">
@@ -275,77 +305,53 @@ private createGameContainer(): void {
     `;
     document.body.appendChild(this.gameContainer);
 }
-    // private createGameContainer(): void {
-    //     this.gameContainer = document.createElement('div');
-    //     this.gameContainer.id = 'game-container';
-    //     this.gameContainer.className = 'hidden fixed inset-0 z-50 bg-black';
-    //     this.gameContainer.innerHTML = `
-    //         <div class="relative w-full min-h-full flex flex-col">
-    //             <!-- Game Header -->
-    //             <div class="bg-gradient-to-r from-purple-900 to-blue-900 p-4 flex justify-between items-center">
-    //                 <div class="flex items-center space-x-4">
-    //                     <h2 class="text-2xl font-bold text-white">Transcendence - Pong</h2>
-    //                     <div class="flex items-center space-x-2">
-    //                         <div id="game-connection-status" class="w-3 h-3 rounded-full bg-yellow-500"></div>
-    //                         <span id="game-connection-text" class="text-yellow-400 text-sm">Connecting...</span>
-    //                     </div>
-    //                 </div>
-    //                 <div class="flex items-center space-x-4">
-    //                     <button id="start-game-btn" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-    //                         START GAME
-    //                     </button>
-    //                     <button id="exit-game-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all">
-    //                         Exit
-    //                     </button>
-    //                 </div>
-    //             </div>
-    //
-    //             <!-- Game Canvas Area -->
-    //             <div class="flex-1 flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900">
-    //                 <div class="text-center space-y-6">
-    //                     <div class="relative">
-    //                         <canvas id="game-canvas" width="800" height="600" class="border-4 border-purple-500 rounded-lg shadow-2xl bg-black"></canvas>
-    //                     </div>
-    //
-    //                     <!-- Game Info -->
-    //                     <div class="bg-white/10 backdrop-blur-lg rounded-lg p-4 max-w-2xl mx-auto">
-    //                         <div class="flex justify-around text-white">
-    //                             <div class="text-center">
-    //                                 <p class="text-sm text-purple-300">Player 1</p>
-    //                                 <p id="player1-score" class="text-3xl font-bold">0</p>
-    //                             </div>
-    //                             <div class="text-center">
-    //                                 <p class="text-sm text-purple-300">Game Status</p>
-    //                                 <p id="game-status-text" class="text-xl font-semibold text-yellow-400">Ready</p>
-    //                             </div>
-    //                             <div class="text-center">
-    //                                 <p class="text-sm text-purple-300">Player 2</p>
-    //                                 <p id="player2-score" class="text-3xl font-bold">0</p>
-    //                             </div>
-    //                         </div>
-    //                     </div>
-    //
-    //                     <!-- Controls Info -->
-    //                     <div class="bg-white/5 backdrop-blur rounded-lg p-3 max-w-2xl mx-auto">
-    //                         <p class="text-gray-300 text-sm">
-    //                             Controls: <span class="text-purple-300 font-mono">W/S</span> for left paddle, 
-    //                             <span class="text-purple-300 font-mono">↑/↓</span> for right paddle
-    //                         </p>
-    //                     </div>
-    //
-    //                     <!-- Game Log -->
-    //                     <div class="bg-white/5 backdrop-blur rounded-lg p-4 max-w-2xl mx-auto">
-    //                         <h3 class="text-sm font-semibold text-purple-300 mb-2">Game Log</h3>
-    //                         <div id="game-log" class="h-24 overflow-y-auto space-y-1 text-left text-sm font-mono text-gray-300">
-    //                         </div>
-    //                     </div>
-    //                 </div>
-    //             </div>
-    //         </div>
-    //     `;
-    //     document.body.appendChild(this.gameContainer);
-    // }
-    //
+    private showGameOverDialog(gameData: GameState) {
+        const dialog = document.getElementById('game-over-dialog');
+        const scoreP1 = document.getElementById('final-score-p1');
+        const scoreP2 = document.getElementById('final-score-p2');
+        const winnerMsg = document.getElementById('winner-message');
+        
+        if (!dialog) return;
+        
+        // Update scores
+        if (gameData && gameData.scores) {
+            if (scoreP1) scoreP1.textContent = gameData.scores.left || 0;
+            if (scoreP2) scoreP2.textContent = gameData.scores.right || 0;
+            
+            // Determine winner
+            if (winnerMsg) {
+                if (gameData.scores.player1 > gameData.scores.player2) {
+                    winnerMsg.textContent = '🎉 Player 1 Wins!';
+                } else if (gameData.scores.player2 > gameData.scores.player1) {
+                    winnerMsg.textContent = '🎉 Player 2 Wins!';
+                } else {
+                    winnerMsg.textContent = "It's a Tie!";
+                }
+            }
+        }
+        
+        // Show dialog
+        dialog.classList.remove('hidden');
+        
+        // Setup button handlers
+        const newGameBtn = document.getElementById('new-game-btn');
+        const closeBtn = document.getElementById('close-dialog-btn');
+        
+        if (newGameBtn) {
+            newGameBtn.onclick = () => {
+                dialog.classList.add('hidden');
+                this.loadGame(true); // recreate WebSocket connection --> redondant, to be avoided
+            };
+        }
+        
+        if (closeBtn) {
+            closeBtn.onclick = () => {
+                dialog.classList.add('hidden');
+                this.drawWaitingScreen();
+            };
+        }
+    }
+
     private addGameLog(message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info'): void {
         const logContainer = document.getElementById('game-log');
         if (!logContainer) return;
@@ -445,11 +451,20 @@ private createGameContainer(): void {
 
     private handleServerMessage(message: ServerMessage): void {
         switch (message.type) {
-            case 'connected':
-                this.addGameLog(`Connected to session: ${message.sessionId}`, 'success');
-                if (message.data) {
+            case 'newSession':
+               if (message.data) {
+                    console.log(message);
                     this.gameState = message.data;
-                    this.drawWaitingScreen();
+                    console.log('Session ID:', message.sessionId);
+                    this.sessionId = message.sessionId;
+                    this.addGameLog(`Connected to new session: ${this.sessionId}`, 'success');
+                    if (this.gameState.status === 'waiting') {
+                      this.drawWaitingScreen();
+                    } else if (this.gameState.status === 'playing') {
+                      this.updateScores(message.data.scores);
+                      this.renderGame();
+                    }
+                    console.log('URL updated to:', window.location.pathname); // Verify it changed
                 }
                 break;
 
@@ -474,6 +489,17 @@ private createGameContainer(): void {
 
             case 'gameOver':
                 this.addGameLog(`Game Over! ${message.message || ''}`, 'warning');
+                const startBtn = document.getElementById('start-game-btn');
+                if (startBtn) {
+                  (startBtn as HTMLButtonElement).disabled = false;
+                }
+                this.drawWaitingScreen();
+                this.sessionId = null;
+
+                this.showGameOverDialog(this.gameState);
+                this.gameState = null;
+
+
                 const statusText = document.getElementById('game-status-text');
                 if (statusText) {
                     statusText.textContent = 'Game Over';
@@ -513,12 +539,12 @@ private createGameContainer(): void {
         }
     }
 
-    private async loadGame(): Promise<void> {
+    private async loadGame(createSocket: boolean): Promise<void> {
         try {
-            const startBtn = document.getElementById('gameBtn');
-            if (startBtn) {
-                startBtn.textContent = 'Connecting...';
-                startBtn.classList.add('opacity-50');
+            const gameBtn = document.getElementById('gameBtn');
+            if (gameBtn) {
+                gameBtn.textContent = 'Connecting...';
+                gameBtn.classList.add('opacity-50');
             }
 
             // Create game session via HTTP first
@@ -528,8 +554,6 @@ private createGameContainer(): void {
             });
 
             const data = await response.json();
-
-            console.log(data);
 
             if (response.ok && data.sessionId) {
                 this.sessionId = data.sessionId;
@@ -551,7 +575,8 @@ private createGameContainer(): void {
                 this.ctx = this.canvas?.getContext('2d') || null;
 
                 // Connect via WebSocket
-                await this.createWebSocketConnection(this.sessionId);
+                if (createSocket)
+                  await this.createWebSocketConnection(this.sessionId);
                 
                 this.addGameLog('Ready to play! Press START GAME', 'info');
                 this.drawWaitingScreen();
@@ -563,10 +588,10 @@ private createGameContainer(): void {
             console.error('Connection error:', error);
             alert('Failed to connect to game service. Please try again.');
             // console.log(data);
-            const startBtn = document.getElementById('gameBtn');
-            if (startBtn) {
-                startBtn.textContent = 'start again';
-                startBtn.classList.remove('opacity-50');
+            const gameBtn = document.getElementById('gameBtn');
+            if (gameBtn) {
+                gameBtn.textContent = 'start again';
+                gameBtn.classList.remove('opacity-50');
             }
         }
     }
@@ -582,7 +607,6 @@ private createGameContainer(): void {
             // Send start command via WebSocket
             this.sendWebSocketMessage({ type: 'start' });
             this.addGameLog('Game started!', 'success');
-
             if (startBtn) {
                 startBtn.textContent = 'Running';
             }
@@ -598,7 +622,7 @@ private createGameContainer(): void {
         }
     }
 
-    private updateScores(scores: { left: number; right: number }): void {
+    private updateScores(scores: Scores): void {
         const player1Score = document.getElementById('player1-score');
         const player2Score = document.getElementById('player2-score');
         
@@ -694,9 +718,10 @@ private createGameContainer(): void {
             mainContent.classList.remove('hidden');
         }
 
-        const startBtn = document.getElementById('start-btn');
+        const startBtn = document.getElementById('start-game-btn');
         if (startBtn) {
-            startBtn.textContent = 'test';
+            startBtn.textContent = 'PLAY';
+            (startBtn as HTMLButtonElement).disabled = false;
             startBtn.classList.remove('opacity-50');
         }
 
@@ -750,17 +775,10 @@ private createGameContainer(): void {
     }
 
     private setupEventListeners(): void {
-        const refreshBtn = document.getElementById('refresh-btn');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => {
-                this.animateRefresh(refreshBtn);
-                this.healthChecker.checkHealth();
-            });
-        }
 
-        const startBtn = document.getElementById('gameBtn');
-        if (startBtn) {
-            startBtn.addEventListener('click', () => this.loadGame());
+        const gameBtn = document.getElementById('gameBtn');
+        if (gameBtn) {
+            gameBtn.addEventListener('click', () => this.loadGame(true));
         }
 
         document.addEventListener('click', (e) => {
@@ -769,7 +787,9 @@ private createGameContainer(): void {
                 this.exitGame();
             }
             if (target.id === 'start-game-btn') {
-                this.startGameSession();
+                if (this.sessionId) {
+                  this.startGameSession();
+                }
                 console.log("start game");
             }
         });

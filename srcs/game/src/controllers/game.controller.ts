@@ -4,6 +4,34 @@ import { randomUUID } from 'crypto';
 import { gameSessions, playerConnections } from '../core/game.state.js'
 import { ServerMessage, ClientMessage } from '../core/game.types.js'
 
+  export async function newGameSession(request: FastifyRequest, reply: FastifyReply) {
+    const sessionId = randomUUID();
+    const game = new PongGame(sessionId);
+
+    gameSessions.set(sessionId, game);
+    playerConnections.set(sessionId, new Set());
+    
+    request.log.info(`[${sessionId}] New game session created`);
+
+    return {
+      status: 'success',
+      message: 'Game session created',
+      sessionId,
+      wsUrl: `/game/${sessionId}`
+    };
+  }
+
+  export async function healthCheck(request: FastifyRequest, reply: FastifyReply) {
+    return {
+      status: 'healthy',
+      service: 'websocket-game-service',
+      activeSessions: gameSessions.size,
+      activeConnections: Array.from(playerConnections.values())
+        .reduce((sum, conns) => sum + conns.size, 0),
+      timestamp: new Date().toISOString()
+    };
+  }
+
 // Remove closed connections
 function cleanupConnection(app: FastifyInstance, sessionId: string, ws: WebSocket) {
   const connections = playerConnections.get(sessionId);
@@ -55,25 +83,8 @@ export async function listGameSessions(request: FastifyRequest, reply: FastifyRe
     };
 }
 
-
-function handleIncomingMessage(this: FastifyInstance, ws: any, game: PongGame, sessionId: any)
+function handleIncomingMessage(this: FastifyInstance, ws: any, game: PongGame | undefined, sessionId: any)
 {
-      // broadcast gameState at 60FPS to very client in the session
-      const stateInterval = setInterval(() => {
-        if (!game) return;
-
-        var status = game.getState().status;
-
-        // if (status === 'playing') {
-        //   broadcastToSession(sessionId, {type: 'gameOver', data: game.getState()});
-        // } else {
-
-          broadcastToSession(sessionId, {type: 'state', data: game.getState()})
-        // }
-        // if (game) {
-        // }
-      }, 16); // ~60 FPS
-
       // Handle incoming messages
       ws.on('message', (data: Buffer) => {
         try {
@@ -82,19 +93,18 @@ function handleIncomingMessage(this: FastifyInstance, ws: any, game: PongGame, s
             case 'start':
               if (game) {
                 game.start();
-                broadcastToSession(sessionId, {
-                  type: 'state',
-                  message: 'Game started',
-                  data: game.getState()
-                });
+                broadcastToSession(sessionId, {type: 'state', message: 'Game started', data: game.getState()});
                 this.log.info(`[${sessionId}] Game started`);
+              } else {
+                // should create New Game
               }
               break;
-            case 'stop':
+            case 'stop': // Should be 'quit'
               if (game) {
                 game.stop();
                 broadcastToSession(sessionId, {
-                  type: 'state',
+                  // type: 'state',
+                  type: 'gameOver',
                   message: 'Game stopped',
                   data: game.getState()
                 });
@@ -139,15 +149,9 @@ function handleIncomingMessage(this: FastifyInstance, ws: any, game: PongGame, s
       });
 }
 
-
-export async function webSocketConnection(this: FastifyInstance, socket: any, req: FastifyRequest) {
-      console.log("get to the sessions id by WS");
-      const params = req.params as { sessionId: string };
-      const sessionId = params.sessionId;
-      const ws = socket;
-      
+function joinGame(this: FastifyInstance, sessionId: any, socket: any): PongGame {
       // Get or create game session
-      let game = gameSessions.get(sessionId);
+      let game: PongGame | undefined = gameSessions.get(sessionId);
       if (!game) {
         game = new PongGame(sessionId);
         gameSessions.set(sessionId, game);
@@ -158,47 +162,45 @@ export async function webSocketConnection(this: FastifyInstance, socket: any, re
       // Add connection to session
       const connections = playerConnections.get(sessionId);
       if (connections) {
-        connections.add(ws);
+        connections.add(socket);
       }
       this.log.info(`[${sessionId}] Player connected (${connections?.size} total)`);
       
       // Send initial connection confirmation
-      ws.send(JSON.stringify({
-        type: 'connected',
+      socket.send(JSON.stringify({
+        type: 'newSession',
         sessionId,
         message: 'Connected to game session',
         data: game.getState()
       } as ServerMessage));
+      return game;
+}
+
+export async function handleWebSocketConnection(this: FastifyInstance, socket: any, req: FastifyRequest) {
+      console.log("get to the sessions id by WS");
+      const params = req.params as { sessionId: string };
+      const sessionId = params.sessionId;
       
-      // Set up game state broadcasting
-      handleIncomingMessage.call(this, ws, game, sessionId);
-      
-  };
+      let game: PongGame | undefined = joinGame.call(this, sessionId, socket);
+
+      // broadcast gameState at 60FPS to very client in the session
+      const stateInterval = setInterval(() => {
+        if (!game) return;
+
+        const current_status = game.getState().status;
+
+        if (current_status === 'playing') {
+          broadcastToSession(sessionId, {type: 'state', data: game.getState()})
+        } else if (current_status === 'finished') {
+          broadcastToSession(sessionId, {type: 'gameOver', data: game.getState()});
+          this.log.info(`[${sessionId}] Game finished`);
+          gameSessions.delete(sessionId);
+          playerConnections.delete(sessionId);
+          clearInterval(stateInterval);
+          game = undefined;
+        }
+      }, 16); // ~60 FPS
+      handleIncomingMessage.call(this, socket, game, sessionId);
+};
   
-  export async function newGameSession(request: FastifyRequest, reply: FastifyReply) {
-    const sessionId = randomUUID();
-    const game = new PongGame(sessionId);
 
-    gameSessions.set(sessionId, game);
-    playerConnections.set(sessionId, new Set());
-    
-    request.log.info(`[${sessionId}] New game session created`);
-
-    return {
-      status: 'success',
-      message: 'Game session created',
-      sessionId,
-      wsUrl: `/game/${sessionId}`
-    };
-  }
-
-  export async function healthCheck(request: FastifyRequest, reply: FastifyReply) {
-    return {
-      status: 'healthy',
-      service: 'websocket-game-service',
-      activeSessions: gameSessions.size,
-      activeConnections: Array.from(playerConnections.values())
-        .reduce((sum, conns) => sum + conns.size, 0),
-      timestamp: new Date().toISOString()
-    };
-  }
