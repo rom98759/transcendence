@@ -32,12 +32,11 @@ export function registerAuthRoutes(app: FastifyInstance) {
 
     const init: RequestInit = {
       method: request.method,
-      headers: {
-        'content-type': request.headers['content-type'] || 'application/json',
-      },
+      headers: {},
     };
 
-    if (request.method !== "GET" && request.method !== "HEAD") {
+    if (request.method !== "GET" && request.method !== "HEAD" && request.body) {
+      (init.headers as Record<string, string>)['content-type'] = request.headers['content-type'] || 'application/json';
       init.body = JSON.stringify(request.body);
     }
 

@@ -17,11 +17,6 @@ const app = fastify({
 // Register fastify-cookie
 app.register(fastifyCookie);
 
-// Register fastify-jwt
-app.register(fastifyJwt, {
-  secret: (globalThis as any).process?.env?.JWT_SECRET || "supersecretkey",  // USE Hashicorp Vault ------------------------------------
-});
-
 console.log("register");
 app.register(websocketPlugin);
 // Hook verify JWT routes `/api` sauf les routes PUBLIC_ROUTES
