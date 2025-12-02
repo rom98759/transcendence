@@ -47,16 +47,35 @@ app.addHook("onRequest", async (request: any, reply: any) => {
       .send({ error: { message: "Unauthorized", code: "UNAUTHORIZED" } });
   }
 
-  // Verify JWT token
+  // Verify JWT token auth service
   try {
-    const decoded = app.jwt.verify(token);
-    request.user = decoded; // injecte user dans la requête (username, id, etc.)
+    const verifyResponse = await fetch("http://auth-service:3001/verify", {
+      method: "GET",
+      headers: {
+        "cookie": `token=${token}`,
+        "content-type": "application/json"
+      }
+    });
+
+    if (!verifyResponse.ok) {
+      logger.logAuth({
+        url: request.url,
+        token: true,
+        verifyStatus: verifyResponse.status
+      }, false);
+      return reply
+        .code(401)
+        .send({ error: { message: "Unauthorized", code: "UNAUTHORIZED" } });
+    }
+
+    const verifyData = await verifyResponse.json();
+    request.user = verifyData.result.user;
     logger.logAuth({ url: request.url, user: request.user.username }, true);
   } catch (err: any) {
     logger.logAuth({
       url: request.url,
       token: true,
-      jwtError: err?.message
+      verifyError: err?.message
     }, false);
     return reply
       .code(401)

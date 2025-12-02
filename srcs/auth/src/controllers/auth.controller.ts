@@ -129,6 +129,57 @@ export async function logoutHandler(this: FastifyInstance, request: FastifyReque
   return reply.clearCookie("token").send({ result: { message: 'Logged out successfully' } });
 }
 
+// Appeler depuis gateway pour vérifier la validité du token cookie
+export async function verifyHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+  const token = request.cookies?.token || request.headers.authorization?.replace('Bearer ', '');
+
+  if (!token) {
+    logger.warn({ event: 'verify_token_missing' });
+    return reply.code(401).send({
+      error: {
+        message: 'No token provided',
+        code: 'TOKEN_MISSING'
+      }
+    });
+  }
+
+  try {
+    // Vérifie et décode le token JWT
+    const decoded = this.jwt.verify(token) as { sub: number; username: string };
+
+    // Vérifier user found
+    const user = authService.findByUsername(decoded.username);
+    if (!user) {
+      logger.warn({ event: 'verify_user_not_found', username: decoded.username });
+      return reply.code(401).send({
+        error: {
+          message: 'User not found',
+          code: 'USER_NOT_FOUND'
+        }
+      });
+    }
+
+    logger.info({ event: 'verify_success', username: decoded.username, id: decoded.sub });
+    return reply.code(200).send({
+      result: {
+        valid: true,
+        user: {
+          id: decoded.sub,
+          username: decoded.username
+        }
+      }
+    });
+  } catch (err: any) {
+    logger.warn({ event: 'verify_token_invalid', err: err?.message || err });
+    return reply.code(401).send({
+      error: {
+        message: 'Invalid or expired token',
+        code: 'INVALID_TOKEN'
+      }
+    });
+  }
+}
+
 // DEV ONLY - À supprimer
 export async function meHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
   const username = (request.headers as any)["x-user-name"] || null;
