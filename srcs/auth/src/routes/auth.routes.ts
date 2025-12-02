@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { meHandler, loginHandler, registerHandler, logoutHandler, listAllUsers } from "../controllers/auth.controller.js";
+import { meHandler, loginHandler, registerHandler, logoutHandler, listAllUsers, notFoundHandler } from "../controllers/auth.controller.js";
 
 export async function authRoutes(app: FastifyInstance) {
   app.get("/", async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
@@ -20,4 +20,7 @@ export async function authRoutes(app: FastifyInstance) {
   app.get("/me", meHandler);
 
   app.get("/list", listAllUsers);
+
+  // Gestion des routes inconnues (doit être en dernier)
+  app.all("/*", notFoundHandler);
 }

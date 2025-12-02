@@ -152,3 +152,20 @@ export async function listAllUsers(this: FastifyInstance, request: FastifyReques
 	return reply.code(500).send({ error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' } });
   }
 }
+
+// Handler pour les routes inconnues
+export async function notFoundHandler(this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
+  const username = (request.headers as any)["x-user-name"] || null;
+  logger.warn({
+    event: 'route_not_found',
+    method: request.method,
+    url: request.url,
+    user: username
+  });
+  return reply.code(404).send({
+    error: {
+      message: `Route not found: ${request.method} ${request.url}`,
+      code: 'ROUTE_NOT_FOUND'
+    }
+  });
+}
