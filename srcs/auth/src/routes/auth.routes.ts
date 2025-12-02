@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from "fastify";
-import { meHandler, loginHandler, registerHandler, logoutHandler, listAllUsers, notFoundHandler } from "../controllers/auth.controller.js";
+import { meHandler, loginHandler, registerHandler, logoutHandler, verifyHandler, listAllUsers, notFoundHandler } from "../controllers/auth.controller.js";
 
 export async function authRoutes(app: FastifyInstance) {
   app.get("/", async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
@@ -15,6 +15,8 @@ export async function authRoutes(app: FastifyInstance) {
   app.post("/login", loginHandler);
 
   app.post("/logout", logoutHandler);
+
+  app.get("/verify", verifyHandler);
 
   // DEV ONLY - À supprimer en production
   app.get("/me", meHandler);
