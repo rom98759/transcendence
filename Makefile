@@ -41,6 +41,11 @@ ifeq ($(OS), Darwin)
 	colima start --mount $(VOLUMES_PATH):w --vm-type vz
 endif
 
+check:
+	npx prettier . --check
+format:
+	npx prettier . --write
+	
 nginx:
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build nginx-proxy
 redis:
