@@ -7,20 +7,11 @@ export interface ClientMessage {
 }
 
 export interface ServerMessage {
-  type: 'newSession' | 'state' | 'gameOver' | 'error' | 'pong';
+  type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong';
   sessionId?: string;
   data?: GameState;
   message?: string;
 }
-
-// export interface Ball {
-//   x: number;
-//   y: number;
-//   radius: number;
-//   velocityX: number;
-//   velocityY: number;
-//   speed: number;
-// }
 
 export interface Paddle {
   y: number;

@@ -6,6 +6,7 @@ interface Coordinate {
   x: number,
   y: number
 }
+
 function map(
   value: number,
   valueMin: number,
@@ -238,6 +239,34 @@ reactFrom(pos: Vector2, spread: number, intensity: number): void {
     ) 
     return force;
   }
+
+    updateRegion(
+    time: number,
+    minX: number,
+    maxX: number,
+    minY: number,
+    maxY: number,
+    scale: number = 0.005,
+  ): void {
+    const gridHeight = this.forceField.length;
+    const gridWidth = this.forceField[0].length;
+    
+    const startGridX = Math.max(0, Math.floor(minX / this.size));
+    const endGridX = Math.min(gridWidth - 1, Math.ceil(maxX / this.size));
+    const startGridY = Math.max(0, Math.floor(minY / this.size));
+    const endGridY = Math.min(gridHeight - 1, Math.ceil(maxY / this.size));
+    
+    for (let gridY = startGridY; gridY <= endGridY; gridY++) {
+      for (let gridX = startGridX; gridX <= endGridX; gridX++) {
+        const worldX = gridX * this.size * scale;
+        const worldY = gridY * this.size * scale;
+        
+        const value = this.noise3D(worldX, worldY, time);
+        this.forceField[gridY][gridX] = (value + 1) / 2;
+      }
+    }
+  }
+
 /**
    * Generate a 2D grid of noise values with custom pixel size
    * @param width - Total width in pixels

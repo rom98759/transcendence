@@ -68,10 +68,10 @@ export class PongGame {
     this.cosmicBackground = new CosmicMicroWaveNoise(this.width, this.height, 10);
     this.ball = new Ball(
       new Vector2(this.width / 2, this.height / 2), // position
-      new Vector2(5, 5),  // velocity (direction + vitesse)
+      new Vector2(0, 0),  // velocity (direction + vitesse)
       10, // size of the ball
       5, // speed limit
-      5, // mass -> more the mass is, less it is affected by other forces
+      1, // mass -> more the mass is, less it is affected by other forces
     );
 
     // Paddle state
@@ -142,45 +142,19 @@ export class PongGame {
     } else if (this.paddles.right.moving === "down") {
       this.paddles.right.y += this.paddles.right.speed;
     }
+
+    // Keep paddles within bounds
+    this.paddles.left.y = Math.max(
+      0,
+      Math.min(this.height - this.paddles.left.height, this.paddles.left.y),
+    );
+    this.paddles.right.y = Math.max(
+      0,
+      Math.min(this.height - this.paddles.right.height, this.paddles.right.y),
+    );
   }
 
-  update(): void {
-    // Get force from noise field
-    // const force = this.cosmicBackground.getForceAt2D(
-    //   this.ball.pos.x,
-    //   this.ball.pos.y,
-    //   0.01,  // Small scale = smooth forces
-    //   0.5,   // Moderate strength
-    //   this.time
-    // );
-
-    this.cosmicBackground.update(this.time);
-    this.cosmicBackground.affectedFrom(this.ball.pos, 5, 1);
-
-    const force = this.cosmicBackground.getVectorAt(
-      this.ball.pos.x,
-      this.ball.pos.y,
-      this.time,
-    )
-
-    // const noiseAtPosition = this.cosmicBackground.getNoiseFrom(this.ball.pos);
-
-    
-    // inverse the forcefield each time the ball hit a paddle
-    force.mult(this.serve);
-    this.ball.apply(force);
-    this.ball.update(); 
-
-    this.paddleMove();
-
-    // Ball collision with top/bottom walls
-    if (
-      this.ball.pos.y - this.ball.radius <= 0 ||
-      this.ball.pos.y + this.ball.radius >= this.height
-    ) {
-      this.ball.vel.y = -this.ball.vel.y;
-    }
-
+  racketShot() {
     // Ball collision with left paddle
     if (this.ball.pos.x - this.ball.radius <= 20 + this.paddles.left.width) {
       if (
@@ -188,13 +162,8 @@ export class PongGame {
         this.ball.pos.y <= this.paddles.left.y + this.paddles.left.height
       ) {
         this.ball.vel.x = -this.ball.vel.x;
-        // this.ball.vel.mult(-1);
-        this.ball.acc.add(new Vector2(5, 0));
+        this.ball.acc.add(new Vector2(15, 0));
         this.serve *= -1;
-
-        // Add spin based on where ball hits paddle
-        // const hitPos = (this.ball.pos.y - this.paddles.left.y) / this.paddles.left.height;
-        // this.ball.vel.y = (hitPos - 0.5) * 10;
       }
     }
 
@@ -208,15 +177,60 @@ export class PongGame {
         this.ball.pos.y <= this.paddles.right.y + this.paddles.right.height
       ) {
         this.ball.vel.x = -this.ball.vel.x;
-        // this.ball.vel.mult(-1);
-        this.ball.acc.add(new Vector2(-5, 0));
+        this.ball.acc.add(new Vector2(-15, 0));
         this.serve *= -1;
-
-        // const hitPos = (this.ball.pos.y - this.paddles.right.y) / this.paddles.right.height;
-        // this.ball.vel.y = (hitPos - 0.5) * 10;
       }
     }
+  }
 
+  collision() {
+    var bounce = false;
+   // Ball collision with top/bottom walls
+    if (this.ball.pos.y - this.ball.radius <= 0) {
+      this.ball.pos.y = 0 + this.ball.radius;
+      this.ball.vel.y = -this.ball.vel.y;
+    } else if (this.ball.pos.y + this.ball.radius >= this.height) {
+      this.ball.pos.y = this.height - this.ball.radius;
+      this.ball.vel.y = -this.ball.vel.y;
+    }
+    this.racketShot();
+  }
+
+  update(): void {
+    // Get force from noise field
+    // const force = this.cosmicBackground.getForceAt2D(
+    //   this.ball.pos.x,
+    //   this.ball.pos.y,
+    //   0.01,  // Small scale = smooth forces
+    //   0.5,   // Moderate strength
+    //   this.time
+    // );
+
+    this.cosmicBackground.update(this.time);
+
+    this.cosmicBackground.affectedFrom(this.ball.pos, 5, 1);
+
+    const force = this.cosmicBackground.getVectorAt(
+      this.ball.pos.x,
+      this.ball.pos.y,
+      this.time,
+    )
+
+    // const noiseAtPosition = this.cosmicBackground.getNoiseFrom(this.ball.pos);
+
+    // inverse the forcefield each time the ball hit a paddle
+    force.mult(this.serve);
+    this.ball.apply(force);
+    this.ball.update(); 
+
+    this.paddleMove();
+    this.collision();
+
+     const epsilon = 2;// 1 pixel tolerance
+
+    if (Math.abs(this.ball.pos.x - this.width / 2) < epsilon) {
+          this.ball.pos.y = Math.random() * this.height;
+    }
     // Ball out of bounds - scoring
     if (this.ball.pos.x - this.ball.radius <= 0) {
       // Right player scores
@@ -234,15 +248,7 @@ export class PongGame {
       );
     }
 
-    // Keep paddles within bounds
-    this.paddles.left.y = Math.max(
-      0,
-      Math.min(this.height - this.paddles.left.height, this.paddles.left.y),
-    );
-    this.paddles.right.y = Math.max(
-      0,
-      Math.min(this.height - this.paddles.right.height, this.paddles.right.y),
-    );
+
 
     // Check win condition
     if (this.scores.left >= 5 || this.scores.right >= 5) {
@@ -288,8 +294,7 @@ export class PongGame {
       },
       scores: this.scores,
       status: this.status,
-      // cosmicBackground: this.cosmicBackground.getField(this.width, this.height, 10, this.time)
-      cosmicBackground: this.cosmicBackground.forceField
+      cosmicBackground: this.cosmicBackground.forceField,
     };
   }
 }

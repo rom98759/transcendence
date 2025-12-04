@@ -1,7 +1,7 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import { gameRoutes } from './routes/game.routes.js';
-import { gameSessions, playerConnections} from './core/game.state.js';
+import { gameSessions } from './core/game.state.js';
 import type { PongGame } from './core/game.engine.js'
 
 const fastify = Fastify({ logger: true });
@@ -21,6 +21,7 @@ fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
     path: request.url
   });
 });
+
 // Start server
 const start = async () => {
   try {
@@ -38,8 +39,8 @@ start();
 // Cleanup on shutdown
 process.on('SIGTERM', () => {
   console.log('Shutting down game service...');
-  gameSessions.forEach((game: PongGame) => game.stop());
+  gameSessions.forEach((session: any) => session.game.stop());
+  gameSessions.forEach((session: any) => session.players.clear());
   gameSessions.clear();
-  playerConnections.clear();
   process.exit(0);
 });

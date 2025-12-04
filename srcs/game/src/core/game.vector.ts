@@ -46,7 +46,7 @@ export class Vector2 {
     const len = this.length();
     if (len > max) {
       // Normalize then scale to max length
-      return this.normalize().mult(max);
+      return this.normalizeVec().mult(max);
     }
     return new Vector2(this.x, this.y);
   }
@@ -61,6 +61,7 @@ export class Vector2 {
     }
     return new Vector2(this.x / scalar, this.y / scalar)
   }
+
   normalizeVec(): Vector2 {
     const len = this.length();
     return len === 0 ? new Vector2(0, 0) : new Vector2(this.x / len, this.y / len);

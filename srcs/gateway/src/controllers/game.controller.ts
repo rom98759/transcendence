@@ -15,7 +15,7 @@ export function registerGameRoutes(app: FastifyInstance) {
     return res;
   });
 
-  // WebSocket proxy route for /api/game/ws
+  // // WebSocket proxy route for /api/game/ws
   app.get("/ws", { websocket: true }, (connection: any, request: FastifyRequest) => {
     webSocketProxyRequest(app, connection, request, "/ws");
   });

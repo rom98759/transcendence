@@ -189,7 +189,7 @@ interface GameState {
 
 // WebSocket message types
 interface ServerMessage {
-    type: 'newSession' | 'state' | 'gameOver' | 'error' | 'pong';
+    type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong';
     sessionId?: string;
     data?: GameState;
     message?: string;
@@ -237,102 +237,231 @@ private createGameContainer(): void {
     this.gameContainer = document.createElement('div');
     this.gameContainer.id = 'game-container';
     this.gameContainer.className = 'hidden fixed inset-0 z-50 bg-black overflow-y-auto'; // overflow-y-auto added
+    // this.gameContainer.innerHTML = `
+    //     <div class="relative w-full flex flex-col"> <!-- Removed h-full -->
+    //         <!-- Game Header -->
+    //         <div class="bg-gradient-to-r from-purple-900 to-blue-900 p-4 flex justify-between items-center">
+    //             <div class="flex items-center space-x-4">
+    //                 <h2 class="text-2xl font-bold text-white">Transcendence - Pong</h2>
+    //                 <div class="flex items-center space-x-2">
+    //                     <div id="game-connection-status" class="w-3 h-3 rounded-full bg-yellow-500"></div>
+    //                     <span id="game-connection-text" class="text-yellow-400 text-sm">Connecting...</span>
+    //                 </div>
+    //             </div>
+    //             <div class="flex items-center space-x-4">
+    //                 <button id="start-game-btn" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+    //                     START GAME
+    //                 </button>
+    //                 <button id="exit-game-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all">
+    //                     Exit
+    //                 </button>
+    //             </div>
+    //         </div>
+    //         <!-- Game Over dial box -->
+    //         <div id="game-over-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+    //             <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border-2 border-blue-500">
+    //                 <h2 class="text-3xl font-bold text-center mb-6 text-white">Game Over!</h2>
+    //
+    //                 <!-- Score Display -->
+    //                 <div class="mb-6 space-y-3">
+    //                     <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+    //                         <span class="text-lg text-gray-300">Player 1:</span>
+    //                         <span id="final-score-p1" class="text-2xl font-bold text-blue-400">0</span>
+    //                     </div>
+    //                     <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+    //                         <span class="text-lg text-gray-300">Player 2:</span>
+    //                         <span id="final-score-p2" class="text-2xl font-bold text-red-400">0</span>
+    //                     </div>
+    //                 </div>
+    //
+    //                 <!-- Winner Message -->
+    //                 <p id="winner-message" class="text-center text-xl mb-6 text-yellow-400"></p>
+    //
+    //                 <!-- Buttons -->
+    //                 <div class="flex gap-4">
+    //                     <button id="new-game-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
+    //                         New Game
+    //                     </button>
+    //                     <button id="close-dialog-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+    //                         Close
+    //                     </button>
+    //                 </div>
+    //             </div>
+    //         </div>
+    //         <!-- Game Canvas Area -->
+    //         <div class="flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 py-8"> <!-- Removed flex-1, added py-8 -->
+    //             <div class="text-center space-y-6">
+    //                 <div class="relative">
+    //                     <canvas id="game-canvas" width="800" height="600" class="border-4 border-purple-500 rounded-lg shadow-2xl bg-black"></canvas>
+    //                 </div>
+    //
+    //                 <!-- Game Info -->
+    //                 <div class="bg-white/10 backdrop-blur-lg rounded-lg p-4 max-w-2xl mx-auto">
+    //                     <div class="flex justify-around text-white">
+    //                         <div class="text-center">
+    //                             <p class="text-sm text-purple-300">Player 1</p>
+    //                             <p id="player1-score" class="text-3xl font-bold">0</p>
+    //                         </div>
+    //                         <div class="text-center">
+    //                             <p class="text-sm text-purple-300">Game Status</p>
+    //                             <p id="game-status-text" class="text-xl font-semibold text-yellow-400">Ready</p>
+    //                         </div>
+    //                         <div class="text-center">
+    //                             <p class="text-sm text-purple-300">Player 2</p>
+    //                             <p id="player2-score" class="text-3xl font-bold">0</p>
+    //                         </div>
+    //                     </div>
+    //                 </div>
+    //
+    //                 <!-- Controls Info -->
+    //                 <div class="bg-white/5 backdrop-blur rounded-lg p-3 max-w-2xl mx-auto">
+    //                     <p class="text-gray-300 text-sm">
+    //                         Controls: <span class="text-purple-300 font-mono">W/S</span> for left paddle, 
+    //                         <span class="text-purple-300 font-mono">↑/↓</span> for right paddle
+    //                     </p>
+    //                 </div>
+    //
+    //                 <!-- Game Log -->
+    //                 <div class="bg-white/5 backdrop-blur rounded-lg p-4 max-w-2xl mx-auto">
+    //                     <h3 class="text-sm font-semibold text-purple-300 mb-2">Game Log</h3>
+    //                     <div id="game-log" class="h-24 overflow-y-auto space-y-1 text-left text-sm font-mono text-gray-300">
+    //                     </div>
+    //                 </div>
+    //             </div>
+    //         </div>
+    //     </div>
+    // `;
+    // document.body.appendChild(this.gameContainer);
+
+
     this.gameContainer.innerHTML = `
-        <div class="relative w-full flex flex-col"> <!-- Removed h-full -->
-            <!-- Game Header -->
-            <div class="bg-gradient-to-r from-purple-900 to-blue-900 p-4 flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <h2 class="text-2xl font-bold text-white">Transcendence - Pong</h2>
-                    <div class="flex items-center space-x-2">
-                        <div id="game-connection-status" class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <span id="game-connection-text" class="text-yellow-400 text-sm">Connecting...</span>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <button id="start-game-btn" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-                        START GAME
-                    </button>
-                    <button id="exit-game-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all">
-                        Exit
-                    </button>
-                </div>
-            </div>
-            <!-- Game Over dial box -->
-            <div id="game-over-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border-2 border-blue-500">
-                    <h2 class="text-3xl font-bold text-center mb-6 text-white">Game Over!</h2>
-                    
-                    <!-- Score Display -->
-                    <div class="mb-6 space-y-3">
-                        <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
-                            <span class="text-lg text-gray-300">Player 1:</span>
-                            <span id="final-score-p1" class="text-2xl font-bold text-blue-400">0</span>
-                        </div>
-                        <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
-                            <span class="text-lg text-gray-300">Player 2:</span>
-                            <span id="final-score-p2" class="text-2xl font-bold text-red-400">0</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Winner Message -->
-                    <p id="winner-message" class="text-center text-xl mb-6 text-yellow-400"></p>
-                    
-                    <!-- Buttons -->
-                    <div class="flex gap-4">
-                        <button id="new-game-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
-                            New Game
-                        </button>
-                        <button id="close-dialog-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
-                            Close
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <!-- Game Canvas Area -->
-            <div class="flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 py-8"> <!-- Removed flex-1, added py-8 -->
-                <div class="text-center space-y-6">
-                    <div class="relative">
-                        <canvas id="game-canvas" width="800" height="600" class="border-4 border-purple-500 rounded-lg shadow-2xl bg-black"></canvas>
-                    </div>
-                    
-                    <!-- Game Info -->
-                    <div class="bg-white/10 backdrop-blur-lg rounded-lg p-4 max-w-2xl mx-auto">
-                        <div class="flex justify-around text-white">
-                            <div class="text-center">
-                                <p class="text-sm text-purple-300">Player 1</p>
-                                <p id="player1-score" class="text-3xl font-bold">0</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-sm text-purple-300">Game Status</p>
-                                <p id="game-status-text" class="text-xl font-semibold text-yellow-400">Ready</p>
-                            </div>
-                            <div class="text-center">
-                                <p class="text-sm text-purple-300">Player 2</p>
-                                <p id="player2-score" class="text-3xl font-bold">0</p>
-                            </div>
-                        </div>
-                    </div>
+<!-- Game Container with Settings Sliders -->
+<div class="relative w-full flex flex-col">
+  <!-- Game Header -->
+  <div class="bg-gradient-to-r from-purple-900 to-blue-900 p-4 flex justify-between items-center">
+    <div class="flex items-center space-x-4">
+      <h2 class="text-2xl font-bold text-white">Transcendence - Pong</h2>
+      <div class="flex items-center space-x-2">
+        <div id="game-connection-status" class="w-3 h-3 rounded-full bg-yellow-500"></div>
+        <span id="game-connection-text" class="text-yellow-400 text-sm">Connecting...</span>
+      </div>
+    </div>
+    <div class="flex items-center space-x-4">
+      <button id="start-game-btn" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed">START GAME</button>
+      <button id="exit-game-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all">Exit</button>
+    </div>
+  </div>
+             <!-- Game Over dial box -->
+             <div id="game-over-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                 <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border-2 border-blue-500">
+                     <h2 class="text-3xl font-bold text-center mb-6 text-white">Game Over!</h2>
+    
+                     <!-- Score Display -->
+                     <div class="mb-6 space-y-3">
+                         <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+                             <span class="text-lg text-gray-300">Player 1:</span>
+                             <span id="final-score-p1" class="text-2xl font-bold text-blue-400">0</span>
+                         </div>
+                         <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+                             <span class="text-lg text-gray-300">Player 2:</span>
+                             <span id="final-score-p2" class="text-2xl font-bold text-red-400">0</span>
+                         </div>
+                     </div>
+    
+                     <!-- Winner Message -->
+                     <p id="winner-message" class="text-center text-xl mb-6 text-yellow-400"></p>
+    
+                     <!-- Buttons -->
+                     <div class="flex gap-4">
+                         <button id="new-game-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
+                             New Game
+                         </button>
+                         <button id="close-dialog-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+                           Close
+                         </button>
+                     </div>
+                 </div>
+             </div>
+  <!-- Settings Sliders -->
+  <div class="bg-white/10 backdrop-blur-lg p-4 m-4 rounded-xl text-white space-y-4">
+    <h3 class="text-xl font-semibold text-purple-300">Game Settings</h3>
+    <form id="settings-form" class="space-y-4">
+      <div>
+        <label class="flex justify-between items-center">Ball Max Speed <span id="val-ballMaxSpeed">10</span></label>
+        <input type="range" name="ballMaxSpeed" value="10" min="0" max="100" step="1" class="w-full" />
+      </div>
+      <div>
+        <label class="flex justify-between items-center">Ball Radius <span id="val-ballRadius">5</span></label>
+        <input type="range" name="ballRadius" value="5" min="1" max="50" step="1" class="w-full" />
+      </div>
+      <div>
+        <label class="flex justify-between items-center">Ball Mass <span id="val-ballMass">1</span></label>
+        <input type="range" name="ballMass" value="1" min="0.1" max="10" step="0.1" class="w-full" />
+      </div>
+      <div>
+        <label class="flex justify-between items-center">Field Scale <span id="val-fieldScale">100</span></label>
+        <input type="range" name="fieldScale" value="100" min="10" max="500" step="1" class="w-full" />
+      </div>
+    </form>
+  </div>
 
-                    <!-- Controls Info -->
-                    <div class="bg-white/5 backdrop-blur rounded-lg p-3 max-w-2xl mx-auto">
-                        <p class="text-gray-300 text-sm">
-                            Controls: <span class="text-purple-300 font-mono">W/S</span> for left paddle, 
-                            <span class="text-purple-300 font-mono">↑/↓</span> for right paddle
-                        </p>
-                    </div>
+  <!-- Game Canvas Area -->
+  <div class="flex items-center justify-center bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 py-8">
+    <div class="text-center space-y-6">
+      <div class="relative">
+        <canvas id="game-canvas" width="800" height="600" class="border-4 border-purple-500 rounded-lg shadow-2xl bg-black"></canvas>
+      </div>
 
-                    <!-- Game Log -->
-                    <div class="bg-white/5 backdrop-blur rounded-lg p-4 max-w-2xl mx-auto">
-                        <h3 class="text-sm font-semibold text-purple-300 mb-2">Game Log</h3>
-                        <div id="game-log" class="h-24 overflow-y-auto space-y-1 text-left text-sm font-mono text-gray-300">
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Game Info -->
+      <div class="bg-white/10 backdrop-blur-lg rounded-lg p-4 max-w-2xl mx-auto">
+        <div class="flex justify-around text-white">
+          <div class="text-center">
+            <p class="text-sm text-purple-300">Player 1</p>
+            <p id="player1-score" class="text-3xl font-bold">0</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-purple-300">Game Status</p>
+            <p id="game-status-text" class="text-xl font-semibold text-yellow-400">Ready</p>
+          </div>
+          <div class="text-center">
+            <p class="text-sm text-purple-300">Player 2</p>
+            <p id="player2-score" class="text-3xl font-bold">0</p>
+          </div>
         </div>
-    `;
+      </div>
+
+      <!-- Controls Info -->
+      <div class="bg-white/5 backdrop-blur rounded-lg p-3 max-w-2xl mx-auto">
+        <p class="text-gray-300 text-sm">Controls: <span class="text-purple-300 font-mono">W/S</span> for left paddle, <span class="text-purple-300 font-mono">↑/↓</span> for right paddle</span></p>
+      </div>
+
+      <!-- Game Log -->
+      <div class="bg-white/5 backdrop-blur rounded-lg p-4 max-w-2xl mx-auto">
+        <h3 class="text-sm font-semibold text-purple-300 mb-2">Game Log</h3>
+        <div id="game-log" class="h-24 overflow-y-auto space-y-1 text-left text-sm font-mono text-gray-300"></div>
+      </div>
+    </div>
+  </div>
+</div>`
+
     document.body.appendChild(this.gameContainer);
 }
+
+    private gameSetting(form: any) {
+      const gameSessionId = this.sessionId;
+
+      const data = {
+        gameSessionId,
+        settings: Object.fromEntries(new FormData(form).entries()),
+      };
+
+      fetch("http://localhost:8080/api/game-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+    }
+
     private showGameOverDialog(gameData: GameState) {
         const dialog = document.getElementById('game-over-dialog');
         const scoreP1 = document.getElementById('final-score-p1');
@@ -480,7 +609,7 @@ private createGameContainer(): void {
 
     private handleServerMessage(message: ServerMessage): void {
         switch (message.type) {
-            case 'newSession':
+            case 'connected':
                if (message.data) {
                     console.log(message);
                     this.gameState = message.data;
@@ -836,6 +965,17 @@ private renderNoiseField(
     }
 
     private setupEventListeners(): void {
+
+        const form = document.getElementById("settings-form");
+        if (form) {
+          form.addEventListener("input", (e) => {
+            const target = e.target as HTMLInputElement;
+            const label = document.getElementById(`val-${target.name}`);
+            if (label) label.textContent = target.value;
+            this.gameSetting(form);
+          });
+        }
+
 
         const gameBtn = document.getElementById('gameBtn');
         if (gameBtn) {

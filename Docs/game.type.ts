@@ -1,4 +1,3 @@
-
 // Message types
 export interface ClientMessage {
   type: 'paddle' | 'start' | 'stop' | 'ping';
@@ -7,20 +6,11 @@ export interface ClientMessage {
 }
 
 export interface ServerMessage {
-  type: 'newSession' | 'state' | 'gameOver' | 'error' | 'pong';
+  type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong';
   sessionId?: string;
   data?: any;
   message?: string;
 }
-
-// export interface Ball {
-//   x: number;
-//   y: number;
-//   radius: number;
-//   velocityX: number;
-//   velocityY: number;
-//   speed: number;
-// }
 
 export interface Paddle {
   y: number;
@@ -60,4 +50,5 @@ export interface GameState {
   };
   scores: Scores;
   status: GameStatus;
+  cosmicBackground: number[][];
 }
