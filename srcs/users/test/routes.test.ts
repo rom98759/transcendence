@@ -1,16 +1,15 @@
-import { afterAll, beforeAll, describe, expect, jest, test } from '@jest/globals';
+import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
 import fastify from "fastify";
 import { umRoutes } from "../src/routes/um.routes.js";
-
-jest.mock("../src/services/um.service.js", () =>({
-    findByUsername: jest.fn(),
-    createProfile: jest.fn()
-}));
-
+import { API_ERRORS } from '../src/utils/messages.js';
 import * as umService from "../src/services/um.service.js";
-import { getProfileByUsername } from '../src/controllers/um.controller.js';
+import { UserProfile } from 'src/generated/prisma/client.js';
+import { afterEach } from 'node:test';
 
-describe("User Management Routes", () => {
+// auto mock all functions from this file
+vi.mock("../src/services/um.service.js");
+
+describe("GET /users/:username", () => {
     const app = fastify();
 
     beforeAll(async () => {
@@ -22,57 +21,40 @@ describe("User Management Routes", () => {
         await app.close();
     });
 
+    afterEach(() => {
+        vi.clearAllMocks();
+    });
+
     const mockUser = { id: 1, authId: 1, username: "toto", email: "toto@test.com", createdAt: new Date() };
-    const mockFindByUsername = jest.fn<typeof umService.findByUsername>();
 
     test("GET /users/:username - Should return user profile", async () => {
-        const mockRequest = {
-            params: { username: 'toto' },
-            log: { info: jest.fn() }
-        } as any;
-
-        const mockReply = {
-            status: jest.fn().mockReturnThis(),
-            send: jest.fn()
-        } as any;
-
-        jest.spyOn(umService, 'findByUsername');
+        vi.spyOn(umService, 'findByUsername').mockResolvedValue(mockUser as UserProfile);
         
-        mockFindByUsername(mockUser);
-
         const response = await app.inject({
             method: 'GET',
             url: "/users/toto"
         });
 
         expect(response.statusCode).toBe(200);
-        expect(JSON.parse(response.payload)).toEqual(expect.objectContaining({
-            username: "toto"
-        }));
+        expect(JSON.parse(response.payload)).toEqual({
+            profile: expect.objectContaining({
+                username: "toto"
+            })
+        })
     });
 
     test("GET /users/:username - Should return 404 if not found", async () => {
-        const mockRequest = {
-            params: { username: 'unknown' },
-            log: { info: jest.fn() }
-        } as any;
-
-        const mockReply = {
-            status: jest.fn().mockReturnThis(),
-            send: jest.fn()
-        } as any;
-
+        vi.spyOn(umService, 'findByUsername').mockResolvedValue(null);
+        
         const response = await app.inject({
             method: 'GET',
             url: "/users/unknown"
         });
 
-        (umService.findByUsername as jest.Mock).mockResolvedValue(null);
-
-        await getProfileByUsername(request, reply);
-
-        expect(reply.status).toHaveBeenCalledWith(404);
-        expect(reply.send).toHaveBeenCalledWith({message: "User not found"})
+        expect(response.statusCode).toBe(404);
+        expect(JSON.parse(response.payload)).toEqual({
+                message: API_ERRORS.USER.NOT_FOUND
+        });
     });
 
     test("GET /users/:username - Should reject admin as username", async () => {
@@ -83,7 +65,23 @@ describe("User Management Routes", () => {
         });
 
         expect(response.statusCode).toBe(400);
+
+        const body = JSON.parse(response.payload);
+        expect(body.error).toBe(API_ERRORS.USER.INVALID_FORMAT);
     });
 
+    test("GET /users/:username - Should return 500 if service throws error", async () => {
+        vi.spyOn(umService, 'findByUsername').mockRejectedValue(new Error(API_ERRORS.DB.CONNECTION_ERROR));
+        
+        const response = await app.inject({
+            method: 'GET',
+            url: "/users/unknown"
+        });
 
+        expect(response.statusCode).toBe(500);
+        expect(JSON.parse(response.payload)).toEqual(expect.objectContaining({
+                error: "Internal Server Error",
+                message: API_ERRORS.DB.CONNECTION_ERROR,
+        }));
+    });
 })

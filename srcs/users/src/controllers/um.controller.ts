@@ -2,15 +2,16 @@ import { FastifyReply, FastifyRequest } from 'fastify'
 import * as umService from '../services/um.service.js'
 import { ValidationSchemas } from '../validation/validation.js'
 import z from 'zod'
+import { API_ERRORS, LOG_EVENTS } from '../utils/messages.js'
 
 function handleInvalidRequest<T>(
   request: FastifyRequest,
   reply: FastifyReply,
   validation: z.ZodSafeParseError<T>
 ) {
-  request.log.warn({ event: 'invalid_request', request: request })
+  request.log.warn({ event: LOG_EVENTS.INVALID_REQUEST, request: request })
   return reply.status(400).send({
-    error: 'invalid format',
+    error: API_ERRORS.USER.INVALID_FORMAT,
     details: z.treeifyError(validation.error),
   })
 }
@@ -20,7 +21,7 @@ export async function getProfileByUsername(
   reply: FastifyReply
 ) {
   const { username } = request.params
-  request.log.info({ event: 'get_profile', username })
+  request.log.info({ event: LOG_EVENTS.GET_PROFILE_BY_USERNAME, username })
 
   const validation = ValidationSchemas['Username'].safeParse({ username })
   if (!validation.success) {
@@ -29,7 +30,7 @@ export async function getProfileByUsername(
 
   const profile = await umService.findByUsername(username)
   if (!profile) {
-    return reply.status(404).send({ message: 'User not found' })
+    return reply.status(404).send({ message: API_ERRORS.USER.NOT_FOUND })
   }
 
   return reply.status(200).send({profile: profile});
@@ -42,7 +43,7 @@ export async function createProfile(
   reply: FastifyReply
 ) {
   const { authId, email, username } = request.body
-  request.log.info({ event: 'create_profile', request })
+  request.log.info({ event: LOG_EVENTS.CREATE_PROFILE, request })
 
   const validation = ValidationSchemas['UserCreate'].safeParse({
     authId,
@@ -61,8 +62,7 @@ export async function createProfile(
     return reply
       .status(409)
       .send({
-        message:
-          'Profile might already exist. Or an eror occurred during creation',
+        message: API_ERRORS.USER.CREATE_FAILED,
       })
   }
 }
