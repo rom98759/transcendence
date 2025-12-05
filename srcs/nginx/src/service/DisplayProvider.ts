@@ -1,216 +1,7 @@
-class HealthChecker {
-  // Update status style
-  private async updateStatus(
-    dot: HTMLElement | null,
-    label: HTMLElement | null,
-    isOnline: boolean,
-    onlineText = 'Ready',
-    offlineText = 'Offline',
-  ) {
-    if (!dot || !label) return
+import { HealthChecker } from './HealthChecker.js'
+import { GameState, ServerMessage, ClientMessage, Vector2D } from '../core/types.js'
 
-    dot.className = `w-3 h-3 rounded-full bg-${isOnline ? 'green' : 'red'}-400 ${isOnline ? 'animate-pulse' : ''}`
-    label.textContent = isOnline ? onlineText : offlineText
-    label.className = `text-${isOnline ? 'green' : 'red'}-400 text-sm font-mono`
-
-    const parent = dot.closest('.flex')?.parentElement
-    if (parent) {
-      if (isOnline) {
-        parent.classList.remove('opacity-50')
-      } else {
-        parent.classList.add('opacity-50')
-      }
-    }
-  }
-
-  private async checkNginx(): Promise<boolean> {
-    const nginxDot = document.getElementById('nginx-status')
-    const nginxLabel = nginxDot?.nextElementSibling?.nextElementSibling as HTMLElement
-
-    try {
-      const response = await fetch('/health')
-      if (response.ok) {
-        await this.updateStatus(nginxDot, nginxLabel, true)
-        return true
-      } else {
-        throw new Error('Nginx offline')
-      }
-    } catch (error) {
-      console.warn('Nginx check failed:', error)
-      await this.updateStatus(nginxDot, nginxLabel, false)
-      return false
-    }
-  }
-
-  private async checkUsers(): Promise<boolean> {
-    const usersDot = document.getElementById('users-status')
-    const usersLabel = usersDot?.nextElementSibling?.nextElementSibling as HTMLElement
-    try {
-      const response = await fetch('/api/users')
-      const data = await response.json()
-
-      if (response.ok && usersDot) {
-        await this.updateStatus(usersDot, usersLabel, true)
-        return true
-      } else {
-        throw new Error('users offline')
-      }
-    } catch (error) {
-      console.warn('users check failed:', error)
-      await this.updateStatus(usersDot, usersLabel, false)
-      return false
-    }
-  }
-
-  private async checkRedis(): Promise<boolean> {
-    const redisDot = document.getElementById('redis-status')
-    const redisLabel = redisDot?.nextElementSibling?.nextElementSibling as HTMLElement
-    try {
-      const response = await fetch('/api/redis')
-      const data = await response.json()
-
-      if (response.ok && redisDot) {
-        await this.updateStatus(redisDot, redisLabel, true)
-        return true
-      } else {
-        throw new Error('Redis offline')
-      }
-    } catch (error) {
-      console.warn('Redis check failed:', error)
-      await this.updateStatus(redisDot, redisLabel, false)
-      return false
-    }
-  }
-
-  private async checkAPI(): Promise<boolean> {
-    const apiDot = document.getElementById('api-status')
-    const apiLabel = apiDot?.nextElementSibling?.nextElementSibling as HTMLElement
-
-    try {
-      const response = await fetch('/api/health')
-      const data = await response.json()
-
-      if (response.ok) {
-        await this.updateStatus(apiDot, apiLabel, true)
-        return true
-      } else {
-        throw new Error('API offline')
-      }
-    } catch (error) {
-      console.warn('API check failed:', error)
-      await this.updateStatus(apiDot, apiLabel, false)
-      return false
-    }
-  }
-
-  private async checkGame(): Promise<boolean> {
-    const gameDot = document.getElementById('game-status')
-    const gameLabel = gameDot?.nextElementSibling?.nextElementSibling as HTMLElement
-
-    try {
-      const response = await fetch('/api/game/health')
-      const data = await response.json()
-
-      if (response.ok) {
-        await this.updateStatus(gameDot, gameLabel, true)
-        return true
-      } else {
-        throw new Error('Game-service offline')
-      }
-    } catch (error) {
-      console.warn('Game check failed:', error)
-      await this.updateStatus(gameDot, gameLabel, false)
-      return false
-    }
-  }
-
-  private async checkBlockchain(): Promise<boolean> {
-    const blockDot = document.getElementById('game-status')
-    const blockLabel = blockDot?.nextElementSibling?.nextElementSibling as HTMLElement
-
-    try {
-      const response = await fetch('/api/block/health')
-      const data = await response.json()
-
-      if (response.ok) {
-        await this.updateStatus(blockDot, blockLabel, true)
-        return true
-      } else {
-        throw new Error('Blockchain-service offline')
-      }
-    } catch (error) {
-      console.warn('Blockchain check failed:', error)
-      await this.updateStatus(blockDot, blockLabel, false)
-      return false
-    }
-  }
-
-  private async checkAllServices(): Promise<void> {
-    const statusElement = document.getElementById('status')
-    const nginxOnline = await this.checkNginx()
-    const apiOnline = await this.checkAPI()
-    const usersOnline = await this.checkUsers()
-    const redisOnline = await this.checkRedis()
-    const gameOnline = await this.checkGame()
-    const blockchainOnline = await this.checkBlockchain()
-
-    if (statusElement) {
-      if (
-        nginxOnline &&
-        apiOnline &&
-        redisOnline &&
-        usersOnline &&
-        gameOnline &&
-        blockchainOnline
-      ) {
-        statusElement.textContent = 'Online'
-        statusElement.className =
-          'px-3 py-1 rounded-full text-sm font-semibold bg-green-500 text-white'
-      } else {
-        statusElement.textContent = '✗ Offline'
-        statusElement.className =
-          'px-3 py-1 rounded-full text-sm font-semibold bg-red-500 text-white'
-      }
-    }
-  }
-
-  public async checkHealth(): Promise<void> {
-    await this.checkAllServices()
-  }
-}
-
-// Game state interface matching server updates
-export interface Vector2D {
-  x: number
-  y: number
-}
-
-interface GameState {
-  ball: { x: number; y: number; radius: number }
-  paddles: {
-    left: { y: number; height: number }
-    right: { y: number; height: number }
-  }
-  scores: { left: number; right: number }
-  status: 'waiting' | 'playing' | 'paused' | 'finished'
-  cosmicBackground: number[][] | null
-}
-
-// WebSocket message types
-interface ServerMessage {
-  type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong'
-  sessionId?: string
-  data?: GameState
-  message?: string
-}
-
-interface ClientMessage {
-  type: 'paddle' | 'start' | 'stop' | 'ping'
-  paddle?: 'left' | 'right'
-  direction?: 'up' | 'down' | 'stop'
-}
-
-class TranscendenceApp {
+export class DisplayProvider {
   private startTime: number
   private healthChecker: HealthChecker
   private gameContainer: HTMLElement | null = null
@@ -224,6 +15,7 @@ class TranscendenceApp {
   private maxReconnectAttempts: number = 5
 
   constructor() {
+    console.log("init")
     this.startTime = Date.now()
     this.healthChecker = new HealthChecker()
     this.init()
@@ -235,7 +27,6 @@ class TranscendenceApp {
     this.createParticles()
     this.setupEventListeners()
     this.createGameContainer()
-
     // setInterval(() => this.updateTime(), 1000);
     // setInterval(() => this.updateUptime(), 1000);
     // setInterval(() => this.healthChecker.checkHealth(), 1000);
@@ -263,37 +54,37 @@ class TranscendenceApp {
             <button id="exit-game-btn" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-all">Exit</button>
           </div>
         </div>
-                   <!-- Game Over dial box -->
-                   <div id="game-over-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                       <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border-2 border-blue-500">
-                           <h2 class="text-3xl font-bold text-center mb-6 text-white">Game Over!</h2>
-          
-                           <!-- Score Display -->
-                           <div class="mb-6 space-y-3">
-                               <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
-                                   <span class="text-lg text-gray-300">Player 1:</span>
-                                   <span id="final-score-p1" class="text-2xl font-bold text-blue-400">0</span>
-                               </div>
-                               <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
-                                   <span class="text-lg text-gray-300">Player 2:</span>
-                                   <span id="final-score-p2" class="text-2xl font-bold text-red-400">0</span>
-                               </div>
-                           </div>
-          
-                           <!-- Winner Message -->
-                           <p id="winner-message" class="text-center text-xl mb-6 text-yellow-400"></p>
-          
-                           <!-- Buttons -->
-                           <div class="flex gap-4">
-                               <button id="new-game-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
-                                   New Game
-                               </button>
-                               <button id="close-dialog-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
-                                 Close
-                               </button>
-                           </div>
-                       </div>
-                   </div>
+        <!-- Game Over dial box -->
+        <div id="game-over-dialog" class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div class="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 border-2 border-blue-500">
+             <h2 class="text-3xl font-bold text-center mb-6 text-white">Game Over!</h2>
+
+             <!-- Score Display -->
+             <div class="mb-6 space-y-3">
+                 <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+                     <span class="text-lg text-gray-300">Player 1:</span>
+                     <span id="final-score-p1" class="text-2xl font-bold text-blue-400">0</span>
+                 </div>
+                 <div class="flex justify-between items-center bg-gray-700 p-4 rounded">
+                     <span class="text-lg text-gray-300">Player 2:</span>
+                     <span id="final-score-p2" class="text-2xl font-bold text-red-400">0</span>
+                 </div>
+             </div>
+
+             <!-- Winner Message -->
+             <p id="winner-message" class="text-center text-xl mb-6 text-yellow-400"></p>
+
+             <!-- Buttons -->
+             <div class="flex gap-4">
+                 <button id="new-game-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
+                     New Game
+                 </button>
+                 <button id="close-dialog-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+                   Close
+                 </button>
+             </div>
+          </div>
+        </div>
         <!-- Settings Sliders -->
         <div class="bg-white/10 backdrop-blur-lg p-4 m-4 rounded-xl text-white space-y-4">
           <h3 class="text-xl font-semibold text-purple-300">Game Settings</h3>
@@ -365,12 +156,6 @@ class TranscendenceApp {
       gameSessionId,
       settings: Object.fromEntries(new FormData(form).entries()),
     }
-
-    // const res = await fetch('http://localhost:8080/api/game-settings', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(data),
-    // })
   }
 
   private showGameOverDialog(gameData: GameState) {
@@ -969,6 +754,3 @@ class TranscendenceApp {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  new TranscendenceApp()
-})
