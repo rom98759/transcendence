@@ -153,9 +153,10 @@ export async function proxyRequest(
 
     clearTimeout(timeoutHandle)
 
-    const setCookie = response.headers.get('set-cookie')
-    if (setCookie) {
-      reply.header('set-cookie', setCookie)
+    // Forward all Set-Cookie headers from upstream (getSetCookie() returns array of all cookies)
+    const setCookies = response.headers.getSetCookie?.() || [];
+    if (setCookies.length > 0) {
+      setCookies.forEach(cookie => reply.header("set-cookie", cookie));
     }
 
     const contentType = response.headers.get('content-type') || ''

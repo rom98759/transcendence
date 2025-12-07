@@ -21,6 +21,42 @@ export interface Logger {
   error(context: LogContext): void
 }
 
+/**
+ * Sanitize les données sensibles pour les logs
+ * Remplace les champs sensibles par '[REDACTED]'
+ */
+function sanitizeForLog(data: any): any {
+  if (!data || typeof data !== 'object') return data;
+
+  const SENSITIVE_FIELDS = [
+    'password',
+    'token',
+    'secret',
+    'totp_secret',
+    'jwt',
+    'authorization',
+    'cookie',
+    'loginToken',
+    '2fa_login_token',
+    '2fa_setup_token',
+    'access_token',
+    'refresh_token'
+  ];
+
+  const sanitized = Array.isArray(data) ? [...data] : { ...data };
+
+  for (const key of Object.keys(sanitized)) {
+    const lowerKey = key.toLowerCase();
+    if (SENSITIVE_FIELDS.some(field => lowerKey.includes(field))) {
+      sanitized[key] = '[REDACTED]';
+    } else if (typeof sanitized[key] === 'object' && sanitized[key] !== null) {
+      sanitized[key] = sanitizeForLog(sanitized[key]);
+    }
+  }
+
+  return sanitized;
+}
+
 class AuthLogger implements Logger {
   private serviceName = 'auth-service'
   private logLevel: string = process.env.LOG_LEVEL || 'info'
@@ -33,13 +69,14 @@ class AuthLogger implements Logger {
   }
 
   private formatLog(level: string, context: LogContext): object {
-    const timestamp = new Date().toISOString()
+    const timestamp = new Date().toISOString();
+    const sanitizedContext = sanitizeForLog(context);
     return {
       timestamp,
       level,
       service: this.serviceName,
-      ...context,
-    }
+      ...sanitizedContext
+    };
   }
 
   debug(context: LogContext): void {

@@ -2,12 +2,26 @@ import fastify from "fastify";
 import fastifyCors from "@fastify/cors";
 import fastifyJwt from "@fastify/jwt";
 import fastifyCookie from "@fastify/cookie";
+import fastifyRateLimit from "@fastify/rate-limit";
 import websocketPlugin from "@fastify/websocket";
 import { apiRoutes, publicRoutes } from "./routes/gateway.routes.js";
 import { logger, optimizeErrorHandler } from "./utils/logger.js";
 
 const PUBLIC_HEALTH_ROUTES = ["/api/auth/health", "/api/game/health", "/api/block/health"];
-const PUBLIC_ROUTES = ["/api/auth/login", "/api/auth/register", "/api/game/sessions", ...PUBLIC_HEALTH_ROUTES];
+// Routes publiques : pas de vérification JWT requise
+const PUBLIC_ROUTES = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/2fa/verify",
+  "/api/auth/2fa/setup/verify",
+  "/api/game/sessions",
+  ...PUBLIC_HEALTH_ROUTES
+];
+// Routes nécessitant une authentification JWT (mais pas 2FA complète)
+const AUTH_REQUIRED_ROUTES = [
+  "/api/auth/2fa/setup",
+  "/api/auth/2fa/disable"
+];
 
 const app = fastify({
   logger: false, // Utiliser notre logger
@@ -16,6 +30,23 @@ const app = fastify({
 
 // Register fastify-cookie
 app.register(fastifyCookie);
+
+// Rate limiting global
+app.register(fastifyRateLimit, {
+  max: 200,  // Plus permissif car c'est un gateway (aggrege plusieurs services)
+  timeWindow: '1 minute',
+  keyGenerator: (request) => {
+    // Rate limit par IP
+    return request.ip || 'unknown';
+  },
+  errorResponseBuilder: (req, context) => ({
+    error: {
+      message: 'Too many requests, please try again later',
+      code: 'RATE_LIMIT_EXCEEDED',
+      retryAfter: context.after
+    }
+  })
+});
 
 console.log("register");
 app.register(websocketPlugin);
@@ -26,7 +57,7 @@ app.addHook("onRequest", async (request: any, reply: any) => {
   // Routes public non `/api` : on ne fait rien
   if (!url.startsWith("/api")) return;
 
-  // Routes publiques juste `/api/auth/login` et `/api/auth/register` (pas de cookie nécessaire)
+  // Routes publiques
   if (PUBLIC_ROUTES.includes(url)) {
     logger.logAuth({ url, user: request.user?.username }, true);
     return;

@@ -1,31 +1,29 @@
-import { z } from 'zod'
+import { z } from "zod";
+import { RESERVED_USERNAMES, AUTH_CONFIG } from "./constants.js";
 
 // Validation centralisée avec règles métier Transcendence
 export const ValidationSchemas = {
   // Auth schemas
   register: z.object({
-    username: z
-      .string()
-      .min(4, 'Username must be at least 4 characters')
-      .max(30, 'Username must be at most 30 characters')
-      .regex(/^[a-zA-Z0-9_]+$/, 'Username must contain only letters, numbers and underscores')
-      .refine((val: string) => !val.includes('admin'), {
-        message: "Username cannot contain 'admin'",
+    username: z.string()
+      .min(AUTH_CONFIG.USERNAME_MIN_LENGTH, `Username must be at least ${AUTH_CONFIG.USERNAME_MIN_LENGTH} characters`)
+      .max(AUTH_CONFIG.USERNAME_MAX_LENGTH, `Username must be at most ${AUTH_CONFIG.USERNAME_MAX_LENGTH} characters`)
+      .regex(AUTH_CONFIG.USERNAME_PATTERN, "Username must contain only letters, numbers and underscores")
+      .refine((val: string) => !RESERVED_USERNAMES.includes(val.toLowerCase()), {
+        message: "This username is reserved and cannot be used"
       }),
 
-    email: z.string().email('Invalid email format').max(100, 'Email too long'),
+    email: z.string()
+      .email("Invalid email format")
+      .max(AUTH_CONFIG.EMAIL_MAX_LENGTH, "Email too long"),
 
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .max(100, 'Password too long')
-      .regex(/^(?=.*[a-z])/, 'Password must contain at least one lowercase letter')
-      .regex(/^(?=.*[A-Z])/, 'Password must contain at least one uppercase letter')
-      .regex(/^(?=.*\d)/, 'Password must contain at least one number')
-      .regex(
-        /^(?=.*[!@#$%^&*])/,
-        'Password must contain at least one special character (!@#$%^&*)',
-      ),
+    password: z.string()
+      .min(AUTH_CONFIG.PASSWORD_MIN_LENGTH, `Password must be at least ${AUTH_CONFIG.PASSWORD_MIN_LENGTH} characters`)
+      .max(AUTH_CONFIG.PASSWORD_MAX_LENGTH, "Password too long")
+      .regex(/^(?=.*[a-z])/, "Password must contain at least one lowercase letter")
+      .regex(/^(?=.*[A-Z])/, "Password must contain at least one uppercase letter")
+      .regex(/^(?=.*\d)/, "Password must contain at least one number")
+      .regex(/^(?=.*[!@#$%^&*])/, "Password must contain at least one special character (!@#$%^&*)")
   }),
 
   login: z
