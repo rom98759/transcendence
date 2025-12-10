@@ -6,6 +6,7 @@ import { authRoutes } from './routes/auth.routes.js';
 import { initAdminUser, initInviteUser } from './utils/init-users.js';
 import { logger } from './utils/logger.js';
 import { AUTH_CONFIG, ERROR_CODES } from './utils/constants.js';
+import * as totpService from './services/totp.service.js';
 
 const env = (globalThis as any).process?.env || {};
 
@@ -46,7 +47,21 @@ app.register(authRoutes, { prefix: '/' });
 
     await initAdminUser();
     await initInviteUser();
-    logger.info({ event: 'service_ready', message: 'Auth service is ready' });
+
+    // Nettoyer les sessions expirées au démarrage
+    totpService.cleanupExpiredSessions();
+
+    // Maintenance automatique toutes les 5 minutes
+    const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+    setInterval(() => {
+      totpService.cleanupExpiredSessions();
+    }, CLEANUP_INTERVAL);
+
+    logger.info({
+      event: 'service_ready',
+      message: 'Auth service is ready',
+      cleanupInterval: `${CLEANUP_INTERVAL / 1000}s`
+    });
   } catch (error: any) {
     logger.error({ event: 'service_startup_failed', err: error?.message || error });
     console.error(error);

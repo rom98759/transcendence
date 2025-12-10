@@ -64,6 +64,22 @@ try {
   throw e;
 }
 
+// Table pour stocker temporairement les secrets TOTP pendant le setup
+try {
+	db.exec(`
+    CREATE TABLE IF NOT EXISTS totp_setup_secrets (
+      token TEXT PRIMARY KEY,
+      user_id INTEGER NOT NULL,
+      secret TEXT NOT NULL,
+      expires_at DATETIME NOT NULL,
+      FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+		`);
+} catch (err) {
+  const e: any = new Error(`Failed to initialize TOTP setup secrets table: ${((err as any)?.message) || String(err)}`);
+  throw e;
+}
+
 export interface DBUser {
   id?: number;
   username: string;
@@ -100,6 +116,12 @@ const deleteLoginTokenAttemptStmt = db.prepare('DELETE FROM login_token_attempts
 // Role management statements
 const getUserRoleStmt = db.prepare('SELECT role FROM users WHERE id = ?');
 const updateUserRoleStmt = db.prepare('UPDATE users SET role = ? WHERE id = ?');
+
+// TOTP setup secrets statements
+const insertTotpSetupSecretStmt = db.prepare('INSERT INTO totp_setup_secrets (token, user_id, secret, expires_at) VALUES (?, ?, ?, ?)');
+const getTotpSetupSecretStmt = db.prepare('SELECT secret, user_id, expires_at FROM totp_setup_secrets WHERE token = ?');
+const deleteTotpSetupSecretStmt = db.prepare('DELETE FROM totp_setup_secrets WHERE token = ?');
+const cleanExpiredTotpSecretsStmt = db.prepare("DELETE FROM totp_setup_secrets WHERE expires_at < datetime('now')");
 
 export function findUserByUsername(username: string): DBUser | null {
   try {
@@ -419,6 +441,87 @@ export function updateUserRole(userId: number, role: string): void {
   } catch (err) {
     const error: any = new Error(`Error updating user role: ${((err as any)?.message) || String(err)}`);
     error.code = 'DB_UPDATE_USER_ROLE_ERROR';
+    throw error;
+  }
+}
+
+// ============================================
+// TOTP Setup Secrets Functions
+// ============================================
+
+/**
+ * Stocke temporairement un secret TOTP pendant le setup
+ * @param token Token associé au setup
+ * @param userId ID de l'utilisateur
+ * @param secret Secret TOTP à stocker
+ * @param expiresInSeconds Durée de validité en secondes (défaut: 120)
+ */
+export function storeTotpSetupSecret(token: string, userId: number, secret: string, expiresInSeconds: number = 120): void {
+  try {
+    const expiresAt = new Date(Date.now() + expiresInSeconds * 1000).toISOString();
+    insertTotpSetupSecretStmt.run(token, userId, secret, expiresAt);
+  } catch (err) {
+    const error: any = new Error(`Error storing TOTP setup secret: ${((err as any)?.message) || String(err)}`);
+    error.code = 'DB_STORE_TOTP_SETUP_SECRET_ERROR';
+    throw error;
+  }
+}
+
+/**
+ * Récupère un secret TOTP temporaire
+ * @param token Token associé au setup
+ * @returns Le secret et l'ID utilisateur si valide, null sinon
+ */
+export function getTotpSetupSecret(token: string): { secret: string; userId: number } | null {
+  try {
+    const result = getTotpSetupSecretStmt.get(token) as { secret: string; user_id: number; expires_at: string } | undefined;
+
+    if (!result) {
+      return null;
+    }
+
+    // Vérifier si le secret n'est pas expiré
+    const expiresAt = new Date(result.expires_at);
+    if (expiresAt < new Date()) {
+      // Secret expiré, le supprimer
+      deleteTotpSetupSecretStmt.run(token);
+      return null;
+    }
+
+    return { secret: result.secret, userId: result.user_id };
+  } catch (err) {
+    const error: any = new Error(`Error getting TOTP setup secret: ${((err as any)?.message) || String(err)}`);
+    error.code = 'DB_GET_TOTP_SETUP_SECRET_ERROR';
+    throw error;
+  }
+}
+
+/**
+ * Supprime un secret TOTP temporaire
+ * @param token Token associé au setup
+ */
+export function deleteTotpSetupSecret(token: string): void {
+  try {
+    deleteTotpSetupSecretStmt.run(token);
+  } catch (err) {
+    const error: any = new Error(`Error deleting TOTP setup secret: ${((err as any)?.message) || String(err)}`);
+    error.code = 'DB_DELETE_TOTP_SETUP_SECRET_ERROR';
+    throw error;
+  }
+}
+
+/**
+ * Nettoie les secrets TOTP expirés (maintenance)
+ */
+export function cleanExpiredTotpSecrets(): void {
+  try {
+    const result = cleanExpiredTotpSecretsStmt.run();
+    if (result.changes > 0) {
+      console.log(`Cleaned ${result.changes} expired TOTP setup secrets`);
+    }
+  } catch (err) {
+    const error: any = new Error(`Error cleaning expired TOTP secrets: ${((err as any)?.message) || String(err)}`);
+    error.code = 'DB_CLEAN_EXPIRED_TOTP_SECRETS_ERROR';
     throw error;
   }
 }

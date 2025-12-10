@@ -133,26 +133,84 @@
           // Fonction utilitaire pour formater les erreurs
           function formatErrorMessage(result) {
             if (!result.data || typeof result.data !== 'object') {
-              return `Erreur (${result.status}): ${result.data}`
+              return `<div class="text-red-700">Erreur (${result.status}): ${result.data || 'Inconnue'}</div>`
             }
 
             const error = result.data.error
             if (!error) {
-              return `Erreur (${result.status}): ${JSON.stringify(result.data)}`
+              return `<div class="text-red-700">Erreur (${result.status}): ${JSON.stringify(result.data)}</div>`
             }
 
-            let html = `<div class="text-red-700 font-medium">${error.message}</div>`
+            let html = `<div class="text-red-700 font-medium mb-2">❌ ${error.message}</div>`
 
+            // Afficher un hint si disponible
+            if (error.hint) {
+              html += `<div class="text-orange-600 text-sm mb-2 flex items-start gap-1">`
+              html += `<span>💡</span><span>${error.hint}</span>`
+              html += `</div>`
+            }
+
+            // Afficher des informations complémentaires
+            if (error.details && typeof error.details === 'string') {
+              html += `<div class="text-gray-600 text-sm mb-2">${error.details}</div>`
+            }
+
+            // Afficher les erreurs de validation détaillées
             if (error.details && Array.isArray(error.details)) {
               html += '<div class="error-details mt-3">'
-              html += '<div class="text-sm font-medium text-gray-700 mb-2">Détails :</div>'
+              html += '<div class="text-xs font-semibold text-gray-700 mb-2">Détails des erreurs :</div>'
               error.details.forEach((detail) => {
+                const field = detail.path && detail.path[0] ? `<strong>${detail.path[0]}</strong>: ` : ''
                 html += `<div class="error-item">`
                 html += `<span class="error-icon">•</span>`
-                html += `<span>${detail.message}</span>`
+                html += `<span>${field}${detail.message}</span>`
                 html += `</div>`
               })
               html += '</div>'
+            }
+
+            // Afficher les erreurs par champ si disponibles (format structuré)
+            if (error.fields && typeof error.fields === 'object') {
+              html += '<div class="error-details mt-3">'
+              html += '<div class="text-xs font-semibold text-gray-700 mb-2">Problèmes à corriger :</div>'
+              Object.entries(error.fields).forEach(([field, messages]) => {
+                const fieldLabel = {
+                  username: '👤 Nom d\'utilisateur',
+                  email: '📧 Email',
+                  password: '🔒 Mot de passe',
+                  code: '🔢 Code',
+                  general: '⚠️ Général'
+                }[field] || field
+
+                if (Array.isArray(messages)) {
+                  messages.forEach(msg => {
+                    html += `<div class="error-item">`
+                    html += `<span class="error-icon">•</span>`
+                    html += `<span><strong>${fieldLabel}</strong>: ${msg}</span>`
+                    html += `</div>`
+                  })
+                }
+              })
+              html += '</div>'
+            }
+
+            // Afficher le champ concerné si disponible
+            if (error.field && !error.fields) {
+              html += `<div class="text-gray-500 text-xs mt-2">Champ: ${error.field}</div>`
+            }
+
+            // Afficher les tentatives restantes si disponible
+            if (typeof error.remainingAttempts === 'number') {
+              const color = error.remainingAttempts <= 1 ? 'text-red-600' : 'text-orange-600'
+              html += `<div class="${color} text-sm mt-2 font-medium">`
+              html += `⚠️ ${error.remainingAttempts} tentative(s) restante(s)`
+              html += `</div>`
+            }
+
+            // Afficher l'expiration si disponible
+            if (error.expiresIn || result.data.result?.expiresIn) {
+              const expires = error.expiresIn || result.data.result?.expiresIn
+              html += `<div class="text-gray-500 text-xs mt-2">⏱️ Expire dans ${expires} secondes</div>`
             }
 
             return html
@@ -188,14 +246,35 @@
             try {
               const result = await postJson('/api/auth/login', { username, password })
               if (result.ok) {
-                loginMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ Connexion réussie</div>'
-                console.log('Données reçues:', result.data)
+                const resultData = result.data?.result || {}
+
+                if (resultData.require2FA) {
+                  // 2FA requise
+                  loginMsg.innerHTML = `
+                    <div class="text-blue-700 font-medium mb-2">🔐 ${resultData.message || 'Authentification 2FA requise'}</div>
+                    ${resultData.details ? `<div class="text-gray-600 text-sm mb-2">${resultData.details}</div>` : ''}
+                    ${resultData.expiresIn ? `<div class="text-gray-500 text-xs">⏱️ Session valide ${resultData.expiresIn} secondes</div>` : ''}
+                    <div class="text-sm mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                      📱 Utilisez la carte "Vérification 2FA" ci-dessous pour entrer votre code
+                    </div>
+                  `
+                } else {
+                  // Connexion réussie
+                  loginMsg.innerHTML = `
+                    <div class="text-green-700 font-medium mb-2">✓ ${resultData.message || 'Connexion réussie'}</div>
+                    ${resultData.username ? `<div class="text-gray-600 text-sm">Connecté en tant que: <strong>${resultData.username}</strong></div>` : ''}
+                  `
+                  // Réinitialiser le formulaire après succès
+                  setTimeout(() => {
+                    loginForm.reset()
+                    loginMsg.innerHTML = ''
+                  }, 3000)
+                }
               } else {
                 loginMsg.innerHTML = formatErrorMessage(result)
               }
             } catch (err) {
-              loginMsg.innerHTML = `<div class="text-red-700">Connexion impossible: ${err.message}</div>`
+              loginMsg.innerHTML = `<div class="text-red-700">❌ Connexion impossible: ${err.message}</div>`
             } finally {
               loginBtn.disabled = false
             }
@@ -296,8 +375,18 @@
             try {
               const result = await postJson('/api/auth/register', { username, email, password })
               if (result.ok) {
-                regMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ Inscription réussie</div>'
+                const resultData = result.data?.result || {}
+                regMsg.innerHTML = `
+                  <div class="text-green-700 font-medium mb-2">✓ ${resultData.message || 'Inscription réussie !'}</div>
+                  ${resultData.username ? `<div class="text-gray-600 text-sm mb-2">Compte créé: <strong>${resultData.username}</strong></div>` : ''}
+                  <div class="text-sm mt-2 p-3 bg-green-50 border border-green-200 rounded">
+                    👉 Vous pouvez maintenant vous connecter avec la carte "Connexion" ci-dessus
+                  </div>
+                `
+                // Réinitialiser le formulaire après succès
+                setTimeout(() => {
+                  registerForm.reset()
+                }, 2000)
                 console.log('Données reçues:', result.data)
               } else {
                 regMsg.innerHTML = formatErrorMessage(result)
@@ -606,6 +695,393 @@
             <div class="msg" id="listUsersMsg"></div>
           </div>
         </div>
+
+        <!-- Carte Configuration 2FA -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-purple-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              ></path>
+            </svg>
+            Configurer la 2FA
+          </h2>
+          <div class="space-y-4">
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <div class="flex items-start">
+                <svg
+                  class="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span class="text-sm text-blue-800"
+                  >Activez la double authentification avec Google Authenticator</span
+                >
+              </div>
+            </div>
+            <button
+              id="setup2FABtn"
+              class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Générer le QR Code
+            </button>
+            <div id="qrCodeSection" class="hidden">
+              <div class="bg-gray-50 p-4 rounded-lg text-center">
+                <img
+                  id="qrCodeImg"
+                  class="mx-auto mb-3 border-2 border-gray-200 rounded-lg"
+                  style="max-width: 250px"
+                />
+                <div class="text-xs text-gray-600 mb-2">Secret TOTP:</div>
+                <div
+                  id="totpSecret"
+                  class="text-xs font-mono bg-white p-2 rounded border break-all mb-3"
+                ></div>
+                <div class="text-xs text-gray-500 mb-3">
+                  Scannez le QR code avec Google Authenticator
+                </div>
+              </div>
+              <div>
+                <label for="verify2FACode" class="block text-sm font-medium text-gray-700 mb-1"
+                  >Code à 6 chiffres</label
+                >
+                <input
+                  id="verify2FACode"
+                  type="text"
+                  maxlength="6"
+                  placeholder="000000"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center font-mono text-lg"
+                />
+              </div>
+              <button
+                id="verify2FABtn"
+                class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Activer la 2FA
+              </button>
+            </div>
+            <div class="msg" id="setup2FAMsg"></div>
+          </div>
+        </div>
+        <script>
+          // Code de la carte Configuration 2FA
+          const setup2FABtn = document.getElementById('setup2FABtn')
+          const verify2FABtn = document.getElementById('verify2FABtn')
+          const setup2FAMsg = document.getElementById('setup2FAMsg')
+          const qrCodeSection = document.getElementById('qrCodeSection')
+          const qrCodeImg = document.getElementById('qrCodeImg')
+          const totpSecret = document.getElementById('totpSecret')
+          const verify2FACode = document.getElementById('verify2FACode')
+
+          setup2FABtn.addEventListener('click', async () => {
+            setup2FAMsg.innerHTML = ''
+            setup2FAMsg.className = 'msg mt-3'
+            setup2FABtn.disabled = true
+            qrCodeSection.classList.add('hidden')
+
+            try {
+              const res = await fetch('/api/auth/2fa/setup', {
+                method: 'POST',
+                credentials: 'include',
+              })
+              const text = await res.text()
+              let data
+              try {
+                data = JSON.parse(text)
+              } catch {
+                data = text
+              }
+
+              if (res.ok && data.result) {
+                const result = data.result
+
+                // Afficher le QR code (le secret est stocké côté serveur)
+                qrCodeImg.src = result.qrCode
+                totpSecret.textContent = 'Secret stocké de manière sécurisée côté serveur'
+                qrCodeSection.classList.remove('hidden')
+
+                const expiresIn = result.expiresIn || 120
+                setup2FAMsg.innerHTML =
+                  `<div class="text-green-700 font-medium">✓ QR Code généré avec succès<br>
+                  <span class="text-sm">Session valide ${expiresIn} secondes</span></div>`
+              } else {
+                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+              }
+            } catch (err) {
+              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              setup2FABtn.disabled = false
+            }
+          })
+
+          verify2FABtn.addEventListener('click', async () => {
+            const code = verify2FACode.value.trim()
+            if (!code || code.length !== 6) {
+              setup2FAMsg.innerHTML =
+                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>'
+              return
+            }
+
+            setup2FAMsg.innerHTML = ''
+            setup2FAMsg.className = 'msg mt-3'
+            verify2FABtn.disabled = true
+
+            try {
+              const res = await fetch('/api/auth/2fa/setup/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                  code: code
+                  // Le secret n'est PAS envoyé, il est déjà stocké côté serveur
+                }),
+              })
+              const text = await res.text()
+              let data
+              try {
+                data = JSON.parse(text)
+              } catch {
+                data = text
+              }
+
+              if (res.ok) {
+                setup2FAMsg.innerHTML =
+                  '<div class="text-green-700 font-medium">✓ 2FA activée avec succès ! Vous êtes maintenant connecté.</div>'
+                qrCodeSection.classList.add('hidden')
+                verify2FACode.value = ''
+              } else {
+                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+              }
+            } catch (err) {
+              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              verify2FABtn.disabled = false
+            }
+          })
+        </script>
+
+        <!-- Carte Vérification 2FA (Login) -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-orange-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              ></path>
+            </svg>
+            Vérification 2FA
+          </h2>
+          <div class="space-y-4">
+            <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+              <div class="flex items-start">
+                <svg
+                  class="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                <span class="text-sm text-orange-800"
+                  >Utilisez cette carte après le login si la 2FA est activée</span
+                >
+              </div>
+            </div>
+            <div>
+              <label for="login2FACode" class="block text-sm font-medium text-gray-700 mb-1"
+                >Code à 6 chiffres</label
+              >
+              <input
+                id="login2FACode"
+                type="text"
+                maxlength="6"
+                placeholder="000000"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center font-mono text-lg"
+              />
+            </div>
+            <button
+              id="verifyLogin2FABtn"
+              class="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Vérifier et se connecter
+            </button>
+            <div class="msg" id="verifyLogin2FAMsg"></div>
+          </div>
+        </div>
+        <script>
+          // Code de la carte Vérification 2FA (Login)
+          const verifyLogin2FABtn = document.getElementById('verifyLogin2FABtn')
+          const verifyLogin2FAMsg = document.getElementById('verifyLogin2FAMsg')
+          const login2FACode = document.getElementById('login2FACode')
+
+          verifyLogin2FABtn.addEventListener('click', async () => {
+            const code = login2FACode.value.trim()
+
+            if (!code || code.length !== 6) {
+              verifyLogin2FAMsg.innerHTML =
+                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>'
+              verifyLogin2FAMsg.className = 'msg mt-3'
+              return
+            }
+
+            verifyLogin2FAMsg.innerHTML = ''
+            verifyLogin2FAMsg.className = 'msg mt-3'
+            verifyLogin2FABtn.disabled = true
+
+            try {
+              const res = await fetch('/api/auth/2fa/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ code: code }),
+              })
+              const text = await res.text()
+              let data
+              try {
+                data = JSON.parse(text)
+              } catch {
+                data = text
+              }
+
+              if (res.ok) {
+                verifyLogin2FAMsg.innerHTML =
+                  '<div class="text-green-700 font-medium">✓ Connexion réussie avec 2FA !</div>'
+                login2FACode.value = ''
+              } else {
+                verifyLogin2FAMsg.innerHTML = formatErrorMessage({
+                  ok: false,
+                  status: res.status,
+                  data,
+                })
+              }
+            } catch (err) {
+              verifyLogin2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              verifyLogin2FABtn.disabled = false
+            }
+          })
+        </script>
+
+        <!-- Carte Désactivation 2FA -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              ></path>
+            </svg>
+            Désactiver la 2FA
+          </h2>
+          <div class="space-y-4">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+              <div class="flex items-start">
+                <svg
+                  class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  ></path>
+                </svg>
+                <span class="text-sm text-red-800"
+                  >⚠️ Attention: Vous devez être connecté pour désactiver la 2FA</span
+                >
+              </div>
+            </div>
+            <button
+              id="disable2FABtn"
+              class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Désactiver la 2FA
+            </button>
+            <div class="msg" id="disable2FAMsg"></div>
+          </div>
+        </div>
+        <script>
+          // Code de la carte Désactivation 2FA
+          const disable2FABtn = document.getElementById('disable2FABtn')
+          const disable2FAMsg = document.getElementById('disable2FAMsg')
+
+          disable2FABtn.addEventListener('click', async () => {
+            if (!confirm('Êtes-vous sûr de vouloir désactiver la double authentification ?')) {
+              return
+            }
+
+            disable2FAMsg.innerHTML = ''
+            disable2FAMsg.className = 'msg mt-3'
+            disable2FABtn.disabled = true
+
+            try {
+              const res = await fetch('/api/auth/2fa/disable', {
+                method: 'POST',
+                credentials: 'include',
+              })
+              const text = await res.text()
+              let data
+              try {
+                data = JSON.parse(text)
+              } catch {
+                data = text
+              }
+
+              if (res.ok) {
+                disable2FAMsg.innerHTML =
+                  '<div class="text-green-700 font-medium">✓ 2FA désactivée avec succès</div>'
+              } else {
+                disable2FAMsg.innerHTML = formatErrorMessage({
+                  ok: false,
+                  status: res.status,
+                  data,
+                })
+              }
+            } catch (err) {
+              disable2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              disable2FABtn.disabled = false
+            }
+          })
+        </script>
 
         <!-- Carte Blockchain-->
         <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
