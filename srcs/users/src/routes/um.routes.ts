@@ -1,13 +1,13 @@
 import { getProfileByUsername } from '../controllers/um.controller.js'
-import { FastifyInstance } from 'fastify'
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify'
 
 export async function umRoutes(app: FastifyInstance) {
   app.get('/', async function (this: FastifyInstance) {
     return { message: 'User management service is running' }
   })
 
-  app.get('/health', async function (this: FastifyInstance) {
-    return { message: 'Service healthy' }
+  app.get('/health', async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
+    return reply.code(200).send({ status: "healthy" })
   })
 
   app.get('/users/:username', getProfileByUsername)
