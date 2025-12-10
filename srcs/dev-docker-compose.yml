@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # Development nginx with hot reload
+  nginx-proxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    container_name: nginx-proxy-dev
+    ports:
+      - '8080:80'
+      - '4430:443'
+    volumes:
+      - ./nginx/src:/usr/share/nginx/src
+      # - ./nginx/conf.d:/etc/nginx/conf.d:ro
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:
+      api-gateway:
+        condition: service_started
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # All other services use production setup
+  api-gateway:
+    build:
+      context: ./gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    expose:
+      - '3000'
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-supersecretkey}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:
+      auth-service:
+        condition: service_healthy
+
+  auth-service:
+    build:
+      context: ./auth
+      dockerfile: Dockerfile
+    container_name: auth-service
+    expose:
+      - '3001'
+    environment:
+      - NODE_ENV=production
+      - AUTH_DB_PATH=/data/auth.db
+      - JWT_SECRET=${JWT_SECRET:-supersecretkey}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3001/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  blockchain-service:
+    build:
+      context: ./blockchain
+      dockerfile: Dockerfile
+    container_name: blockchain-service
+    expose:
+      - '3005'
+    environment:
+      - NODE_ENV=production
+      - BLOCK_DB_PATH=/data/blockchain.db
+      - REDIS_URL=redis://redis-broker:6379
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3005/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  game-service:
+    build:
+      context: ./game
+      dockerfile: Dockerfile
+    container_name: game-service-dev
+    expose:
+      - '3003'
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=redis://redis-broker:6379
+    volumes:
+      - ./game/src:/app/src
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3003/health']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  data:

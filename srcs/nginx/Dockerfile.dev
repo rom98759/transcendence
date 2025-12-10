@@ -1,0 +1,29 @@
+# ===========================
+# 1. BUILDER STAGE
+# ===========================
+# ===========================
+# NGINX RUNTIME WITH NODE
+# ===========================
+FROM nginx:alpine
+
+# Install Node.js for esbuild hot reload
+RUN apk add --no-cache nodejs npm
+
+WORKDIR /app
+
+# Install esbuild globally for faster execution
+RUN npm install -g esbuild
+
+# Copy nginx configs
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY conf.d/default.conf /etc/nginx/conf.d/default.conf
+
+# Copy entrypoint script
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+EXPOSE 80 443
+
+CMD ["/start.sh"]
+
+

@@ -1,62 +1,63 @@
+import { Vector2 } from './game.vector.js'
 // Message types
+export interface GameSettings {
+  ballRadius: number
+  ballSpeed: number
+  ballMass: number
+  paddleSpeed: number
+  microWaveSize: number
+}
+
 export interface ClientMessage {
-  type: 'paddle' | 'start' | 'stop' | 'ping';
-  paddle?: 'left' | 'right';
-  direction?: 'up' | 'down' | 'stop';
+  type: 'paddle' | 'start' | 'stop' | 'ping'
+  paddle?: 'left' | 'right'
+  direction?: 'up' | 'down' | 'stop'
 }
 
 export interface ServerMessage {
-  type: 'newSession' | 'state' | 'gameOver' | 'error' | 'pong';
-  sessionId?: string;
-  data?: any;
-  message?: string;
+  type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong'
+  sessionId?: string
+  data?: GameState
+  message?: string
 }
 
-// export interface Ball {
-//   x: number;
-//   y: number;
-//   radius: number;
-//   velocityX: number;
-//   velocityY: number;
-//   speed: number;
-// }
-
 export interface Paddle {
-  y: number;
-  height: number;
-  width: number;
-  speed: number;
-  moving: 'up' | 'down' | 'stop';
+  y: number
+  height: number
+  width: number
+  speed: number
+  moving: 'up' | 'down' | 'stop'
 }
 
 export interface Paddles {
-  left: Paddle;
-  right: Paddle;
+  left: Paddle
+  right: Paddle
 }
 
 export interface Scores {
-  left: number;
-  right: number;
+  left: number
+  right: number
 }
 
-export type GameStatus = 'waiting' | 'playing' | 'paused' | 'finished';
+export type GameStatus = 'waiting' | 'playing' | 'paused' | 'finished'
 
 export interface GameState {
   ball: {
-    x: number;
-    y: number;
-    radius: number;
-  };
+    x: number
+    y: number
+    radius: number
+  }
   paddles: {
     left: {
-      y: number;
-      height: number;
-    };
+      y: number
+      height: number
+    }
     right: {
-      y: number;
-      height: number;
-    };
-  };
-  scores: Scores;
-  status: GameStatus;
+      y: number
+      height: number
+    }
+  }
+  scores: Scores
+  status: GameStatus
+  cosmicBackground: number[][] | null
 }

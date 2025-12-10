@@ -1,0 +1,22 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install build tools if needed
+RUN apk add --no-cache python3 make g++ wget
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy source code
+COPY . .
+
+# Verify files (debugging)
+RUN ls -la /app && ls -la /app/src
+
+# Expose port
+EXPOSE 3003
+
+# Run with tsx watch
+CMD ["npx", "tsx", "watch", "--poll", "src/server.ts"]

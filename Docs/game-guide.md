@@ -1,14 +1,19 @@
-## game service 
+# game service
 
-### Memory management: 
+## Memory management:
 
-    const gameSessions = new Map<string, PongGame>();
-    const playerConnections = new Map<string, Set<WebSocket>>();
+    export const gameSessions = new Map<string, {
+      id: string;
+      game: PongGame;
+      interval: NodeJS.Timeout | null;
+      players: Set<any>; // sockets des clients
+    }>();
 
-### Routes:
+## Routes:
 
--> api/game/health
+**-> api/game/health**
 
+```
     return:
         status: 'healthy',
         service: 'websocket-game-service',
@@ -16,67 +21,55 @@
         activeConnections: Array.from(playerConnections.values())
           .reduce((sum, conns) => sum + conns.size, 0),
         timestamp: new Date().toISOString()
+```
 
--> api/game/create-session 
+**-> api/game/create-session**
+Creation d'une nouvelle session de jeu: - ID de sessions -> sessionId = randomUUID(); - nouvelle instance de jeu;
 
-    Mise en place d'une nouvelle session de jeu avec:
-    - ID de sessions -> sessionId = randomUUID();
-    - nouvelle instance de jeu -> const game = new PongGame(sessionId);
-
+```
     return:
         status: 'success',
         message: 'Game session created',
         sessionId,
         wsUrl: `/game/${sessionId}`
 
--> api/game/:sessionId
+```
 
-    Websocket endpoint
-
-    1) If no game exist at sessionId, create a new game.
-    2) add the new player connection. 
-    3) send ServerMessage of success:
-        ws.send(JSON.stringify({
-          type: 'connected',
-          sessionId,
-          message: 'Connected to game session',
-          data: game.getState()
-        } as ServerMessage));
-    4) Start broadcasting game state at 60fps.
+**-> api/game/:sessionId**
+Websocket endpoint 1) Get into the given game session. Add client's websocket to the session. 2) send confirmation message type: connected; 3) Start broadcasting game state at 60fps.
 
 -> api/game/sessions
+List alls game sessions (debug purpose).
 
-    Show current array of running game sessions (debug purpose).
-    
-### Communication par WebSocket 
+## Communication par WebSocket
 
-    Une seule connection par client, echange de messages en continue.
-    Message du server delivre a 60FPS a tous les clients de la session de jeu.
+_Client_ <-- WebSocket 1 --> _API_ <-- WebSocket 2 --> _Game-service_
+Une seule connection par client, echange de messages en continue.
+Message du server delivre a 60FPS a tous les clients de la session de jeu.
+Expected message by the server:
 
-    Expected message by the server:
-
-    ```
+```
     interface ClientMessage {
       type: 'paddle' | 'start' | 'stop' | 'ping';
       paddle?: 'left' | 'right';
       direction?: 'up' | 'down' | 'stop';
     }
-    ```
+```
 
-    Expected message by the client:
+Expected message by the client:
 
-    ```
+```
     interface ServerMessage {
       type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong';
       sessionId?: string;
       data?: any;
       message?: string;
     }
-    ```
+```
 
     Use of a switch to set actions on client message:
 
-    Message's types: 
+    Message's types:
     - paddle (move paddles)
     - ping (answer pong)
     - stop (stop the current game session)
@@ -86,7 +79,7 @@
 
 ## Game Logic
 
-    Server broadcast game state as:
+    Server broadcast game state as ServerMessage:
     ```
      interface GameState {
       ball: {
@@ -106,5 +99,12 @@
       };
       scores: Scores;
       status: GameStatus;
+      cosmicBackground: number[][];
     }
     ```
+
+the Ball is influenced by the cosmic background forcefield, animated by time.
+
+### The Cosmic MicroWave BackGround && Perlin Noise
+
+...

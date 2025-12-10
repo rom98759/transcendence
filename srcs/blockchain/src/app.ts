@@ -1,16 +1,16 @@
-import Fastify from "fastify";
-import { registerPlugins } from "./plugins/index.js";
-import { registerRoutes } from "./module/block.routes.js";
-import { registerErrorHandler } from "./core/error-handler.js";
+import Fastify from 'fastify'
+import { registerPlugins } from './plugins/index.js'
+import { registerRoutes } from './module/block.routes.js'
+import { registerErrorHandler } from './core/error-handler.js'
 
 export async function buildApp() {
   const app = Fastify({
-    logger: true
-  });
+    logger: true,
+  })
 
-  await registerPlugins(app);
-  await registerErrorHandler(app);
-  await registerRoutes(app);
+  await registerPlugins(app)
+  await registerErrorHandler(app)
+  await registerRoutes(app)
 
-  return app;
+  return app
 }

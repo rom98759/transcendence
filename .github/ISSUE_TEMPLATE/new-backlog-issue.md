@@ -1,10 +1,9 @@
 ---
 name: New backlog issue
 about: New feature added to backlog
-title: "US Issue or TT Issue"
+title: 'US Issue or TT Issue'
 labels: ''
 assignees: ''
-
 ---
 
 # Description
@@ -14,11 +13,15 @@ assignees: ''
 ## Acceptance criteria
 
 ## Additional context (screenshots, links, ...)
+
 ---
+
 # Priority and estimates
 
 <!-- Select one priority by marking [x] and leave the others blank -->
+
 **priority** :
+
 - [ ] low (not planned)
 - [ ] medium (add in next sprint)
 - [ ] high (add in current sprint)
@@ -26,8 +29,7 @@ assignees: ''
 
 **estimate** : X story points
 
-cf [resource](https://teamhood.com/agile/story-point-estimation-table/) for story points
----
+## cf [resource](https://teamhood.com/agile/story-point-estimation-table/) for story points
 
 # Definition of done
 

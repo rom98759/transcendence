@@ -13,6 +13,7 @@ auth-service (port 3001)
 ## Services
 
 ### nginx-proxy
+
 - **Rôle** : Reverse proxy et serveur de fichiers statiques
 - **Port** : 80 (HTTP), 443 (HTTPS)
 - **Routes** :
@@ -22,6 +23,7 @@ auth-service (port 3001)
   - `/health` : Health check Nginx
 
 ### api-gateway
+
 - **Rôle** : API Gateway avec gestion JWT et routage
 - **Port** : 3000
 - **Fonctionnalités** :
@@ -37,6 +39,7 @@ auth-service (port 3001)
   - `/api/auth/*` : Routes d'authentification (proxifiées vers auth-service)
 
 ### auth-service
+
 - **Rôle** : Service d'authentification avec base de données SQLite
 - **Port** : 3001
 - **Base de données** : `/data/auth.db` (volume persistant)
@@ -51,6 +54,7 @@ auth-service (port 3001)
 ## Variables d'environnement
 
 Variables disponibles :
+
 - `HOST_VOLUME_PATH` : Chemin pour les volumes Docker
 - `JWT_SECRET` : Clé secrète JWT (à changer en production !)
 - `LOG_LEVEL` : Niveau de log (debug, info, warn, error)
@@ -68,6 +72,7 @@ Une fois démarré :
   - http://localhost/gateway/healthAll (Tous les services)
 
 ## Changer :
+
 - Changez `JWT_SECRET` dans `.env`
 - Configurez HTTPS avec certificats SSL
 - Utilisez un secret management (Hashicorp Vault)

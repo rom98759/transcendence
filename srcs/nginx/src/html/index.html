@@ -1,0 +1,806 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Transcendence - Auth & Game Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      .striped-disabled {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .striped-disabled::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: repeating-linear-gradient(
+          45deg,
+          transparent,
+          transparent 10px,
+          rgba(0, 0, 0, 0.2) 10px,
+          rgba(0, 0, 0, 0.2) 20px
+        );
+        pointer-events: none;
+      }
+      .error-details {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 6px;
+        padding: 12px;
+        margin-top: 8px;
+      }
+      .error-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 6px;
+        font-size: 13px;
+      }
+      .error-item:last-child {
+        margin-bottom: 0;
+      }
+      .error-icon {
+        color: #dc2626;
+        margin-right: 6px;
+        font-weight: bold;
+      }
+      .service-status {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+      }
+      .status-healthy {
+        background-color: #dcfce7;
+        color: #166534;
+      }
+      .status-unhealthy {
+        background-color: #fee2e2;
+        color: #dc2626;
+      }
+    </style>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+    <div id="first-screen" class="container mx-auto px-4 max-w-7xl">
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-2">Transcendence super Platform</h1>
+        <p class="text-gray-600">Authentication & Services</p>
+      </div>
+
+      <!-- Carte de connexion -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
+              ></path>
+            </svg>
+            Connexion
+          </h2>
+          <form id="loginForm" class="space-y-4">
+            <div>
+              <label for="loginUsername" class="block text-sm font-medium text-gray-700 mb-1"
+                >Nom d'utilisateur</label
+              >
+              <input
+                id="loginUsername"
+                name="username"
+                type="text"
+                required
+                autocomplete="username"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1"
+                >Mot de passe</label
+              >
+              <input
+                id="loginPassword"
+                name="password"
+                type="password"
+                required
+                autocomplete="current-password"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <button
+              type="submit"
+              id="loginBtn"
+              class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Connexion
+            </button>
+            <div class="msg" id="loginMsg"></div>
+            <div class="text-xs text-gray-500 mt-2">
+              Envoi POST vers: <code class="bg-gray-100 px-1 rounded">/api/auth/login</code>
+            </div>
+          </form>
+        </div>
+        <script>
+          // Fonction utilitaire pour formater les erreurs
+          function formatErrorMessage(result) {
+            if (!result.data || typeof result.data !== 'object') {
+              return `Erreur (${result.status}): ${result.data}`
+            }
+
+            const error = result.data.error
+            if (!error) {
+              return `Erreur (${result.status}): ${JSON.stringify(result.data)}`
+            }
+
+            let html = `<div class="text-red-700 font-medium">${error.message}</div>`
+
+            if (error.details && Array.isArray(error.details)) {
+              html += '<div class="error-details mt-3">'
+              html += '<div class="text-sm font-medium text-gray-700 mb-2">Détails :</div>'
+              error.details.forEach((detail) => {
+                html += `<div class="error-item">`
+                html += `<span class="error-icon">•</span>`
+                html += `<span>${detail.message}</span>`
+                html += `</div>`
+              })
+              html += '</div>'
+            }
+
+            return html
+          }
+
+          // Code de la carte de connexion
+          const loginForm = document.getElementById('loginForm')
+          const loginMsg = document.getElementById('loginMsg')
+          const loginBtn = document.getElementById('loginBtn')
+
+          async function postJson(url, body) {
+            const res = await fetch(url, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify(body),
+            })
+            const text = await res.text()
+            try {
+              return { ok: res.ok, status: res.status, data: JSON.parse(text) }
+            } catch {
+              return { ok: res.ok, status: res.status, data: text }
+            }
+          }
+
+          loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            loginMsg.innerHTML = ''
+            loginMsg.className = 'msg mt-3'
+            loginBtn.disabled = true
+            const username = document.getElementById('loginUsername').value.trim()
+            const password = document.getElementById('loginPassword').value
+            try {
+              const result = await postJson('/api/auth/login', { username, password })
+              if (result.ok) {
+                loginMsg.innerHTML =
+                  '<div class="text-green-700 font-medium">✓ Connexion réussie</div>'
+                console.log('Données reçues:', result.data)
+              } else {
+                loginMsg.innerHTML = formatErrorMessage(result)
+              }
+            } catch (err) {
+              loginMsg.innerHTML = `<div class="text-red-700">Connexion impossible: ${err.message}</div>`
+            } finally {
+              loginBtn.disabled = false
+            }
+          })
+        </script>
+
+        <!-- Carte d'inscription -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+              ></path>
+            </svg>
+            Inscription
+          </h2>
+          <form id="registerForm" class="space-y-4">
+            <div>
+              <label for="regUsername" class="block text-sm font-medium text-gray-700 mb-1"
+                >Nom d'utilisateur</label
+              >
+              <input
+                id="regUsername"
+                name="username"
+                type="text"
+                required
+                autocomplete="username"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <div class="text-xs text-gray-500 mt-1">
+                Min. 4 caractères, lettres, chiffres et _ uniquement
+              </div>
+            </div>
+            <div>
+              <label for="regEmail" class="block text-sm font-medium text-gray-700 mb-1"
+                >Email</label
+              >
+              <input
+                id="regEmail"
+                name="email"
+                type="email"
+                required
+                autocomplete="email"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label for="regPassword" class="block text-sm font-medium text-gray-700 mb-1"
+                >Mot de passe</label
+              >
+              <input
+                id="regPassword"
+                name="password"
+                type="password"
+                required
+                autocomplete="new-password"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              />
+              <div class="text-xs text-gray-500 mt-1">
+                Min. 8 caractères avec majuscule, minuscule, chiffre et caractère spécial
+              </div>
+            </div>
+            <button
+              type="submit"
+              id="regBtn"
+              class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              S'inscrire
+            </button>
+            <div class="msg" id="regMsg"></div>
+            <div class="text-xs text-gray-500 mt-2">
+              Envoi POST vers: <code class="bg-gray-100 px-1 rounded">/api/auth/register</code>
+            </div>
+          </form>
+        </div>
+        <script>
+          // Code de la carte d'inscription
+          const registerForm = document.getElementById('registerForm')
+          const regMsg = document.getElementById('regMsg')
+          const regBtn = document.getElementById('regBtn')
+
+          registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            regMsg.innerHTML = ''
+            regMsg.className = 'msg mt-3'
+            regBtn.disabled = true
+            const username = document.getElementById('regUsername').value.trim()
+            const email = document.getElementById('regEmail').value.trim()
+            const password = document.getElementById('regPassword').value
+            try {
+              const result = await postJson('/api/auth/register', { username, email, password })
+              if (result.ok) {
+                regMsg.innerHTML =
+                  '<div class="text-green-700 font-medium">✓ Inscription réussie</div>'
+                console.log('Données reçues:', result.data)
+              } else {
+                regMsg.innerHTML = formatErrorMessage(result)
+              }
+            } catch (err) {
+              regMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              regBtn.disabled = false
+            }
+          })
+        </script>
+
+        <!-- Carte de statut des services -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-purple-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            Statut des services
+          </h2>
+          <div id="healthList" class="space-y-2">
+            <div class="text-gray-500 text-sm">Chargement...</div>
+          </div>
+        </div>
+        <script>
+          // Code de la carte de statut des services
+          async function loadHealthAll() {
+            const container = document.getElementById('healthList')
+            container.innerHTML = '<div class="text-gray-500 text-sm">Chargement...</div>'
+            try {
+              const res = await fetch('/public/healthAll', { credentials: 'include' })
+              const text = await res.text()
+              let data
+              try {
+                data = JSON.parse(text)
+              } catch {
+                data = text
+              }
+
+              if (!res.ok) {
+                container.innerHTML = `<div class="text-red-600 text-sm">Erreur (${res.status}): ${JSON.stringify(data)}</div>`
+                return
+              }
+
+              if (typeof data === 'object' && data !== null) {
+                container.innerHTML = ''
+                for (const [service, status] of Object.entries(data)) {
+                  const div = document.createElement('div')
+                  const s = String(status).toLowerCase()
+                  const healthy = s.includes('healthy') || s === 'ok' || s === 'healthy'
+
+                  div.className = `service-status ${healthy ? 'status-healthy' : 'status-unhealthy'}`
+                  div.innerHTML = `
+								<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+									${
+                    healthy
+                      ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>'
+                      : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>'
+                  }
+								</svg>
+								<span class="font-medium">${service}:</span>
+								<span class="ml-1">${status}</span>
+							`
+                  container.appendChild(div)
+                }
+              } else {
+                container.innerHTML = `<div class="text-gray-600 text-sm">${typeof data === 'string' ? data : JSON.stringify(data)}</div>`
+              }
+            } catch (err) {
+              container.innerHTML = `<div class="text-red-600 text-sm">Inaccessible: ${err.message}</div>`
+            }
+          }
+          loadHealthAll()
+          // Rafraîchir le statut toutes les 30 secondes
+          setInterval(loadHealthAll, 30000)
+        </script>
+
+        <!-- Carte de déconnexion -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-red-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              ></path>
+            </svg>
+            Déconnexion
+          </h2>
+          <div class="space-y-4">
+            <button
+              id="logoutBtn"
+              class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Se déconnecter
+            </button>
+            <div class="msg" id="logoutMsg"></div>
+          </div>
+        </div>
+        <script>
+          // Code de la carte de déconnexion
+          document.getElementById('logoutBtn').addEventListener('click', async () => {
+            const logoutMsg = document.getElementById('logoutMsg')
+            const logoutBtn = document.getElementById('logoutBtn')
+            logoutMsg.innerHTML = ''
+            logoutMsg.className = 'msg mt-3'
+            logoutBtn.disabled = true
+            try {
+              const res = await fetch('/api/auth/logout', {
+                method: 'POST',
+                credentials: 'include',
+              })
+              if (res.ok) {
+                logoutMsg.innerHTML =
+                  '<div class="text-green-700 font-medium">✓ Déconnexion réussie</div>'
+              } else {
+                const text = await res.text()
+                let data
+                try {
+                  data = JSON.parse(text)
+                } catch {
+                  data = text
+                }
+                logoutMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+              }
+            } catch (err) {
+              logoutMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              logoutBtn.disabled = false
+            }
+          })
+        </script>
+
+        <!-- Carte Me -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-indigo-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              ></path>
+            </svg>
+            Profil utilisateur
+          </h2>
+          <div class="space-y-4">
+            <button
+              id="meBtn"
+              class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Obtenir mes informations
+            </button>
+            <div class="msg" id="meMsg"></div>
+          </div>
+        </div>
+        <script>
+          // Code de la carte Me
+          const meBtn = document.getElementById('meBtn')
+          const meMsg = document.getElementById('meMsg')
+
+          function formatUserData(data) {
+            if (!data || typeof data !== 'object') return JSON.stringify(data)
+
+            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">'
+            if (data.user) {
+              const user = data.user
+              html += '<div class="space-y-2">'
+              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`
+              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`
+              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`
+              html += '</div>'
+            } else {
+              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+            }
+            html += '</div>'
+            return html
+          }
+
+          meBtn.addEventListener('click', async () => {
+            meMsg.innerHTML = ''
+            meMsg.className = 'msg'
+            meBtn.disabled = true
+            try {
+              const res = await fetch('/api/auth/me', {
+                method: 'GET',
+                credentials: 'include',
+              })
+              const text = await res.text()
+              let data
+              try {
+                data = JSON.parse(text)
+              } catch {
+                data = text
+              }
+              if (res.ok) {
+                meMsg.innerHTML =
+                  '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
+                  formatUserData(data)
+              } else {
+                meMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+              }
+            } catch (err) {
+              meMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              meBtn.disabled = false
+            }
+          })
+        </script>
+
+        <!-- Carte Game -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-yellow-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.5a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H9m-6 0V9a6 6 0 0112 0v3.5"
+              ></path>
+            </svg>
+            Jeu
+          </h2>
+          <div class="space-y-4">
+            <button
+              id="gameBtn"
+              class="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Créer une session de jeu
+            </button>
+            <div class="msg" id="gameMsg"></div>
+          </div>
+        </div>
+
+        <!-- Carte Liste des utilisateurs -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-cyan-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+              ></path>
+            </svg>
+            Administration - Utilisateurs
+          </h2>
+          <div class="space-y-4">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <div class="flex items-center">
+                <svg
+                  class="w-4 h-4 text-yellow-600 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                  ></path>
+                </svg>
+                <span class="text-sm text-yellow-800"
+                  >Interface réservée aux administrateurs - Informations sensibles</span
+                >
+              </div>
+            </div>
+            <button
+              id="listUsersBtn"
+              class="w-full bg-cyan-600 text-white py-2 px-4 rounded-lg hover:bg-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Lister tous les utilisateurs
+            </button>
+            <div class="msg" id="listUsersMsg"></div>
+          </div>
+        </div>
+
+        <!-- Carte Blockchain-->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <svg
+              class="w-5 h-5 mr-2 text-indigo-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+              ></path>
+            </svg>
+            Liste tokens enregistrés
+          </h2>
+          <div class="space-y-4">
+            <button
+              id="blockBtn"
+              class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              lister les enregistrements
+            </button>
+            <div class="msg" id="blockMsg"></div>
+          </div>
+        </div>
+        <script>
+          // Code de la carte blockchain
+          const blockBtn = document.getElementById('blockBtn')
+          const blockMsg = document.getElementById('blockMsg')
+
+          function formatUserData(data) {
+            if (!data || typeof data !== 'object') return JSON.stringify(data)
+
+            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">'
+            if (data.user) {
+              const user = data.user
+              html += '<div class="space-y-2">'
+              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`
+              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`
+              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`
+              html += '</div>'
+            } else {
+              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+            }
+            html += '</div>'
+            return html
+          }
+
+          blockBtn.addEventListener('click', async () => {
+            blockMsg.innerHTML = ''
+            blockMsg.className = 'msg'
+            blockBtn.disabled = true
+            try {
+              const res = await fetch('/api/block/list', {
+                method: 'GET',
+                credentials: 'include',
+              })
+              const text = await res.text()
+              let data
+              try {
+                data = JSON.parse(text)
+              } catch {
+                data = text
+              }
+              if (res.ok) {
+                blockMsg.innerHTML =
+                  '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
+                  formatUserData(data)
+              } else {
+                blockMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+              }
+            } catch (err) {
+              blockMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            } finally {
+              blockBtn.disabled = false
+            }
+          })
+        </script>
+      </div>
+
+      <script>
+        // Code de la carte Liste des utilisateurs
+        const listUsersBtn = document.getElementById('listUsersBtn')
+        const listUsersMsg = document.getElementById('listUsersMsg')
+
+        function formatUserList(data) {
+          if (!data || !data.result || !data.result.users || !Array.isArray(data.result.users)) {
+            return `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+          }
+
+          const users = data.result.users
+          let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">'
+          html += `<div class="flex items-center justify-between mb-4">`
+          html += `<div class="text-sm font-medium text-gray-700">${users.length} utilisateur(s) trouvé(s):</div>`
+          html += `<div class="text-xs text-gray-500">👑 Interface Administrateur</div>`
+          html += `</div>`
+          html += '<div class="space-y-4">'
+
+          users.forEach((user, index) => {
+            const userId = `user-${user.id || index}`
+            html += `<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">`
+
+            // Header avec infos principales
+            html += `<div class="bg-gray-50 px-4 py-3 border-b">`
+            html += `<div class="flex items-center justify-between">`
+            html += `<div class="flex items-center space-x-3">`
+            html += `<div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">`
+            html += `${(user.username || 'U').charAt(0).toUpperCase()}`
+            html += `</div>`
+            html += `<div>`
+            html += `<div class="font-medium text-gray-900">${user.username || 'N/A'}</div>`
+            html += `<div class="text-sm text-gray-600">${user.email || 'Email non disponible'}</div>`
+            html += `</div>`
+            html += `</div>`
+            html += `<div class="flex items-center space-x-2">`
+            html += `<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: ${user.id || 'N/A'}</span>`
+            html += `<button onclick="togglePassword('${userId}')" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded transition-colors">`
+            html += `<span id="toggle-${userId}">Voir hash</span>`
+            html += `</button>`
+            html += `</div>`
+            html += `</div>`
+            html += `</div>`
+
+            // Section mot de passe (initialement cachée)
+            html += `<div id="password-${userId}" class="hidden px-4 py-3 bg-red-50 border-l-4 border-red-200">`
+            html += `<div class="flex items-start space-x-2">`
+            html += `<svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
+            html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>`
+            html += `</svg>`
+            html += `<div class="flex-1 min-w-0">`
+            html += `<div class="text-xs font-medium text-red-800 mb-1">Hash bcrypt (sensible):</div>`
+            html += `<div class="text-xs font-mono text-red-700 bg-red-100 p-2 rounded border break-all">`
+            html += `${user.password || 'N/A'}`
+            html += `</div>`
+            html += `<div class="text-xs text-red-600 mt-1">⚠️ Information confidentielle - Ne pas partager</div>`
+            html += `</div>`
+            html += `</div>`
+            html += `</div>`
+
+            html += `</div>`
+          })
+
+          html += '</div></div>'
+          return html
+        }
+
+        // Fonction pour toggle l'affichage des mots de passe
+        function togglePassword(userId) {
+          const passwordDiv = document.getElementById(`password-${userId}`)
+          const toggleText = document.getElementById(`toggle-${userId}`)
+
+          if (passwordDiv.classList.contains('hidden')) {
+            passwordDiv.classList.remove('hidden')
+            toggleText.textContent = 'Cacher hash'
+          } else {
+            passwordDiv.classList.add('hidden')
+            toggleText.textContent = 'Voir hash'
+          }
+        }
+
+        listUsersBtn.addEventListener('click', async () => {
+          listUsersMsg.innerHTML = ''
+          listUsersMsg.className = 'msg'
+          listUsersBtn.disabled = true
+          try {
+            const res = await fetch('/api/auth/list', {
+              method: 'GET',
+              credentials: 'include',
+            })
+            const text = await res.text()
+            let data
+            try {
+              data = JSON.parse(text)
+            } catch {
+              data = text
+            }
+            if (res.ok) {
+              listUsersMsg.innerHTML =
+                '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
+                formatUserList(data)
+            } else {
+              listUsersMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+            }
+          } catch (err) {
+            listUsersMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+          } finally {
+            listUsersBtn.disabled = false
+          }
+        })
+      </script>
+      <script src="app.js"></script>
+    </div>
+  </body>
+</html>

@@ -1,6 +1,17 @@
 {
+  "scripts": {
+    "dev": "concurrently \"tsc -w\" \"nodemon --watch dist dist/index.js\"",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "build:browser": "npx esbuild src/index.ts --bundle --outfile=src/html/app.js --format=iife --target=es2017",
+    "watch:browser": "npx esbuild src/index.ts --bundle --outfile=src/html/app.js --format=iife --target=es2017 --watch"
+  },
   "devDependencies": {
     "tailwindcss": "^4.1.17",
-    "webpack": "^5.103.0"
+    "webpack": "^5.103.0",
+    "typescript": "^5.0.0",
+    "concurrently": "^8.0.0",
+    "nodemon": "^3.0.0",
+    "@types/node": "^20.0.0"
   }
 }

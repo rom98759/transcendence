@@ -8,8 +8,8 @@ services:
       dockerfile: Dockerfile
     container_name: nginx-proxy
     ports:
-      - "8080:80"
-      - "4430:443"
+      - '8080:80'
+      - '4430:443'
     networks:
       - app-network
     restart: unless-stopped
@@ -17,7 +17,7 @@ services:
       api-gateway:
         condition: service_started
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost/health']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -30,7 +30,7 @@ services:
       dockerfile: Dockerfile
     container_name: api-gateway
     expose:
-      - "3000"
+      - '3000'
     environment:
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET:-supersecretkey}
@@ -49,10 +49,10 @@ services:
       dockerfile: Dockerfile
     container_name: auth-service
     expose:
-      - "3001"
+      - '3001'
     environment:
       - NODE_ENV=production
-      - AUTH_DB_PATH=/data/auth.db  # SQLite database path inside container
+      - AUTH_DB_PATH=/data/auth.db # SQLite database path inside container
       - JWT_SECRET=${JWT_SECRET:-supersecretkey}
       - LOG_LEVEL=${LOG_LEVEL:-info}
     volumes:
@@ -61,7 +61,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/health"]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3001/health']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -74,10 +74,10 @@ services:
       dockerfile: Dockerfile
     container_name: blockchain-service
     expose:
-      - "3005"
+      - '3005'
     environment:
       - NODE_ENV=production
-      - BLOCK_DB_PATH=/data/blockchain.db  # SQLite database path inside container
+      - BLOCK_DB_PATH=/data/blockchain.db # SQLite database path inside container
       - REDIS_URL=redis://redis-broker:6379
       # - JWT_SECRET=${JWT_SECRET:-supersecretkey}
       - LOG_LEVEL=${LOG_LEVEL:-info}
@@ -87,7 +87,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3005/health"]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3005/health']
       interval: 10s
       timeout: 5s
       retries: 3
@@ -97,9 +97,9 @@ services:
     build:
       context: ./game
       dockerfile: Dockerfile
-    container_name: game-service 
+    container_name: game-service
     expose:
-      - "3003"
+      - '3003'
     environment:
       - NODE_ENV=production
       - REDIS_URL=redis://redis-broker:6379
@@ -107,12 +107,12 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3003/health"]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3003/health']
       interval: 10s
       timeout: 5s
       retries: 3
       start_period: 10s
-  
+
   # Redis message broker
   # redis-broker:
   #   build:

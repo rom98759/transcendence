@@ -1,9 +1,9 @@
 ######## Builder #########
 FROM node:18-alpine AS builder
 WORKDIR /build
-COPY ./html ./
+COPY . .
 # Use esbuild to bundle TypeScript for the browser
-RUN npx esbuild index.ts --bundle --outfile=app.js --format=iife --target=es2017
+RUN npx esbuild src/index.ts --bundle --outfile=app.js --format=iife --target=es2017
 # RUN npm install -g typescript && tsc index.ts --outFile app.js --target ES2017 --lib ES2017,DOM
 
 ######## Server #########
@@ -18,10 +18,10 @@ RUN rm /etc/nginx/conf.d/default.conf || true
 # Supprime les entrypoint de l'image officiel
 RUN rm -f /docker-entrypoint.d/*
 
-COPY --from=builder /build/app.js /usr/share/nginx/html/
+COPY --from=builder /build/app.js /usr/share/nginx/src/html/
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY conf.d/default.conf /etc/nginx/conf.d/default.conf
-COPY ./html /usr/share/nginx/html
+COPY ./src      /usr/share/nginx/src
 
 # RUN DNS=$(grep nameserver /etc/resolv.conf | head -n1 | awk '{print $2}') \
 #     && sed -i "s|__DNS__|$DNS|g" /etc/nginx/nginx.conf

@@ -4,7 +4,7 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-
+RUN apk add --no-cache python3 make g++
 # Installer les deps (dev + prod)
 COPY package.json package-lock.json ./
 RUN npm install
@@ -30,7 +30,9 @@ RUN apk add --no-cache wget
 COPY package.json package-lock.json ./
 
 # Installer uniquement les deps nécessaires en runtime
-RUN npm install --omit=dev
+RUN apk add --no-cache --virtual .gyp python3 make g++ \
+    && npm install --omit=dev \
+    && apk del .gyp
 
 # Copier build compilé depuis le builder
 COPY --from=builder /app/dist ./dist
