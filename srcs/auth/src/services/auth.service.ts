@@ -55,6 +55,7 @@ export async function createUser(user: { username: string; email?: string | null
 
 export function validateUser(identifier: string, password: string) {
   const user = findUser(identifier)
+  logger.debug({user});
   if (!user) return false
   return bcrypt.compareSync(password, user.password)
 }

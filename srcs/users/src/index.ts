@@ -1,8 +1,12 @@
 import fastify from 'fastify'
 import { umRoutes as userRoutes } from './routes/um.routes.js'
 import { appenv } from './config/env.js'
+import { loggerConfig } from './config/logger.config.js'
 
-const app = fastify({ logger: appenv.LOG_ENABLED })
+const app = fastify({
+  logger: loggerConfig,
+  disableRequestLogging: false,
+})
 
 export const logger = app.log
 

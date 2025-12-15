@@ -37,7 +37,7 @@ app.addHook('onRequest', async (req: any, reply: any) => {
 
   // Routes publiques juste `/api/auth/login` et `/api/auth/register` (pas de cookie nécessaire)
   if (PUBLIC_ROUTES.includes(url)) {
-    req.log.logAuth({ url, user: req.user?.username }, true)
+    logger.logAuth({ url, user: req.user?.username }, true)
     return
   }
 
@@ -45,7 +45,7 @@ app.addHook('onRequest', async (req: any, reply: any) => {
 
   // No token present
   if (!token) {
-    req.log.logAuth({ url: req.url, token: false }, false)
+    logger.logAuth({ url: req.url, token: false }, false)
     return reply.code(401).send({ error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } })
   }
 
@@ -53,9 +53,9 @@ app.addHook('onRequest', async (req: any, reply: any) => {
   try {
     const decoded = app.jwt.verify(token)
     req.user = decoded // injecte user dans la requête (username, id, etc.)
-    req.log.logAuth({ url: req.url, user: req.user.username }, true)
+    logger.logAuth({ url: req.url, user: req.user.username }, true)
   } catch (err: any) {
-    req.log.logAuth(
+    logger.logAuth(
       {
         url: req.url,
         token: true,
