@@ -1,6 +1,7 @@
 import { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_USERNAME, INVITE_EMAIL, INVITE_PASSWORD, INVITE_USERNAME } from '../config/env.js'
 import * as authService from '../services/auth.service.js'
 import { logger } from './logger.js'
+import { UserRole } from './constants.js'
 
 /**
  * Initialise l'utilisateur admin au démarrage du service
@@ -30,12 +31,16 @@ export async function initAdminUser(): Promise<void> {
       password: ADMIN_PASSWORD,
     })
 
+    // Assigner le rôle admin
+    authService.updateUserRole(adminId, UserRole.ADMIN)
+
     logger.info({
       event: 'admin_user_created',
       username: ADMIN_USERNAME,
       email: ADMIN_EMAIL,
       id: adminId,
-      message: '🔐 Admin user created successfully',
+      role: UserRole.ADMIN,
+      message: 'Admin user created successfully',
     })
 
     // Avertissement sécurité si credentials par défaut

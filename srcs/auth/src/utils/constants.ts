@@ -33,7 +33,13 @@ export const AUTH_CONFIG = {
 
   // TOTP Configuration
   TOTP_WINDOW: 1, // ±30 secondes
+  TOTP_STEP: 30, // Période de rotation (30 secondes standard)
+  TOTP_DIGITS: 6, // Code à 6 chiffres
   TOTP_ISSUER: process.env.APP_NAME || 'Transcendence',
+  TOTP_SETUP_EXPIRATION_SECONDS: 120, // Expiration du secret temporaire en secondes
+
+  // Maintenance
+  CLEANUP_INTERVAL_MS: 5 * 60 * 1000, // 5 minutes en millisecondes
 
   // Cookie Configuration
   COOKIE_MAX_AGE_SECONDS: 60 * 60, // 1 heure (sync avec JWT)

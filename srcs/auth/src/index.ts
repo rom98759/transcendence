@@ -1,10 +1,12 @@
 import fastify, { FastifyReply, FastifyRequest } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifyJwt from '@fastify/jwt'
+import fastifyRateLimit, { errorResponseBuilderContext } from '@fastify/rate-limit'
 import { authRoutes } from './routes/auth.routes.js'
 import { initAdminUser, initInviteUser } from './utils/init-users.js'
+import * as totpService from './services/totp.service.js'
 import { loggerConfig } from './config/logger.config.js'
-import { EVENTS, REASONS } from './utils/constants.js'
+import { AUTH_CONFIG, ERROR_CODES, EVENTS, REASONS } from './utils/constants.js'
 import { AppBaseError } from './types/errors.js'
 import { JWT_SECRET } from './config/env.js'
 
@@ -51,7 +53,20 @@ app.setErrorHandler((error: AppBaseError, req, _reply) => {
 
 // Register shared plugins once
 app.register(fastifyCookie)
-app.register(fastifyJwt, { secret: JWT_SECRET || 'supersecretkey' })
+app.register(fastifyJwt, { secret: JWT_SECRET })
+
+// Rate limiting global
+app.register(fastifyRateLimit, {
+  max: AUTH_CONFIG.RATE_LIMIT.GLOBAL.max,
+  timeWindow: AUTH_CONFIG.RATE_LIMIT.GLOBAL.timeWindow,
+  errorResponseBuilder: (_req: FastifyRequest, context: errorResponseBuilderContext) => ({
+    error: {
+      message: 'Too many requests, please try again later',
+      code: ERROR_CODES.RATE_LIMIT_EXCEEDED,
+      retryAfter: context.after,
+    },
+  }),
+})
 
 app.register(authRoutes, { prefix: '/' });
 
@@ -63,9 +78,18 @@ app.register(authRoutes, { prefix: '/' });
     await initAdminUser()
     await initInviteUser()
 
+    // Nettoyer les sessions expirées au démarrage
+    totpService.cleanupExpiredSessions()
+
+    // Maintenance automatique toutes les 5 minutes
+    setInterval(() => {
+      totpService.cleanupExpiredSessions()
+    }, AUTH_CONFIG.CLEANUP_INTERVAL_MS)
+
     logger.info({
       event: 'service_ready',
       message: 'Auth service is ready',
+      cleanupInterval: `${AUTH_CONFIG.CLEANUP_INTERVAL_MS / 1000}s`,
     })
   } catch (error: any) {
     logger.error({ event: 'service_startup_failed', err: error?.message || error })
@@ -73,4 +97,3 @@ app.register(authRoutes, { prefix: '/' });
     ;(globalThis as any).process?.exit?.(1)
   }
 })()
-
