@@ -12,12 +12,12 @@ export async function healthHandler(request: FastifyRequest, reply: FastifyReply
   return { status: 'healthy' }
 }
 
-export async function healthByNameHandler(request: FastifyRequest, reply: FastifyReply) {
-  const { name } = request.params as { name: string }
+export async function healthByNameHandler(req: FastifyRequest, reply: FastifyReply) {
+  const { name } = req.params as { name: string }
   const service = SERVICES[name]
 
   if (!service) {
-    logger.warn({ event: 'health_check_service_not_found', serviceName: name })
+    req.log.warn({ event: 'health_check_service_not_found', serviceName: name })
     return reply.code(404).send({
       error: { message: 'Service not found', code: 'SERVICE_NOT_FOUND' },
     })
@@ -27,7 +27,7 @@ export async function healthByNameHandler(request: FastifyRequest, reply: Fastif
     const res = await fetch(`http://${service.host}:${service.port}/health`)
     const healthy = res.status === 200
 
-    logger.info({
+    req.log.info({
       event: 'health_check_service',
       serviceName: name,
       healthy,
@@ -39,7 +39,7 @@ export async function healthByNameHandler(request: FastifyRequest, reply: Fastif
     }
     return reply.code(500).send({ status: 'unhealthy' })
   } catch (error) {
-    logger.error({
+    req.log.error({
       event: 'health_check_service_error',
       serviceName: name,
       err: (error as Error).message,
@@ -50,7 +50,7 @@ export async function healthByNameHandler(request: FastifyRequest, reply: Fastif
   }
 }
 
-export async function healthAllHandler(request: FastifyRequest, reply: FastifyReply) {
+export async function healthAllHandler(req: FastifyRequest, reply: FastifyReply) {
   const services = Object.values(SERVICES)
 
   const results: Record<string, string> = {}
@@ -67,6 +67,6 @@ export async function healthAllHandler(request: FastifyRequest, reply: FastifyRe
     }),
   )
 
-  logger.info({ event: 'health_check_all', services: results })
+  req.log.info({ event: 'health_check_all', services: results })
   return results
 }

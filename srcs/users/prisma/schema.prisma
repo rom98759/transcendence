@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model UserProfile {
+  id        Int      @id @default(autoincrement())
+  authId    Int?     @unique
+  createdAt DateTime @default(now())
+  email     String   @unique
+  username  String   @unique
+  avatarUrl String
+}

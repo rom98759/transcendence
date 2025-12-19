@@ -1,7 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import * as authService from '../services/auth.service.js'
-import { generateJWT } from '../services/jwt.service.js'
-import { logger } from '../utils/logger.js'
 import { ValidationSchemas } from '../utils/validation.js'
 import { AUTH_CONFIG, UserRole } from '../utils/constants.js'
 
@@ -24,11 +22,11 @@ function getCookieOptions(maxAgeSeconds: number = AUTH_CONFIG.COOKIE_MAX_AGE_SEC
 
 export async function registerHandler(
   this: FastifyInstance,
-  request: FastifyRequest,
+  req: FastifyRequest,
   reply: FastifyReply,
 ) {
   // Validation Zod
-  const validation = ValidationSchemas.register.safeParse(request.body)
+  const validation = ValidationSchemas.register.safeParse(req.body)
   if (!validation.success) {
     this.log.warn({ event: 'register_validation_failed', errors: validation.error.issues })
 
@@ -51,7 +49,7 @@ export async function registerHandler(
   }
 
   const { username, email, password } = validation.data
-  logger.info({ event: 'register_attempt', username, email })
+  req.log.info({ event: 'register_attempt', username, email })
 
   try {
     if (authService.findByUsername(username)) {
@@ -75,7 +73,7 @@ export async function registerHandler(
       })
     }
   } catch (err: any) {
-    logger.error({ event: 'register_validation_error', username, email, err: err?.message || err })
+    req.log.error({ event: 'register_validation_error', username, email, err: err?.message || err })
     if (err && err.code === 'DB_FIND_USER_BY_USERNAME_ERROR') {
       return reply.code(500).send({
         error: {
@@ -101,18 +99,12 @@ export async function registerHandler(
   }
 
   try {
-    const id = authService.createUser({ username, email, password })
-    logger.info({ event: 'register_success', username, email })
-    return reply.code(201).send({
-      result: {
-        message: `Bienvenue ${username} ! Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.`,
-        id,
-        username,
-      },
-    })
+    const id = await authService.createUser({ username, email, password })
+    req.log.info({ event: 'register_success', username, email, id })
+    return reply.code(201).send({ result: { message: 'User registered successfully', id: id } })
   } catch (err: any) {
-    logger.error({ event: 'register_error', username, email, err: err?.message || err })
-
+    req.log.error({ event: 'register_error', username, email, err: err?.message || err })
+    // Add errors handling
     if (err && err.code === 'USER_EXISTS') {
       return reply.code(400).send({
         error: {
@@ -160,11 +152,11 @@ export async function registerHandler(
 
 export async function loginHandler(
   this: FastifyInstance,
-  request: FastifyRequest,
+  req: FastifyRequest,
   reply: FastifyReply,
 ) {
   // Validation Zod
-  const validation = ValidationSchemas.login.safeParse(request.body)
+  const validation = ValidationSchemas.login.safeParse(req.body)
   if (!validation.success) {
     this.log.warn({ event: 'login_validation_failed', errors: validation.error.issues })
 
@@ -210,7 +202,7 @@ export async function loginHandler(
     })
   }
 
-  logger.info({ event: 'login_attempt', identifier })
+  req.log.info({ event: 'login_attempt', identifier })
 
   try {
     const user = authService.findUser(identifier)
@@ -286,7 +278,7 @@ export async function loginHandler(
         })
     }
   } catch (err: any) {
-    logger.error({ event: 'login_error', identifier, err: err?.message || err })
+    req.log.error({ event: 'login_error', identifier, err: err?.message || err })
     if (err && err.code === 'DB_FIND_USER_BY_IDENTIFIER_ERROR') {
       return reply.code(500).send({
         error: {
@@ -306,11 +298,11 @@ export async function loginHandler(
 
 export async function logoutHandler(
   this: FastifyInstance,
-  request: FastifyRequest,
+  req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const username = (request.headers as any)['x-user-name'] || null
-  logger.info({ event: 'logout', user: username })
+  const username = (req.headers as any)['x-user-name'] || null
+  req.log.info({ event: 'logout', user: username })
   return reply.clearCookie('token').send({ result: { message: 'Logged out successfully' } })
 }
 
@@ -372,11 +364,11 @@ export async function verifyHandler(
 // DEV ONLY - À supprimer    ADMIN ONLY
 export async function meHandler(
   this: FastifyInstance,
-  request: FastifyRequest,
+  req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const username = (request.headers as any)['x-user-name'] || null
-  const idHeader = (request.headers as any)['x-user-id'] || null
+  const username = (req.headers as any)['x-user-name'] || null
+  const idHeader = (req.headers as any)['x-user-id'] || null
   const id = idHeader ? Number(idHeader) : null
 
   logger.info({ event: 'me_request_dev_only', user: username, id })
@@ -422,12 +414,12 @@ export async function meHandler(
 // ADMIN ONLY
 export async function listAllUsers(
   this: FastifyInstance,
-  request: FastifyRequest,
+  req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const idHeader = (request.headers as any)['x-user-id']
+  const idHeader = (req.headers as any)['x-user-id']
   const userId = idHeader ? Number(idHeader) : null
-  const username = (request.headers as any)['x-user-name'] || null
+  const username = (req.headers as any)['x-user-name'] || null
 
   logger.info({ event: 'list_users_attempt', user: username, userId })
 
@@ -441,10 +433,10 @@ export async function listAllUsers(
 
   try {
     const users = authService.listUsers()
-    logger.info({ event: 'list_users_success', user: username, count: users.length })
+    req.log.info({ event: 'list_users_success', user: username, count: users.length })
     return reply.code(200).send({ result: { users } })
   } catch (err: any) {
-    logger.error({ event: 'list_users_error', user: username, err: err?.message || err })
+    req.log.error({ event: 'list_users_error', user: username, err: err?.message || err })
     return reply
       .code(500)
       .send({ error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' } })
@@ -477,6 +469,8 @@ export async function notFoundHandler(
 // ============================================
 
 import * as totpService from '../services/totp.service.js'
+import { logger } from '../index.js'
+import { generateJWT } from '../services/jwt.service.js'
 
 /**
  * POST /2fa/setup

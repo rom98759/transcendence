@@ -1,5 +1,6 @@
-import { logger } from './logger.js'
+import { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_USERNAME, INVITE_EMAIL, INVITE_PASSWORD, INVITE_USERNAME } from '../config/env.js'
 import * as authService from '../services/auth.service.js'
+import { logger } from './logger.js'
 import { UserRole } from './constants.js'
 
 /**
@@ -8,9 +9,7 @@ import { UserRole } from './constants.js'
  */
 export async function initAdminUser(): Promise<void> {
   const env = (globalThis as any).process?.env || {}
-  const ADMIN_USERNAME = env.ADMIN_USERNAME || 'admin'
-  const ADMIN_EMAIL = env.ADMIN_EMAIL || 'admin@transcendence.local'
-  const ADMIN_PASSWORD = env.ADMIN_PASSWORD || 'Admin123!'
+
 
   try {
     // Vérifier si l'admin existe déjà
@@ -26,7 +25,7 @@ export async function initAdminUser(): Promise<void> {
     }
 
     // Créer l'utilisateur admin
-    const adminId = authService.createUser({
+    const adminId = await authService.createUser({
       username: ADMIN_USERNAME,
       email: ADMIN_EMAIL,
       password: ADMIN_PASSWORD,
@@ -81,9 +80,7 @@ export async function initAdminUser(): Promise<void> {
  */
 export async function initInviteUser(): Promise<void> {
   const env = (globalThis as any).process?.env || {}
-  const INVITE_USERNAME = env.INVITE_USERNAME || 'invite'
-  const INVITE_EMAIL = env.INVITE_EMAIL || 'invite@transcendence.local'
-  const INVITE_PASSWORD = env.INVITE_PASSWORD || 'Invite123!'
+
 
   try {
     // Vérifier si l'invité existe déjà

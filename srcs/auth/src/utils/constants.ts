@@ -3,10 +3,13 @@
  * Utiliser ces valeurs dans tout le code pour maintenir la cohérence
  */
 
+export const UM_SERVICE_NAME = process.env['UM_SERVICE_NAME'] || 'user-service';
+export const UM_SERVICE_PORT = process.env['UM_SERVICE_PORT'] || '3002';
+export const UM_SERVICE_URL = `http://${UM_SERVICE_NAME}:${UM_SERVICE_PORT}`
+
 export const AUTH_CONFIG = {
   // JWT Configuration
   JWT_EXPIRATION: '1h',
-
   // Login Token Configuration (2FA)
   LOGIN_TOKEN_EXPIRATION_SECONDS: 120, // 2 minutes
   MAX_LOGIN_TOKEN_ATTEMPTS: 3,
@@ -91,99 +94,159 @@ export const SENSITIVE_FIELDS = [
   'refresh_token',
 ] as const
 
+export const REDACT_PATHS = [
+    'req.headers.authorization',
+    'req.headers.cookie',
+    ...SENSITIVE_FIELDS.map((field) => `*.${field}`)
+] as const;
+
 /**
- * Codes d'erreur standardisés
+ * 4 levels of events
+ * LIFECYCLE of the container when everything goes smooth = INFO
+ * DEPENDENCY when other services or network have issues = WARN
+ * APPLICATION when app itself has anticipated issues = WARN
+ * CRITICAL for unplanned issues that are somehow caught by framework = ERROR (BUG) or not caught = FATAL (PANIC)
+ * NB : service-specific events are prefixed with AUTH, UM, etc
+ * NB : except validation, application level does not need events that can be inferred from caught error status (401, 403, etc)
+ */
+export const EVENTS = {
+    LIFECYCLE: {
+        UP: 'lc_service_up',
+        DOWN: 'lc_service_down',
+        // infra
+        REDIS_CONNECT: "lc_redis_connected",
+        REDIS_DISCONNECT: 'lc_redis_disconnected',
+        DB_CONNECT: 'lc_db_connected',
+        // auth
+        AUTH_REGISTER_SUCCESS: 'lc_auth_registered',
+        AUTH_LOGIN_SUCCESS: 'lc_auth_logged_in',
+        AUTH_TOKEN_SUCCESS: 'lc_auth_token_valid',       // token check ok
+        // user management
+        UM_FRIEND_ADD: 'lc_um_friend_added',
+        UM_FRIEND_REMOVE: 'lc_um_friend_removed',
+        // game
+        GAME_MATCH_START: 'lc_game_match_started',
+        GAME_MATCH_END: 'lc_game_match_ended',
+        GAME_MATCH_ABORT: 'lc_game_match_aborted',
+    },
+
+    DEPENDENCY: {
+        SLOW: 'dep_slow_response',
+        FAIL: 'dep_failure',             // 500 received
+        UNAVAILABLE: 'dep_unavailable',  // Connection refused
+        ROLLBACK: 'dep_rollback',        // when transaction fails : ensure consistency between services
+    },
+
+    APPLICATION: {
+        // service specific errors
+        AUTH_FAIL: 'app_auth_failed',
+        VALIDATION_FAIL: 'app_validation_failed',         
+    },
+
+    CRITICAL: {
+        BUG: 'crit_logic_bug',           // 500 Unhandled exception
+        PANIC: 'crit_panic',             // uncaught by Fastify - process.on('uncaughtException', (err) => {})
+    }
+}
+
+/**
+ * technical reasons behind log events
+ * NB : no need to be too specific - some reasons can be inferred from meta fields (ex : username conflicts)
+ */
+export const REASONS = {
+  SECURITY: {
+    BAD_CREDENTIALS: 'bad_credentials',
+    USER_NOT_FOUND: 'user_not_found',
+    ACCOUNT_LOCKED: 'account_locked',
+    TOKEN_MISSING: 'token_missing',
+    TOKEN_INVALID: 'token_invalid',
+    TOKEN_EXPIRED: 'token_expired',
+    MFA_ON: 'mfa_enabled',
+    MFA_OFF: 'mfa_disabled',
+    MFA_INVALID: 'mfa_code_invalid',
+    MFA_TOTP_SECRET: 'mfa_totp_secret',
+    RATE_LIMIT_REACHED: 'rate_limit_reached',
+  },
+  VALIDATION: {
+    MISSING_FIELD: 'missing_field',
+    WEAK_PASSWORD: 'weak_password',
+    INVALID_FORMAT: 'invalid_format',
+  },
+  CONFLICT: {
+    UNIQUE_VIOLATION: 'conflict_unique_constraint',
+    STATE_VIOLATION: 'conflict_invalid_state',
+    LIMIT_VIOLATION: 'conflict_limit_reached',
+  },
+  NETWORK: {
+    TIMEOUT: 'network_timeout',
+    UNREACHABLE: 'network_unreachable',
+    UPSTREAM_ERROR: 'network_upstream_service_error',     // 4xx or 5xx from service
+  },
+  INFRA: {
+    DB_INIT_ERROR: 'infra_db_init_error',
+    DB_CLOSE_ERROR: 'infra_db_close_error',
+    DB_QUERY_FAIL: 'infra_db_query',                      // other than uniqueness violation
+    REDIS_ERROR: 'infra_redis_error',
+  },
+  UNKNOWN: 'unknown_reason'
+} as const;
+
+
+
+/**
+ * Standardized errors, defining what will be displayed to end user
  */
 export const ERROR_CODES = {
-  // Validation
+  // 400 Validation
   VALIDATION_ERROR: 'VALIDATION_ERROR',
-  MISSING_IDENTIFIER: 'MISSING_IDENTIFIER',
-  MISSING_PARAMETERS: 'MISSING_PARAMETERS',
 
-  // Authentication
-  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
-  TOKEN_MISSING: 'TOKEN_MISSING',
-  INVALID_TOKEN: 'INVALID_TOKEN',
-  EXPIRED_TOKEN: 'EXPIRED_TOKEN',
+  // 401 Authentication
   UNAUTHORIZED: 'UNAUTHORIZED',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
 
-  // User Management
-  USER_EXISTS: 'USER_EXISTS',
-  EMAIL_EXISTS: 'EMAIL_EXISTS',
-  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  // 403 Access
+  FORBIDDEN: 'FORBIDDEN',           // if admin role is required
 
-  // 2FA
-  TWO_FA_ALREADY_ENABLED: '2FA_ALREADY_ENABLED',
-  TWO_FA_NOT_ENABLED: '2FA_NOT_ENABLED',
-  INVALID_2FA_CODE: 'INVALID_2FA_CODE',
-  INVALID_LOGIN_TOKEN: 'INVALID_LOGIN_TOKEN',
-  TOO_MANY_ATTEMPTS: 'TOO_MANY_ATTEMPTS',
+  // 404 - 409 Resources
+  NOT_FOUND: 'NOT_FOUND',
+  CONFLICT: 'CONFLICT',
 
-  // Database
-  DB_ERROR: 'DB_ERROR',
-  DB_FIND_USER_BY_USERNAME_ERROR: 'DB_FIND_USER_BY_USERNAME_ERROR',
-  DB_FIND_USER_BY_EMAIL_ERROR: 'DB_FIND_USER_BY_EMAIL_ERROR',
-  DB_FIND_USER_BY_IDENTIFIER_ERROR: 'DB_FIND_USER_BY_IDENTIFIER_ERROR',
-  DB_FIND_USER_BY_ID_ERROR: 'DB_FIND_USER_BY_ID_ERROR',
-  DB_CREATE_USER_ERROR: 'DB_CREATE_USER_ERROR',
-  DB_CHECK_2FA_ERROR: 'DB_CHECK_2FA_ERROR',
-  DB_GET_TOTP_SECRET_ERROR: 'DB_GET_TOTP_SECRET_ERROR',
-  DB_ENABLE_2FA_ERROR: 'DB_ENABLE_2FA_ERROR',
-  DB_DISABLE_2FA_ERROR: 'DB_DISABLE_2FA_ERROR',
-  DB_CREATE_LOGIN_TOKEN_ERROR: 'DB_CREATE_LOGIN_TOKEN_ERROR',
-  DB_VALIDATE_LOGIN_TOKEN_ERROR: 'DB_VALIDATE_LOGIN_TOKEN_ERROR',
-  DB_DELETE_LOGIN_TOKEN_ERROR: 'DB_DELETE_LOGIN_TOKEN_ERROR',
-  DB_INCREMENT_LOGIN_TOKEN_ATTEMPTS_ERROR: 'DB_INCREMENT_LOGIN_TOKEN_ATTEMPTS_ERROR',
-  DB_GET_LOGIN_TOKEN_ATTEMPTS_ERROR: 'DB_GET_LOGIN_TOKEN_ATTEMPTS_ERROR',
-  DB_CLEAN_EXPIRED_TOKENS_ERROR: 'DB_CLEAN_EXPIRED_TOKENS_ERROR',
-  DB_CLOSE_ERROR: 'DB_CLOSE_ERROR',
-  DB_LIST_USERS_ERROR: 'DB_LIST_USERS_ERROR',
-  DB_GET_USER_ROLE_ERROR: 'DB_GET_USER_ROLE_ERROR',
-  DB_UPDATE_USER_ROLE_ERROR: 'DB_UPDATE_USER_ROLE_ERROR',
-  DB_STORE_TOTP_SETUP_SECRET_ERROR: 'DB_STORE_TOTP_SETUP_SECRET_ERROR',
-  DB_GET_TOTP_SETUP_SECRET_ERROR: 'DB_GET_TOTP_SETUP_SECRET_ERROR',
-  DB_DELETE_TOTP_SETUP_SECRET_ERROR: 'DB_DELETE_TOTP_SETUP_SECRET_ERROR',
-  DB_CLEAN_EXPIRED_TOTP_SECRETS_ERROR: 'DB_CLEAN_EXPIRED_TOTP_SECRETS_ERROR',
-  UNIQUE_VIOLATION: 'UNIQUE_VIOLATION',
-
-  // Access Control
-  FORBIDDEN: 'FORBIDDEN',
-  INSUFFICIENT_PERMISSIONS: 'INSUFFICIENT_PERMISSIONS',
-
-  // Rate Limiting
+  // 429 Limits
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
 
-  // Generic
-  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
-  BAD_REQUEST: 'BAD_REQUEST',
-  NOT_FOUND: 'NOT_FOUND',
-  ROUTE_NOT_FOUND: 'ROUTE_NOT_FOUND',
+  // specific
+  MFA_REQUIRED: 'MFA_REQUIRED',         
+  MFA_INVALID: 'INVALID_MFA_CODE',
 
-  // QR Code
-  QR_CODE_GENERATION_ERROR: 'QR_CODE_GENERATION_ERROR',
+  // 500 for all server errors - no details needed for end user
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
 } as const
 
 /**
- * Messages d'erreur standardisés
+ * Error codes for data layer only
  */
-export const ERROR_MESSAGES = {
-  [ERROR_CODES.VALIDATION_ERROR]: 'Invalid input data',
-  [ERROR_CODES.INVALID_CREDENTIALS]: 'Invalid credentials',
-  [ERROR_CODES.TOKEN_MISSING]: 'Authentication token is missing',
-  [ERROR_CODES.INVALID_TOKEN]: 'Invalid or expired token',
-  [ERROR_CODES.UNAUTHORIZED]: 'Unauthorized access',
-  [ERROR_CODES.USER_EXISTS]: 'User already exists',
-  [ERROR_CODES.EMAIL_EXISTS]: 'Email already in use',
-  [ERROR_CODES.USER_NOT_FOUND]: 'User not found',
-  [ERROR_CODES.TWO_FA_ALREADY_ENABLED]: '2FA is already enabled',
-  [ERROR_CODES.TWO_FA_NOT_ENABLED]: '2FA is not enabled',
-  [ERROR_CODES.INVALID_2FA_CODE]: 'Invalid 2FA code',
-  [ERROR_CODES.INVALID_LOGIN_TOKEN]: 'Invalid or expired login token',
-  [ERROR_CODES.TOO_MANY_ATTEMPTS]: 'Too many failed attempts. Please try again later.',
-  [ERROR_CODES.FORBIDDEN]: 'Access forbidden',
-  [ERROR_CODES.INSUFFICIENT_PERMISSIONS]: 'Insufficient permissions',
-  [ERROR_CODES.RATE_LIMIT_EXCEEDED]: 'Too many requests. Please try again later.',
-  [ERROR_CODES.INTERNAL_SERVER_ERROR]: 'Internal server error',
-  [ERROR_CODES.NOT_FOUND]: 'Resource not found',
-  [ERROR_CODES.ROUTE_NOT_FOUND]: 'Route not found',
+export const DATA_ERROR = {
+    DUPLICATE: 'duplicate_entry',
+    NOT_FOUND: 'not_found',
+    CONNECTION_FAIL: 'connection_fail',
+    CONSTRAINT_VIOLATION: 'constraint_violation',
+    INTERNAL_ERROR: 'internal_error'
 } as const
+
+/**
+ * Standard error messages
+ * NB : some default messages are not user-friendly (CONFLICT, ...)
+ * -> we should check error metadata in frontend to display a more transparent message, eg 'username is taken'
+ */
+// export const ERROR_MESSAGES = {
+//   [ERROR_CODES.VALIDATION_ERROR]: 'Invalid input data',
+//   [ERROR_CODES.UNAUTHORIZED]: 'Unauthorized access',
+//   [ERROR_CODES.INVALID_CREDENTIALS]: 'Invalid credentials',
+//   [ERROR_CODES.FORBIDDEN]: 'Access forbidden',
+//   [ERROR_CODES.NOT_FOUND]: 'Resource not found',
+//   [ERROR_CODES.CONFLICT]: 'Conflicting resource',
+//   [ERROR_CODES.RATE_LIMIT_EXCEEDED]: 'Too many requests. Please try again later.',
+//   [ERROR_CODES.MFA_REQUIRED]: 'Two-factors authentication is required',
+//   [ERROR_CODES.MFA_INVALID]: 'Invalid 2FA code is invalid',
+//   [ERROR_CODES.INTERNAL_ERROR]: 'Internal server error',
+// } as const

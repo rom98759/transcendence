@@ -126,21 +126,21 @@ export function webSocketProxyRequest(
 
 export async function proxyRequest(
   app: FastifyInstance,
-  request: FastifyRequest,
+  req: FastifyRequest,
   reply: FastifyReply,
   url: string,
   init?: RequestInit,
 ) {
   const startTime = Date.now()
   const method = init?.method || 'GET'
-  const userName = (request.headers as any)['x-user-name'] || null
+  const userName = (req.headers as any)['x-user-name'] || null
 
   // Log début de proxy
   logger.logProxyRequest({
     targetUrl: url,
     method,
     user: userName,
-    url: request.url,
+    url: req.url,
   })
 
   // Timeout
@@ -150,7 +150,7 @@ export async function proxyRequest(
 
   try {
     const mergedInit = Object.assign({}, init || {}, { signal: controller.signal })
-    const response: Response = await (app as any).fetchInternal(request, url, mergedInit)
+    const response: Response = await (app as any).fetchInternal(req, url, mergedInit)
 
     clearTimeout(timeoutHandle)
 
@@ -169,7 +169,7 @@ export async function proxyRequest(
       method,
       status: response.status,
       user: userName,
-      url: request.url,
+      url: req.url,
       upstreamDuration: duration,
     })
 
@@ -193,7 +193,7 @@ export async function proxyRequest(
         return body
       } catch (jsonErr) {
         const errorMessage = (jsonErr as Error)?.message || 'Unknown JSON error'
-        logger.error({
+        req.log.error({
           event: 'proxy_json_error',
           targetUrl: url,
           method,
@@ -226,7 +226,7 @@ export async function proxyRequest(
       return text
     } catch (textErr) {
       const errorMessage = (textErr as Error)?.message || 'Unknown text error'
-      logger.error({
+      req.log.error({
         event: 'proxy_text_error',
         targetUrl: url,
         method,

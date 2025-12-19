@@ -1,17 +1,16 @@
-import fastify from 'fastify'
+import fastify, { FastifyReply, FastifyRequest } from 'fastify'
 import fastifyCookie from '@fastify/cookie'
 import fastifyJwt from '@fastify/jwt'
-import fastifyRateLimit from '@fastify/rate-limit'
+import fastifyRateLimit, { errorResponseBuilderContext } from '@fastify/rate-limit'
 import { authRoutes } from './routes/auth.routes.js'
 import { initAdminUser, initInviteUser } from './utils/init-users.js'
-import { logger } from './utils/logger.js'
-import { AUTH_CONFIG, ERROR_CODES } from './utils/constants.js'
 import * as totpService from './services/totp.service.js'
-
-const env = (globalThis as any).process?.env || {}
+import { loggerConfig } from './config/logger.config.js'
+import { AUTH_CONFIG, ERROR_CODES, EVENTS, REASONS } from './utils/constants.js'
+import { AppBaseError } from './types/errors.js'
+import { JWT_SECRET } from './config/env.js'
 
 // Validation du JWT_SECRET au démarrage (CRITIQUE)
-const JWT_SECRET = env.JWT_SECRET
 if (!JWT_SECRET || JWT_SECRET === 'supersecretkey') {
   console.error('❌ CRITICAL: JWT_SECRET must be defined and cannot be the default value')
   console.error('   Set a secure JWT_SECRET in environment variables')
@@ -19,7 +18,38 @@ if (!JWT_SECRET || JWT_SECRET === 'supersecretkey') {
   throw new Error('JWT_SECRET not configured')
 }
 
-const app = fastify({ logger: { level: env.LOG_LEVEL || 'info' } })
+const app = fastify({
+  logger: loggerConfig,
+  disableRequestLogging: false,
+})
+
+export const logger = app.log
+
+/**
+ * @abstract add userId and userName to logger
+ */
+app.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
+    const userId = request.headers['x-user-id'];
+    const userName = request.headers['x-user-name'];
+    const bindings: Record<string, any> = {};
+    if (userId) {
+        bindings.userId = Number(userId) || userId;
+    }
+    if (userName) {
+        bindings.username = userName;
+    }
+    if (Object.keys(bindings).length > 0) {
+        request.log = request.log.child(bindings);
+    }
+});
+
+app.setErrorHandler((error: AppBaseError, req, _reply) => {
+  req.log.error({
+    err: error, 
+    event: error?.context?.event || EVENTS.CRITICAL.BUG,
+    reason: error?.context?.reason || REASONS.UNKNOWN,
+  }, 'Error');
+});
 
 // Register shared plugins once
 app.register(fastifyCookie)
@@ -29,7 +59,7 @@ app.register(fastifyJwt, { secret: JWT_SECRET })
 app.register(fastifyRateLimit, {
   max: AUTH_CONFIG.RATE_LIMIT.GLOBAL.max,
   timeWindow: AUTH_CONFIG.RATE_LIMIT.GLOBAL.timeWindow,
-  errorResponseBuilder: (req, context) => ({
+  errorResponseBuilder: (_req: FastifyRequest, context: errorResponseBuilderContext) => ({
     error: {
       message: 'Too many requests, please try again later',
       code: ERROR_CODES.RATE_LIMIT_EXCEEDED,
@@ -38,8 +68,9 @@ app.register(fastifyRateLimit, {
   }),
 })
 
-app.register(authRoutes, { prefix: '/' })
-;(async () => {
+app.register(authRoutes, { prefix: '/' });
+
+(async () => {
   try {
     const address = await app.listen({ host: '0.0.0.0', port: 3001 })
     console.log(`Auth service listening at ${address}`)

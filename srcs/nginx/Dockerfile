@@ -23,5 +23,8 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY conf.d/default.conf /etc/nginx/conf.d/default.conf
 COPY ./src      /usr/share/nginx/src
 
-EXPOSE 80 443
+# Create directory for uploads
+RUN mkdir -p /usr/share/nginx/html/uploads
+
+EXPOSE 8080 4430
 CMD ["nginx", "-g", "daemon off;"]

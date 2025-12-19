@@ -6,6 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Prisma generated (in all services)
+**/src/data/generated/
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
@@ -69,6 +72,7 @@ web_modules/
 .env
 .env.*
 !.env.example
+!.env.*.example
 
 # Docker volumes and data
 data/

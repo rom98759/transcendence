@@ -1,10 +1,10 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 
-export async function rootHandler(request: FastifyRequest, reply: FastifyReply) {
+export async function rootHandler(req: FastifyRequest, reply: FastifyReply) {
   return { message: 'Welcome to the Gateway API, check /help' }
 }
 
-export async function helpHandler(request: FastifyRequest, reply: FastifyReply) {
+export async function helpHandler(req: FastifyRequest, reply: FastifyReply) {
   const routesPublic = {
     '/': 'GET - Welcome message',
     '/help': 'GET - This help message',
