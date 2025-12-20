@@ -52,6 +52,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Create .env for docker compose
+        env:
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
           mkdir -p srcs
           cat << EOF > srcs/.env
@@ -75,6 +77,7 @@ jobs:
           EOF
 
           cat << EOF > srcs/.env.auth
+          JWT_SECRET=${JWT_SECRET}
           AUTH_DB_PATH=${AUTH_DB_PATH}
           ADMIN_USERNAME=${ADMIN_USERNAME}
           ADMIN_EMAIL=${ADMIN_EMAIL}
@@ -92,6 +95,7 @@ jobs:
           EOF
 
           cat << EOF > srcs/.env.gateway
+          JWT_SECRET=${JWT_SECRET}
           EOF
 
           cat << EOF > srcs/.env.um
