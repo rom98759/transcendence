@@ -74,10 +74,6 @@ jobs:
           REDIS_URL=${REDIS_URL}
           EOF
 
-          cat << EOF > srcs/.env.blockchain
-          BLOCK_DB_PATH=${BLOCK_DB_PATH}
-          EOF
-
           cat << EOF > srcs/.env.auth
           AUTH_DB_PATH=${AUTH_DB_PATH}
           ADMIN_USERNAME=${ADMIN_USERNAME}
@@ -86,6 +82,16 @@ jobs:
           INVITE_USERNAME=${INVITE_USERNAME}
           INVITE_EMAIL=${INVITE_EMAIL}
           INVITE_PASSWORD=${INVITE_PASSWORD}
+          EOF
+
+          cat << EOF > srcs/.env.blockchain
+          BLOCK_DB_PATH=${BLOCK_DB_PATH}
+          EOF
+
+          cat << EOF > srcs/.env.game
+          EOF
+
+          cat << EOF > srcs/.env.gateway
           EOF
 
           cat << EOF > srcs/.env.um
