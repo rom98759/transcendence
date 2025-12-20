@@ -37,11 +37,43 @@ jobs:
       REDIS_SERVICE_PORT: 6379
       REDIS_SERVICE_NAME: "redis-broker"
       REDIS_URL: "redis://redis-broker:6379"
-
+      AUTH_DB_PATH: "/data/auth.db"
+      ADMIN_USERNAME: "admin"
+      ADMIN_EMAIL: "admin@transcendence.local"
+      ADMIN_PASSWORD: "Admin123!"
+      INVITE_USERNAME: "invite"
+      INVITE_EMAIL: "invite@transcendence.local"
+      INVITE_PASSWORD: "Invite123!"
+      BLOCK_DB_PATH: "/data/blockchain.db"
+      UM_DB_PATH: "./data/um.db"
+      UM_DB_URL: "file:./data/um.db"
+    
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - uses: actions/checkout@v4
+      - name: Create .env for docker compose
+        run: |
+          mkdir -p srcs
+          cat << EOF > srcs/.env
+          HOST_VOLUME_PATH=${HOST_VOLUME_PATH}
+          API_GATEWAY_NAME=${API_GATEWAY_NAME}
+          API_GATEWAY_PORT=${API_GATEWAY_PORT}
+          AUTH_SERVICE_NAME=${AUTH_SERVICE_NAME}
+          AUTH_SERVICE_PORT=${AUTH_SERVICE_PORT}
+          BK_SERVICE_NAME=${BK_SERVICE_NAME}
+          BK_SERVICE_PORT=${BK_SERVICE_PORT}
+          UM_SERVICE_NAME=${UM_SERVICE_NAME}
+          GAME_SERVICE_NAME=${GAME_SERVICE_NAME}
+          GAME_SERVICE_PORT=${GAME_SERVICE_PORT}
+          NODE_ENV=${NODE_ENV}
+          PROXY_SERVICE_NAME=${PROXY_SERVICE_NAME}
+          REDIS_SERVICE_NAME=${REDIS_SERVICE_NAME}
+          REDIS_SERVICE_PORT=${REDIS_SERVICE_PORT}
+          REDIS_URL=${CI_REDIS_URL}
+          UM_SERVICE_PORT=${UM_SERVICE_PORT}
+          UM_REDIS_CHANNEL=${UM_REDIS_CHANNEL}
+          UM_DB_URL=${CI_UM_DB_URL}
+          EOF
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: echo "build to do"
+      - name: Build
+        run: make all
