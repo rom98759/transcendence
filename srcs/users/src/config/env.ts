@@ -6,7 +6,10 @@ config({ path: '../.env.um' })
 
 // console.log(process.env)
 export const appenv = cleanEnv(process.env, {
-  NODE_ENV: str({ choices: ['development', 'test', 'production', 'staging'] }),
+  NODE_ENV: str({ 
+    choices: ['development', 'test', 'production', 'staging'],
+    default: 'developement', 
+  }),
   LOG_ENABLED: bool({ default: true }),
   LOG_LEVEL: str({
     choices: ['debug', 'info', 'warn', 'error'],
