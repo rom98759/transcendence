@@ -34,7 +34,7 @@ jobs:
       GAME_SERVICE_NAME: "game-service"
       BK_SERVICE_PORT: "3005"
       BK_SERVICE_NAME: "blockchain-service"
-      REDIS_SERVICE_PORT: 6379
+      REDIS_SERVICE_PORT: "6379"
       REDIS_SERVICE_NAME: "redis-broker"
       REDIS_URL: "redis://redis-broker:6379"
       AUTH_DB_PATH: "/data/auth.db"
@@ -72,10 +72,14 @@ jobs:
           REDIS_SERVICE_NAME=${REDIS_SERVICE_NAME}
           REDIS_SERVICE_PORT=${REDIS_SERVICE_PORT}
           REDIS_URL=${REDIS_URL}
-          UM_DB_URL=${UM_DB_URL}
-          UM_DB_PATH=${UM_DB_PATH}
-          AUTH_DB_PATH=${AUTH_DB_PATH}
+          EOF
+
+          cat << EOF > srcs/.env.blockchain
           BLOCK_DB_PATH=${BLOCK_DB_PATH}
+          EOF
+
+          cat << EOF > srcs/.env.auth
+          AUTH_DB_PATH=${AUTH_DB_PATH}
           ADMIN_USERNAME=${ADMIN_USERNAME}
           ADMIN_EMAIL=${ADMIN_EMAIL}
           ADMIN_PASSWORD=${ADMIN_PASSWORD}
@@ -84,5 +88,11 @@ jobs:
           INVITE_PASSWORD=${INVITE_PASSWORD}
           EOF
 
+          cat << EOF > srcs/.env.um
+          UM_DB_URL=${UM_DB_URL}
+          UM_DB_PATH=${UM_DB_PATH}
+          EOF
+
       - name: Build
         run: make all
+
