@@ -56,11 +56,9 @@ jobs:
         env:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
         run: |
-          if [ -z "$GH_JWT_SECRET" ]; then
+          if [ -z "$JWT_SECRET" ]; then
             echo "No JWT_SECRET from GitHub Secrets (likely a fork PR). Using dummy secret for CI."
             JWT_SECRET="dummysupersecretkey"
-          else
-            JWT_SECRET="$GH_JWT_SECRET"
           fi
 
       - name: Create .env for docker compose

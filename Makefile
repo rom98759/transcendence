@@ -28,7 +28,7 @@ else
 endif
 
 all : volumes build
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d
+	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d || $(MAKE) logs-auth
 # Detect if volumes exist and Colima needs restart
 volumes:
 	@echo "Configuring volumes at $(VOLUMES_PATH)"
