@@ -1,5 +1,5 @@
-import * as z from 'zod';
-import { idSchema, usernameSchema } from './base.schema';
+import { z } from 'zod';
+import { idSchema, usernameSchema } from './base.schema.js';
 
 export const UsernameSchema = z.object({
   username: usernameSchema,

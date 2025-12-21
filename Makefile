@@ -27,7 +27,7 @@ else
 	COMPOSE_CMD=docker compose
 endif
 
-all : volumes build
+all : volumes setup build
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d
 # Detect if volumes exist and Colima needs restart
 volumes:
@@ -52,6 +52,11 @@ else
 	@chmod -R 777 $(VOLUMES_PATH)
 endif
 
+setup:
+	@echo "Installing dependencies and building shared core..."
+	npm install
+	npm run build --workspace srcs/shared/core
+
 dev: colima-dev
 	$(COMPOSE_CMD) -f srcs/dev-docker-compose.yml up --build -d
 
@@ -74,22 +79,24 @@ check:
 	npx prettier . --check
 format:
 	npx prettier . --write
-	
-nginx:
+
+core:
+	npm run build --workspace srcs/shared/core	
+nginx: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(PROXY_SERVICE_NAME)
-redis:
+redis: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(REDIS_SERVICE_NAME)
-api:
+api: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(API_GATEWAY_NAME)
-auth:
+auth: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(AUTH_SERVICE_NAME)
-user:
+user: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(UM_SERVICE_NAME)
-game:
+game: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(GAME_SERVICE_NAME)
-block:
+block: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(BK_SERVICE_NAME)
-build:
+build: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml build
 
 start :
@@ -142,6 +149,10 @@ fclean: clean
 		find $(VOLUMES_PATH) -mindepth 1 -delete || true; \
 	fi
 	@echo "Volume folder cleaned (structure preserved)"
+	@echo "Cleaning local build artifacts..."
+	rm -rf node_modules
+	rm -rf srcs/shared/core/dist
+	rm -rf srcs/*/dist
 
 # Hard reset - deletes everything including folder
 reset-hard: clean
@@ -161,4 +172,4 @@ endif
 # ifeq ($(OS), Darwin)
 # 	colima stop && colima delete
 # endif
-.PHONY : all clean fclean re build volumes colima nginx redis api auth user stop down logs logs-nginx logs-api logs-auth
+.PHONY : all clean fclean re build volumes colima setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth

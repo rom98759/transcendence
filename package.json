@@ -2,13 +2,32 @@
   "name": "transcendence",
   "version": "1.0.0",
   "description": "School 42 Transcendence project",
+  "private": true,
+  "workspaces": [
+    "srcs/shared/core",
+    "srcs/auth",
+    "srcs/users",
+    "srcs/gateway",
+    "srcs/game",
+    "srcs/blockchain",
+    "srcs/nginx"
+  ],
   "main": "index.js",
   "directories": {
     "doc": "docs"
   },  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky || true",
+    "build:core": "npm run build --workspace srcs/shared/core",
+    "build:users": "npm run build --workspace srcs/users",
+    "build:auth": "npm run build --workspace srcs/auth",
+    "build:gateway": "npm run build --workspace srcs/gateway",
+    "build:game": "npm run build --workspace srcs/game",
+    "build:blockchain": "npm run build --workspace srcs/blockchain",
+    "build:nginx": "npm run build --workspace srcs/nginx",
+    "build:all": "npm run build:core && npm run build:users && npm run build:auth && npm run build:gateway && npm run build:game && npm run build:blockchain && npm run build:nginx",
+    "clean": "rm -rf srcs/*/dist srcs/shared/core/dist node_modules srcs/*/node_modules"
   },
   "repository": {
     "type": "git",

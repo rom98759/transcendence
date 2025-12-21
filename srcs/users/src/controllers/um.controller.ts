@@ -3,7 +3,7 @@ import * as umService from '../services/um.service.js'
 import z from 'zod'
 import { API_ERRORS, LOG_EVENTS } from '../utils/messages.js'
 import { mapProfileToDTO } from '../utils/mappers.js'
-import { UserCreateSchema, UsernameSchema } from '../schemas/profile.schema.js'
+import { Schemas } from '@transcendence/core'
 
 function handleInvalidRequest<T>(
   req: FastifyRequest,
@@ -24,7 +24,7 @@ export async function getProfileByUsername(
   const { username } = req.params
   req.log.info({ event: LOG_EVENTS.GET_PROFILE_BY_USERNAME, username })
 
-  const validation = UsernameSchema.safeParse({ username })
+  const validation = Schemas.UsernameSchema.safeParse({ username })
   if (!validation.success) {
     return handleInvalidRequest(req, reply, validation)
   }
@@ -46,7 +46,7 @@ export async function createProfile(
   const { authId, email, username } = req.body
   req.log.info({ event: LOG_EVENTS.CREATE_PROFILE, request: req })
 
-  const validation = UserCreateSchema.safeParse({
+  const validation = Schemas.UserCreateSchema.safeParse({
     authId,
     email,
     username,
