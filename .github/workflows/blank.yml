@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HOST_VOLUME_PATH: "data"
-      NODE_ENV: "development"
+      NODE_ENV: "production"
       PROXY_SERVICE_NAME: "nginx-proxy"
       API_GATEWAY_NAME: "api-gateway"
       API_GATEWAY_PORT: "3000"
@@ -106,3 +106,5 @@ jobs:
       - name: Build
         run: make all
 
+      - name: Get auth-service logs
+        run: docker logs auth-service
