@@ -1,6 +1,6 @@
 import { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_USERNAME, INVITE_EMAIL, INVITE_PASSWORD, INVITE_USERNAME } from '../config/env.js'
+import { logger } from '../index.js'
 import * as authService from '../services/auth.service.js'
-import { logger } from './logger.js'
 import { UserRole } from './constants.js'
 
 /**

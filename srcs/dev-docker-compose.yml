@@ -1,18 +1,23 @@
 version: '3.8'
 
+x-healthcheck-template: &healthcheck-template
+  interval: 10s
+  timeout: 5s
+  retries: 3
+  start_period: 10s
+
 services:
   # Development nginx with hot reload
   nginx-proxy:
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
-    container_name: nginx-proxy-dev
+    container_name: ${PROXY_SERVICE_NAME}-dev
     ports:
-      - '8080:80'
-      - '4430:443'
+      - "8080:80"
+      - "4430:443"
     volumes:
       - ./nginx/src:/usr/share/nginx/src
-      # - ./nginx/conf.d:/etc/nginx/conf.d:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -20,24 +25,21 @@ services:
       api-gateway:
         condition: service_started
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost/health']
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      <<: *healthcheck-template
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
       start_period: 5s
 
-  # All other services use production setup
+  # Main Fastify API
   api-gateway:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    container_name: api-gateway
+    container_name: "${API_GATEWAY_NAME}"
     expose:
-      - '3000'
-    environment:
-      - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET:-supersecretkey}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - "${API_GATEWAY_PORT}"
+    env_file:
+      - path: ./.env
+      - path: ./.env.gateway
     networks:
       - app-network
     restart: unless-stopped
@@ -45,79 +47,109 @@ services:
       auth-service:
         condition: service_healthy
 
+  # Auth service
   auth-service:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: auth-service
+    container_name: "${AUTH_SERVICE_NAME}"
     expose:
-      - '3001'
-    environment:
-      - NODE_ENV=production
-      - AUTH_DB_PATH=/data/auth.db
-      - JWT_SECRET=${JWT_SECRET:-supersecretkey}
-      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - "${AUTH_SERVICE_PORT}"
+    env_file:
+      - path: ./.env
+      - path: ./.env.auth
     volumes:
       - data:/data
     networks:
       - app-network
     restart: unless-stopped
+    depends_on:
+      user-service:
+        condition: service_healthy
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3001/health']
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      <<: *healthcheck-template
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${AUTH_SERVICE_PORT}/health"]
 
+  # Blockchain service
   blockchain-service:
     build:
       context: ./blockchain
       dockerfile: Dockerfile
-    container_name: blockchain-service
+    container_name: "${BK_SERVICE_NAME}"
     expose:
-      - '3005'
-    environment:
-      - NODE_ENV=production
-      - BLOCK_DB_PATH=/data/blockchain.db
-      - REDIS_URL=redis://redis-broker:6379
-      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - "${BK_SERVICE_PORT}"
+    env_file:
+      - path: ./.env
+      - path: ./.env.blockchain
     volumes:
       - data:/data
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3005/health']
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      <<: *healthcheck-template
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${BK_SERVICE_PORT}/health"]
 
+  # Game service with development volume mount
   game-service:
     build:
       context: ./game
       dockerfile: Dockerfile
     container_name: game-service-dev
     expose:
-      - '3003'
-    environment:
-      - NODE_ENV=production
-      - REDIS_URL=redis://redis-broker:6379
+      - "${GAME_SERVICE_PORT}"
+    env_file:
+      - path: ./.env
+      - path: ./.env.game
     volumes:
       - ./game/src:/app/src
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost:3003/health']
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 10s
+      <<: *healthcheck-template
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${GAME_SERVICE_PORT}/health"]
+  
+  # Redis broker
+  redis-broker:
+    build:
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: ${REDIS_SERVICE_NAME}
+    expose:
+      - "${REDIS_SERVICE_PORT}"
+    networks:
+      - app-network
+    restart: unless-stopped
 
+  # User service
+  user-service:
+    build:
+      context: ./${UM_SERVICE_DIR}
+      dockerfile: Dockerfile
+    container_name: ${UM_SERVICE_NAME}
+    expose:
+      - "${UM_SERVICE_PORT}"
+    env_file:
+      - path: ./.env
+      - path: ./.env.um
+    volumes:
+      - data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-template
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${UM_SERVICE_PORT}/health"]
+   
 networks:
-  app-network:
-    driver: bridge
+    app-network:
+      driver: bridge
 
 volumes:
   data:
+    driver: local
+    driver_opts:
+      device: ${HOST_VOLUME_PATH}/data
+      o: bind
+      type: none

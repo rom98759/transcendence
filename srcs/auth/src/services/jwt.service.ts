@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify'
-import { logger } from '../utils/logger.js'
+import { logger } from '../index.js'
 
 export interface JWTPayload {
   sub: number

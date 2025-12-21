@@ -13,7 +13,7 @@ import { authenticator } from 'otplib'
 import QRCode from 'qrcode'
 import * as db from './database.js'
 import { AUTH_CONFIG } from '../utils/constants.js'
-import { logger } from '../utils/logger.js'
+import { logger } from '../index.js'
 
 // ============================================
 // Configuration TOTP

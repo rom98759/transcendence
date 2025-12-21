@@ -3,9 +3,9 @@ import * as db from './database.js'
 import { createUserProfile } from './external/um.service.js'
 import { DataError, ServiceError } from '../types/errors.js'
 import { APP_ERRORS } from '../utils/error-catalog.js'
-import { logger } from '../utils/logger.js'
 import { EVENTS, REASONS, UserRole } from '../utils/constants.js'
 import { ADMIN_USERNAME, INVITE_USERNAME } from '../config/env.js'
+import { logger } from '../index.js'
 
 const SALT_ROUNDS = 10
 
