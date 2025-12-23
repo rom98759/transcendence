@@ -50,7 +50,7 @@ export async function addTournament(this: FastifyInstance, request: FastifyReque
     this.log.info({ event: "snapshot_register_success", tx_id, tour_id, player1_id, player2_id, player3_id, player4_id, rowSnapId });
     
     this.log.info({ event: "blockchain_register_attempt", tx_id, tour_id, player1_id, player2_id, player3_id, player4_id});
-    const tournament: BlockTournamentStored = await storeTournament(request.body as  BlockTournamentInput);
+    const tournament: BlockTournamentStored = await storeTournament(this.log, request.body as  BlockTournamentInput);
     const {date_confirmed, tx_hash} = tournament;
     this.log.info({ event: "blockchain_register_success", tx_id, tour_id, tx_hash});
     

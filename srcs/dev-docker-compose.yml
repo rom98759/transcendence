@@ -83,6 +83,8 @@ services:
       - BLOCK_DB_PATH=/data/blockchain.db
       - REDIS_URL=redis://redis-broker:6379
       - LOG_LEVEL=${LOG_LEVEL:-debug}
+    env_file:
+      - path: ./.env.blockchain
     volumes:
       - data:/data
       - ./blockchain/src:/app/src

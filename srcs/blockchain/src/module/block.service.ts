@@ -1,8 +1,17 @@
 import { getGameStorage } from "../core/GameStorage.client.js";
 import { BlockTournamentInput, BlockTournamentStored } from "./block.schema.js";
+import { FastifyInstance } from "fastify";
+import type { AppLogger } from "../core/logger.js";
 
-export async function storeTournament(tournament: BlockTournamentInput): Promise<BlockTournamentStored>{
-  const gamestorage = getGameStorage();
+export async function storeTournament(logger: AppLogger, tournament: BlockTournamentInput): Promise<BlockTournamentStored>{
+  logger.info({
+    event: "blockchain_env_check",
+    BLOCKCHAIN_READY: process.env.BLOCKCHAIN_READY,
+    GAME_STORAGE_ADDRESS: !!process.env.GAME_STORAGE_ADDRESS,
+    AVALANCHE_RPC_URL: !!process.env.AVALANCHE_RPC_URL,
+  });
+
+  const gamestorage = getGameStorage(logger);
   if (!gamestorage) {
     const error: any = new Error(`Error during Tournament Blockchain storage: Smart Contract don't exist`);
     error.code = 'BLOCKCHAIN_NO_SMART_CONTRACT_ERR';
