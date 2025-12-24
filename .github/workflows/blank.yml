@@ -19,7 +19,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
     env:
-      HOST_VOLUME_PATH: "data"
+      VOLUME_NAME: "data"
       NODE_ENV: "production"
       PROXY_SERVICE_NAME: "nginx-proxy"
       API_GATEWAY_NAME: "api-gateway"
@@ -64,7 +64,7 @@ jobs:
             JWT_SECRET="$GH_JWT_SECRET"
           fi
           cat << EOF > srcs/.env
-          HOST_VOLUME_PATH=${HOST_VOLUME_PATH}
+          VOLUME_NAME=${VOLUME_NAME}
           NODE_ENV=${NODE_ENV}
           PROXY_SERVICE_NAME=${PROXY_SERVICE_NAME}
           API_GATEWAY_NAME=${API_GATEWAY_NAME}
