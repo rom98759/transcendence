@@ -12,7 +12,7 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
-    container_name: ${PROXY_SERVICE_NAME}-dev
+    container_name: "${PROXY_SERVICE_NAME}-dev"
     ports:
       - "8080:80"
       - "4430:443"
@@ -34,7 +34,7 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    container_name: "${API_GATEWAY_NAME}"
+    container_name: "${API_GATEWAY_NAME}-dev"
     expose:
       - "${API_GATEWAY_PORT}"
     env_file:
@@ -52,7 +52,7 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: "${AUTH_SERVICE_NAME}"
+    container_name: "${AUTH_SERVICE_NAME}-dev"
     expose:
       - "${AUTH_SERVICE_PORT}"
     env_file:
@@ -75,7 +75,7 @@ services:
     build:
       context: ./blockchain
       dockerfile: Dockerfile
-    container_name: "${BK_SERVICE_NAME}"
+    container_name: "${BK_SERVICE_NAME}-dev"
     expose:
       - "${BK_SERVICE_PORT}"
     env_file:
@@ -95,7 +95,7 @@ services:
     build:
       context: ./game
       dockerfile: Dockerfile
-    container_name: game-service-dev
+    container_name: "${GAME_SERVICE_NAME}-dev"
     expose:
       - "${GAME_SERVICE_PORT}"
     env_file:
@@ -115,7 +115,7 @@ services:
     build:
       context: ./redis
       dockerfile: Dockerfile
-    container_name: ${REDIS_SERVICE_NAME}
+    container_name: "${REDIS_SERVICE_NAME}-dev"
     expose:
       - "${REDIS_SERVICE_PORT}"
     networks:
@@ -127,7 +127,7 @@ services:
     build:
       context: ./${UM_SERVICE_DIR}
       dockerfile: Dockerfile
-    container_name: ${UM_SERVICE_NAME}
+    container_name: ${UM_SERVICE_NAME}-dev
     expose:
       - "${UM_SERVICE_PORT}"
     env_file:
@@ -150,6 +150,6 @@ volumes:
   data:
     driver: local
     driver_opts:
-      device: ${HOST_VOLUME_PATH}/data
+      device: ${HOST_VOLUME_PATH}
       o: bind
       type: none
