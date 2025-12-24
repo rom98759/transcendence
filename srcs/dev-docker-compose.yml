@@ -127,7 +127,7 @@ services:
     build:
       context: ./${UM_SERVICE_DIR}
       dockerfile: Dockerfile
-    container_name: ${UM_SERVICE_NAME}-dev
+    container_name: "${UM_SERVICE_NAME}-dev"
     expose:
       - "${UM_SERVICE_PORT}"
     env_file:
