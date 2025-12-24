@@ -43,6 +43,7 @@ const insertSnapTournamentStmt = db.prepare(`INSERT INTO snapshot(tx_id,tour_id,
 const listSnapStmt = db.prepare(`SELECT * FROM snapshot`);
 const getSnapTournamentStmt = db.prepare(`SELECT * FROM snapshot WHERE tx_id = ?`);
 const updateTournamentStmt = db.prepare(`UPDATE snapshot SET tx_hash = ?, date_confirmed = ? WHERE tx_id = ?`);
+const truncateSnapshotStmt = db.prepare(`DELETE FROM snapshot`);
 
 export function insertSnapTournament(block: BlockTournamentInput): number{
     try {    
@@ -93,6 +94,18 @@ export function updateTournament(tx_id: number, tx_hash: string, date: string){
       `Error storing tx_hash in DB: ${(err as any)?.message || String(err)}`,
     )
     error.code = 'DB_REGISTER_HASH_ERROR'
+    throw error
+  }
+}
+
+export function truncateSnapshot(): void{
+  try{
+    truncateSnapshotStmt.run();
+  } catch (err){
+    const error: any = new Error(
+      `Error truncating Snapshot Table: ${(err as any)?.message || String(err)}`,
+    )
+    error.code = 'DB_TRUNCATE_ERROR'
     throw error
   }
 }

@@ -3,7 +3,7 @@ import { registerPlugins } from './plugins/index.js'
 import { registerRoutes } from './module/block.routes.js'
 import { registerErrorHandler } from './core/error-handler.js'
 
-export async function buildApp() {
+// export async function buildApp() {
   const app = Fastify({
     logger: true,
   })
@@ -12,5 +12,6 @@ export async function buildApp() {
   registerErrorHandler(app)
   await registerRoutes(app)
 
-  return app
-}
+  export default app
+  // return app
+// }
