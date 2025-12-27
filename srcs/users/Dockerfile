@@ -34,6 +34,8 @@ COPY srcs/users/tsconfig.build.json ./srcs/users/tsconfig.build.json
 COPY srcs/users/src ./srcs/users/src
 COPY srcs/users/entrypoint.sh ./srcs/users/entrypoint.sh
 
+RUN apk add --no-cache python3 make g++
+
 # Copy Prisma files
 COPY srcs/users/prisma ./srcs/users/prisma
 COPY srcs/users/prisma.config.* ./srcs/users/
