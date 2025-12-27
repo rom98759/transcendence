@@ -38,8 +38,12 @@ Creation d'une nouvelle session de jeu: - ID de sessions -> sessionId = randomUU
 **-> api/game/:sessionId**
 Websocket endpoint 1) Get into the given game session. Add client's websocket to the session. 2) send confirmation message type: connected; 3) Start broadcasting game state at 60fps.
 
--> api/game/sessions
+**-> api/game/sessions**
 List alls game sessions (debug purpose).
+
+**-> api/game/settings**
+modify the settings of the game for a given sessions id (in the header)
+
 
 ## Communication par WebSocket
 

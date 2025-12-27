@@ -14,10 +14,11 @@ export class GameDisplay {
   gameState: GameState | null = null
   resultDialog: HTMLElement
   panel: HTMLElement
-  sessions: HTMLElement
-  sessionsInterval: Node.timeout | null
+  gameSessions: HTMLElement
+  sessionsInterval: Node.timeout | null = null
   settings: HTMLElement
   gameArena: HTMLElement
+  gameLogs: HTMLElement
   sessionId: string | undefined = undefined
   canvas: HTMLCanvasElement | null = null
   context: CanvasRenderingContext2D | null = null
@@ -25,23 +26,26 @@ export class GameDisplay {
   maxReconnectAttempts: number = 5
   websocket: WebSocket | null = null
   pingInterval: number | null = null
+  settingsTimeout: number | null = null
 
   constructor() {
+    this.gameLogs = document.createElement('div')
     this.screen = document.createElement('div')
-    this.sessions = document.createElement('div')
+    this.gameSessions = document.createElement('div')
+    this.gameSessions.id = 'game-sessions'
     this.settings = document.createElement('div')
     this.main = document.createElement('div')
     this.gameArena = document.createElement('div')
     this.panel = document.createElement('div')
     this.resultDialog = document.createElement('div')
 
-    this.sessions.id = 'sessions'
+    // this.sessions.id = 'sessions'
     // this.screen.id = game-container'
-    this.main.id = 'main'
-    this.resultDialog.id = 'game-over-dialog'
+    // this.main.id = 'main'
+    // this.resultDialog.id = 'game-over-dialog'
 
-    this.settings.className =
-      'hidden fixed inset-0 bg-black bg-opacity-75 flex flex-col items-center gap-4 p-4 justify-center z-50'
+    this.gameLogs.className = 'hidden'
+    this.settings.className = 'hidden' // 'hidden fixed inset-0 bg-black bg-opacity-75 flex flex-col items-center gap-4 p-4 justify-center z-50'
     this.screen.className = 'hidden fixed inset-0 z-50 bg-black overflow-y-auto'
     this.main.className = 'w-full h-full flex flex-row' // ← HORIZONTAL layout!
     this.panel.className = 'w-1/3 bg-gray-800'
@@ -50,6 +54,22 @@ export class GameDisplay {
       'class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50'
 
     this.buildElements()
+  }
+
+  showPanel(panel: 'settings' | 'game-logs' | 'game-sessions') {
+    ;['settings', 'game-logs', 'game-sessions'].forEach((id) => {
+      const el = document.getElementById(id)
+      if (el) {
+        el.classList.toggle('hidden', id !== panel)
+      }
+    })
+    if (panel === 'game-sessions') {
+      // this.loadSessions()
+      this.sessionsInterval = window.setInterval(() => this.loadSessions(), 2000)
+    } else if (this.sessionsInterval) {
+      clearInterval(this.sessionsInterval)
+      this.sessionsInterval = null
+    }
   }
 
   makeResultDialog() {
@@ -73,14 +93,15 @@ export class GameDisplay {
   }
 
   makePanel() {
+    this.panel.id = 'panel'
     this.panel.innerHTML = `
       <!-- Buttons -->
       <div class="flex gap-4">
          <button id="create-game-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
              Create simple game !!
          </button>
-         <button id="create-tournament-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
-             Create Tournament
+         <button id="create-tournament-btn" class="flex-1 striped-disabled bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+             Create Tournament ??
          </button>
          <button id="exit-btn" class="flex-1 bg-red-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
             Exit to main page
@@ -90,6 +111,7 @@ export class GameDisplay {
   }
 
   makeSettings() {
+    this.settings.id = 'settings'
     this.settings.innerHTML = `
       <form id="settings-form" class="space-y-4">
         <div>
@@ -106,37 +128,42 @@ export class GameDisplay {
         </div>
         <div>
           <label class="flex justify-between items-center">MicroWave Size<span id="val-microWaveSize">100</span></label>
-          <input type="range" name="microWaveSize" value="10" min="4" max="50" step="1" class="w-full" />
+          <input type="range" name="microWaveSize" value="16" min="8" max="50" step="1" class="w-full" />
         </div>
         <div>
           <label class="flex justify-between items-center">Paddle Speed <span id="val-paddleSpeed">100</span></label>
           <input type="range" name="paddleSpeed" value="8" min="4" max="30" step="1" class="w-full" />
         </div>
       </form>
-      <button id="start-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
-          Play NOW
+      <div class="flex gap-2 mt-4">
+        <button id="start-btn" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold rounded transition">
+            START LOCAL
+        </button>
+        <button id="wait-opponent-btn" class="flex-1 striped-disabled bg-grey-600 hover:bg-green-700 text-white rounded transition">
+            START REMOTE
+        </button>
+        <button id="stop-btn" class="flex-1 striped-disabled bg-orange-600 hover:bg-green-700 text-white font-bold rounded transition">
+            STOP
+        </button>
+      <button id="invite-btn" class="flex-1 striped-disabled bg-grey-600 hover:bg-blue-700 text-white font-bold rounded transition">
+        Invite Player
       </button>
-      <button id="wait-opponent-btn" class="striped-disabled bg-orange-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded transition">
-          wait for player
-      </button>
-    <button id="invite-btn" class="striped-disabled bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded transition">
-    Invite Player
-    </button>
-    <div id="invite-input-container" class="hidden w-full">
-        <input 
-            id="invite-input" 
-            type="text" 
-            placeholder="Enter player username..." 
-            class="w-full px-4 py-3 rounded border-2 border-blue-500 focus:outline-none focus:border-blue-600"
-        />
-        <div class="flex gap-2 mt-2">
-            <button id="send-invite-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
-                Send Invite
-            </button>
-            <button id="cancel-invite-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition">
-                Cancel
-            </button>
-        </div>
+      <div id="invite-input-container" class="hidden w-full">
+          <input 
+              id="invite-input" 
+              type="text" 
+              placeholder="Enter player username..." 
+              class="w-full px-4 py-3 rounded border-2 border-blue-500 focus:outline-none focus:border-blue-600"
+          />
+          <div class="flex gap-2 mt-2">
+              <button id="send-invite-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                  Send Invite
+              </button>
+              <button id="cancel-invite-btn" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition">
+                  Cancel
+              </button>
+          </div>
+      </div>
     </div>
       `
   }
@@ -149,7 +176,12 @@ export class GameDisplay {
             <div class="relative">
               <canvas id="game-canvas" width="800" height="600" class="border-4 border-purple-500 rounded-lg shadow-2xl bg-black"></canvas>
             </div>
+      `
+  }
 
+  makeGameLogs() {
+    this.gameLogs.id = 'game-logs'
+    this.gameLogs.innerHTML = `
             <!-- Game Info -->
             <div class="bg-white/10 backdrop-blur-lg rounded-lg p-4 max-w-2xl mx-auto">
               <div class="flex justify-around text-white">
@@ -167,7 +199,6 @@ export class GameDisplay {
                 </div>
               </div>
             </div>
-
             <!-- Controls Info -->
             <div class="bg-white/5 backdrop-blur rounded-lg p-3 max-w-2xl mx-auto">
               <p class="text-gray-300 text-sm">Controls: <span class="text-purple-300 font-mono">W/S</span> for left paddle, <span class="text-purple-300 font-mono">↑/↓</span> for right paddle</span></p>
@@ -178,8 +209,11 @@ export class GameDisplay {
               <h3 class="text-sm font-semibold text-purple-300 mb-2">Game Log</h3>
               <div id="game-log" class="h-24 overflow-y-auto space-y-1 text-left text-sm font-mono text-gray-300"></div>
             </div>
-
-          </div>`
+          </div>
+        <button id="stop2-btn" class="flex-1 striped-disabled bg-orange-600 hover:bg-green-700 text-white font-bold rounded transition">
+            STOP
+        </button>
+    `
   }
 
   buildElements() {
@@ -187,13 +221,17 @@ export class GameDisplay {
     this.makeSettings()
     this.makeGameArena()
     this.makePanel()
-    this.panel.appendChild(this.sessions)
+    this.makeGameLogs()
+    this.panel.appendChild(this.gameSessions)
+    this.panel.appendChild(this.settings)
+    this.panel.appendChild(this.gameLogs)
     this.main.appendChild(this.panel)
     this.main.appendChild(this.gameArena)
-    this.main.appendChild(this.settings)
+    // this.main.appendChild(this.settings)
     this.screen.appendChild(this.main)
     document.body.appendChild(this.screen)
     this.setupEventListeners()
+    // this.loadSessions()
   }
 
   async askForGameSession(): Promise<void> {
@@ -208,11 +246,11 @@ export class GameDisplay {
         this.gameArena.classList.remove('hidden')
         this.sessionId = data.sessionId
         console.log('Created game session:', this.sessionId)
-
         console.log('game session result:', data)
         await this.openWebSocket(this.sessionId)
-
-        this.settings.classList.remove('hidden')
+        this.showPanel('settings')
+        // this.settings.classList.remove('hidden')
+        // this.sessions.classList.add('hidden')
       } else {
         throw new Error(data.message || 'Failed to create game session')
       }
@@ -224,12 +262,13 @@ export class GameDisplay {
   }
 
   async joinSession(sessionId: string) {
+    if (this.sessionId) return
     try {
       this.sessionId = sessionId
       await this.openWebSocket(this.sessionId)
-      this.gameArena.classList.remove('hidden')
+      this.showPanel('game-logs')
     } catch (error) {
-      console.error('Failed to join session:', error)
+      console.error('Failed to join session (bad session ?):', error)
       this.sessionId = undefined
       throw error
     }
@@ -241,17 +280,17 @@ export class GameDisplay {
       const data = await res.json() // parse JSON
 
       // Clear existing children
-      this.sessions.innerHTML = ''
+      this.gameSessions.innerHTML = ''
 
       if (!data.sessions || data.sessions.length === 0) {
-        this.sessions.innerHTML = `
+        this.gameSessions.innerHTML = `
                   <div class="text-gray-400 p-2">No active sessions</div>
               `
         return
       }
 
       // Create a card for each session
-      data.sessions.forEach((session) => {
+      data.sessions.forEach((session: any) => {
         const div = document.createElement('div')
 
         div.className =
@@ -266,12 +305,11 @@ export class GameDisplay {
 
         // Optional: Click to join a session
         div.onclick = () => this.joinSession(session.sessionId)
-
-        this.sessions.appendChild(div)
+        this.gameSessions.appendChild(div)
       })
     } catch (err) {
       console.error('Failed to load sessions:', err)
-      this.sessions.innerHTML = `<div class="text-red-500 p-2">Error loading sessions.</div>`
+      this.gameSessions.innerHTML = `<div class="text-red-500 p-2">Error loading gameSessions.</div>`
     }
   }
 
@@ -281,9 +319,8 @@ export class GameDisplay {
 
       this.screen.classList.remove('hidden')
       this.main.classList.remove('hidden')
-      this.loadSessions()
-      this.sessionsInterval = setInterval(() => this.loadSessions(), 2000)
-
+      this.showPanel('game-sessions')
+      // this.showSessions()
       document.getElementById('first-screen')?.classList.add('hidden')
       // Initialize canvas
       this.canvas = this.gameArena.querySelector('#game-canvas') as HTMLCanvasElement
@@ -296,24 +333,49 @@ export class GameDisplay {
   }
 
   private setupEventListeners(): void {
+    const form = document.getElementById('settings-form') as HTMLFormElement
+    if (!form) return
+
+    // Get all range inputs
+    const inputs = form.querySelectorAll('input[type="range"]')
+    inputs.forEach((input) => {
+      const rangeInput = input as HTMLInputElement
+      const name = rangeInput.name
+      const valueSpan = document.getElementById(`val-${name}`)
+
+      // Update display value and submit on input
+      rangeInput.addEventListener('input', async () => {
+        // Update the displayed value
+        if (valueSpan) {
+          valueSpan.textContent = rangeInput.value
+        }
+
+        // Submit settings
+        await this.submitSettings()
+      })
+
+      // Initialize displayed value on load
+      if (valueSpan) {
+        valueSpan.textContent = rangeInput.value
+      }
+    })
+
     // Game button
-    const gameBtn = document.getElementById('create-session-btn')
-    if (gameBtn) {
-      gameBtn.addEventListener('click', () => this.askForGameSession())
+    const newSessionBtn = document.getElementById('create-session-btn')
+    if (newSessionBtn) {
+      newSessionBtn.addEventListener('click', () => this.askForGameSession())
     }
-    // const sessionsListBtn = document.getElementById('sessionsListBtn');
-    // if (sessionsListBtn) {
-    //   sessionsListBtn.addEventListener('click', () => this.displaySessionsList());
-    // }
+
     // Click events
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement
       if (target.id === 'create-game-btn') this.askForGameSession()
       if (target.id === 'exit-btn') this.exitGame()
-      if (target.id === 'start-btn') {
-        if (this.sessionId) this.startGame()
-        console.log('start game')
+      if (target.id === 'stop-btn' || target.id === 'stop2-btn') {
+        this.stopGame()
+        this.showPanel('game-sessions')
       }
+      if (target.id === 'start-btn' && this.sessionId) this.startGame()
     })
 
     // Keyboard controls
@@ -321,77 +383,84 @@ export class GameDisplay {
     document.addEventListener('keyup', (e) => this.handleKeyUp(e))
   }
 
-  private exitGame(): void {
-    // Send stop command
-    document.getElementById('first-screen')?.classList.remove('hidden')
+  private stopGame(): void {
+    this.gameLogs.classList.add('hidden')
     if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
       this.sendWebSocketMessage({ type: 'stop' })
     }
-
     // Close WebSocket
     this.stopPingInterval()
     if (this.websocket) {
       this.websocket.close(1000, 'User exited game')
       this.websocket = null
     }
-
-    this.screen.classList.add('hidden')
-    this.addGameLog('Disconnected from game', 'warning')
     this.updateConnectionStatus(false, 'Disconnected')
     this.sessionId = undefined
     this.gameState = null
-    console.log('Exited game')
+    this.drawWaitingScreen()
+    console.log('Game stoped')
+    // this.showSessions()
   }
 
-  private async submitSettings() {
-    const form = document.getElementById('settings-form') as HTMLFormElement
-    try {
-      if (form) {
-        const formData = new FormData()
-        // Convert FormData to GameSettings
-        const settings: GameSettings = {
-          ballRadius: Number(formData.get('ballRadius')),
-          ballSpeed: Number(formData.get('ballSpeed')),
-          ballMass: Number(formData.get('ballMass')),
-          paddleSpeed: Number(formData.get('paddleSpeed')),
-          microWaveSize: Number(formData.get('microWaveSize')),
-        }
-
-        await fetch('/api/game/settings', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include', // send cookies/session
-          body: JSON.stringify({
-            sessionId: this.sessionId,
-            settings: settings,
-          }),
-        })
-        console.log('settings saved !')
-      }
-    } catch (error) {
-      console.error('Failed to save settings:', error)
-      throw error
+  private exitGame(): void {
+    // Send stop command
+    this.stopGame()
+    document.getElementById('first-screen')?.classList.remove('hidden')
+    this.screen.classList.add('hidden')
+    this.addGameLog('Disconnected from game', 'warning')
+    console.log('Exited game')
+    if (this.sessionsInterval) {
+      console.log("clear interval")
+      clearInterval(this.sessionsInterval)
+      this.sessionsInterval = null;
     }
   }
 
+  private async submitSettings() {
+    // Clear previous timeout
+    if (this.settingsTimeout) {
+      clearTimeout(this.settingsTimeout)
+    }
+
+    // Wait 300ms after last change before submitting
+    this.settingsTimeout = window.setTimeout(async () => {
+      const form = document.getElementById('settings-form') as HTMLFormElement
+      try {
+        if (form) {
+          const formData = new FormData(form)
+          const settings: GameSettings = {
+            ballRadius: Number(formData.get('ballRadius')),
+            ballSpeed: Number(formData.get('ballSpeed')),
+            ballMass: Number(formData.get('ballMass')),
+            paddleSpeed: Number(formData.get('paddleSpeed')),
+            microWaveSize: Number(formData.get('microWaveSize')),
+          }
+
+          await fetch('/api/game/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              sessionId: this.sessionId,
+              settings: settings,
+            }),
+          })
+          console.log('settings saved !')
+        }
+      } catch (error) {
+        console.error('Failed to save settings:', error)
+      }
+    }, 300)
+  }
+
   private async startGame(): Promise<void> {
+    this.showPanel('game-logs')
     try {
-      // Send start command via WebSocket
-      this.settings.classList.add('hidden')
-      this.gameArena.classList.remove('hidden')
       this.sendWebSocketMessage({ type: 'start' })
       this.addGameLog('Game started!', 'success')
     } catch (error) {
       console.error('Failed to start game:', error)
       this.addGameLog(`Error: ${error}`, 'error')
-
-      const startBtn = document.getElementById('start-game-btn')
-      if (startBtn) {
-        startBtn.textContent = 'START GAME'
-        ;(startBtn as HTMLButtonElement).disabled = false
-      }
     }
   }
 
@@ -449,7 +518,7 @@ export class GameDisplay {
           this.sessionId = message.sessionId
           this.addGameLog(`Connected to new session: ${this.sessionId}`, 'success')
           if (this.gameState.status === 'waiting') {
-            this.drawWaitingScreen()
+            this.drawPreview()
           } else if (this.gameState.status === 'playing') {
             this.updateScores(message.data.scores)
             this.renderGame()
@@ -461,6 +530,11 @@ export class GameDisplay {
       case 'state':
         if (message.data) {
           this.gameState = message.data
+          if (this.gameState.status === 'waiting') {
+            this.updateScores({ left: 0, right: 0 })
+            this.drawPreview()
+            break
+          }
           this.updateScores(message.data.scores)
           this.renderGame()
 
@@ -527,7 +601,6 @@ export class GameDisplay {
     const width = noiseField[0].length // Number of columns (x)
 
     const pixelSize = this.canvas.height / height // scale up pixels visually
-    console.log('pixel size: ', pixelSize, 'noise height: ', height)
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
         const value = noiseField[y][x]
@@ -601,14 +674,21 @@ export class GameDisplay {
 
       this.websocket = new WebSocket(wsUrl)
 
+      // Set a connection timeout
+      const connectionTimeout = setTimeout(() => {
+        if (this.websocket?.readyState !== WebSocket.OPEN) {
+          this.websocket?.close()
+          this.addGameLog('Connection timeout', 'error')
+          reject(new Error('WebSocket connection timeout'))
+        }
+      }, 5000) // 5 second timeout
+
       this.websocket.onopen = () => {
+        clearTimeout(connectionTimeout)
         this.addGameLog('WebSocket connected', 'success')
         this.updateConnectionStatus(true, 'Connected (WebSocket)')
         this.reconnectAttempts = 0
-
-        // Start ping interval to keep connection alive
         this.startPingInterval()
-
         resolve()
       }
 
@@ -622,34 +702,47 @@ export class GameDisplay {
       }
 
       this.websocket.onerror = (error) => {
+        clearTimeout(connectionTimeout)
         console.error('WebSocket error:', error)
         this.addGameLog('WebSocket error occurred', 'error')
+        this.updateConnectionStatus(false, 'Disconnected')
         reject(error)
       }
 
       this.websocket.onclose = (event) => {
-        this.addGameLog(`WebSocket closed (code: ${event.code})`, 'warning')
+        clearTimeout(connectionTimeout)
+        if (event.code !== 1000) {
+          // 1000 = normal closure
+          this.addGameLog(
+            `Connection closed: ${event.code} - ${event.reason || 'Unknown reason'}`,
+            'error',
+          )
+
+          // Reject if we haven't resolved yet
+          if (this.websocket?.readyState !== WebSocket.OPEN) {
+            reject(
+              new Error(
+                `WebSocket closed with code ${event.code}: ${event.reason || 'Connection rejected'}`,
+              ),
+            )
+          }
+        } else {
+          this.addGameLog('Connection closed normally', 'info')
+        }
         this.updateConnectionStatus(false, 'Disconnected')
         this.stopPingInterval()
 
         // Attempt reconnection if not intentional
-        if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
-          this.reconnectAttempts++
-          this.addGameLog(`Reconnecting... (attempt ${this.reconnectAttempts})`, 'warning')
-          setTimeout(() => {
-            if (this.sessionId) {
-              this.openWebSocket(this.sessionId)
-            }
-          }, 2000)
-        }
+        // if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
+        //   this.reconnectAttempts++
+        //   this.addGameLog(`Reconnecting... (attempt ${this.reconnectAttempts})`, 'warning')
+        //   setTimeout(() => {
+        //     if (this.sessionId) {
+        //       this.openWebSocket(this.sessionId)
+        //     }
+        //   }, 2000)
+        // }
       }
-
-      // Timeout for connection
-      setTimeout(() => {
-        if (this.websocket?.readyState !== WebSocket.OPEN) {
-          reject(new Error('WebSocket connection timeout'))
-        }
-      }, 5000)
     })
   }
 
@@ -667,6 +760,47 @@ export class GameDisplay {
       }
       statusText.textContent = text
     }
+  }
+
+  private drawPreview(): void {
+    if (!this.context || !this.canvas || !this.gameState) return
+
+    // Clear canvas
+    this.context.fillStyle = '#000000'
+    this.renderNoiseField(this.gameState.cosmicBackground)
+    // this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Draw center line
+    this.context.strokeStyle = '#444444'
+    this.context.setLineDash([10, 10])
+    this.context.beginPath()
+    this.context.moveTo(this.canvas.width / 2, 0)
+    this.context.lineTo(this.canvas.width / 2, this.canvas.height)
+    this.context.stroke()
+    this.context.setLineDash([])
+
+    // Draw left paddle
+    this.context.fillStyle = '#ffffff'
+    this.context.fillRect(20, this.gameState.paddles.left.y, 10, this.gameState.paddles.left.height)
+
+    // Draw right paddle
+    this.context.fillRect(
+      this.canvas.width - 30,
+      this.gameState.paddles.right.y,
+      10,
+      this.gameState.paddles.right.height,
+    )
+
+    // Draw ball
+    this.context.beginPath()
+    this.context.arc(
+      this.gameState.ball.x,
+      this.gameState.ball.y,
+      this.gameState.ball.radius,
+      0,
+      Math.PI * 2,
+    )
+    this.context.fill()
   }
 
   private drawWaitingScreen(): void {

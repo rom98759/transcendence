@@ -91,7 +91,7 @@ services:
     build:
       context: ./game
       dockerfile: Dockerfile
-    container_name: game-service 
+    container_name: ${GAME_SERVICE_NAME}
     expose:
       - "${GAME_SERVICE_PORT}"
     env_file:

@@ -3,7 +3,6 @@
  */
 
 export const GATEWAY_CONFIG = {
-
   // Routes publiques : pas de vérification JWT requise
   PUBLIC_ROUTES: [
     '/api/auth/login',

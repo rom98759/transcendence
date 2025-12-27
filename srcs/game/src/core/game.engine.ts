@@ -141,6 +141,17 @@ export class PongGame {
     }
   }
 
+  preview(): void {
+    if (this.status !== 'waiting') return
+
+    if (this.gameLoopInterval) {
+      clearInterval(this.gameLoopInterval)
+    }
+    this.gameLoopInterval = setInterval(() => {
+      this.updateBackground()
+    }, 1000 / 60)
+  }
+
   start(): void {
     if (this.status === 'playing') return
 
@@ -148,6 +159,9 @@ export class PongGame {
     console.log(`[${this.sessionId}] Game started`)
 
     // Run game loop at 60 FPS
+    if (this.gameLoopInterval) {
+      clearInterval(this.gameLoopInterval)
+    }
     this.gameLoopInterval = setInterval(() => {
       this.update()
     }, 1000 / 60)
@@ -242,6 +256,14 @@ export class PongGame {
       this.resetBall()
       console.log(`[${this.sessionId}] Score: ${this.scores.left} - ${this.scores.right}`)
     }
+  }
+
+  updateBackground(): void {
+    if (this.cosmicBackground) {
+      this.cosmicBackground.update(this.time)
+      this.cosmicBackground.affectedFrom(this.ball.pos, this.ball.radius, 1.8)
+    }
+    this.time += 0.01
   }
 
   update(): void {

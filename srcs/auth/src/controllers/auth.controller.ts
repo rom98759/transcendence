@@ -258,7 +258,13 @@ export async function loginHandler(
     } else {
       // Pas de 2FA : générer le JWT directement
       const userRole = authService.getUserRole(user.id || 0)
-      const token = generateJWT(this, user.id || 0, user.username, userRole, AUTH_CONFIG.JWT_EXPIRATION)
+      const token = generateJWT(
+        this,
+        user.id || 0,
+        user.username,
+        userRole,
+        AUTH_CONFIG.JWT_EXPIRATION,
+      )
       logger.info({ event: 'login_success', identifier })
 
       reply

@@ -155,9 +155,9 @@ export async function proxyRequest(
     clearTimeout(timeoutHandle)
 
     // Forward all Set-Cookie headers from upstream (getSetCookie() returns array of all cookies)
-    const setCookies = response.headers.getSetCookie?.() || [];
+    const setCookies = response.headers.getSetCookie?.() || []
     if (setCookies.length > 0) {
-      setCookies.forEach(cookie => reply.header("set-cookie", cookie));
+      setCookies.forEach((cookie) => reply.header('set-cookie', cookie))
     }
 
     const contentType = response.headers.get('content-type') || ''
@@ -246,17 +246,17 @@ export async function proxyRequest(
   } catch (err: any) {
     clearTimeout(timeoutHandle)
     const isAbort = err && (err.name === 'AbortError' || err.type === 'aborted')
-    const isNetworkError = err && (
-      err.code === 'ECONNREFUSED' ||
-      err.code === 'ENOTFOUND' ||
-      err.code === 'ETIMEDOUT' ||
-      err.code === 'ECONNRESET'
-    )
+    const isNetworkError =
+      err &&
+      (err.code === 'ECONNREFUSED' ||
+        err.code === 'ENOTFOUND' ||
+        err.code === 'ETIMEDOUT' ||
+        err.code === 'ECONNRESET')
     const errorMessage = (err as Error)?.message || 'Unknown network error'
     const duration = Date.now() - startTime
 
     // Log avec distinction entre timeout, erreur réseau et autres erreurs
-    const event = isAbort ? 'proxy_timeout' : (isNetworkError ? 'proxy_network_error' : 'proxy_error')
+    const event = isAbort ? 'proxy_timeout' : isNetworkError ? 'proxy_network_error' : 'proxy_error'
     logger.error({
       event,
       targetUrl: url,
@@ -298,8 +298,8 @@ export async function proxyRequest(
       error: {
         message: 'Bad gateway',
         code: ERROR_CODES.BAD_GATEWAY,
-        details: errorMessage
-      }
+        details: errorMessage,
+      },
     }
   }
 }

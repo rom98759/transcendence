@@ -58,7 +58,8 @@ export async function gameSettings(this: FastifyInstance, req: FastifyRequest) {
 
 export async function newGameSession(this: FastifyInstance) {
   const sessionId = randomUUID()
-  getGame.call(this, null, sessionId)
+  const sessionData = getGame.call(this, null, sessionId)
+  if (sessionData.game) sessionData.game.preview()
   return {
     status: 'success',
     message: 'Game session created',

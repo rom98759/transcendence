@@ -1,8 +1,8 @@
 import { FastifyInstance, FastifyRequest } from 'fastify'
 import { gameSessions } from '../core/game.state.js'
 import { ServerMessage, ClientMessage } from '../core/game.types.js'
-
 import { addPlayerConnection, cleanupConnection } from './game.connections.js'
+
 // Broadcast state to all clients in a session
 export function broadcastToSession(sessionId: string, message: ServerMessage) {
   const currentSession = gameSessions.get(sessionId)
@@ -44,14 +44,15 @@ export function handleClientMessage(this: FastifyInstance, ws: any, sessionId: s
             this.log.info(`[${sessionId}] Game started`)
           }
           break
-        case 'stop': // Should be 'quit'
+        case 'stop': // Should be 'quit' it mean quit & disconnect
           if (game) {
-            game.stop()
             broadcastToSession(sessionId, {
               type: 'gameOver',
               message: 'Game stopped',
               data: game.getState(),
             })
+            game.stop()
+            cleanupConnection(ws, currentSession.id)
             this.log.info(`[${sessionId}] Game stopped`)
           }
           break
@@ -104,6 +105,11 @@ export function defineCommunicationInterval(sessionId: string): any {
         data: currentSessionData.game.getState(),
       })
       cleanupConnection(null, sessionId)
+    } else if (status === 'waiting') {
+      broadcastToSession(sessionId, {
+        type: 'state',
+        data: currentSessionData.game.getState(),
+      })
     }
   }, 16)
   return interval

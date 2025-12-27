@@ -94,15 +94,15 @@ class GatewayLogger implements Logger {
   }
 
   private formatLog(level: string, context: LogContext): object {
-    const timestamp = new Date().toISOString();
-    const sanitized = logUtils.sanitizeForLog(context);
+    const timestamp = new Date().toISOString()
+    const sanitized = logUtils.sanitizeForLog(context)
     const baseLog = {
       timestamp,
       level,
       service: this.serviceName,
       environment: this.isDevelopment ? 'development' : 'production',
-      ...sanitized
-    };
+      ...sanitized,
+    }
 
     // Supprime champs sensibles
     if (!this.isDevelopment) {

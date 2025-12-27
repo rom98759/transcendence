@@ -3,18 +3,13 @@ OS := $(shell uname)
 # Try to load .env file if it exists
 -include srcs/.env
 export
-ifeq ($(OS), Linux)
-	VOLUMES_PATH := $(shell pwd)/data
-	PROJECT_PATH := $(shell pwd)
-else
-	VOLUMES_PATH := $(shell pwd)/volumes
-	PROJECT_PATH := $(shell pwd)
-endif
+PROJECT_PATH := $(shell pwd)
+VOLUMES_PATH := $(PROJECT_PATH)/data
 
 
 # Override VOLUMES_PATH if HOST_VOLUME_PATH is set in .env
-ifdef HOST_VOLUME_PATH
-	VOLUMES_PATH := $(shell pwd)/$(HOST_VOLUME_PATH)
+ifdef VOLUME_NAME
+	VOLUMES_PATH := $(PROJECT_PATH)/$(VOLUME_NAME)
 endif
 
 JM = $(findstring Jean, $(shell uname -a))
@@ -27,42 +22,33 @@ else
 	COMPOSE_CMD=docker compose
 endif
 
-all : volumes build
+all : volumes colima build
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d
-# Detect if volumes exist and Colima needs restart
+
 volumes:
-	@echo "Configuring volumes at $(VOLUMES_PATH)"
-ifeq ($(OS), Darwin)
-	@if [ ! -d "$(VOLUMES_PATH)" ]; then \
-		echo "Creating new volume path, Colima restart required"; \
-		mkdir -p $(VOLUMES_PATH); \
-		chmod -R 777 $(VOLUMES_PATH); \
-		if colima list 2>/dev/null | grep -q "Running"; then \
-			echo "Stopping Colima to mount new path..."; \
-			colima stop; \
-		fi; \
-		$(MAKE) colima; \
-	else \
-		echo "Volume path exists: $(VOLUMES_PATH)"; \
-		mkdir -p $(VOLUMES_PATH); \
-		chmod -R 777 $(VOLUMES_PATH); \
-	fi
-else
 	@mkdir -p $(VOLUMES_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
-endif
 
-dev: colima-dev
-	$(COMPOSE_CMD) -f srcs/dev-docker-compose.yml up --build -d
+dev: volumes colima-dev
+	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/dev-docker-compose.yml up --build -d
 
 colima-dev:
 ifeq ($(OS),Darwin)
 	@echo "Checking Colima status and mounts..."
-	@colima status --verbose | grep -q "$(PROJECT_PATH)" || \
-	( echo "Starting Colima with mount $(PROJECT_PATH)..." && \
-	  colima start --mount "$(PROJECT_PATH):w" --vm-type vz )
+	@if ! colima list 2>/dev/null | grep -q "Running"; then \
+		echo "Starting Colima with mount $(PROJECT_PATH)"; \
+		colima start --mount "$(PROJECT_PATH):w" --vm-type vz; \
+	else \
+		echo "Colima is running, checking mounts..."; \
+		if ! colima status 2>/dev/null | grep -q "$(PROJECT_PATH)"; then \
+			echo "Mount missing, restarting Colima with correct mount..."; \
+			colima stop; \
+			colima start --mount "$(PROJECT_PATH):w" --vm-type vz; \
+		else \
+			echo "Mount already configured: $(PROJECT_PATH)"; \
+		fi; \
+	fi
 endif
-
 
 colima:
 	@echo "system is : $(OS)"
@@ -101,7 +87,6 @@ down :
 
 logs:
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml logs -f
-
 logs-nginx:
 	$(CONTAINER_CMD) logs -f $(PROXY_SERVICE_NAME)
 logs-api:
@@ -145,7 +130,7 @@ fclean: clean
 
 # Hard reset - deletes everything including folder
 reset-hard: clean
-	@echo "WARNING: Full reset including Colima restart"
+	@echo "WARNING: Full reset including Colima stop"
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
 	-$(CONTAINER_CMD) system prune -a --volumes --force
@@ -153,8 +138,6 @@ ifeq ($(OS), Darwin)
 	@echo "Stopping Colima…"
 	-colima stop
 	rm -rf $(VOLUMES_PATH)
-	@echo "Restarting Colima with fresh mount…"
-	$(MAKE) colima
 else
 	rm -rf $(VOLUMES_PATH)
 endif

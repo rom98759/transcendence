@@ -4,6 +4,8 @@
 
 FROM node:20-alpine AS builder
 
+# needed for better-sqlite3
+RUN apk add --no-cache python3 make g++
 WORKDIR /app
 
 COPY package.json package-lock.json ./
@@ -32,6 +34,8 @@ RUN apk add --no-cache wget \
 
 RUN mkdir -p ./data && chown -R appuser:appgroup /app
 
+# needed for npm ci
+RUN apk add --no-cache python3 make g++
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 

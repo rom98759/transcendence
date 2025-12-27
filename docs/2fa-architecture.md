@@ -26,6 +26,7 @@ srcs/auth/src/
 #### Tables principales
 
 **`users`** - Stockage permanent des configurations 2FA
+
 ```sql
 CREATE TABLE users (
   id INTEGER PRIMARY KEY,
@@ -39,6 +40,7 @@ CREATE TABLE users (
 ```
 
 **`totp_setup_secrets`** - Stockage temporaire pendant le setup (2 minutes)
+
 ```sql
 CREATE TABLE totp_setup_secrets (
   token TEXT PRIMARY KEY,           -- Token de session setup
@@ -50,6 +52,7 @@ CREATE TABLE totp_setup_secrets (
 ```
 
 **`login_tokens`** - Tokens de session login 2FA (2 minutes)
+
 ```sql
 CREATE TABLE login_tokens (
   token TEXT PRIMARY KEY,
@@ -60,6 +63,7 @@ CREATE TABLE login_tokens (
 ```
 
 **`login_token_attempts`** - Compteur de tentatives échouées
+
 ```sql
 CREATE TABLE login_token_attempts (
   token TEXT PRIMARY KEY,
@@ -163,18 +167,18 @@ sequenceDiagram
 ```typescript
 export const AUTH_CONFIG = {
   // TOTP Configuration
-  TOTP_WINDOW: 1,                          // ±30 secondes
-  TOTP_ISSUER: 'Transcendence',            // Nom dans l'app
+  TOTP_WINDOW: 1, // ±30 secondes
+  TOTP_ISSUER: 'Transcendence', // Nom dans l'app
 
   // Sessions
-  LOGIN_TOKEN_EXPIRATION_SECONDS: 120,     // 2 minutes
-  MAX_LOGIN_TOKEN_ATTEMPTS: 3,             // 3 tentatives max
+  LOGIN_TOKEN_EXPIRATION_SECONDS: 120, // 2 minutes
+  MAX_LOGIN_TOKEN_ATTEMPTS: 3, // 3 tentatives max
 
   // JWT
   JWT_EXPIRATION: '1h',
-  COOKIE_MAX_AGE_SECONDS: 3600,            // 1 heure
-  COOKIE_2FA_MAX_AGE_SECONDS: 120,         // 2 minutes
-};
+  COOKIE_MAX_AGE_SECONDS: 3600, // 1 heure
+  COOKIE_2FA_MAX_AGE_SECONDS: 120, // 2 minutes
+}
 ```
 
 ### Compatibilité
@@ -188,12 +192,15 @@ export const AUTH_CONFIG = {
 ## Endpoints API
 
 ### POST `/2fa/setup`
+
 Initialise la configuration 2FA
 
 **Headers:**
+
 - `Cookie: token=<JWT>` (authentification requise)
 
 **Response 200:**
+
 ```json
 {
   "result": {
@@ -205,18 +212,22 @@ Initialise la configuration 2FA
 ```
 
 **Errors:**
+
 - `401`: Token manquant/invalide
 - `400`: 2FA déjà activée
 
 ---
 
 ### POST `/2fa/setup/verify`
+
 Vérifie le code et active la 2FA
 
 **Headers:**
+
 - `Cookie: 2fa_setup_token=<token>` (session setup)
 
 **Body:**
+
 ```json
 {
   "code": "123456"
@@ -224,6 +235,7 @@ Vérifie le code et active la 2FA
 ```
 
 **Response 200:**
+
 ```json
 {
   "result": {
@@ -234,6 +246,7 @@ Vérifie le code et active la 2FA
 ```
 
 **Errors:**
+
 - `400`: Code invalide (format ou valeur)
 - `401`: Session expirée
 - `429`: Trop de tentatives (3 max)
@@ -241,12 +254,15 @@ Vérifie le code et active la 2FA
 ---
 
 ### POST `/2fa/verify`
+
 Vérifie le code lors du login
 
 **Headers:**
+
 - `Cookie: 2fa_login_token=<token>` (session login)
 
 **Body:**
+
 ```json
 {
   "code": "123456"
@@ -254,6 +270,7 @@ Vérifie le code lors du login
 ```
 
 **Response 200:**
+
 ```json
 {
   "result": {
@@ -264,6 +281,7 @@ Vérifie le code lors du login
 ```
 
 **Errors:**
+
 - `400`: Code invalide
 - `401`: Session expirée
 - `429`: Trop de tentatives
@@ -271,12 +289,15 @@ Vérifie le code lors du login
 ---
 
 ### POST `/2fa/disable`
+
 Désactive la 2FA
 
 **Headers:**
+
 - `Cookie: token=<JWT>` (authentification requise)
 
 **Response 200:**
+
 ```json
 {
   "result": {
@@ -319,12 +340,16 @@ Désactive la 2FA
 
 ```typescript
 // Nettoyage toutes les 5 minutes
-setInterval(() => {
-  totpService.cleanupExpiredSessions();
-}, 5 * 60 * 1000);
+setInterval(
+  () => {
+    totpService.cleanupExpiredSessions()
+  },
+  5 * 60 * 1000,
+)
 ```
 
 Supprime:
+
 - Sessions setup expirées
 - Login tokens expirés
 - Compteurs de tentatives orphelins
@@ -334,6 +359,7 @@ Supprime:
 ### Events loggés
 
 **Setup:**
+
 - `totp_secret_generated`: Secret créé
 - `totp_setup_session_created`: Session initiée
 - `totp_setup_code_valid`: Code accepté
@@ -341,12 +367,14 @@ Supprime:
 - `totp_enabled`: 2FA activée
 
 **Login:**
+
 - `login_2fa_required`: 2FA demandée
 - `totp_login_code_valid`: Code accepté
 - `totp_login_code_invalid`: Code refusé
 - `2fa_verify_success`: Login réussi
 
 **Maintenance:**
+
 - `totp_cleanup_completed`: Nettoyage effectué
 
 ## Tests
@@ -354,6 +382,7 @@ Supprime:
 ### Test manuel
 
 1. **Setup 2FA:**
+
    ```bash
    # Login
    curl -X POST http://localhost:3000/api/auth/login \
@@ -375,6 +404,7 @@ Supprime:
    ```
 
 2. **Login avec 2FA:**
+
    ```bash
    # Login (retourne require2FA)
    curl -X POST http://localhost:3000/api/auth/login \
@@ -426,15 +456,18 @@ WHERE is_2fa_enabled = 1 AND totp_secret IS NULL;
 ### Code toujours invalide
 
 1. **Vérifier l'horloge serveur:**
+
    ```bash
    date
    timedatectl status
    ```
+
    Le TOTP nécessite une synchronisation NTP précise (±30s)
 
 2. **Vérifier la fenêtre TOTP:**
+
    ```typescript
-   authenticator.options.window = 1; // ±30s
+   authenticator.options.window = 1 // ±30s
    ```
 
 3. **Logs détaillés:**
@@ -446,6 +479,7 @@ WHERE is_2fa_enabled = 1 AND totp_secret IS NULL;
 ### Session expirée trop vite
 
 Augmenter la durée dans `constants.ts`:
+
 ```typescript
 LOGIN_TOKEN_EXPIRATION_SECONDS: 180, // 3 minutes
 ```
@@ -453,6 +487,7 @@ LOGIN_TOKEN_EXPIRATION_SECONDS: 180, // 3 minutes
 ### Trop de tentatives
 
 Réinitialiser manuellement:
+
 ```sql
 DELETE FROM login_token_attempts WHERE token = 'xxx';
 ```
