@@ -1,10 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-import { PrismaLibSql } from '@prisma/adapter-libsql';
-
-const adapter = new PrismaLibSql({
-  url: process.env['DATABASE_URL'] ?? 'file:./data/um.db',
-});
-const prisma = new PrismaClient({ adapter });
+import { prisma } from 'src/data/prisma';
 
 export async function addFriend(userId: number, friendId: number) {
   const userExists = await prisma.userProfile.findUnique({

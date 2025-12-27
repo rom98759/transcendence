@@ -1,15 +1,13 @@
-import path from "path";
-import { defineConfig } from "prisma/config";
+import path from 'path';
+import { appenv } from '../src/config/env';
+import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
-  earlyAccess: true,
-  schema: path.join(__dirname, "schema.prisma"),
-  migrate: {
-    async adapter() {
-      const { PrismaLibSQL } = await import("@prisma/adapter-libsql");
-      return new PrismaLibSQL({
-        url: process.env.DATABASE_URL ?? "file:./data/um.db",
-      });
-    },
+  schema: path.join(__dirname, 'schema.prisma'),
+  migrations: {
+    path: 'prisma/migrations',
+  },
+  datasource: {
+    url: appenv.UM_DB_URL,
   },
 });
