@@ -22,6 +22,7 @@ model UserProfile {
 model Friendship {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
+  nickname  String?
   
   userId    Int
   user      UserProfile @relation("user", fields: [userId], references: [id], onDelete: Cascade)

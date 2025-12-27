@@ -127,6 +127,7 @@ export async function removeFriend(
   }
 }
 
+// PUT /users/friends/:targetId
 export async function updateFriend(
   req: FastifyRequest<{
     Params: { targetId: string };
@@ -150,6 +151,7 @@ export async function updateFriend(
       relationId: result.id,
       user1Id: result.userId,
       user2Id: result.friendId,
+      nickname: result.nickname,
     });
   } catch (error) {
     req.log.error(error);

@@ -58,6 +58,7 @@ export async function getFriendsByUserId(userId: number) {
       username: friendProfile.username,
       avatar_url: friendProfile.avatarUrl,
       createdAt: f.createdAt,
+      nickname: f.nickname,
     };
   });
 }
@@ -94,6 +95,5 @@ export async function updateFriend(userId: number, targetId: number, _nickname: 
     return null;
   }
 
-  // Note: nickname field needs to be added to Friendship model in schema.prisma
   return friendship;
 }
