@@ -23,7 +23,7 @@ else
 endif
 
 all : volumes colima build
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d
+	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d || $(MAKE) logs-auth
 
 volumes:
 	@mkdir -p $(VOLUMES_PATH)
