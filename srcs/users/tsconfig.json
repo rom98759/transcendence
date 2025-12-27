@@ -7,7 +7,7 @@
     "noEmit": true,
     "baseUrl": "./",
     "outDir": "./dist",
-    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "strict": true, // strict type check
     "esModuleInterop": true, // allow imports from CommonJS modules
     "skipLibCheck": true,

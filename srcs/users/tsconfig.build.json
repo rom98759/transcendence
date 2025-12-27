@@ -7,7 +7,8 @@
     "noEmit": false,
     "isolatedModules": false,
     "allowImportingTsExtensions": false,
-    "types": ["node"]
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]
