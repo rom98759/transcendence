@@ -1,6 +1,6 @@
-import { appenv } from './src/config/env'
+import { appenv } from './src/config/env';
 
-import { defineConfig } from 'prisma/config'
+import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
@@ -10,4 +10,4 @@ export default defineConfig({
   datasource: {
     url: appenv.UM_DB_URL,
   },
-})
+});

@@ -30,11 +30,11 @@ Remarque : ces headers sont fournis par la `gateway` _après_ validation du JWT.
 ```ts
 // dans service X (ex: game)
 export async function getProfile(request: FastifyRequest, reply: FastifyReply) {
-  const userName = (request.headers as any)['x-user-name'] || null
-  const userId = Number((request.headers as any)['x-user-id']) || null
-  if (!userId) return reply.code(401).send({ error: { message: 'Unauthorized' } })
+  const userName = (request.headers as any)['x-user-name'] || null;
+  const userId = Number((request.headers as any)['x-user-id']) || null;
+  if (!userId) return reply.code(401).send({ error: { message: 'Unauthorized' } });
   // utiliser userId pour récupérer/enregistrer des ressources en DB
-  return { data: { id: userId, username: userName } }
+  return { data: { id: userId, username: userName } };
 }
 ```
 
@@ -44,12 +44,12 @@ export async function getProfile(request: FastifyRequest, reply: FastifyReply) {
 
 ```ts
 // gateway/src/controllers/auth.controller.ts
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { proxyRequest } from '../utils/proxy'
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { proxyRequest } from '../utils/proxy';
 app.get('/me', async (request, reply) => {
   // proxyRequest ajoutera les headers internes et propagera Set-Cookie
-  return await proxyRequest(app, request, reply, 'http://game:3001/me')
-})
+  return await proxyRequest(app, request, reply, 'http://game:3001/me');
+});
 ```
 
 - Important : dans le code de la gateway utilisez le hostname du service (`http://game:3001`)

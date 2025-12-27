@@ -12,10 +12,10 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
-    container_name: "${PROXY_SERVICE_NAME}-dev"
+    container_name: '${PROXY_SERVICE_NAME}-dev'
     ports:
-      - "8080:80"
-      - "4430:443"
+      - '8080:80'
+      - '4430:443'
     volumes:
       - ./nginx/src:/usr/share/nginx/src
     networks:
@@ -26,7 +26,7 @@ services:
         condition: service_started
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'http://localhost/health']
       start_period: 5s
 
   # Main Fastify API
@@ -34,9 +34,9 @@ services:
     build:
       context: ./gateway
       dockerfile: Dockerfile
-    container_name: "${API_GATEWAY_NAME}-dev"
+    container_name: '${API_GATEWAY_NAME}-dev'
     expose:
-      - "${API_GATEWAY_PORT}"
+      - '${API_GATEWAY_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.gateway
@@ -52,9 +52,9 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: "${AUTH_SERVICE_NAME}-dev"
+    container_name: '${AUTH_SERVICE_NAME}-dev'
     expose:
-      - "${AUTH_SERVICE_PORT}"
+      - '${AUTH_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.auth
@@ -68,16 +68,24 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${AUTH_SERVICE_PORT}/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${AUTH_SERVICE_PORT}/health',
+        ]
 
   # Blockchain service
   blockchain-service:
     build:
       context: ./blockchain
       dockerfile: Dockerfile
-    container_name: "${BK_SERVICE_NAME}-dev"
+    container_name: '${BK_SERVICE_NAME}-dev'
     expose:
-      - "${BK_SERVICE_PORT}"
+      - '${BK_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.blockchain
@@ -88,16 +96,24 @@ services:
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${BK_SERVICE_PORT}/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${BK_SERVICE_PORT}/health',
+        ]
 
   # Game service with development volume mount
   game-service:
     build:
       context: ./game
       dockerfile: Dockerfile
-    container_name: "${GAME_SERVICE_NAME}-dev"
+    container_name: '${GAME_SERVICE_NAME}-dev'
     expose:
-      - "${GAME_SERVICE_PORT}"
+      - '${GAME_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.game
@@ -108,16 +124,24 @@ services:
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${GAME_SERVICE_PORT}/health"]
-  
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${GAME_SERVICE_PORT}/health',
+        ]
+
   # Redis broker
   redis-broker:
     build:
       context: ./redis
       dockerfile: Dockerfile
-    container_name: "${REDIS_SERVICE_NAME}-dev"
+    container_name: '${REDIS_SERVICE_NAME}-dev'
     expose:
-      - "${REDIS_SERVICE_PORT}"
+      - '${REDIS_SERVICE_PORT}'
     networks:
       - app-network
     restart: unless-stopped
@@ -127,9 +151,9 @@ services:
     build:
       context: ./${UM_SERVICE_DIR}
       dockerfile: Dockerfile
-    container_name: "${UM_SERVICE_NAME}-dev"
+    container_name: '${UM_SERVICE_NAME}-dev'
     expose:
-      - "${UM_SERVICE_PORT}"
+      - '${UM_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.um
@@ -140,11 +164,19 @@ services:
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${UM_SERVICE_PORT}/health"]
-   
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${UM_SERVICE_PORT}/health',
+        ]
+
 networks:
-    app-network:
-      driver: bridge
+  app-network:
+    driver: bridge
 
 volumes:
   data:

@@ -1,14 +1,14 @@
-import { config } from 'dotenv'
-import { bool, cleanEnv, port, str } from 'envalid'
+import { config } from 'dotenv';
+import { bool, cleanEnv, port, str } from 'envalid';
 
-config({ path: '../.env' })
-config({ path: '../.env.um' })
+config({ path: '../.env' });
+config({ path: '../.env.um' });
 
 // console.log(process.env)
 export const appenv = cleanEnv(process.env, {
-  NODE_ENV: str({ 
+  NODE_ENV: str({
     choices: ['development', 'test', 'production', 'staging'],
-    default: 'developement', 
+    default: 'developement',
   }),
   LOG_ENABLED: bool({ default: true }),
   LOG_LEVEL: str({
@@ -21,6 +21,6 @@ export const appenv = cleanEnv(process.env, {
   UM_DB_PATH: str({ default: './data/um.db' }),
   UM_DB_NAME: str({ default: 'um.db' }),
   UM_DB_URL: str({ default: 'file:./data/um.db' }),
-  UM_REDIS_CHANNEL: str({default: 'user_management'}),
-  REDIS_SERVICE_NAME: str({default: 'redis-broker'})
-})
+  UM_REDIS_CHANNEL: str({ default: 'user_management' }),
+  REDIS_SERVICE_NAME: str({ default: 'redis-broker' }),
+});

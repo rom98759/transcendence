@@ -1,13 +1,17 @@
-import fastify from 'fastify'
-import ScalarApiReference from '@scalar/fastify-api-reference'
-import { umRoutes as userRoutes } from './routes/um.routes.js'
-import { appenv } from './config/env.js'
-import { loggerConfig } from './config/logger.config.js'
-import { jsonSchemaTransform, serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod'
-import fastifySwagger from '@fastify/swagger'
+import fastify from 'fastify';
+import ScalarApiReference from '@scalar/fastify-api-reference';
+import { umRoutes as userRoutes } from './routes/um.routes.js';
+import { appenv } from './config/env.js';
+import { loggerConfig } from './config/logger.config.js';
+import {
+  jsonSchemaTransform,
+  serializerCompiler,
+  validatorCompiler,
+  ZodTypeProvider,
+} from 'fastify-type-provider-zod';
+import fastifySwagger from '@fastify/swagger';
 
 export async function buildApp() {
-
   const app = fastify({
     logger: loggerConfig,
     disableRequestLogging: false,
@@ -17,30 +21,28 @@ export async function buildApp() {
   await app.setSerializerCompiler(serializerCompiler);
 
   if (appenv.NODE_ENV !== 'test') {
-
     await app.register(fastifySwagger, {
       openapi: {
         info: {
-          title: "User API documentation",
-          description: "User API",
-          version: "0.0.1",
+          title: 'User API documentation',
+          description: 'User API',
+          version: '0.0.1',
         },
-        servers: [{url: `http://localhost:8080/users`}],
+        servers: [{ url: `http://localhost:8080/users` }],
       },
       transform: jsonSchemaTransform,
     });
 
-
-  // app.get('/doc/json', (req, reply) => {
-  //   reply.send(app.swagger());
-  // });
+    // app.get('/doc/json', (req, reply) => {
+    //   reply.send(app.swagger());
+    // });
 
     await app.register(ScalarApiReference, {
       routePrefix: '/doc',
       configuration: {
         theme: 'purple',
       },
-    })
+    });
   }
 
   await app.register(userRoutes);
@@ -50,15 +52,15 @@ export async function buildApp() {
 
 const app = await buildApp();
 
-export const logger = app.log
+export const logger = app.log;
 
 app.listen(
   { host: '0.0.0.0', port: appenv.UM_SERVICE_PORT },
   (err: Error | null, address: string) => {
     if (err) {
-      app.log.error({ message: err.message })
-      process.exit(1)
+      app.log.error({ message: err.message });
+      process.exit(1);
     }
-    app.log.info({ message: `User Management service listening at ${address}` })
-  }
-)
+    app.log.info({ message: `User Management service listening at ${address}` });
+  },
+);

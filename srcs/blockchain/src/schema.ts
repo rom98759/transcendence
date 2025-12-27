@@ -5,7 +5,7 @@ export const rowIdSchema = {
     id: { type: 'number' },
   },
   required: ['id'],
-} as const
+} as const;
 
 // Body for POST /
 export const bodySchema = {
@@ -16,4 +16,4 @@ export const bodySchema = {
     last_name: { type: 'string' },
   },
   required: ['id', 'first_name', 'last_name'],
-} as const
+} as const;

@@ -1,74 +1,74 @@
-import { Scores, GameState, ServerMessage, ClientMessage, Vector2D } from '../core/types.js'
+import { Scores, GameState, ServerMessage, ClientMessage, Vector2D } from '../core/types.js';
 
 export interface GameSettings {
-  ballRadius: number
-  ballSpeed: number
-  ballMass: number
-  paddleSpeed: number
-  microWaveSize: number
+  ballRadius: number;
+  ballSpeed: number;
+  ballMass: number;
+  paddleSpeed: number;
+  microWaveSize: number;
 }
 
 export class GameDisplay {
-  screen: HTMLElement
-  main: HTMLElement
-  gameState: GameState | null = null
-  resultDialog: HTMLElement
-  panel: HTMLElement
-  gameSessions: HTMLElement
-  sessionsInterval: Node.timeout | null = null
-  settings: HTMLElement
-  gameArena: HTMLElement
-  gameLogs: HTMLElement
-  sessionId: string | undefined = undefined
-  canvas: HTMLCanvasElement | null = null
-  context: CanvasRenderingContext2D | null = null
-  reconnectAttempts: number = 0
-  maxReconnectAttempts: number = 5
-  websocket: WebSocket | null = null
-  pingInterval: number | null = null
-  settingsTimeout: number | null = null
+  screen: HTMLElement;
+  main: HTMLElement;
+  gameState: GameState | null = null;
+  resultDialog: HTMLElement;
+  panel: HTMLElement;
+  gameSessions: HTMLElement;
+  sessionsInterval: Node.timeout | null = null;
+  settings: HTMLElement;
+  gameArena: HTMLElement;
+  gameLogs: HTMLElement;
+  sessionId: string | undefined = undefined;
+  canvas: HTMLCanvasElement | null = null;
+  context: CanvasRenderingContext2D | null = null;
+  reconnectAttempts: number = 0;
+  maxReconnectAttempts: number = 5;
+  websocket: WebSocket | null = null;
+  pingInterval: number | null = null;
+  settingsTimeout: number | null = null;
 
   constructor() {
-    this.gameLogs = document.createElement('div')
-    this.screen = document.createElement('div')
-    this.gameSessions = document.createElement('div')
-    this.gameSessions.id = 'game-sessions'
-    this.settings = document.createElement('div')
-    this.main = document.createElement('div')
-    this.gameArena = document.createElement('div')
-    this.panel = document.createElement('div')
-    this.resultDialog = document.createElement('div')
+    this.gameLogs = document.createElement('div');
+    this.screen = document.createElement('div');
+    this.gameSessions = document.createElement('div');
+    this.gameSessions.id = 'game-sessions';
+    this.settings = document.createElement('div');
+    this.main = document.createElement('div');
+    this.gameArena = document.createElement('div');
+    this.panel = document.createElement('div');
+    this.resultDialog = document.createElement('div');
 
     // this.sessions.id = 'sessions'
     // this.screen.id = game-container'
     // this.main.id = 'main'
     // this.resultDialog.id = 'game-over-dialog'
 
-    this.gameLogs.className = 'hidden'
-    this.settings.className = 'hidden' // 'hidden fixed inset-0 bg-black bg-opacity-75 flex flex-col items-center gap-4 p-4 justify-center z-50'
-    this.screen.className = 'hidden fixed inset-0 z-50 bg-black overflow-y-auto'
-    this.main.className = 'w-full h-full flex flex-row' // ← HORIZONTAL layout!
-    this.panel.className = 'w-1/3 bg-gray-800'
-    this.gameArena.className = 'hidden w-2/3 items-center'
+    this.gameLogs.className = 'hidden';
+    this.settings.className = 'hidden'; // 'hidden fixed inset-0 bg-black bg-opacity-75 flex flex-col items-center gap-4 p-4 justify-center z-50'
+    this.screen.className = 'hidden fixed inset-0 z-50 bg-black overflow-y-auto';
+    this.main.className = 'w-full h-full flex flex-row'; // ← HORIZONTAL layout!
+    this.panel.className = 'w-1/3 bg-gray-800';
+    this.gameArena.className = 'hidden w-2/3 items-center';
     this.resultDialog.className =
-      'class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50'
+      'class="hidden fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50';
 
-    this.buildElements()
+    this.buildElements();
   }
 
   showPanel(panel: 'settings' | 'game-logs' | 'game-sessions') {
-    ;['settings', 'game-logs', 'game-sessions'].forEach((id) => {
-      const el = document.getElementById(id)
+    ['settings', 'game-logs', 'game-sessions'].forEach((id) => {
+      const el = document.getElementById(id);
       if (el) {
-        el.classList.toggle('hidden', id !== panel)
+        el.classList.toggle('hidden', id !== panel);
       }
-    })
+    });
     if (panel === 'game-sessions') {
       // this.loadSessions()
-      this.sessionsInterval = window.setInterval(() => this.loadSessions(), 2000)
+      this.sessionsInterval = window.setInterval(() => this.loadSessions(), 2000);
     } else if (this.sessionsInterval) {
-      clearInterval(this.sessionsInterval)
-      this.sessionsInterval = null
+      clearInterval(this.sessionsInterval);
+      this.sessionsInterval = null;
     }
   }
 
@@ -89,11 +89,11 @@ export class GameDisplay {
 
              <!-- Winner Message -->
              <p id="winner-message" class="text-center text-xl mb-6 text-yellow-400"></p>
-              `
+              `;
   }
 
   makePanel() {
-    this.panel.id = 'panel'
+    this.panel.id = 'panel';
     this.panel.innerHTML = `
       <!-- Buttons -->
       <div class="flex gap-4">
@@ -107,11 +107,11 @@ export class GameDisplay {
             Exit to main page
          </button>
       </div>
-      `
+      `;
   }
 
   makeSettings() {
-    this.settings.id = 'settings'
+    this.settings.id = 'settings';
     this.settings.innerHTML = `
       <form id="settings-form" class="space-y-4">
         <div>
@@ -165,7 +165,7 @@ export class GameDisplay {
           </div>
       </div>
     </div>
-      `
+      `;
   }
 
   makeGameArena() {
@@ -176,11 +176,11 @@ export class GameDisplay {
             <div class="relative">
               <canvas id="game-canvas" width="800" height="600" class="border-4 border-purple-500 rounded-lg shadow-2xl bg-black"></canvas>
             </div>
-      `
+      `;
   }
 
   makeGameLogs() {
-    this.gameLogs.id = 'game-logs'
+    this.gameLogs.id = 'game-logs';
     this.gameLogs.innerHTML = `
             <!-- Game Info -->
             <div class="bg-white/10 backdrop-blur-lg rounded-lg p-4 max-w-2xl mx-auto">
@@ -213,205 +213,205 @@ export class GameDisplay {
         <button id="stop2-btn" class="flex-1 striped-disabled bg-orange-600 hover:bg-green-700 text-white font-bold rounded transition">
             STOP
         </button>
-    `
+    `;
   }
 
   buildElements() {
-    this.makeResultDialog()
-    this.makeSettings()
-    this.makeGameArena()
-    this.makePanel()
-    this.makeGameLogs()
-    this.panel.appendChild(this.gameSessions)
-    this.panel.appendChild(this.settings)
-    this.panel.appendChild(this.gameLogs)
-    this.main.appendChild(this.panel)
-    this.main.appendChild(this.gameArena)
+    this.makeResultDialog();
+    this.makeSettings();
+    this.makeGameArena();
+    this.makePanel();
+    this.makeGameLogs();
+    this.panel.appendChild(this.gameSessions);
+    this.panel.appendChild(this.settings);
+    this.panel.appendChild(this.gameLogs);
+    this.main.appendChild(this.panel);
+    this.main.appendChild(this.gameArena);
     // this.main.appendChild(this.settings)
-    this.screen.appendChild(this.main)
-    document.body.appendChild(this.screen)
-    this.setupEventListeners()
+    this.screen.appendChild(this.main);
+    document.body.appendChild(this.screen);
+    this.setupEventListeners();
     // this.loadSessions()
   }
 
   async askForGameSession(): Promise<void> {
-    if (this.sessionId) return
+    if (this.sessionId) return;
     try {
       const response = await fetch('/api/game/create-session', {
         method: 'POST',
         credentials: 'include',
-      })
-      const data = await response.json()
+      });
+      const data = await response.json();
       if (response.ok && data.sessionId) {
-        this.gameArena.classList.remove('hidden')
-        this.sessionId = data.sessionId
-        console.log('Created game session:', this.sessionId)
-        console.log('game session result:', data)
-        await this.openWebSocket(this.sessionId)
-        this.showPanel('settings')
+        this.gameArena.classList.remove('hidden');
+        this.sessionId = data.sessionId;
+        console.log('Created game session:', this.sessionId);
+        console.log('game session result:', data);
+        await this.openWebSocket(this.sessionId);
+        this.showPanel('settings');
         // this.settings.classList.remove('hidden')
         // this.sessions.classList.add('hidden')
       } else {
-        throw new Error(data.message || 'Failed to create game session')
+        throw new Error(data.message || 'Failed to create game session');
       }
     } catch (error) {
-      console.error('Connection error:', error)
-      alert('Failed to connect to game service. Please try again.')
-      throw error // Re-throw so display() knows it failed
+      console.error('Connection error:', error);
+      alert('Failed to connect to game service. Please try again.');
+      throw error; // Re-throw so display() knows it failed
     }
   }
 
   async joinSession(sessionId: string) {
-    if (this.sessionId) return
+    if (this.sessionId) return;
     try {
-      this.sessionId = sessionId
-      await this.openWebSocket(this.sessionId)
-      this.showPanel('game-logs')
+      this.sessionId = sessionId;
+      await this.openWebSocket(this.sessionId);
+      this.showPanel('game-logs');
     } catch (error) {
-      console.error('Failed to join session (bad session ?):', error)
-      this.sessionId = undefined
-      throw error
+      console.error('Failed to join session (bad session ?):', error);
+      this.sessionId = undefined;
+      throw error;
     }
   }
 
   async loadSessions() {
     try {
-      const res = await fetch('/api/game/sessions')
-      const data = await res.json() // parse JSON
+      const res = await fetch('/api/game/sessions');
+      const data = await res.json(); // parse JSON
 
       // Clear existing children
-      this.gameSessions.innerHTML = ''
+      this.gameSessions.innerHTML = '';
 
       if (!data.sessions || data.sessions.length === 0) {
         this.gameSessions.innerHTML = `
                   <div class="text-gray-400 p-2">No active sessions</div>
-              `
-        return
+              `;
+        return;
       }
 
       // Create a card for each session
       data.sessions.forEach((session: any) => {
-        const div = document.createElement('div')
+        const div = document.createElement('div');
 
         div.className =
-          'p-4 mb-2 bg-gray-800 text-white rounded shadow cursor-pointer hover:bg-gray-700'
+          'p-4 mb-2 bg-gray-800 text-white rounded shadow cursor-pointer hover:bg-gray-700';
 
         div.innerHTML = `
                   <div class="font-bold text-lg">Session ${session.sessionId}</div>
                   <div class="text-sm text-gray-300">State: ${session.state}</div>
                   <div class="text-sm text-gray-300">Players: ${session.playerCount}</div>
                   <div class="text-sm text-gray-300">Interval running: ${session.hasInterval}</div>
-              `
+              `;
 
         // Optional: Click to join a session
-        div.onclick = () => this.joinSession(session.sessionId)
-        this.gameSessions.appendChild(div)
-      })
+        div.onclick = () => this.joinSession(session.sessionId);
+        this.gameSessions.appendChild(div);
+      });
     } catch (err) {
-      console.error('Failed to load sessions:', err)
-      this.gameSessions.innerHTML = `<div class="text-red-500 p-2">Error loading gameSessions.</div>`
+      console.error('Failed to load sessions:', err);
+      this.gameSessions.innerHTML = `<div class="text-red-500 p-2">Error loading gameSessions.</div>`;
     }
   }
 
   display() {
     try {
-      console.log('game display: showing game UI')
+      console.log('game display: showing game UI');
 
-      this.screen.classList.remove('hidden')
-      this.main.classList.remove('hidden')
-      this.showPanel('game-sessions')
+      this.screen.classList.remove('hidden');
+      this.main.classList.remove('hidden');
+      this.showPanel('game-sessions');
       // this.showSessions()
-      document.getElementById('first-screen')?.classList.add('hidden')
+      document.getElementById('first-screen')?.classList.add('hidden');
       // Initialize canvas
-      this.canvas = this.gameArena.querySelector('#game-canvas') as HTMLCanvasElement
-      this.context = this.canvas?.getContext('2d') || null
+      this.canvas = this.gameArena.querySelector('#game-canvas') as HTMLCanvasElement;
+      this.context = this.canvas?.getContext('2d') || null;
 
-      this.drawWaitingScreen()
+      this.drawWaitingScreen();
     } catch (error) {
-      console.error('Failed to create game session in display():', error)
+      console.error('Failed to create game session in display():', error);
     }
   }
 
   private setupEventListeners(): void {
-    const form = document.getElementById('settings-form') as HTMLFormElement
-    if (!form) return
+    const form = document.getElementById('settings-form') as HTMLFormElement;
+    if (!form) return;
 
     // Get all range inputs
-    const inputs = form.querySelectorAll('input[type="range"]')
+    const inputs = form.querySelectorAll('input[type="range"]');
     inputs.forEach((input) => {
-      const rangeInput = input as HTMLInputElement
-      const name = rangeInput.name
-      const valueSpan = document.getElementById(`val-${name}`)
+      const rangeInput = input as HTMLInputElement;
+      const name = rangeInput.name;
+      const valueSpan = document.getElementById(`val-${name}`);
 
       // Update display value and submit on input
       rangeInput.addEventListener('input', async () => {
         // Update the displayed value
         if (valueSpan) {
-          valueSpan.textContent = rangeInput.value
+          valueSpan.textContent = rangeInput.value;
         }
 
         // Submit settings
-        await this.submitSettings()
-      })
+        await this.submitSettings();
+      });
 
       // Initialize displayed value on load
       if (valueSpan) {
-        valueSpan.textContent = rangeInput.value
+        valueSpan.textContent = rangeInput.value;
       }
-    })
+    });
 
     // Game button
-    const newSessionBtn = document.getElementById('create-session-btn')
+    const newSessionBtn = document.getElementById('create-session-btn');
     if (newSessionBtn) {
-      newSessionBtn.addEventListener('click', () => this.askForGameSession())
+      newSessionBtn.addEventListener('click', () => this.askForGameSession());
     }
 
     // Click events
     document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement
-      if (target.id === 'create-game-btn') this.askForGameSession()
-      if (target.id === 'exit-btn') this.exitGame()
+      const target = e.target as HTMLElement;
+      if (target.id === 'create-game-btn') this.askForGameSession();
+      if (target.id === 'exit-btn') this.exitGame();
       if (target.id === 'stop-btn' || target.id === 'stop2-btn') {
-        this.stopGame()
-        this.showPanel('game-sessions')
+        this.stopGame();
+        this.showPanel('game-sessions');
       }
-      if (target.id === 'start-btn' && this.sessionId) this.startGame()
-    })
+      if (target.id === 'start-btn' && this.sessionId) this.startGame();
+    });
 
     // Keyboard controls
-    document.addEventListener('keydown', (e) => this.handleKeyDown(e))
-    document.addEventListener('keyup', (e) => this.handleKeyUp(e))
+    document.addEventListener('keydown', (e) => this.handleKeyDown(e));
+    document.addEventListener('keyup', (e) => this.handleKeyUp(e));
   }
 
   private stopGame(): void {
-    this.gameLogs.classList.add('hidden')
+    this.gameLogs.classList.add('hidden');
     if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
-      this.sendWebSocketMessage({ type: 'stop' })
+      this.sendWebSocketMessage({ type: 'stop' });
     }
     // Close WebSocket
-    this.stopPingInterval()
+    this.stopPingInterval();
     if (this.websocket) {
-      this.websocket.close(1000, 'User exited game')
-      this.websocket = null
+      this.websocket.close(1000, 'User exited game');
+      this.websocket = null;
     }
-    this.updateConnectionStatus(false, 'Disconnected')
-    this.sessionId = undefined
-    this.gameState = null
-    this.drawWaitingScreen()
-    console.log('Game stoped')
+    this.updateConnectionStatus(false, 'Disconnected');
+    this.sessionId = undefined;
+    this.gameState = null;
+    this.drawWaitingScreen();
+    console.log('Game stoped');
     // this.showSessions()
   }
 
   private exitGame(): void {
     // Send stop command
-    this.stopGame()
-    document.getElementById('first-screen')?.classList.remove('hidden')
-    this.screen.classList.add('hidden')
-    this.addGameLog('Disconnected from game', 'warning')
-    console.log('Exited game')
+    this.stopGame();
+    document.getElementById('first-screen')?.classList.remove('hidden');
+    this.screen.classList.add('hidden');
+    this.addGameLog('Disconnected from game', 'warning');
+    console.log('Exited game');
     if (this.sessionsInterval) {
-      console.log("clear interval")
-      clearInterval(this.sessionsInterval)
+      console.log('clear interval');
+      clearInterval(this.sessionsInterval);
       this.sessionsInterval = null;
     }
   }
@@ -419,22 +419,22 @@ export class GameDisplay {
   private async submitSettings() {
     // Clear previous timeout
     if (this.settingsTimeout) {
-      clearTimeout(this.settingsTimeout)
+      clearTimeout(this.settingsTimeout);
     }
 
     // Wait 300ms after last change before submitting
     this.settingsTimeout = window.setTimeout(async () => {
-      const form = document.getElementById('settings-form') as HTMLFormElement
+      const form = document.getElementById('settings-form') as HTMLFormElement;
       try {
         if (form) {
-          const formData = new FormData(form)
+          const formData = new FormData(form);
           const settings: GameSettings = {
             ballRadius: Number(formData.get('ballRadius')),
             ballSpeed: Number(formData.get('ballSpeed')),
             ballMass: Number(formData.get('ballMass')),
             paddleSpeed: Number(formData.get('paddleSpeed')),
             microWaveSize: Number(formData.get('microWaveSize')),
-          }
+          };
 
           await fetch('/api/game/settings', {
             method: 'POST',
@@ -444,23 +444,23 @@ export class GameDisplay {
               sessionId: this.sessionId,
               settings: settings,
             }),
-          })
-          console.log('settings saved !')
+          });
+          console.log('settings saved !');
         }
       } catch (error) {
-        console.error('Failed to save settings:', error)
+        console.error('Failed to save settings:', error);
       }
-    }, 300)
+    }, 300);
   }
 
   private async startGame(): Promise<void> {
-    this.showPanel('game-logs')
+    this.showPanel('game-logs');
     try {
-      this.sendWebSocketMessage({ type: 'start' })
-      this.addGameLog('Game started!', 'success')
+      this.sendWebSocketMessage({ type: 'start' });
+      this.addGameLog('Game started!', 'success');
     } catch (error) {
-      console.error('Failed to start game:', error)
-      this.addGameLog(`Error: ${error}`, 'error')
+      console.error('Failed to start game:', error);
+      this.addGameLog(`Error: ${error}`, 'error');
     }
   }
 
@@ -468,43 +468,43 @@ export class GameDisplay {
     message: string,
     type: 'info' | 'success' | 'error' | 'warning' = 'info',
   ): void {
-    const logContainer = document.getElementById('game-log')
-    if (!logContainer) return
+    const logContainer = document.getElementById('game-log');
+    if (!logContainer) return;
 
     const colorClass = {
       info: 'text-blue-400',
       success: 'text-green-400',
       error: 'text-red-400',
       warning: 'text-yellow-400',
-    }[type]
+    }[type];
 
-    const timestamp = new Date().toLocaleTimeString()
-    const logEntry = document.createElement('div')
-    logEntry.className = colorClass
-    logEntry.textContent = `[${timestamp}] ${message}`
-    logContainer.appendChild(logEntry)
-    logContainer.scrollTop = logContainer.scrollHeight
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    logEntry.className = colorClass;
+    logEntry.textContent = `[${timestamp}] ${message}`;
+    logContainer.appendChild(logEntry);
+    logContainer.scrollTop = logContainer.scrollHeight;
   }
 
   private sendWebSocketMessage(message: ClientMessage): void {
     if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
-      this.websocket.send(JSON.stringify(message))
+      this.websocket.send(JSON.stringify(message));
     } else {
-      console.warn('WebSocket not connected, cannot send message')
-      this.addGameLog('Cannot send message - not connected', 'error')
+      console.warn('WebSocket not connected, cannot send message');
+      this.addGameLog('Cannot send message - not connected', 'error');
     }
   }
 
   private startPingInterval(): void {
     this.pingInterval = window.setInterval(() => {
-      this.sendWebSocketMessage({ type: 'ping' })
-    }, 30000) // Ping every 30 seconds
+      this.sendWebSocketMessage({ type: 'ping' });
+    }, 30000); // Ping every 30 seconds
   }
 
   private stopPingInterval(): void {
     if (this.pingInterval !== null) {
-      clearInterval(this.pingInterval)
-      this.pingInterval = null
+      clearInterval(this.pingInterval);
+      this.pingInterval = null;
     }
   }
 
@@ -512,129 +512,134 @@ export class GameDisplay {
     switch (message.type) {
       case 'connected':
         if (message.data) {
-          console.log(message)
-          this.gameState = message.data
-          console.log('Session ID:', message.sessionId)
-          this.sessionId = message.sessionId
-          this.addGameLog(`Connected to new session: ${this.sessionId}`, 'success')
+          console.log(message);
+          this.gameState = message.data;
+          console.log('Session ID:', message.sessionId);
+          this.sessionId = message.sessionId;
+          this.addGameLog(`Connected to new session: ${this.sessionId}`, 'success');
           if (this.gameState.status === 'waiting') {
-            this.drawPreview()
+            this.drawPreview();
           } else if (this.gameState.status === 'playing') {
-            this.updateScores(message.data.scores)
-            this.renderGame()
+            this.updateScores(message.data.scores);
+            this.renderGame();
           }
-          console.log('URL updated to:', window.location.pathname)
+          console.log('URL updated to:', window.location.pathname);
         }
-        break
+        break;
 
       case 'state':
         if (message.data) {
-          this.gameState = message.data
+          this.gameState = message.data;
           if (this.gameState.status === 'waiting') {
-            this.updateScores({ left: 0, right: 0 })
-            this.drawPreview()
-            break
+            this.updateScores({ left: 0, right: 0 });
+            this.drawPreview();
+            break;
           }
-          this.updateScores(message.data.scores)
-          this.renderGame()
+          this.updateScores(message.data.scores);
+          this.renderGame();
 
           // Update status text
-          const statusText = document.getElementById('game-status-text')
+          const statusText = document.getElementById('game-status-text');
           if (statusText && message.data.status) {
             statusText.textContent =
-              message.data.status.charAt(0).toUpperCase() + message.data.status.slice(1)
+              message.data.status.charAt(0).toUpperCase() + message.data.status.slice(1);
             statusText.className = `text-xl font-semibold ${
               message.data.status === 'playing'
                 ? 'text-green-400'
                 : message.data.status === 'finished'
                   ? 'text-red-400'
                   : 'text-yellow-400'
-            }`
+            }`;
           }
         }
-        break
+        break;
 
       case 'gameOver':
-        this.addGameLog(`Game Over! ${message.message || ''}`, 'warning')
-        const startBtn = document.getElementById('start-game-btn')
+        this.addGameLog(`Game Over! ${message.message || ''}`, 'warning');
+        const startBtn = document.getElementById('start-game-btn');
         if (startBtn) {
-          ;(startBtn as HTMLButtonElement).disabled = false
+          (startBtn as HTMLButtonElement).disabled = false;
         }
         if (message.data) {
-          this.gameState = message.data
+          this.gameState = message.data;
         }
         if (message.data) {
-          this.updateScores(message.data.scores)
+          this.updateScores(message.data.scores);
         }
-        this.drawWaitingScreen()
-        this.sessionId = undefined
+        this.drawWaitingScreen();
+        this.sessionId = undefined;
 
         // this.showGameOverDialog(this.gameState)
-        this.gameState = null
+        this.gameState = null;
 
-        const statusText = document.getElementById('game-status-text')
+        const statusText = document.getElementById('game-status-text');
         if (statusText) {
-          statusText.textContent = 'Game Over'
-          statusText.className = 'text-xl font-semibold text-red-400'
+          statusText.textContent = 'Game Over';
+          statusText.className = 'text-xl font-semibold text-red-400';
         }
-        break
+        break;
 
       case 'error':
-        this.addGameLog(`Error: ${message.message}`, 'error')
-        break
+        this.addGameLog(`Error: ${message.message}`, 'error');
+        break;
 
       case 'pong':
         // Heartbeat response - connection is alive
-        break
+        break;
     }
   }
 
   private renderNoiseField(noiseField: number[][] | null) {
-    if (!this.context || !this.canvas) return
+    if (!this.context || !this.canvas) return;
 
     if (!noiseField) {
-      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height)
-      return
+      this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      return;
     }
 
-    const height = noiseField.length // Number of rows (y)
-    const width = noiseField[0].length // Number of columns (x)
+    const height = noiseField.length; // Number of rows (y)
+    const width = noiseField[0].length; // Number of columns (x)
 
-    const pixelSize = this.canvas.height / height // scale up pixels visually
+    const pixelSize = this.canvas.height / height; // scale up pixels visually
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
-        const value = noiseField[y][x]
+        const value = noiseField[y][x];
 
         // const brightness = Math.floor(value * 255);
         // context.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
-        const hue = value * 360
-        this.context.fillStyle = `hsl(${hue}, 100%, 50%)`
+        const hue = value * 360;
+        this.context.fillStyle = `hsl(${hue}, 100%, 50%)`;
 
-        this.context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize)
+        this.context.fillRect(x * pixelSize, y * pixelSize, pixelSize, pixelSize);
       }
     }
   }
 
   private renderGame(): void {
-    if (!this.context || !this.canvas || !this.gameState) return
+    if (!this.context || !this.canvas || !this.gameState) return;
 
     // Clear canvas
-    this.context.fillStyle = '#000000'
-    this.renderNoiseField(this.gameState.cosmicBackground)
+    this.context.fillStyle = '#000000';
+    this.renderNoiseField(this.gameState.cosmicBackground);
     // this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw center line
-    this.context.strokeStyle = '#444444'
-    this.context.setLineDash([10, 10])
-    this.context.beginPath()
-    this.context.moveTo(this.canvas.width / 2, 0)
-    this.context.lineTo(this.canvas.width / 2, this.canvas.height)
-    this.context.stroke()
-    this.context.setLineDash([])
+    this.context.strokeStyle = '#444444';
+    this.context.setLineDash([10, 10]);
+    this.context.beginPath();
+    this.context.moveTo(this.canvas.width / 2, 0);
+    this.context.lineTo(this.canvas.width / 2, this.canvas.height);
+    this.context.stroke();
+    this.context.setLineDash([]);
 
     // Draw left paddle
-    this.context.fillStyle = '#ffffff'
-    this.context.fillRect(20, this.gameState.paddles.left.y, 10, this.gameState.paddles.left.height)
+    this.context.fillStyle = '#ffffff';
+    this.context.fillRect(
+      20,
+      this.gameState.paddles.left.y,
+      10,
+      this.gameState.paddles.left.height,
+    );
 
     // Draw right paddle
     this.context.fillRect(
@@ -642,81 +647,81 @@ export class GameDisplay {
       this.gameState.paddles.right.y,
       10,
       this.gameState.paddles.right.height,
-    )
+    );
 
     // Draw ball
-    this.context.beginPath()
+    this.context.beginPath();
     this.context.arc(
       this.gameState.ball.x,
       this.gameState.ball.y,
       this.gameState.ball.radius,
       0,
       Math.PI * 2,
-    )
-    this.context.fill()
+    );
+    this.context.fill();
   }
 
   private updateScores(scores: Scores): void {
-    const player1Score = document.getElementById('player1-score')
-    const player2Score = document.getElementById('player2-score')
+    const player1Score = document.getElementById('player1-score');
+    const player2Score = document.getElementById('player2-score');
 
-    if (player1Score) player1Score.textContent = scores.left.toString()
-    if (player2Score) player2Score.textContent = scores.right.toString()
+    if (player1Score) player1Score.textContent = scores.left.toString();
+    if (player2Score) player2Score.textContent = scores.right.toString();
   }
 
   private async openWebSocket(sessionId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       // Determine WebSocket URL (assuming same host)
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
-      const wsUrl = `${protocol}//${window.location.host}/api/game/${sessionId}`
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}/api/game/${sessionId}`;
 
-      this.addGameLog(`Connecting to ${wsUrl}`, 'info')
+      this.addGameLog(`Connecting to ${wsUrl}`, 'info');
 
-      this.websocket = new WebSocket(wsUrl)
+      this.websocket = new WebSocket(wsUrl);
 
       // Set a connection timeout
       const connectionTimeout = setTimeout(() => {
         if (this.websocket?.readyState !== WebSocket.OPEN) {
-          this.websocket?.close()
-          this.addGameLog('Connection timeout', 'error')
-          reject(new Error('WebSocket connection timeout'))
+          this.websocket?.close();
+          this.addGameLog('Connection timeout', 'error');
+          reject(new Error('WebSocket connection timeout'));
         }
-      }, 5000) // 5 second timeout
+      }, 5000); // 5 second timeout
 
       this.websocket.onopen = () => {
-        clearTimeout(connectionTimeout)
-        this.addGameLog('WebSocket connected', 'success')
-        this.updateConnectionStatus(true, 'Connected (WebSocket)')
-        this.reconnectAttempts = 0
-        this.startPingInterval()
-        resolve()
-      }
+        clearTimeout(connectionTimeout);
+        this.addGameLog('WebSocket connected', 'success');
+        this.updateConnectionStatus(true, 'Connected (WebSocket)');
+        this.reconnectAttempts = 0;
+        this.startPingInterval();
+        resolve();
+      };
 
       this.websocket.onmessage = (event) => {
         try {
-          const message: ServerMessage = JSON.parse(event.data)
-          this.handleServerMessage(message)
+          const message: ServerMessage = JSON.parse(event.data);
+          this.handleServerMessage(message);
         } catch (error) {
-          console.error('Failed to parse WebSocket message:', error)
+          console.error('Failed to parse WebSocket message:', error);
         }
-      }
+      };
 
       this.websocket.onerror = (error) => {
-        clearTimeout(connectionTimeout)
-        console.error('WebSocket error:', error)
-        this.addGameLog('WebSocket error occurred', 'error')
-        this.updateConnectionStatus(false, 'Disconnected')
-        reject(error)
-      }
+        clearTimeout(connectionTimeout);
+        console.error('WebSocket error:', error);
+        this.addGameLog('WebSocket error occurred', 'error');
+        this.updateConnectionStatus(false, 'Disconnected');
+        reject(error);
+      };
 
       this.websocket.onclose = (event) => {
-        clearTimeout(connectionTimeout)
+        clearTimeout(connectionTimeout);
         if (event.code !== 1000) {
           // 1000 = normal closure
           this.addGameLog(
             `Connection closed: ${event.code} - ${event.reason || 'Unknown reason'}`,
             'error',
-          )
+          );
 
           // Reject if we haven't resolved yet
           if (this.websocket?.readyState !== WebSocket.OPEN) {
@@ -724,13 +729,13 @@ export class GameDisplay {
               new Error(
                 `WebSocket closed with code ${event.code}: ${event.reason || 'Connection rejected'}`,
               ),
-            )
+            );
           }
         } else {
-          this.addGameLog('Connection closed normally', 'info')
+          this.addGameLog('Connection closed normally', 'info');
         }
-        this.updateConnectionStatus(false, 'Disconnected')
-        this.stopPingInterval()
+        this.updateConnectionStatus(false, 'Disconnected');
+        this.stopPingInterval();
 
         // Attempt reconnection if not intentional
         // if (event.code !== 1000 && this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -742,46 +747,51 @@ export class GameDisplay {
         //     }
         //   }, 2000)
         // }
-      }
-    })
+      };
+    });
   }
 
   private updateConnectionStatus(connected: boolean, text: string): void {
-    const statusDot = document.getElementById('game-connection-status')
-    const statusText = document.getElementById('game-connection-text')
+    const statusDot = document.getElementById('game-connection-status');
+    const statusText = document.getElementById('game-connection-text');
 
     if (statusDot && statusText) {
       if (connected) {
-        statusDot.className = 'w-3 h-3 rounded-full bg-green-500 animate-pulse'
-        statusText.className = 'text-green-400 text-sm'
+        statusDot.className = 'w-3 h-3 rounded-full bg-green-500 animate-pulse';
+        statusText.className = 'text-green-400 text-sm';
       } else {
-        statusDot.className = 'w-3 h-3 rounded-full bg-red-500'
-        statusText.className = 'text-red-400 text-sm'
+        statusDot.className = 'w-3 h-3 rounded-full bg-red-500';
+        statusText.className = 'text-red-400 text-sm';
       }
-      statusText.textContent = text
+      statusText.textContent = text;
     }
   }
 
   private drawPreview(): void {
-    if (!this.context || !this.canvas || !this.gameState) return
+    if (!this.context || !this.canvas || !this.gameState) return;
 
     // Clear canvas
-    this.context.fillStyle = '#000000'
-    this.renderNoiseField(this.gameState.cosmicBackground)
+    this.context.fillStyle = '#000000';
+    this.renderNoiseField(this.gameState.cosmicBackground);
     // this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw center line
-    this.context.strokeStyle = '#444444'
-    this.context.setLineDash([10, 10])
-    this.context.beginPath()
-    this.context.moveTo(this.canvas.width / 2, 0)
-    this.context.lineTo(this.canvas.width / 2, this.canvas.height)
-    this.context.stroke()
-    this.context.setLineDash([])
+    this.context.strokeStyle = '#444444';
+    this.context.setLineDash([10, 10]);
+    this.context.beginPath();
+    this.context.moveTo(this.canvas.width / 2, 0);
+    this.context.lineTo(this.canvas.width / 2, this.canvas.height);
+    this.context.stroke();
+    this.context.setLineDash([]);
 
     // Draw left paddle
-    this.context.fillStyle = '#ffffff'
-    this.context.fillRect(20, this.gameState.paddles.left.y, 10, this.gameState.paddles.left.height)
+    this.context.fillStyle = '#ffffff';
+    this.context.fillRect(
+      20,
+      this.gameState.paddles.left.y,
+      10,
+      this.gameState.paddles.left.height,
+    );
 
     // Draw right paddle
     this.context.fillRect(
@@ -789,68 +799,68 @@ export class GameDisplay {
       this.gameState.paddles.right.y,
       10,
       this.gameState.paddles.right.height,
-    )
+    );
 
     // Draw ball
-    this.context.beginPath()
+    this.context.beginPath();
     this.context.arc(
       this.gameState.ball.x,
       this.gameState.ball.y,
       this.gameState.ball.radius,
       0,
       Math.PI * 2,
-    )
-    this.context.fill()
+    );
+    this.context.fill();
   }
 
   private drawWaitingScreen(): void {
-    if (!this.context || !this.canvas) return
+    if (!this.context || !this.canvas) return;
 
-    this.context.fillStyle = '#000000'
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height)
+    this.context.fillStyle = '#000000';
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     // Draw center line
-    this.context.strokeStyle = '#ffffff'
-    this.context.setLineDash([10, 10])
-    this.context.beginPath()
-    this.context.moveTo(this.canvas.width / 2, 0)
-    this.context.lineTo(this.canvas.width / 2, this.canvas.height)
-    this.context.stroke()
+    this.context.strokeStyle = '#ffffff';
+    this.context.setLineDash([10, 10]);
+    this.context.beginPath();
+    this.context.moveTo(this.canvas.width / 2, 0);
+    this.context.lineTo(this.canvas.width / 2, this.canvas.height);
+    this.context.stroke();
 
     // Draw text
-    this.context.fillStyle = '#ffffff'
-    this.context.font = '24px Arial'
-    this.context.textAlign = 'center'
+    this.context.fillStyle = '#ffffff';
+    this.context.font = '24px Arial';
+    this.context.textAlign = 'center';
     this.context.fillText(
       'Press START GAME to begin',
       this.canvas.width / 2,
       this.canvas.height / 2,
-    )
+    );
   }
 
   private handleKeyDown(e: KeyboardEvent): void {
-    if (!this.sessionId || this.gameState?.status !== 'playing') return
+    if (!this.sessionId || this.gameState?.status !== 'playing') return;
 
-    let paddle: 'left' | 'right' | null = null
-    let direction: 'up' | 'down' | null = null
+    let paddle: 'left' | 'right' | null = null;
+    let direction: 'up' | 'down' | null = null;
 
     // W/S for left paddle
     if (e.key === 'w' || e.key === 'W') {
-      paddle = 'left'
-      direction = 'up'
+      paddle = 'left';
+      direction = 'up';
     } else if (e.key === 's' || e.key === 'S') {
-      paddle = 'left'
-      direction = 'down'
+      paddle = 'left';
+      direction = 'down';
     }
     // Arrow keys for right paddle
     else if (e.key === 'ArrowUp') {
-      paddle = 'right'
-      direction = 'up'
-      e.preventDefault() // Prevent page scroll
+      paddle = 'right';
+      direction = 'up';
+      e.preventDefault(); // Prevent page scroll
     } else if (e.key === 'ArrowDown') {
-      paddle = 'right'
-      direction = 'down'
-      e.preventDefault()
+      paddle = 'right';
+      direction = 'down';
+      e.preventDefault();
     }
 
     if (paddle && direction) {
@@ -858,20 +868,20 @@ export class GameDisplay {
         type: 'paddle',
         paddle,
         direction,
-      })
+      });
     }
   }
 
   private handleKeyUp(e: KeyboardEvent): void {
-    if (!this.sessionId || this.gameState?.status !== 'playing') return
+    if (!this.sessionId || this.gameState?.status !== 'playing') return;
 
-    let paddle: 'left' | 'right' | null = null
+    let paddle: 'left' | 'right' | null = null;
 
     if (e.key === 'w' || e.key === 'W' || e.key === 's' || e.key === 'S') {
-      paddle = 'left'
+      paddle = 'left';
     } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-      paddle = 'right'
-      e.preventDefault()
+      paddle = 'right';
+      e.preventDefault();
     }
 
     if (paddle) {
@@ -879,7 +889,7 @@ export class GameDisplay {
         type: 'paddle',
         paddle,
         direction: 'stop',
-      })
+      });
     }
   }
 }

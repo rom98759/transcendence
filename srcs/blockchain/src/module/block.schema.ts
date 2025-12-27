@@ -5,7 +5,7 @@ export const blockIdSchema = {
     tx_id: { type: 'number' },
   },
   required: ['tx_id'],
-} as const
+} as const;
 
 // Body for POST /
 export const blockSchema = {
@@ -30,16 +30,16 @@ export const blockSchema = {
     'player2_score',
     'winner_id',
   ],
-} as const
+} as const;
 
 export interface Blockchain {
-  tx_id: number
-  tx_hash?: string
-  date_confirmed?: string
-  match_id: number
-  player1_id: number
-  player2_id: number
-  player1_score: number
-  player2_score: number
-  winner_id: number
+  tx_id: number;
+  tx_hash?: string;
+  date_confirmed?: string;
+  match_id: number;
+  player1_id: number;
+  player2_id: number;
+  player1_score: number;
+  player2_score: number;
+  winner_id: number;
 }
