@@ -5,7 +5,7 @@
     "moduleResolution": "bundler", // required for Vite
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["node", "better-sqlite3"],
+    "types": ["node"],
     "baseUrl": "./",
     "outDir": "./dist",
     "strict": true, // strict type check
