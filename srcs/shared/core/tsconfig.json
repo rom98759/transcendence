@@ -8,6 +8,10 @@
     "noEmit": false,
     
     "types": ["node"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../../node_modules/@types"
+    ],
     "allowSyntheticDefaultImports": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
