@@ -2,16 +2,16 @@ import { z } from 'zod';
 import { idSchema, usernameSchema } from './base.schema.js';
 
 export const UsernameParams = z.object({
-  username: usernameSchema,
+  username: usernameSchema
 });
 
-export const ProfileData = z.object({
+export const ProfileData= z.object({
   id: idSchema,
   authId: z.number(),
   createdAt: z.date(),
-  email: z.string().nullable(), // Prisma returns null, not undefined
+  email: z.string().nullable(),      // Prisma returns null, not undefined
   username: z.string(),
-  avatarUrl: z.string().nullable(), // Prisma returns null, not undefined
+  avatarUrl: z.string().nullable(),  // Prisma returns null, not undefined
 });
 
 export const Profile = z.object({
@@ -22,8 +22,8 @@ export const Profile = z.object({
 export const ProfileCreateIn = z.object({
   authId: idSchema,
   username: usernameSchema,
-  email: z.string().email().optional(), // API accepts undefined
-  avatarUrl: z.string().optional(), // API accepts undefined
+  email: z.string().email().optional(),     // API accepts undefined
+  avatarUrl: z.string().optional(),   // API accepts undefined
 });
 
 // inferred DTOs

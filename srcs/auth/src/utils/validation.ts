@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { RESERVED_USERNAMES, AUTH_CONFIG } from './constants.js';
+import { z } from 'zod'
+import { RESERVED_USERNAMES, AUTH_CONFIG } from './constants.js'
 
 // Validation centralisée avec règles métier Transcendence
 export const ValidationSchemas = {
@@ -54,30 +54,30 @@ export const ValidationSchemas = {
       message: 'Either username or email must be provided',
       path: ['username'],
     }),
-};
+}
 
 // Helper pour validation avec log d'erreurs
 export function validateRequest<T>(
   schema: z.ZodSchema<T>,
   data: unknown,
 ): {
-  success: boolean;
-  data?: T;
-  errors?: z.ZodIssue[];
+  success: boolean
+  data?: T
+  errors?: z.ZodIssue[]
 } {
-  const result = schema.safeParse(data);
+  const result = schema.safeParse(data)
   if (!result.success) {
     return {
       success: false,
       errors: result.error.issues,
-    };
+    }
   }
   return {
     success: true,
     data: result.data,
-  };
+  }
 }
 
 // Types dérivés automatiquement
-export type RegisterInput = z.infer<typeof ValidationSchemas.register>;
-export type LoginInput = z.infer<typeof ValidationSchemas.login>;
+export type RegisterInput = z.infer<typeof ValidationSchemas.register>
+export type LoginInput = z.infer<typeof ValidationSchemas.login>

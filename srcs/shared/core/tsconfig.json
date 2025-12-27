@@ -1,22 +1,25 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext", // ESM output
-    "moduleResolution": "bundler", // good for Vite / bundlers
-
+    "module": "ESNext",                  // ESM output
+    "moduleResolution": "bundler",       // good for Vite / bundlers
+    
     "allowImportingTsExtensions": false,
     "noEmit": false,
-
+    
     "types": ["node"],
-    "typeRoots": ["./node_modules/@types", "../../../node_modules/@types"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../../../node_modules/@types"
+    ],
     "allowSyntheticDefaultImports": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
     "exactOptionalPropertyTypes": true,
-
+    
     "sourceMap": true,
     "inlineSources": true,
-
+  
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
@@ -30,7 +33,8 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

@@ -18,61 +18,60 @@ function isFastifyError(err: Error | unknown): err is FastifyError {
  * @abstract configure logging to facilitate future compatibility with ELK
  */
 export const loggerConfig: LoggerOptions = {
-  redact: [...REDACT_PATHS],
-  level: process.env.LOG_LEVEL || 'info',
-  timestamp: () => `,"time":"${new Date().toISOString()}"`,
-  base: {
-    env: process.env.NODE_ENV,
-    service: process.env.AUTH_SERVICE_NAME,
-    pid: process.pid,
-    hostname: hostname(),
-  },
-  formatters: {
-    level: (label) => {
-      return { level: label };
+    redact: [...REDACT_PATHS],
+    level: process.env.LOG_LEVEL || 'info',
+    timestamp: () => `,"time":"${new Date().toISOString()}"`,
+    base: {
+        env: process.env.NODE_ENV,
+        service: process.env.AUTH_SERVICE_NAME,
+        pid: process.pid,
+        hostname: hostname()
     },
-  },
-  serializers: {
-    req(request: FastifyRequest | IncomingMessage) {
-      const rawReq = isFastifyRequest(request) ? request.raw : request;
-      const serialized = stdSerializers.req(rawReq);
-      if (isFastifyRequest(request)) {
-        return {
-          ...serialized,
-          remoteAddress: request.ip,
-          hostname: request.hostname,
-          traceId: request.id,
-        };
-      }
-      return serialized;
+    formatters: {
+        level: (label) => {
+            return { level: label };
+        },
     },
-    err(err: unknown) {
-      if (err instanceof Error) {
-        const serialized = stdSerializers.err(err);
+    serializers: {
+        req (request: FastifyRequest | IncomingMessage) {
+            const rawReq = isFastifyRequest(request) ? request.raw : request;
+            const serialized = stdSerializers.req(rawReq);
+            if (isFastifyRequest(request)) {
+                return {
+                   ...serialized,
+                   remoteAddress: request.ip,
+                   hostname: request.hostname,
+                   traceId: request.id,
+                };
+            }
+            return serialized;
+        
+        },
+        err (err: unknown) {
+            if (err instanceof Error) {
+                const serialized = stdSerializers.err(err);
 
-        if (isFastifyError(err)) {
-          return {
-            ...serialized,
-            code: err.code,
-            statusCode: err.statusCode,
-          };
+                if (isFastifyError(err)) {
+                    return {
+                        ...serialized,
+                        code: err.code,
+                        statusCode: err.statusCode
+                    };
+                }
+                return serialized;
+            }
+            return {
+                type: 'UnknownError',
+                message: String(err)
+            };
         }
-        return serialized;
-      }
-      return {
-        type: 'UnknownError',
-        message: String(err),
-      };
     },
-  },
-  transport: isDev
-    ? {
+    transport: isDev ? {
         target: 'pino-pretty',
         options: {
-          colorize: true,
-          translateTime: 'HH:MM:ss Z',
-          ignore: 'pid,hostname',
+            colorize: true,
+            translateTime: 'HH:MM:ss Z',
+            ignore: 'pid,hostname'
         },
-      }
-    : undefined,
-};
+    } : undefined,
+}
