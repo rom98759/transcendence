@@ -6,7 +6,7 @@
     "outDir": "./dist",
     "noEmit": false,
     "isolatedModules": false,
-    "allowImportingTsExtensions": false,
+    "allowImportingTsExtensions": false
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "test"]

@@ -9,9 +9,9 @@ datasource db {
 
 model UserProfile {
   id        Int      @id @default(autoincrement())
-  authId    Int?     @unique
+  authId    Int      @unique
   createdAt DateTime @default(now())
-  email     String   @unique
+  email     String?  @unique
   username  String   @unique
-  avatarUrl String
+  avatarUrl String?
 }

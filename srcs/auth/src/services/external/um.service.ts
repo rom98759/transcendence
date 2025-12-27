@@ -1,3 +1,4 @@
+import { logger } from "../../index.js";
 import { CreateProfileDTO, UserProfileDTO } from "../../types/dto.js";
 import { ServiceError } from "../../types/errors.js";
 import { UM_SERVICE_URL } from "../../utils/constants.js";
@@ -5,7 +6,8 @@ import { APP_ERRORS } from "../../utils/error-catalog.js";
 
 export async function createUserProfile(payload: CreateProfileDTO): Promise<UserProfileDTO> {
     try {
-        const response = await fetch(`${UM_SERVICE_URL}/users`, {
+        logger.info({msg:`calling POST ${UM_SERVICE_URL}/`, payload:payload});
+        const response = await fetch(`${UM_SERVICE_URL}/`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json',},
             body: JSON.stringify(payload),
@@ -17,6 +19,7 @@ export async function createUserProfile(payload: CreateProfileDTO): Promise<User
         }
         return await response.json() as UserProfileDTO;
     } catch (error) {
+        logger.error({msg:`error POST ${UM_SERVICE_URL}/users`, error:error});
         if (error instanceof ServiceError) throw error;
         throw new ServiceError(APP_ERRORS.SERVICE_UNAVAILABLE, {originalError: error});
     }

@@ -28,7 +28,7 @@ export function findUserById(id: number) {
 export async function createUser(user: { username: string; email?: string | null; password: string }): Promise<number> {
   const hash = await bcrypt.hash(user.password, SALT_ROUNDS);
   let userId: number;
-  
+
   try {
       userId = db.createUser({ username: user.username, email: user.email || null, password: hash });
   } catch (err: any) {
@@ -46,6 +46,7 @@ export async function createUser(user: { username: string; email?: string | null
   if ([ADMIN_USERNAME, INVITE_USERNAME].includes(user.username))
     return userId;
 
+  logger.info("created in auth DB");
   try {
     await createUserProfile({
         authId: userId,

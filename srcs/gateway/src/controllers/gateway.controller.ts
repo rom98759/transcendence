@@ -14,6 +14,7 @@ export async function helpHandler(req: FastifyRequest, reply: FastifyReply) {
     '/auth/login': 'POST - User login',
     '/auth/register': 'POST - User registration',
     '/block/health': 'GET - Health check blockchain service',
+    '/users/doc' : 'GET - User doc'
   }
 
   const routesPrivateAuth = {

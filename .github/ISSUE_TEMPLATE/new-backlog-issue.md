@@ -10,7 +10,7 @@ assignees: ''
 
 **user story** : As a [role], I want [feature] so that [benefit]
 
-## Acceptance criteria
+# Details
 
 ## Additional context (screenshots, links, ...)
 
@@ -18,27 +18,25 @@ assignees: ''
 
 # Priority and estimates
 
-<!-- Select one priority by marking [x] and leave the others blank -->
-
-**priority** :
-
-- [ ] low (not planned)
-- [ ] medium (add in next sprint)
-- [ ] high (add in current sprint)
-- [ ] critical (add in current sprint top priority)
-
-**estimate** : X story points
-
-## cf [resource](https://teamhood.com/agile/story-point-estimation-table/) for story points
-
 # Definition of done
+
+## functional
+
+Testing details : auto, manual, ...
+
+## technical
 
 - [ ] Tests are written using X
 - [ ] Tests are passing
+
+## others
+
 - [ ] Documentation is updated (in code and / or wiki)
 
-# Subtasks (if applicable)
+## Out of scope
 
-- [ ] Subtask 1
-- [ ] Subtask 2
-- [ ] Subtask 3
+# Subtasks
+
+- [ ] Tests
+- [ ] Implementation
+- [ ] Doc

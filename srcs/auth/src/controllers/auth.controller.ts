@@ -98,6 +98,7 @@ export async function registerHandler(
     })
   }
 
+  logger.info("validations passed");
   try {
     const id = await authService.createUser({ username, email, password })
     req.log.info({ event: 'register_success', username, email, id })

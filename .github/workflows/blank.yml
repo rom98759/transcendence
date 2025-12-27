@@ -52,6 +52,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Create .env for docker compose
         env:
           GH_JWT_SECRET: ${{ secrets.JWT_SECRET }}

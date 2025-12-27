@@ -1,7 +1,7 @@
-import js from '@eslint/js'
-import globals from 'globals'
-import tseslint from 'typescript-eslint'
-import { defineConfig } from 'eslint/config'
+import js from '@eslint/js';
+import globals from 'globals';
+import tseslint from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 
 export default defineConfig([
   {
@@ -9,7 +9,7 @@ export default defineConfig([
     plugins: { js },
     extends: ['js/recommended'],
     languageOptions: { globals: globals.browser },
-    ignores: ["src/data/generated/**", "coverage/**", "dist/**"]
+    ignores: ['src/data/generated/**', 'coverage/**', 'dist/**'],
   },
   tseslint.configs.recommended,
-])
+]);

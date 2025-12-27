@@ -5,7 +5,7 @@ OS := $(shell uname)
 export
 PROJECT_PATH := $(shell pwd)
 VOLUMES_PATH := $(PROJECT_PATH)/data
-
+UPLOADS_PATH := $(VOLUMES_PATH)/uploads
 
 # Override VOLUMES_PATH if HOST_VOLUME_PATH is set in .env
 ifdef VOLUME_NAME
@@ -27,6 +27,7 @@ all : volumes colima build
 
 volumes:
 	@mkdir -p $(VOLUMES_PATH)
+	@mkdir -p $(UPLOADS_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
 
 dev: volumes colima-dev
@@ -60,22 +61,24 @@ check:
 	npx prettier . --check
 format:
 	npx prettier . --write
-	
-nginx:
+
+core:
+	npm run build --workspace srcs/shared/core	
+nginx: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(PROXY_SERVICE_NAME)
-redis:
+redis: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(REDIS_SERVICE_NAME)
-api:
+api: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(API_GATEWAY_NAME)
-auth:
+auth: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(AUTH_SERVICE_NAME)
-user:
+user: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(UM_SERVICE_NAME)
-game:
+game: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(GAME_SERVICE_NAME)
-block:
+block: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(BK_SERVICE_NAME)
-build:
+build: core
 	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml build
 
 start :
@@ -127,6 +130,10 @@ fclean: clean
 		find $(VOLUMES_PATH) -mindepth 1 -delete || true; \
 	fi
 	@echo "Volume folder cleaned (structure preserved)"
+	@echo "Cleaning local build artifacts..."
+	rm -rf node_modules
+	rm -rf srcs/shared/core/dist
+	rm -rf srcs/*/dist
 
 # Hard reset - deletes everything including folder
 reset-hard: clean
@@ -144,4 +151,4 @@ endif
 # ifeq ($(OS), Darwin)
 # 	colima stop && colima delete
 # endif
-.PHONY : all clean fclean re build volumes colima nginx redis api auth user stop down logs logs-nginx logs-api logs-auth
+.PHONY : all clean fclean re build volumes colima setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth

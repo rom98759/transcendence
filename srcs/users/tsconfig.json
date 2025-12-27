@@ -1,34 +1,30 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "module": "esnext",                         // required for Vite
-    "moduleResolution": "bundler",              // required for Vite
+    "module": "esnext", // required for Vite
+    "moduleResolution": "bundler", // required for Vite
     "allowImportingTsExtensions": true,
-    "noEmit": true,              
+    "noEmit": true,
     "types": ["node", "better-sqlite3"],
     "baseUrl": "./",
     "outDir": "./dist",
-    "strict": true,                             // strict type check
-    "esModuleInterop": true,                    // allow imports from CommonJS modules
+    "strict": true, // strict type check
+    "esModuleInterop": true, // allow imports from CommonJS modules
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,                    // required for Vite
+    "isolatedModules": true, // required for Vite
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitReturns": true,                  // duplicate ESLint ? prevent implicit undefined
-    "noUnusedLocals": true,                     // duplicate ESLint ?
-    "noUnusedParameters": true,                 // duplicate ESLint ?
-    "noFallthroughCasesInSwitch": true,         // duplicate ESLint ? prevent missing break in switch
-    "noImplicitOverride": true,                 // duplicate ESLint ?
+    "noImplicitReturns": true, // duplicate ESLint ? prevent implicit undefined
+    "noUnusedLocals": true, // duplicate ESLint ?
+    "noUnusedParameters": true, // duplicate ESLint ?
+    "noFallthroughCasesInSwitch": true, // duplicate ESLint ? prevent missing break in switch
+    "noImplicitOverride": true, // duplicate ESLint ?
     "noPropertyAccessFromIndexSignature": true, // duplicate ESLint ? can't use obj.key if not defined explicitely
-    "exactOptionalPropertyTypes": true,
-    "sourceMap": true,                          // debug
+    "exactOptionalPropertyTypes": true, // tedious
+    "sourceMap": true, // debug
     "inlineSources": true
   },
-  "include": [
-    "src/**/*",
-    "test/**/*", 
-    "prisma.config.ts"
-],
+  "include": ["src/**/*", "test/**/*", "prisma.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

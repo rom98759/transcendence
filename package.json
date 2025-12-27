@@ -2,13 +2,30 @@
   "name": "transcendence",
   "version": "1.0.0",
   "description": "School 42 Transcendence project",
+  "private": true,
+  "workspaces": [
+    "srcs/shared/core",
+    "srcs/gateway",
+    "srcs/users"
+  ],
   "main": "index.js",
   "directories": {
     "doc": "docs"
-  },  
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky"
+    "prepare": "husky || true",
+    "build:core": "npm run build --workspace srcs/shared/core",
+    "build:users": "npm run build --workspace srcs/users",
+    "build:auth": "npm run build --workspace srcs/auth",
+    "build:gateway": "npm run build --workspace srcs/gateway",
+    "build:game": "npm run build --workspace srcs/game",
+    "build:blockchain": "npm run build --workspace srcs/blockchain",
+    "build:nginx": "npm run build --workspace srcs/nginx",
+    "build:all": "npm run build:core && npm run build:users && npm run build:auth && npm run build:gateway && npm run build:game && npm run build:blockchain && npm run build:nginx",
+    "format:users": "npm run format --workspace srcs/users",
+    "format:shared": "prettier --write srcs/shared",
+    "clean": "rm -rf srcs/*/dist srcs/shared/core/dist node_modules srcs/*/node_modules"
   },
   "repository": {
     "type": "git",
@@ -25,16 +42,16 @@
   "devDependencies": {
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
-    "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "prettier": "^3.7.4"
   },
   "lint-staged": {
-    "**/*.{ts,js,json,md}": [
+    "**/*.{ts,tsx,js,css,json,md}": [
       "prettier --write"
     ]
   },
   "dependencies": {
+    "husky": "^9.1.7",
     "ioredis": "^5.8.2"
   }
 }
