@@ -84,9 +84,9 @@ test: test-user
 
 test-coverage: test-coverage-user
 
-test-user:
+test-user: build-core
 	npm run test --workspace srcs/users
-test-coverage-user:
+test-coverage-user: build-core
 	npm run test:coverage --workspace srcs/users
 
 # --- DB ---

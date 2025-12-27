@@ -53,6 +53,7 @@ export default {
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@transcendence/core': path.resolve(__dirname, '../shared/core/src/index.ts')
     },
   },
 };

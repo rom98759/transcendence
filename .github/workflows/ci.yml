@@ -53,6 +53,9 @@ jobs:
         with:
           jwt_secret: ${{ secrets.JWT_SECRET }}
 
+      - name: Build Core
+        run: make build-core
+
       - name: Test coverage
         run: make test-coverage
 
