@@ -6,6 +6,7 @@
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "types": ["node"],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "baseUrl": "./",
     "outDir": "./dist",
     "strict": true, // strict type check
