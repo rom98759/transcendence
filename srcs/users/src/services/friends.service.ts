@@ -1,48 +1,28 @@
-import { prisma } from '../data/prisma.js';
+import * as friendsData from '../data/friends.data.js';
 
 export async function addFriend(userId: number, friendId: number) {
-  const userExists = await prisma.userProfile.findUnique({
-    where: { id: userId },
-  });
-  const friendExists = await prisma.userProfile.findUnique({
-    where: { id: friendId },
-  });
+  const userExists = await friendsData.findUserById(userId);
+  const friendExists = await friendsData.findUserById(friendId);
 
   if (!userExists || !friendExists) {
     throw new Error('One or both users do not exist');
   }
 
-  const existingFriendship = await prisma.friendship.findUnique({
-    where: { userId_friendId: { userId, friendId } },
-  });
-
+  const existingFriendship = await friendsData.findFriendship(userId, friendId);
   if (existingFriendship) {
     throw new Error('Friendship already exists');
   }
 
-  const friendCount = await prisma.friendship.count({
-    where: { userId },
-  });
-
+  const friendCount = await friendsData.countFriends(userId);
   if (friendCount >= 10) {
     throw new Error('Friend limit reached');
   }
 
-  return await prisma.friendship.create({
-    data: { userId, friendId },
-  });
+  return await friendsData.createFriendship(userId, friendId);
 }
 
 export async function getFriendsByUserId(userId: number) {
-  const friendships = await prisma.friendship.findMany({
-    where: {
-      OR: [{ userId }, { friendId: userId }],
-    },
-    include: {
-      user: true,
-      friend: true,
-    },
-  });
+  const friendships = await friendsData.findFriendshipsByUser(userId);
 
   return friendships.map((f: any) => {
     const friendProfile = f.userId === userId ? f.friend : f.user;
@@ -58,36 +38,20 @@ export async function getFriendsByUserId(userId: number) {
 }
 
 export async function removeFriend(userId: number, targetId: number) {
-  const friendship = await prisma.friendship.findFirst({
-    where: {
-      OR: [
-        { userId, friendId: targetId },
-        { userId: targetId, friendId: userId },
-      ],
-    },
-  });
+  const friendship = await friendsData.findFriendshipAnyDirection(userId, targetId);
 
   if (!friendship) {
     return null;
   }
 
-  return await prisma.friendship.delete({
-    where: { id: friendship.id },
-  });
+  return await friendsData.deleteFriendshipById(friendship.id);
 }
 
 export async function updateFriend(userId: number, targetId: number, _nickname: string) {
-  const friendship = await prisma.friendship.findFirst({
-    where: {
-      OR: [
-        { userId, friendId: targetId },
-        { userId: targetId, friendId: userId },
-      ],
-    },
-  });
+  const friendship = await friendsData.findFriendshipAnyDirection(userId, targetId);
   if (!friendship) {
     return null;
   }
-
-  return friendship;
+  await friendsData.updateFriendshipNickname(friendship.id, _nickname);
+  return await friendsData.findFriendshipAnyDirection(userId, targetId);
 }

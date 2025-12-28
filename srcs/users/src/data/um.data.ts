@@ -21,5 +21,3 @@ export async function createProfile(data: {
     },
   });
 }
-
-//create delete update get functions for user profiles as needed

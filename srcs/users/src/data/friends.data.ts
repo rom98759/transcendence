@@ -1,30 +1,48 @@
-import { Friendship } from '@prisma/client';
 import { prisma } from './prisma.js';
 
-export async function createFriendship(userId: number, friendId: number, nickname?: string): Promise<Friendship> {
-  return await prisma.friendship.create({
-    data: { userId, friendId, nickname: nickname === undefined ? null : nickname },
+export async function findUserById(id: number) {
+  return prisma.userProfile.findUnique({ where: { id } });
+}
+
+export async function findFriendship(userId: number, friendId: number) {
+  return prisma.friendship.findUnique({
+    where: { userId_friendId: { userId, friendId } },
   });
 }
 
+export async function countFriends(userId: number) {
+  return prisma.friendship.count({ where: { userId } });
+}
 
-export async function getFriendshipsByUserId(userId: number): Promise<Friendship[]> {
-  return await prisma.friendship.findMany({
+export async function createFriendship(userId: number, friendId: number) {
+  return prisma.friendship.create({ data: { userId, friendId } });
+}
+
+export async function findFriendshipsByUser(userId: number) {
+  return prisma.friendship.findMany({
+    where: { OR: [{ userId }, { friendId: userId }] },
+    include: { user: true, friend: true },
+  });
+}
+
+export async function findFriendshipAnyDirection(userId: number, targetId: number) {
+  return prisma.friendship.findFirst({
     where: {
-      OR: [{ userId }, { friendId: userId }],
+      OR: [
+        { userId, friendId: targetId },
+        { userId: targetId, friendId: userId },
+      ],
     },
   });
 }
 
-export async function updateFriendshipNickname(userId: number, friendId: number, nickname: string): Promise<Friendship | null> {
-  return await prisma.friendship.update({
-    where: { userId_friendId: { userId, friendId } },
-    data: { nickname },
-  });
+export async function deleteFriendshipById(id: number) {
+  return prisma.friendship.delete({ where: { id } });
 }
 
-export async function deleteFriendship(userId: number, friendId: number): Promise<Friendship | null> {
-  return await prisma.friendship.delete({
-    where: { userId_friendId: { userId, friendId } },
+export async function updateFriendshipNickname(id: number, nickname: string) {
+  return prisma.friendship.update({
+    where: { id },
+    data: { nickname },
   });
 }
