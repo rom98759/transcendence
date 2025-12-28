@@ -28,19 +28,19 @@ jobs:
         run: make lint
         continue-on-error: true
 
-  # build:
-  #   runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
     
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Setup Environment
-  #       uses: ./.github/actions/setup-project
-  #       with:
-  #         jwt_secret: ${{ secrets.JWT_SECRET }}
+      - name: Setup Environment
+        uses: ./.github/actions/setup-project
+        with:
+          jwt_secret: ${{ secrets.JWT_SECRET }}
 
-  #     - name: Build
-  #       run: make build
+      - name: Build
+        run: make build
 
   test:
     runs-on: ubuntu-latest
