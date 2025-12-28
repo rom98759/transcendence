@@ -17,7 +17,7 @@
     "doc": "docs"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "",
     "prepare": "husky || true",
     "clean": "rm -rf srcs/*/dist srcs/shared/core/dist node_modules srcs/*/node_modules"
   },

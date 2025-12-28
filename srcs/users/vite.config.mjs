@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 //  * @type {import('vitest/config').UserConfig}
 //  */
 export default {
+  root: '.',
   build: {
     outDir: 'dist',
     target: 'node20',
