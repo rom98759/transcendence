@@ -33,7 +33,7 @@ export default {
   test: {
     globals: true,
     environment: 'node',
-    include: ['srcs/users/test/**/*.{test,spec}.ts'],
+    include: ['test/**/*.{test,spec}.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'json-summary'],
