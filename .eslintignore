@@ -1,0 +1,18 @@
+# Builds
+**/dist
+**/build
+
+# Tests reports
+**/coverage
+
+# Prisma
+**/generated
+**/prisma/client
+
+# Non JS config files
+**/*.json
+**/*.yaml
+**/*.yml
+
+# Node
+**/node_modules

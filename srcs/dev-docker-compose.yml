@@ -33,8 +33,8 @@ services:
   # Main Fastify API
   api-gateway:
     build:
-      context: ./gateway
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: "srcs/gateway/Dockerfile"
     container_name: "${API_GATEWAY_NAME}-dev"
     expose:
       - "${API_GATEWAY_PORT}"
@@ -126,28 +126,8 @@ services:
   # User service
   user-service:
     build:
-      context: ./${UM_SERVICE_DIR}
-      dockerfile: Dockerfile
-    container_name: ${UM_SERVICE_NAME}-dev
-    expose:
-      - "${UM_SERVICE_PORT}"
-    env_file:
-      - path: ./.env
-      - path: ./.env.um
-    volumes:
-      - data:/data
-    networks:
-      - app-network
-    restart: unless-stopped
-    healthcheck:
-      <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${UM_SERVICE_PORT}/health"]
-
-  # User service
-  user-service:
-    build:
-      context: ./${UM_SERVICE_DIR}
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: srcs/users/Dockerfile
     container_name: "${UM_SERVICE_NAME}-dev"
     expose:
       - "${UM_SERVICE_PORT}"

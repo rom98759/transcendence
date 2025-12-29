@@ -15,7 +15,6 @@ assignees: ''
 ## Additional context (screenshots, links, ...)
 
 > [!NOTE]
-> 
 
 ---
 
@@ -23,12 +22,23 @@ assignees: ''
 
 # Definition of done
 
+## functional
+
+Testing details : auto, manual, ...
+
+## technical
+
 - [ ] Tests are written using X
 - [ ] Tests are passing
+
+## others
+
 - [ ] Documentation is updated (in code and / or wiki)
 
-# Subtasks (if applicable)
+## Out of scope
 
-- [ ] Subtask 1
-- [ ] Subtask 2
-- [ ] Subtask 3
+# Subtasks
+
+- [ ] Tests
+- [ ] Implementation
+- [ ] Doc

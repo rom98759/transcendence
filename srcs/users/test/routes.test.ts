@@ -1,93 +1,98 @@
 import { afterAll, beforeAll, describe, expect, test, vi } from 'vitest';
-import fastify from "fastify";
-import { umRoutes } from "../src/routes/um.routes.js";
 import { API_ERRORS } from '../src/utils/messages.js';
-import * as umService from "../src/services/um.service.js";
-import * as mappers from "../src/utils/mappers.js";
 import { afterEach } from 'node:test';
-import { UserProfile } from '@prisma/client'
+import { ProfileDTO } from '@transcendence/core';
+import { buildApp } from '../src/index.js';
+import { FastifyInstance } from 'fastify';
 
-// auto mock all functions from this file
-// vi.mock("../src/services/um.service.js");
-// vi.mock("../src/utils/mappers.js");
+vi.mock('../src/services/um.service.js', () => ({
+  findByUsername: vi.fn(),
+  createProfileInData: vi.fn(),
+}));
 
-describe("GET /users/:username", () => {
-    const app = fastify();
+vi.mock('../src/utils/mappers.js', () => ({
+  mapUserProfileToDTO: vi.fn(),
+}));
 
-    beforeAll(async () => {
-        app.register(umRoutes);
-        await app.ready();
+import * as umService from '../src/services/um.service.js';
+
+let app: FastifyInstance;
+
+describe('GET /:username', () => {
+  beforeAll(async () => {
+    process.env['NODE_ENV'] = 'test';
+    app = await buildApp();
+    await app.ready();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const mockProfileDTO = { username: 'toto', avatarUrl: 'avatars/default.png' };
+
+  test('GET /:username - Should return user profile', async () => {
+    vi.spyOn(umService, 'findByUsername').mockResolvedValue(mockProfileDTO as ProfileDTO);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/toto',
     });
 
-    afterAll(async () => {
-        await app.close();
+    expect(umService.findByUsername).toHaveBeenCalledWith('toto');
+    expect(response.statusCode).toBe(200);
+    expect(JSON.parse(response.payload)).toEqual({
+      username: 'toto',
+      avatarUrl: 'avatars/default.png',
+    });
+  });
+
+  test('GET /:username - Should return 404 if not found', async () => {
+    vi.spyOn(umService, 'findByUsername').mockResolvedValue(null);
+
+    const response = await app.inject({
+      method: 'GET',
+      url: '/unknown',
     });
 
-    afterEach(() => {
-        vi.clearAllMocks();
+    expect(response.statusCode).toBe(404);
+    expect(JSON.parse(response.payload)).toEqual({
+      message: API_ERRORS.USER.NOT_FOUND,
+    });
+  });
+
+  test('GET /:username - Should reject admin as username', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/admin',
     });
 
-    const mockProfile = { id: 1, authId: 1, username: "toto", email: "toto@test.com", createdAt: new Date(), avatarUrl: "avatars/default.png" };
-    const mockProfileDTO = { username: "toto", avatarUrl: "avatars/default.png"};
+    const body = JSON.parse(response.payload);
 
-    test("GET /users/:username - Should return user profile", async () => {
-        vi.spyOn(umService, 'findByUsername').mockResolvedValue(mockProfile as UserProfile);
-        vi.spyOn(mappers, 'mapProfileToDTO').mockReturnValue(mockProfileDTO);
+    expect(response.statusCode).toBe(400);
+    expect(body.message).toBe("params/username Username cannot contain 'admin'");
+  });
 
-        const response = await app.inject({
-            method: 'GET',
-            url: "/users/toto"
-        });
+  test('GET /:username - Should return 500 if service throws error', async () => {
+    vi.spyOn(umService, 'findByUsername').mockRejectedValue(
+      new Error(API_ERRORS.DB.CONNECTION_ERROR),
+    );
 
-        expect(umService.findByUsername).toHaveBeenCalledWith("toto");
-        expect(mappers.mapProfileToDTO).toHaveBeenCalledWith(mockProfile);
-        expect(response.statusCode).toBe(200);
-        expect(JSON.parse(response.payload)).toEqual({
-            profile: expect.objectContaining({
-                username: "toto"
-            })
-        })
+    const response = await app.inject({
+      method: 'GET',
+      url: '/unknown',
     });
 
-    test("GET /users/:username - Should return 404 if not found", async () => {
-        vi.spyOn(umService, 'findByUsername').mockResolvedValue(null);
-        
-        const response = await app.inject({
-            method: 'GET',
-            url: "/users/unknown"
-        });
-
-        expect(response.statusCode).toBe(404);
-        expect(JSON.parse(response.payload)).toEqual({
-                message: API_ERRORS.USER.NOT_FOUND
-        });
-    });
-
-    test("GET /users/:username - Should reject admin as username", async () => {
-
-        const response = await app.inject({
-            method: 'GET',
-            url: "/users/admin"
-        });
-
-        expect(response.statusCode).toBe(400);
-
-        const body = JSON.parse(response.payload);
-        expect(body.error).toBe(API_ERRORS.USER.INVALID_FORMAT);
-    });
-
-    test("GET /users/:username - Should return 500 if service throws error", async () => {
-        vi.spyOn(umService, 'findByUsername').mockRejectedValue(new Error(API_ERRORS.DB.CONNECTION_ERROR));
-        
-        const response = await app.inject({
-            method: 'GET',
-            url: "/users/unknown"
-        });
-
-        expect(response.statusCode).toBe(500);
-        expect(JSON.parse(response.payload)).toEqual(expect.objectContaining({
-                error: "Internal Server Error",
-                message: API_ERRORS.DB.CONNECTION_ERROR,
-        }));
-    });
-})
+    expect(response.statusCode).toBe(500);
+    expect(JSON.parse(response.payload)).toEqual(
+      expect.objectContaining({
+        error: 'Internal Server Error',
+        message: API_ERRORS.DB.CONNECTION_ERROR,
+      }),
+    );
+  });
+});

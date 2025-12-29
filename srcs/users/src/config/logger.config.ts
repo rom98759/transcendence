@@ -5,7 +5,6 @@ import { appenv } from './env.js';
 import { PinoLoggerOptions } from 'fastify/types/logger.js';
 import serializer from 'pino-std-serializers/index.js';
 
-
 const isDev = appenv.NODE_ENV !== 'production';
 
 function isFastifyRequest(req: IncomingMessage | FastifyRequest): req is FastifyRequest {
@@ -18,66 +17,64 @@ function isFastifyError(err: Error | unknown): err is FastifyError {
 
 /**
  * @abstract configure logging to facilitate future compatibility with ELK
- * @todo check if logging of all headers (except for authorization as of now) is necessary 
+ * @todo check if logging of all headers (except for authorization as of now) is necessary
  */
 export const loggerConfig: PinoLoggerOptions = {
-    redact: ['req.headers.authorization'],
-    level: appenv.LOG_LEVEL || 'info',
-    timestamp: () => `,"time":"${new Date().toISOString()}"`,
-    base: {
-        env: appenv.NODE_ENV,
-        service: appenv.UM_SERVICE_NAME,
-        pid: process.pid,
-        hostname: hostname()
+  redact: ['req.headers.authorization'],
+  level: appenv.LOG_LEVEL || 'info',
+  timestamp: () => `,"time":"${new Date().toISOString()}"`,
+  base: {
+    env: appenv.NODE_ENV,
+    service: appenv.UM_SERVICE_NAME,
+    pid: process.pid,
+    hostname: hostname(),
+  },
+  formatters: {
+    level: (label) => {
+      return { level: label };
     },
-    formatters: {
-        level: (label) => {
-            return { level: label };
-        },
+  },
+  serializers: {
+    req(request: FastifyRequest | IncomingMessage) {
+      const rawReq = isFastifyRequest(request) ? request.raw : request;
+      const serialized = serializer.req(rawReq as IncomingMessage);
+      if (isFastifyRequest(request)) {
+        return {
+          ...serialized,
+          remoteAddress: request.ip,
+          hostname: request.hostname,
+          traceId: request.id,
+        };
+      }
+      return serialized;
     },
-    serializers: {
-        req (request: FastifyRequest | IncomingMessage) {
-            const rawReq = isFastifyRequest(request) ? request.raw : request;
-            const serialized = serializer.req(rawReq as IncomingMessage);
-            if (isFastifyRequest(request)) {
-                return {
-                   ...serialized,
-                   remoteAddress: request.ip,
-                   hostname: request.hostname,
-                   traceId: request.id,
-                };
-            }
-            return serialized;
-        
-        },
-        err (err: unknown) {
-            if (err instanceof Error) {
-                const serialized = serializer.err(err);
+    err(err: unknown) {
+      if (err instanceof Error) {
+        const serialized = serializer.err(err);
 
-                if (isFastifyError(err)) {
-                    return {
-                        ...serialized,
-                        code: err.code,
-                        statusCode: err.statusCode
-                    };
-                }
-                return serialized;
-            }
-            return {
-                type: 'UnknownError',
-                message: String(err)
-            };
+        if (isFastifyError(err)) {
+          return {
+            ...serialized,
+            code: err.code,
+            statusCode: err.statusCode,
+          };
         }
+        return serialized;
+      }
+      return {
+        type: 'UnknownError',
+        message: String(err),
+      };
     },
-    ...(isDev && {
-            transport: {
-                target: 'pino-pretty',
-                options: {
-                    colorize: true,
-                    translateTime: 'HH:MM:ss Z',
-                    ignore: 'pid,hostname'
-                },
-            }
-        }
-    ),
-}
+  },
+  ...(isDev && {
+    transport: {
+      target: 'pino-pretty',
+      options: {
+        colorize: true,
+        translateTime: 'HH:MM:ss Z',
+        ignore: 'pid,hostname',
+      },
+    },
+  }),
+};

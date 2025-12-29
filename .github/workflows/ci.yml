@@ -1,0 +1,110 @@
+name: CI
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+  workflow_dispatch:
+
+jobs:
+  
+  lint:
+    permissions:
+      contents: read
+      packages: read
+      pull-requests: read
+      checks: write
+    runs-on: ubuntu-latest
+    env:
+      CI: TRUE
+  
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-project
+        with:
+          jwt_secret: ${{ secrets.JWT_SECRET }}
+
+      - name: Prettier
+        run: make format
+
+      # CI for ESLint will pass until we get rid of errors        
+      - name: ESLint Save report as JSON
+        run: npm run lint:report
+        continue-on-error: true
+
+      - name: Annotate Code Linting Results
+        uses: ataylorme/eslint-annotate-action@v3
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          report-json: "eslint_report.json"
+          fail-on-error: false
+          fail-on-warning: false
+
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-project
+        with:
+          jwt_secret: ${{ secrets.JWT_SECRET }}
+
+      - name: Build
+        run: make build
+
+  test:
+    runs-on: ubuntu-latest
+    env:
+        NODE_ENV: development
+        NPM_CONFIG_PRODUCTION: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-project
+        with:
+          jwt_secret: ${{ secrets.JWT_SECRET }}
+
+      - name: Build Core
+        run: make build-core
+
+      - name: Build Users
+        run: make build-user
+
+      - name: Test coverage
+        run: make test-coverage
+
+        # Extract lines percentage
+      - name: Get coverage percentage for users
+        id: coverage
+        shell: bash
+        run: |
+          SUMMARY_FILE="srcs/users/coverage/coverage-summary.json"
+          
+          if [ -f "$SUMMARY_FILE" ]; then
+            PCT=$(jq -r '.total.lines.pct' $SUMMARY_FILE)
+            echo "Users Coverage: $PCT%"
+            echo "UM_COVERAGE=$PCT" >> $GITHUB_ENV
+          else
+            echo "❌ Error: Coverage file not found at $SUMMARY_FILE"
+            exit 1
+          fi
+      
+      - name: Update coverage badge
+        uses: Schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_SECRET }}
+          gistID: ${{ secrets.GIST_ID }}
+          filename: coverage-users.json
+          label: User service test coverage
+          message: ${{ env.UM_COVERAGE }}%
+          valColorRange: ${{ env.UM_COVERAGE }}
+          maxColorRange: 100
+          minColorRange: 50
+          namedLogo: vitest
