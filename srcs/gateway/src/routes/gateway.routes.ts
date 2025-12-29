@@ -13,6 +13,7 @@ export async function apiRoutes(app: FastifyInstance) {
   app.register(registerBlockRoutes, { prefix: '/block' });
   app.register(registerFriendsRoutes, { prefix: '/users/friends' });
   app.register(registerUsersRoutes, { prefix: '/users' });
+  app.register(registerUsersRoutes, { prefix: '/users' });
 }
 
 /**

@@ -1,0 +1,46 @@
+name: 'Setup Project'
+description: 'Installs Node, dependencies and generates .env files'
+inputs:
+  jwt_secret:
+    description: 'JWT Secret from repo secrets'
+    required: false
+    default: 'dummysupersecretkey'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+
+    - name: Create .env files
+      shell: bash
+      env:
+        INPUT_JWT: ${{ inputs.jwt_secret }}
+      run: |
+        mkdir -p srcs
+        
+        # Secret handling (dummy if PR from a fork)
+        if [ -z "$INPUT_JWT" ]; then
+          JWT_VAL="dummysupersecretkey"
+        else
+          JWT_VAL="$INPUT_JWT"
+        fi
+
+        echo "Generating env files..."
+        cp srcs/.env.example srcs/.env
+        cp srcs/.env.auth.example srcs/.env.auth
+        cp srcs/.env.blockchain.example srcs/.env.blockchain
+        cp srcs/.env.game.example srcs/.env.game
+        cp srcs/.env.gateway.example srcs/.env.gateway
+        cp srcs/.env.um.example srcs/.env.um
+
+        # Replace secret with sed
+        sed -i "s|JWT_SECRET=.*|JWT_SECRET=${JWT_VAL}|g" srcs/.env.auth
+        sed -i "s|JWT_SECRET=.*|JWT_SECRET=${JWT_VAL}|g" srcs/.env.gateway

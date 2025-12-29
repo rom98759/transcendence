@@ -1,110 +1,140 @@
-OS := $(shell uname)
+include make/config.mk
 
-# Try to load .env file if it exists
--include srcs/.env
-export
-PROJECT_PATH := $(shell pwd)
-VOLUMES_PATH := $(PROJECT_PATH)/data
-UPLOADS_PATH := $(VOLUMES_PATH)/uploads
-
-# Override VOLUMES_PATH if HOST_VOLUME_PATH is set in .env
-ifdef VOLUME_NAME
-	VOLUMES_PATH := $(PROJECT_PATH)/$(VOLUME_NAME)
-endif
-
-JM = $(findstring Jean, $(shell uname -a))
-
-ifeq ($(JM), Jean)
-	CONTAINER_CMD=podman
-	COMPOSE_CMD=podman-compose
-else
-	CONTAINER_CMD=docker
-	COMPOSE_CMD=docker compose
-endif
+# === Global ===
 
 all : volumes colima build
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d
+	$(D_COMPOSE) up -d
+
+dev: volumes colima-dev
+	$(D_COMPOSE_DEV) up --build -d
 
 volumes:
 	@mkdir -p $(VOLUMES_PATH)
 	@mkdir -p $(UPLOADS_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
 
-dev: volumes colima-dev
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/dev-docker-compose.yml up --build -d
+start :
+	$(D_COMPOSE) start
+stop :
+	$(D_COMPOSE) stop
+down :
+	$(D_COMPOSE) down
 
-colima-dev:
-ifeq ($(OS),Darwin)
-	@echo "Checking Colima status and mounts..."
-	@if ! colima list 2>/dev/null | grep -q "Running"; then \
-		echo "Starting Colima with mount $(PROJECT_PATH)"; \
-		colima start --mount "$(PROJECT_PATH):w" --vm-type vz; \
-	else \
-		echo "Colima is running, checking mounts..."; \
-		if ! colima status 2>/dev/null | grep -q "$(PROJECT_PATH)"; then \
-			echo "Mount missing, restarting Colima with correct mount..."; \
-			colima stop; \
-			colima start --mount "$(PROJECT_PATH):w" --vm-type vz; \
-		else \
-			echo "Mount already configured: $(PROJECT_PATH)"; \
-		fi; \
-	fi
-endif
+include make/colima.mk
 
-colima:
-	@echo "system is : $(OS)"
-ifeq ($(OS), Darwin)
-	colima start --mount $(VOLUMES_PATH):w --vm-type vz
-endif
+# --- Linters ---
 
-check:
+format-check:
 	npx prettier . --check
 format:
 	npx prettier . --write
 
-core:
-	npm run build --workspace srcs/shared/core	
-nginx: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(PROXY_SERVICE_NAME)
-redis: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(REDIS_SERVICE_NAME)
-api: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(API_GATEWAY_NAME)
-auth: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(AUTH_SERVICE_NAME)
-user: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(UM_SERVICE_NAME)
-game: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(GAME_SERVICE_NAME)
-block: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml up -d --build $(BK_SERVICE_NAME)
-build: core
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml build
+format-core:
+	npx prettier srcs/shared --write
+format-user:
+	npx prettier srcs/users --write
 
-start :
-	$(COMPOSE_CMD) -f srcs/docker-compose.yml start 
-stop :
-	$(COMPOSE_CMD) -f srcs/docker-compose.yml stop 
-down :
-	$(COMPOSE_CMD) -f srcs/docker-compose.yml down
+lint:
+	npx eslint .
+lint-fix:
+	npx eslint . --fix
+
+# === Services ===
+
+# --- Installs Node ---
+install:
+	npm ci
+
+# --- Builds Node ---
+build-core: install
+	$(N_BUILD_WK)/shared/core
+build-nginx: install
+	$(N_BUILD_WK)/nginx
+build-auth: install
+	$(N_BUILD_WK)/auth
+build-game: install
+	$(N_BUILD_WK)/game
+build-block: install
+	$(N_BUILD_WK)/blockchain
+build-api: install
+	$(N_BUILD_WK)/gateway
+build-user: install
+	cd srcs/users && npm install --force && npm run build
+
+# --- Builds Images ---
+nginx: build-core
+	$(D_COMPOSE) up -d --build $(PROXY_SERVICE_NAME)
+redis: build-core
+	$(D_COMPOSE) up -d --build $(REDIS_SERVICE_NAME)
+api: build-core build-api
+	$(D_COMPOSE) up -d --build $(API_GATEWAY_NAME)
+auth: build-core build-auth
+	$(D_COMPOSE) up -d --build $(AUTH_SERVICE_NAME)
+user: build-core build-user
+	$(D_COMPOSE) up -d --build $(UM_SERVICE_NAME)
+game: build-core build-game
+	$(D_COMPOSE) up -d --build $(GAME_SERVICE_NAME)
+block: build-core build-block
+	$(D_COMPOSE) up -d --build $(BK_SERVICE_NAME)
+build: build-core
+	$(D_COMPOSE) build
+
+# --- Test ---
+test: install test-user
+
+test-coverage: install test-coverage-user
+
+test-user: build-core
+	cd srcs/users && npx vitest run --config vite.config.mjs
+test-coverage-user: build-core
+	cd srcs/users && npx vitest run --coverage --config vite.config.mjs
+
+# --- DB ---
+redis-cli:
+	$(CONTAINER_CMD) exec -it $(REDIS_SERVICE_NAME) redis-cli
+
+# --- Shell access ---
+
+# generic rule : replace % with service name
+shell-%:
+	$(CONTAINER_CMD) logs -f $*
+shell-nginx:
+	$(CONTAINER_CMD) exec -it $(PROXY_SERVICE_NAME) /bin/sh
+shell-redis:
+	$(CONTAINER_CMD) exec -it $(REDIS_SERVICE_NAME) /bin/sh
+shell-api:
+	$(CONTAINER_CMD) exec -it $(API_GATEWAY_NAME) /bin/sh
+shell-auth:
+	$(CONTAINER_CMD) exec -it $(AUTH_SERVICE_NAME) /bin/sh
+shell-user:
+	$(CONTAINER_CMD) exec -it $(USER_SERVICE_NAME) /bin/sh
+shell-game:
+	$(CONTAINER_CMD) exec -it $(GAME_SERVICE_NAME) /bin/sh
+shell-block:
+	$(CONTAINER_CMD) exec -it $(BK_SERVICE_NAME) /bin/sh
+
+# --- Logs and status ---
 
 logs:
-	HOST_VOLUME_PATH=$(VOLUMES_PATH) $(COMPOSE_CMD) -f srcs/docker-compose.yml logs -f
+	$(D_COMPOSE) logs -f
+# generic rule : replace % with service name
+logs-%:
+	$(CONTAINER_CMD) logs -f $*
+
 logs-nginx:
 	$(CONTAINER_CMD) logs -f $(PROXY_SERVICE_NAME)
+logs-redis:
+	$(CONTAINER_CMD) logs -f $(REDIS_SERVICE_NAME)
 logs-api:
 	$(CONTAINER_CMD) logs -f $(API_GATEWAY_NAME)
 logs-auth:
 	$(CONTAINER_CMD) logs -f $(AUTH_SERVICE_NAME)
-logs-game:
-	$(CONTAINER_CMD) logs -f $(GAME_SERVICE_NAME)
 logs-user:
 	$(CONTAINER_CMD) logs -f $(UM_SERVICE_NAME)
-logs-bk:
+logs-game:
+	$(CONTAINER_CMD) logs -f $(GAME_SERVICE_NAME)
+logs-block:
 	$(CONTAINER_CMD) logs -f $(BK_SERVICE_NAME)
-logs-redis:
-	$(CONTAINER_CMD) logs -f $(REDIS_SERVICE_NAME)
-re : fclean all
 
 show:
 	$(CONTAINER_CMD) images
@@ -112,11 +142,14 @@ show:
 	$(CONTAINER_CMD) ps
 	$(CONTAINER_CMD) network ls
 
+# === Clean ===
+
 # Clean WITHOUT deleting images → SAFE
+# xargs -r won't launch next command list is empty
 clean:
 	@echo "Stopping and removing containers…"
-	@if [ -n "$$($(CONTAINER_CMD) ps -q)" ]; then $(CONTAINER_CMD) stop $$($(CONTAINER_CMD) ps -q); else echo "No running containers to stop."; fi
-	@if [ -n "$$($(CONTAINER_CMD) ps -aq)" ]; then $(CONTAINER_CMD) rm -f $$($(CONTAINER_CMD) ps -aq); else echo "No running containers to remove."; fi
+	@$(CONTAINER_CMD) ps -q | xargs -r $(CONTAINER_CMD) stop
+	@$(CONTAINER_CMD) ps -aq | xargs -r $(CONTAINER_CMD) rm -f
 	@echo "Pruning unused resources (SAFE)…"
 	$(CONTAINER_CMD) system prune -f
 
@@ -126,17 +159,19 @@ fclean: clean
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
 	@echo "Cleaning volume contents…"
-	@if [ -d "$(VOLUMES_PATH)" ]; then \
+	@if [ -d "$(VOLUMES_PATH)" ] && [ "$(VOLUMES_PATH)" != "/" ]; then \
 		find $(VOLUMES_PATH) -mindepth 1 -delete || true; \
 	fi
 	@echo "Volume folder cleaned (structure preserved)"
+
+re : fclean all
+
+clean-packages:
 	@echo "Cleaning local build artifacts..."
-	rm -rf node_modules
-	rm -rf srcs/shared/core/dist
-	rm -rf srcs/*/dist
+	npm run clean
 
 # Hard reset - deletes everything including folder
-reset-hard: clean
+reset-hard: clean clean-packages
 	@echo "WARNING: Full reset including Colima stop"
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
@@ -148,7 +183,5 @@ ifeq ($(OS), Darwin)
 else
 	rm -rf $(VOLUMES_PATH)
 endif
-# ifeq ($(OS), Darwin)
-# 	colima stop && colima delete
-# endif
-.PHONY : all clean fclean re build volumes colima setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth
+
+.PHONY : all clean fclean re check format core build volumes setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth colima colima-dev
