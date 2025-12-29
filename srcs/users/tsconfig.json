@@ -5,9 +5,9 @@
     "moduleResolution": "bundler", // required for Vite
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "types": ["node", "better-sqlite3"],
     "baseUrl": "./",
     "outDir": "./dist",
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "strict": true, // strict type check
     "esModuleInterop": true, // allow imports from CommonJS modules
     "skipLibCheck": true,

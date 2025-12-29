@@ -11,6 +11,7 @@ const __dirname = path.dirname(__filename);
 //  * @type {import('vitest/config').UserConfig}
 //  */
 export default {
+  root: '.',
   build: {
     outDir: 'dist',
     target: 'node20',
@@ -29,22 +30,33 @@ export default {
       ],
     },
   },
-
   test: {
     globals: true,
     environment: 'node',
     include: ['test/**/*.{test,spec}.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'json-summary'],
+      reportsDirectory: 'coverage',
       exclude: [
         'node_modules/',
         'test/',
         'generated/',
         'dist/',
         '**/*.config.ts',
+        '**/*.config.js',
+        '**/*.config.mjs',
         '**/src/data/generated/**',
+        '**/*.d.ts',
+        '**/types/**',
       ],
+      thresholds: {
+        lines: 20,
+        functions: 20,
+        branches: 20,
+        statements: 20,
+      },
+      include: ['src/**/*.ts'],
     },
   },
   esbuild: {
@@ -53,6 +65,7 @@ export default {
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@transcendence/core': path.resolve(__dirname, '../shared/core/src/index.ts')
     },
   },
 };

@@ -32,9 +32,9 @@ services:
   # Main Fastify API
   api-gateway:
     build:
-      context: ..
+      context: ../
       dockerfile: "srcs/gateway/Dockerfile"
-    container_name: "${API_GATEWAY_NAME}"
+    container_name: "${API_GATEWAY_NAME}-dev"
     expose:
       - "${API_GATEWAY_PORT}"
     env_file:
@@ -137,7 +137,7 @@ services:
     build:
       context: ..
       dockerfile: srcs/users/Dockerfile
-    container_name: "${UM_SERVICE_NAME}"
+    container_name: "${UM_SERVICE_NAME}-dev"
     expose:
       - "${UM_SERVICE_PORT}"
     env_file:

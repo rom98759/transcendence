@@ -1,0 +1,65 @@
+# .github/CODEOWNERS
+
+# =========================
+# Global / infra / tooling
+# =========================
+
+/Makefile                     @rom98759 @jmtth @codastream @Ilia1177
+/package.json                 @rom98759 @jmtth @codastream @Ilia1177
+/package-lock.json            @rom98759 @jmtth @codastream @Ilia1177
+/srcs/docker-compose.yml      @rom98759 @jmtth @codastream @Ilia1177
+/srcs/dev-docker-compose.yml  @rom98759 @jmtth @codastream @Ilia1177
+/.env.example                 @codastream @rom98759 @jmtth @Ilia1177 @lisambet
+
+/commitlint.config.js         @rom98759 @jmtth @codastream
+/eslint.config.json           @rom98759 @jmtth @codastream
+<!-- /tsconfig.json              @rom98759 @jmtth @codastream -->
+
+/.github/**                   @rom98759 @jmtth @codastream
+/.husky/**                    @rom98759 @jmtth @codastream
+
+/test-game.sh                 @Ilia1177
+/test-*.sh                    @rom98759 @jmtth
+
+# =========================
+# Backend services
+# =========================
+
+/srcs/auth/**                 @rom98759
+/.env.auth.*                  @rom98759
+
+/srcs/blockchain/**           @jmtth 
+/.env.blockchain.*            @jmtth
+
+/srcs/game/**                 @Ilia1177 
+/.env.game.*                  @Ilia1177 
+
+/srcs/gateway/**              @rom98759 
+/.env.gateway.*               @rom98759
+
+/srcs/users/**                @codastream @lisambet 
+/.env.um.*                    @codastream @lisambet 
+
+/srcs/nginx/conf.d/**         @rom98759 @codastream
+/srcs/nginx/nginx.conf        @rom98759 @codastream
+
+# =========================
+# Frontend
+# =========================
+
+/srcs/nginx/src/**            @Ilia1177 @lisambet @codastream
+/srcs/nginx/html/**           @Ilia1177 @lisambet @codastream
+
+# =========================
+# Docs & misc
+# =========================
+
+/Docs/**                      @codastream @rom98759 @jmtth @Ilia1177 @lisambet 
+/README.md                    @codastream @rom98759 @jmtth @Ilia1177 @lisambet 
+
+# =========================
+# Default fallbacks
+# =========================
+
+# Any file not explicitly matched above
+*                              @codastream @rom98759 @jmtth @Ilia1177 @lisambet

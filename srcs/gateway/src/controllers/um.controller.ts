@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { proxyRequest } from '../utils/proxy.js';
+import { CatchAllParams } from '../types/params.types.js';
 
 const UM_SERVICE_URL = 'http://user-service:3002';
 
@@ -38,28 +39,31 @@ export function registerUsersRoutes(app: FastifyInstance) {
     },
   );
 
-  app.all('/*', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawPath = (request.params as any)['*'];
-    const cleanPath = rawPath.replace(/^api\/users\//, '');
-    const url = `${UM_SERVICE_URL}/${cleanPath}`;
-    const queryString = new URL(request.url, 'http://localhost').search;
-    const fullUrl = `${url}${queryString}`;
+  app.all<{ Params: CatchAllParams }>(
+    '/*',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const rawPath = (request.params as CatchAllParams)['*'];
+      const cleanPath = rawPath.replace(/^api\/users\//, '');
+      const url = `${UM_SERVICE_URL}/${cleanPath}`;
+      const queryString = new URL(request.url, 'http://localhost').search;
+      const fullUrl = `${url}${queryString}`;
 
-    app.log.info({
-      event: 'um_proxy_request',
-      method: request.method,
-      user: request.headers['x-user-name'] || null,
-    });
+      app.log.info({
+        event: 'um_proxy_request',
+        method: request.method,
+        user: request.headers['x-user-name'] || null,
+      });
 
-    const init: RequestInit = {
-      method: request.method,
-    };
+      const init: RequestInit = {
+        method: request.method,
+      };
 
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
-      init.body = JSON.stringify(request.body);
-    }
+      if (request.method !== 'GET' && request.method !== 'HEAD') {
+        init.body = JSON.stringify(request.body);
+      }
 
-    const res = await proxyRequest(app, request, reply, fullUrl, init);
-    return res;
-  });
+      const res = await proxyRequest(app, request, reply, fullUrl, init);
+      return res;
+    },
+  );
 }
