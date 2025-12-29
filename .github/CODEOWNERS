@@ -18,7 +18,8 @@
 /.github/**                   @rom98759 @jmtth @codastream
 /.husky/**                    @rom98759 @jmtth @codastream
 
-/test-*.sh                    @rom98759 @jmtth @codastream
+/test-game.sh                 @Ilia1177
+/test-*.sh                    @rom98759 @jmtth
 
 # =========================
 # Backend services
