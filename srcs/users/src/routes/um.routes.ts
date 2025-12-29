@@ -2,14 +2,10 @@
 import { createProfile, getProfileByUsername } from '../controllers/um.controller.js';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import {
-  UsernameParams,
-  Profile,
-  ProfileCreateIn,
-  type UsernameParamsDTO,
-} from '@transcendence/core';
+import { UsernameParams, Profile, ProfileCreateIn } from '@transcendence/core';
+import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 
-export async function umRoutes(app: FastifyInstance) {
+export const umRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     '/health',
     async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
@@ -17,9 +13,7 @@ export async function umRoutes(app: FastifyInstance) {
     },
   );
 
-  app.get<{
-    Params: UsernameParamsDTO;
-  }>(
+  app.get(
     '/:username',
     {
       schema: {
@@ -70,4 +64,4 @@ export async function umRoutes(app: FastifyInstance) {
     },
     createProfile,
   );
-}
+};

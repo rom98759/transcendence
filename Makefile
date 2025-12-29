@@ -61,7 +61,7 @@ build-block: install
 build-api: install
 	$(N_BUILD_WK)/gateway
 build-user: install
-	cd srcs/users && npm install --force && npm run build
+	cd srcs/users && npm install && npm run build
 
 # --- Builds Images ---
 nginx: build-core
