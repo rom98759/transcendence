@@ -45,7 +45,7 @@ lint-fix:
 
 # --- Installs Node ---
 install:
-	npm ci
+	npm i
 
 # --- Builds Node ---
 build-core: install
@@ -87,7 +87,7 @@ test: install test-user
 test-coverage: install test-coverage-user
 
 test-user: build-core
-	cd srcs/users && npx vitest run --config vite.config.mjs
+	cd srcs/users && npm install && npx vitest run --config vite.config.mjs
 test-coverage-user: build-core
 	cd srcs/users && npx vitest run --coverage --config vite.config.mjs
 

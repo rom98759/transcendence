@@ -30,11 +30,11 @@ app.register(fastifyJwt, { secret: JWT_SECRET });
 app.register(fastifyRateLimit, {
   max: GATEWAY_CONFIG.RATE_LIMIT.GLOBAL.max,
   timeWindow: GATEWAY_CONFIG.RATE_LIMIT.GLOBAL.timeWindow,
-  keyGenerator: (request) => {
+  keyGenerator: (request: any) => {
     // Rate limit par IP
     return request.ip || 'unknown';
   },
-  errorResponseBuilder: (req, context) => ({
+  errorResponseBuilder: (req: any, context: any) => ({
     error: {
       message: 'Too many requests, please try again later',
       code: ERROR_CODES.RATE_LIMIT_EXCEEDED,

@@ -52,7 +52,7 @@
   },
   "lint-staged": {
     "**/*.{ts,tsx,js,css,json,md}": [
-      "prettier --write"
+      "npx prettier --write"
     ]
   },
   "dependencies": {
