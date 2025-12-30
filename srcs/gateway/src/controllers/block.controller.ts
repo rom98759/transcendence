@@ -1,5 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { proxyRequest } from '../utils/proxy.js'
+import { proxyRequest, proxyBlockRequest } from '../utils/proxy.js'
 
 export function registerBlockRoutes(app: FastifyInstance) {
   // Regular HTTP routes
@@ -7,6 +7,11 @@ export function registerBlockRoutes(app: FastifyInstance) {
     app.log.info({ event: 'blockchain_health', remote: 'blockchain', url: '/health' })
     const res = await proxyRequest(app, request, reply, 'http://blockchain-service:3005/health')
     return res
+  })
+  app.get('/blockchain', async (request, reply) => {
+    app.log.info({ event: 'blockchain_consult', remote: 'blockchain', url: '/blockchain' })
+    const url = `http://blockchain-service:3005/blockchain`
+    return proxyBlockRequest(app, request, reply, url)
   })
 
   app.all('/*', async (request: FastifyRequest, reply: FastifyReply) => {

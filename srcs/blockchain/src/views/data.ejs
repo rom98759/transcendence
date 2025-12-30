@@ -3,19 +3,18 @@
 <div class="container">
   <h1><%= message %></h1>
       <p>
-        tx_id: <%= datadb.tx_id %> - 
-        <% if (datadb.tx_hash) { %>
-        tx_hash: <%= datadb.tx_hash %> - 
+        tx_id: <%= snapshots.tx_id %> - 
+        <% if (snapshots.tx_hash) { %>
+        tx_hash: <%= snapshots.tx_hash %> - 
         <% } %>
-        <% if (datadb.date_confirmed) { %>
-        date_confirmed: <%= datadb.date_confirmed %> - 
+        <% if (snapshots.date_confirmed) { %>
+        date_confirmed: <%= snapshots.date_confirmed %> - 
         <% } %>
-        match_id: <%= datadb.match_id %> - 
-        player1_id: <%= datadb.player1_id %> - 
-        player2_id: <%= datadb.player2_id %> - 
-        player1_score: <%= datadb.player1_score %> - 
-        player2_score: <%= datadb.player2_score %> - 
-        winner_id: <%= datadb.winner_id %> - 
+        match_id: <%= snapshots.tour_id %> - 
+        player1_id: <%= snapshots.player1_id %> - 
+        player2_id: <%= snapshots.player2_id %> - 
+        player1_score: <%= snapshots.player3_id %> - 
+        player2_score: <%= snapshots.player4_id %> - 
       </p>
 </div>
 

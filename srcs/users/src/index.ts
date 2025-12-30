@@ -1,5 +1,6 @@
 import fastify from 'fastify';
-import { umRoutes as userRoutes } from './routes/um.routes.js';
+import ScalarApiReference from '@scalar/fastify-api-reference';
+import { umRoutes } from './routes/um.routes.js';
 import { appenv } from './config/env.js';
 import { loggerConfig } from './config/logger.config.js';
 import ScalarApiReference from '@scalar/fastify-api-reference';
@@ -27,7 +28,7 @@ export async function buildApp() {
   await app.setSerializerCompiler(serializerCompiler);
 
   if (appenv.NODE_ENV !== 'test') {
-    await app.register(fastifySwagger, {
+    await app.register(fastifySwagger as any, {
       openapi: {
         info: {
           title: 'User API documentation',
@@ -43,7 +44,7 @@ export async function buildApp() {
     //   reply.send(app.swagger());
     // });
 
-    await app.register(ScalarApiReference, {
+    await app.register(ScalarApiReference as any, {
       routePrefix: '/doc',
       configuration: {
         theme: 'purple',
@@ -51,7 +52,7 @@ export async function buildApp() {
     });
   }
 
-  await app.register(userRoutes);
+  await app.register(umRoutes);
 
   return app;
 }

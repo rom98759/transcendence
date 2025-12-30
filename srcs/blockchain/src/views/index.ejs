@@ -11,8 +11,8 @@
                 <input type="number" class="form-control" id="tx_id" name="tx_id" />
             </div>
             <div class="mb-2">
-                <label for="match_id">match_id</label>
-                <input type="number" class="form-control" id="match_id" name="match_id" />
+                <label for="tour_id">tour</label>
+                <input type="number" class="form-control" id="tour_id" name="tour_id" />
             </div>
             <div class="mb-2">
                 <label for="player1_id">player1_id</label>
@@ -23,16 +23,12 @@
                 <input type="number" class="form-control" id="player2_id" name="player2_id" />
             </div>
             <div class="mb-2">
-                <label for="player1_score">player1_score</label>
-                <input type="number" class="form-control" id="player1_score" name="player1_score" />
+                <label for="player3_id">player3_id</label>
+                <input type="number" class="form-control" id="player3_id" name="player3_id" />
             </div>
             <div class="mb-2">
-                <label for="player2_score">player2_score</label>
-                <input type="number" class="form-control" id="player2_score" name="player2_score" />
-            </div>
-            <div class="mb-2">
-                <label for="winner_id">winner_id</label>
-                <input type="number" class="form-control" id="winner_id" name="winner_id" />
+                <label for="player4_id">player4_id</label>
+                <input type="number" class="form-control" id="player4_id" name="player4_id" />
             </div>
             <button class="btn btn-primary">New data</button>
         </form>
@@ -44,18 +40,16 @@
         <form id="registerForm">
             <label for="regtxId">tx_id</label>
             <input id="regtxId" name="tx_id" type="text" />
-            <label for="regmId">match_id</label>
-            <input id="regmId" name="match_id" type="text" />
+            <label for="regmId">tour_id</label>
+            <input id="regmId" name="tour_id" type="text" />
             <label for="regp1Id">player1_id</label>
             <input id="regp1Id" name="player1_id" type="text" />
             <label for="regp2Id">player2_id</label>
             <input id="regp2Id" name="player2_id" type="text" />
-            <label for="regp1S">player1_score</label>
-            <input id="regp1S" name="player1_score" type="text" />
-            <label for="regp2S">player2_score</label>
-            <input id="regp2S" name="player2_score" type="text" />
-            <label for="regwId">winner_id</label>
-            <input id="regwId" name="winner_id" type="text" />
+            <label for="regp3Id">player3_id</label>
+            <input id="regp3Id" name="player3_id" type="text" />
+            <label for="regp4Id">player4_id</label>
+            <input id="regp4Id" name="player4_id" type="text" />
             <button class="btn btn-primary mt-3" type="submit" id="regBtn">S'inscrire</button>
             <div class="msg" id="regMsg"></div>
             <div class="small">Envoi POST vers: <code>/register</code></div>
@@ -88,14 +82,13 @@
             regMsg.className = "msg";
             regBtn.disabled = true;
             const tx_id = document.getElementById("regtxId").value;
-            const match_id = document.getElementById("regmId").value;
+            const tour_id = document.getElementById("regmId").value;
             const player1_id = document.getElementById("regp1Id").value;
             const player2_id = document.getElementById("regp2Id").value;
-            const player1_score = document.getElementById("regp1S").value;
-            const player2_score = document.getElementById("regp2S").value;
-            const winner_id = document.getElementById("regwId").value;
+            const player3_id = document.getElementById("regp3Id").value;
+            const player4_id = document.getElementById("regp4Id").value;
             try {
-                const result = await postJson("/register", { tx_id, match_id, player1_id, player2_id,player1_score,player2_score,winner_id  });
+                const result = await postJson("/tournaments", { tx_id, tour_id, player1_id, player2_id,player3_id,player4_id  });
                 if (result.ok) {
                     regMsg.textContent = "Inscription réussie";
                     regMsg.classList.add("success");
@@ -120,25 +113,23 @@
                     <th scope="col">tx_id</th>
                     <th scope="col">tx_hash</th>
                     <th scope="col">date_confirmed</th>
-                    <th scope="col">m_id</th>
+                    <th scope="col">t_id</th>
                     <th scope="col">p1_id</th>
                     <th scope="col">p2_id</th>
-                    <th scope="col">p1_score</th>
-                    <th scope="col">p2_score</th>
-                    <th scope="col">winner</th>
+                    <th scope="col">p3_id</th>
+                    <th scope="col">p4_id</th>
                 </tr>
             </thead>
-            <% for (const row of datadb) { %>
+            <% for (const row of snapshots) { %>
             <tr>
                 <td><%= row.tx_id %></td>
                 <td><%= row.tx_hash %></td>
                 <td><%= row.date_confirmed %></td>
-                <td><%= row.match_id %></td>
+                <td><%= row.tour_id %></td>
                 <td><%= row.player1_id %></td>
                 <td><%= row.player2_id %></td>
-                <td><%= row.player1_score %></td>
-                <td><%= row.player2_score %></td>
-                <td><%= row.winner_id %></td>
+                <td><%= row.player3_id %></td>
+                <td><%= row.player4_id %></td>
             </tr>
             <% } %>
         </table>
@@ -176,7 +167,7 @@
             meBtn.disabled = true;
 
             try {
-                const res = await fetch("/list", {
+                const res = await fetch("/tournaments", {
                     method: "GET",
                     credentials: "include"
                 });
@@ -199,7 +190,7 @@
                             const li = document.createElement("li");
                             li.className = "list-group-item d-flex justify-content-between align-items-center";
                             li.innerHTML = `
-							<span><strong>ID:</strong> ${item.tx_id} winner is => ${item.winner_id}</span>
+							<span><strong>Tour ID:</strong> ${item.tour_id} winner is => ${item.player1_id}</span>
 						`;
                             ul.appendChild(li);
                         });

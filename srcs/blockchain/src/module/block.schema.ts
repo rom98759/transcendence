@@ -11,35 +11,31 @@ export const blockIdSchema = {
 export const blockSchema = {
   type: 'object',
   properties: {
-    tx_id: { type: 'number' },
-    tx_hash: { type: 'string' },
-    date_confirmed: { type: 'string' },
-    match_id: { type: 'number' },
-    player1_id: { type: 'number' },
-    player2_id: { type: 'number' },
-    player1_score: { type: 'number' },
-    player2_score: { type: 'number' },
-    winner_id: { type: 'number' },
+    tx_id: { type: "integer" },
+    tx_hash: { type: "string" },
+    date_confirmed: { type: "string" },
+    tour_id: { type: "integer" , minimum: 1},
+    player1_id: { type: "integer" , minimum: 1},
+    player2_id: { type: "integer" , minimum: 1},
+    player3_id: { type: "integer" , minimum: 1},
+    player4_id: { type: "integer" , minimum: 1}
   },
-  required: [
-    'tx_id',
-    'match_id',
-    'player1_id',
-    'player2_id',
-    'player1_score',
-    'player2_score',
-    'winner_id',
-  ],
-} as const
+  required: ["tx_id", "tour_id", "player1_id", "player2_id", "player3_id", "player4_id"],
+  additionalProperties: false
+} as const;
 
-export interface Blockchain {
-  tx_id: number
-  tx_hash?: string
-  date_confirmed?: string
-  match_id: number
-  player1_id: number
-  player2_id: number
-  player1_score: number
-  player2_score: number
-  winner_id: number
+export interface BlockTournamentInput {
+  tx_id: number;
+  tx_hash?: string;
+  date_confirmed?: string;
+  tour_id: number;
+  player1_id: number;
+  player2_id: number;
+  player3_id: number;
+  player4_id: number;
+}
+
+export interface BlockTournamentStored extends BlockTournamentInput {
+  tx_hash: string;
+  date_confirmed: string;
 }

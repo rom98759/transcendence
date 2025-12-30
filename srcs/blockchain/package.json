@@ -3,22 +3,29 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/ejs": "^3.1.5",
     "@types/node": "^24.10.1",
+    "@types/supertest": "^6.0.3",
+    "@vitest/coverage-v8": "^4.0.16",
     "concurrently": "^9.2.1",
+    "dotenv-cli": "^11.0.0",
     "nodemon": "^3.1.11",
     "prettier": "^3.6.2",
     "prettier-plugin-ejs": "^1.0.3",
-    "typescript": "^5.9.3"
+    "supertest": "^7.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.16"
   },
   "name": "blockchain",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "./dist/server.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "devold": "concurrently \"tsc -p tsconfig.json -w\" \"nodemon --watch dist --exec node dist/server.js\"",
-    "dev": "concurrently -k -n TSC,NODE -c yellow,cyan \"tsc -w\" \"nodemon dist/server.js\"",
-    "devmac": "tsc -w & node --watch dist/server.js",
+    "test:block": "dotenv -e .env.test.blockchain vitest",
+    "test": "dotenv -e .env.test vitest",
+    "coverage": "vitest run --coverage",
+    "dev": "nodemon",
+    "dev:block": "dotenv -e .env.test.blockchain nodemon",
     "build": "tsc -p tsconfig.json",
     "start": "tsc -p tsconfig.json && node dist/server.js"
   },
@@ -31,6 +38,7 @@
     "@fastify/view": "^11.1.1",
     "better-sqlite3": "^12.4.1",
     "ejs": "^3.1.10",
+    "ethers": "^6.16.0",
     "fastify": "^5.6.2"
   }
 }

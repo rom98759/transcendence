@@ -44,7 +44,6 @@ List alls game sessions (debug purpose).
 **-> api/game/settings**
 modify the settings of the game for a given sessions id (in the header)
 
-
 ## Communication par WebSocket
 
 _Client_ <-- WebSocket 1 --> _API_ <-- WebSocket 2 --> _Game-service_

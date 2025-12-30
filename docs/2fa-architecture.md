@@ -178,7 +178,7 @@ export const AUTH_CONFIG = {
   JWT_EXPIRATION: '1h',
   COOKIE_MAX_AGE_SECONDS: 3600, // 1 heure
   COOKIE_2FA_MAX_AGE_SECONDS: 120, // 2 minutes
-}
+};
 ```
 
 ### Compatibilité
@@ -342,10 +342,10 @@ Désactive la 2FA
 // Nettoyage toutes les 5 minutes
 setInterval(
   () => {
-    totpService.cleanupExpiredSessions()
+    totpService.cleanupExpiredSessions();
   },
   5 * 60 * 1000,
-)
+);
 ```
 
 Supprime:
@@ -467,7 +467,7 @@ WHERE is_2fa_enabled = 1 AND totp_secret IS NULL;
 2. **Vérifier la fenêtre TOTP:**
 
    ```typescript
-   authenticator.options.window = 1 // ±30s
+   authenticator.options.window = 1; // ±30s
    ```
 
 3. **Logs détaillés:**

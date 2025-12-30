@@ -12,7 +12,7 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
-    container_name: "${PROXY_SERVICE_NAME}-dev"
+    container_name: "${PROXY_SERVICE_NAME}"
     ports:
       - "8080:80"
       - "4430:443"
@@ -52,7 +52,7 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: "${AUTH_SERVICE_NAME}-dev"
+    container_name: "${AUTH_SERVICE_NAME}"
     expose:
       - "${AUTH_SERVICE_PORT}"
     env_file:
@@ -74,18 +74,28 @@ services:
   blockchain-service:
     build:
       context: ./blockchain
-      dockerfile: Dockerfile
-    container_name: "${BK_SERVICE_NAME}-dev"
+      dockerfile: Dockerfile.dev
+    container_name: "${BK_SERVICE_NAME}"
+    ports:
+      - '3005:3005'
     expose:
       - "${BK_SERVICE_PORT}"
+    environment:
+      - NODE_ENV=development
+      - BLOCK_DB_PATH=/data/blockchain.db
+      - REDIS_URL=redis://redis-broker:6379
+      - LOG_LEVEL=${LOG_LEVEL:-debug}
     env_file:
       - path: ./.env
       - path: ./.env.blockchain
     volumes:
       - data:/data
+      - ./blockchain/src:/app/src
+      - ./blockchain/tsconfig.json:/app/tsconfig.json
+      - ./blockchain/nodemon.json:/app/nodemon.json
     networks:
       - app-network
-    restart: unless-stopped
+    restart: "no"
     healthcheck:
       <<: *healthcheck-template
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${BK_SERVICE_PORT}/health"]
@@ -95,7 +105,7 @@ services:
     build:
       context: ./game
       dockerfile: Dockerfile
-    container_name: "${GAME_SERVICE_NAME}-dev"
+    container_name: "${GAME_SERVICE_NAME}"
     expose:
       - "${GAME_SERVICE_PORT}"
     env_file:
@@ -115,7 +125,7 @@ services:
     build:
       context: ./redis
       dockerfile: Dockerfile
-    container_name: "${REDIS_SERVICE_NAME}-dev"
+    container_name: "${REDIS_SERVICE_NAME}"
     expose:
       - "${REDIS_SERVICE_PORT}"
     networks:
@@ -149,7 +159,3 @@ networks:
 volumes:
   data:
     driver: local
-    driver_opts:
-      device: ${HOST_VOLUME_PATH}
-      o: bind
-      type: none

@@ -12,6 +12,6 @@
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true
   },
-
-  "include": ["src"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/SmartContract/**"]
 }
