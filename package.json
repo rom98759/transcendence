@@ -38,6 +38,8 @@
     "@commitlint/cli": "^20.1.0",
     "@commitlint/config-conventional": "^20.0.0",
     "@eslint/js": "^9.39.2",
+    "supertest": "^7.1.4",
+    "@types/supertest": "^6.0.3",
     "@types/node": "^24.10.1",
     "@vitest/coverage-v8": "^4.0.16",
     "eslint": "^9.39.2",
@@ -50,7 +52,7 @@
   },
   "lint-staged": {
     "**/*.{ts,tsx,js,css,json,md}": [
-      "prettier --write"
+      "npx prettier --write"
     ]
   },
   "dependencies": {

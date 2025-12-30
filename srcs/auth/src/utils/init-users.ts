@@ -1,27 +1,33 @@
-import { ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_USERNAME, INVITE_EMAIL, INVITE_PASSWORD, INVITE_USERNAME } from '../config/env.js'
-import { logger } from '../index.js'
-import * as authService from '../services/auth.service.js'
-import { UserRole } from './constants.js'
+import {
+  ADMIN_EMAIL,
+  ADMIN_PASSWORD,
+  ADMIN_USERNAME,
+  INVITE_EMAIL,
+  INVITE_PASSWORD,
+  INVITE_USERNAME,
+} from '../config/env.js';
+import { logger } from '../index.js';
+import * as authService from '../services/auth.service.js';
+import { UserRole } from './constants.js';
 
 /**
  * Initialise l'utilisateur admin au démarrage du service
  * Credentials par défaut
  */
 export async function initAdminUser(): Promise<void> {
-  const env = (globalThis as any).process?.env || {}
-
+  const env = (globalThis as any).process?.env || {};
 
   try {
     // Vérifier si l'admin existe déjà
-    const existingAdmin = authService.findByUsername(ADMIN_USERNAME)
+    const existingAdmin = authService.findByUsername(ADMIN_USERNAME);
 
     if (existingAdmin) {
       logger.info({
         event: 'admin_user_exists',
         username: ADMIN_USERNAME,
         message: 'Admin user already exists, skipping creation',
-      })
-      return
+      });
+      return;
     }
 
     // Créer l'utilisateur admin
@@ -29,10 +35,10 @@ export async function initAdminUser(): Promise<void> {
       username: ADMIN_USERNAME,
       email: ADMIN_EMAIL,
       password: ADMIN_PASSWORD,
-    })
+    });
 
     // Assigner le rôle admin
-    authService.updateUserRole(adminId, UserRole.ADMIN)
+    authService.updateUserRole(adminId, UserRole.ADMIN);
 
     logger.info({
       event: 'admin_user_created',
@@ -41,7 +47,7 @@ export async function initAdminUser(): Promise<void> {
       id: adminId,
       role: UserRole.ADMIN,
       message: 'Admin user created successfully',
-    })
+    });
 
     // Avertissement sécurité si credentials par défaut
     if (ADMIN_PASSWORD === 'Admin123!') {
@@ -50,7 +56,7 @@ export async function initAdminUser(): Promise<void> {
         username: ADMIN_USERNAME,
         message:
           'SECURITY WARNING: Admin user is using default password! Please change ADMIN_PASSWORD environment variable in production',
-      })
+      });
     }
   } catch (error: any) {
     // Si erreur USER_EXISTS
@@ -59,8 +65,8 @@ export async function initAdminUser(): Promise<void> {
         event: 'admin_user_exists',
         username: ADMIN_USERNAME,
         message: 'Admin user already exists',
-      })
-      return
+      });
+      return;
     }
 
     // Autre erreur : log et throw
@@ -69,8 +75,8 @@ export async function initAdminUser(): Promise<void> {
       username: ADMIN_USERNAME,
       err: error?.message || error,
       code: error?.code,
-    })
-    throw error
+    });
+    throw error;
   }
 }
 
@@ -79,20 +85,19 @@ export async function initAdminUser(): Promise<void> {
  * Credentials par défaut
  */
 export async function initInviteUser(): Promise<void> {
-  const env = (globalThis as any).process?.env || {}
-
+  const env = (globalThis as any).process?.env || {};
 
   try {
     // Vérifier si l'invité existe déjà
-    const existingInvite = authService.findByUsername(INVITE_USERNAME)
+    const existingInvite = authService.findByUsername(INVITE_USERNAME);
 
     if (existingInvite) {
       logger.info({
         event: 'invite_user_exists',
         username: INVITE_USERNAME,
         message: 'Invite user already exists, skipping creation',
-      })
-      return
+      });
+      return;
     }
 
     // Créer l'utilisateur invité
@@ -100,7 +105,7 @@ export async function initInviteUser(): Promise<void> {
       username: INVITE_USERNAME,
       email: INVITE_EMAIL,
       password: INVITE_PASSWORD,
-    })
+    });
 
     logger.info({
       event: 'invite_user_created',
@@ -108,7 +113,7 @@ export async function initInviteUser(): Promise<void> {
       email: INVITE_EMAIL,
       id: inviteId,
       message: 'Invite user created successfully',
-    })
+    });
 
     // Avertissement sécurité si credentials par défaut
     if (INVITE_PASSWORD === 'Invite123!') {
@@ -117,7 +122,7 @@ export async function initInviteUser(): Promise<void> {
         username: INVITE_USERNAME,
         message:
           'SECURITY WARNING: Invite user is using default password! Please change INVITE_PASSWORD environment variable in production',
-      })
+      });
     }
   } catch (error: any) {
     // Si erreur USER_EXISTS
@@ -126,8 +131,8 @@ export async function initInviteUser(): Promise<void> {
         event: 'invite_user_exists',
         username: INVITE_USERNAME,
         message: 'Invite user already exists',
-      })
-      return
+      });
+      return;
     }
 
     // Autre erreur : log et throw
@@ -136,7 +141,7 @@ export async function initInviteUser(): Promise<void> {
       username: INVITE_USERNAME,
       err: error?.message || error,
       code: error?.code,
-    })
-    throw error
+    });
+    throw error;
   }
 }

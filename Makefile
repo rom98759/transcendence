@@ -19,6 +19,8 @@ stop :
 	$(D_COMPOSE) stop
 down :
 	$(D_COMPOSE) down
+down-dev :
+	$(D_COMPOSE_DEV) down
 
 include make/colima.mk
 
@@ -43,7 +45,7 @@ lint-fix:
 
 # --- Installs Node ---
 install:
-	npm ci
+	npm i
 
 # --- Builds Node ---
 build-core: install
@@ -59,7 +61,7 @@ build-block: install
 build-api: install
 	$(N_BUILD_WK)/gateway
 build-user: install
-	cd srcs/users && npm install --force && npm run build
+	cd srcs/users && npm install && npm run build
 
 # --- Builds Images ---
 nginx: build-core
@@ -85,7 +87,7 @@ test: install test-user
 test-coverage: install test-coverage-user
 
 test-user: build-core
-	cd srcs/users && npx vitest run --config vite.config.mjs
+	cd srcs/users && npm install && npx vitest run --config vite.config.mjs
 test-coverage-user: build-core
 	cd srcs/users && npx vitest run --coverage --config vite.config.mjs
 
@@ -173,6 +175,7 @@ clean-packages:
 # Hard reset - deletes everything including folder
 reset-hard: clean clean-packages
 	@echo "WARNING: Full reset including Colima stop"
+	@if [ -n "$$($(CONTAINER_CMD) -q)" ]; then $(CONTAINER_CMD) rmi -f $$($(CONTAINER_CMD) images -q); else echo "No images to remove."; fi
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
 	-$(CONTAINER_CMD) system prune -a --volumes --force

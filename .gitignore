@@ -73,6 +73,8 @@ web_modules/
 .env.*
 !.env.example
 !.env.*.example
+!.env.test
+!.env.test.*
 
 # Docker volumes and data
 /data/

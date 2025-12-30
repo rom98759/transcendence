@@ -1,0 +1,22 @@
+FROM node:22-alpine
+
+WORKDIR /app
+
+# Install dependencies needed for building native modules and wget for healthcheck
+RUN apk add --no-cache python3 make g++ wget curl
+
+# Copy package files
+COPY package.json package-lock.json ./
+
+# Install all dependencies (including devDependencies)
+RUN npm install
+
+# Copy source code and configs
+COPY tsconfig.json ./
+COPY nodemon.json ./
+# COPY src ./src
+
+EXPOSE 3005
+
+# Use npm run dev for hot reload with polling
+CMD ["npm", "run", "dev"]
