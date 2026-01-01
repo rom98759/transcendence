@@ -15,8 +15,8 @@ model UserProfile {
   username  String   @unique
   avatarUrl String
 
-  requestedFriendships Friendship[] @relation("requester")
-  receivedFriendships  Friendship[] @relation("receiver")
+  requestedFriendships Friendship[] @relation("user")
+  receivedFriendships  Friendship[] @relation("friend")
 }
 
 model Friendship {
@@ -24,11 +24,11 @@ model Friendship {
   createdAt DateTime @default(now())
   nickname  String?
   
-  requesterId    Int
-  requester UserProfile @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  userId    Int
+  user UserProfile @relation("user", fields: [userId], references: [id], onDelete: Cascade)
 
   friendId  Int
-  receiver  UserProfile @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  friend  UserProfile @relation("friend", fields: [friendId], references: [id], onDelete: Cascade)
   
-  @@unique([requesterId, receiverId])
+  @@unique([userId, friendId])
 }

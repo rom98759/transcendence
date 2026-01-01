@@ -23,7 +23,7 @@ export async function createProfile(req: FastifyRequest, reply: FastifyReply) {
 
   try {
     const profile = await umService.createProfile(req.body as ProfileCreateInDTO);
-    const profileDTO = mappers.mapUserProfileToDTO(profile);
+    const profileDTO = mappers.mapProfileToDTO(profile);
     return reply.status(201).send(profileDTO);
   } catch (error) {
     req.log.error(error);

@@ -3,7 +3,6 @@ import ScalarApiReference from '@scalar/fastify-api-reference';
 import { umRoutes } from './routes/um.routes.js';
 import { appenv } from './config/env.js';
 import { loggerConfig } from './config/logger.config.js';
-import ScalarApiReference from '@scalar/fastify-api-reference';
 
 import {
   jsonSchemaTransform,
@@ -59,7 +58,7 @@ export async function buildApp() {
 
 export const logger = app.log;
 
-app.register(userRoutes, { prefix: '/' });
+app.register(umRoutes, { prefix: '/' });
 
 app.listen(
   { host: '0.0.0.0', port: appenv.UM_SERVICE_PORT },

@@ -1,4 +1,5 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { proxyRequest } from '../utils/proxy.js';
 
 const USERS_SERVICE_URL = 'http://users-service:3004';
 

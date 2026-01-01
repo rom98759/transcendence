@@ -1,8 +1,9 @@
 import * as friendsData from '../data/friends.data.js';
+import * as umData from '../data/um.data.js';
 
 export async function addFriend(userId: number, friendId: number) {
-  const userExists = await friendsData.findUserById(userId);
-  const friendExists = await friendsData.findUserById(friendId);
+  const userExists = await umData.findUserById(userId);
+  const friendExists = await umData.findUserById(friendId);
 
   if (!userExists || !friendExists) {
     throw new Error('One or both users do not exist');
@@ -25,7 +26,7 @@ export async function getFriendsByUserId(userId: number) {
   const friendships = await friendsData.findFriendshipsByUser(userId);
 
   return friendships.map((f: any) => {
-    const friendProfile = f.userId === userId ? f.receiver : f.requester;
+    const friendProfile = f.userId === userId ? f.friend : f.user;
     return {
       id: f.id,
       userId: friendProfile.id,

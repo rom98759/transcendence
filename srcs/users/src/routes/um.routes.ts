@@ -1,11 +1,17 @@
 // import { OpenAPISchema } from 'src/types/swagger.js'
 import { createProfile, getProfileByUsername } from '../controllers/um.controller.js';
+import {
+  addFriend,
+  getFriendsByUserId,
+  removeFriend,
+  updateFriend,
+} from '../controllers/friends.controller.js';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-import { z } from 'zod';
+/*import { z } from 'zod';
 import { UsernameParams, Profile, ProfileCreateIn } from '@transcendence/core';
-import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';*/
 
-export const umRoutes: FastifyPluginAsyncZod = async (app) => {
+export async function umRoutes(app: FastifyInstance) {
   app.get(
     '/health',
     async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
@@ -15,7 +21,7 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
 
   app.get(
     '/:username',
-    {
+    /* {
       schema: {
         tags: ['users'],
         summary: 'Get user profile by username',
@@ -35,11 +41,11 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
             .describe('Profile not found'),
         },
       },
-    },
+    }, */
     getProfileByUsername,
   );
 
-  app.post(
+  /*app.post(
     '/',
     {
       schema: {
@@ -63,7 +69,9 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
       },
     },
     createProfile,
-  );
+  );*/
+
+  app.post('/', createProfile);
 
   app.get('/users/:username', getProfileByUsername);
   app.get('/users/friends/', getFriendsByUserId);

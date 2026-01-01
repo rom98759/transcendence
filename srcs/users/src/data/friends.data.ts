@@ -17,7 +17,7 @@ export async function createFriendship(userId: number, friendId: number) {
 export async function findFriendshipsByUser(userId: number) {
   return prisma.friendship.findMany({
     where: { OR: [{ userId }, { friendId: userId }] },
-    include: { requester: true, receiver: true },
+    include: { user: true, friend: true },
   });
 }
 

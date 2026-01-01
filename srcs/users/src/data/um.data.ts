@@ -36,7 +36,7 @@ export async function createProfile(payload: ProfileCreateInDTO): Promise<UserPr
       authId: payload.authId,
       username: payload.username,
       email: payload.email ?? null,
-      avatarUrl: payload.avatarUrl ?? null,
+      avatarUrl: payload.avatarUrl ?? 'assets/avatars/default.png',
     },
   });
   logger.info({ msg: 'created profile in data', created: created });
