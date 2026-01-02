@@ -48,12 +48,20 @@ export default [
   },
    ...tseslint.configs.recommended,
   {
-    files: ['srcs/nginx/**/*.ts'],
+    files: ['srcs/nginx/**/*.{ts, tsx}'],
     languageOptions: {
       globals: {
         ...globals.browser,
       }
-    }
+    },
+    "extends": [
+        "plugin:react/recommended", 
+        "plugin:react-hooks/recommended"
+      ],
+    "plugins": ["react-refresh", "react-hooks"],
+    "rules": {
+      "react-refresh/only-export-components": "warn"
+    },
   },
   {
     files: ['**/*.{js,mjs,cjs}'],

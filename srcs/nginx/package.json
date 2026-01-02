@@ -6,12 +6,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview",
     "start": "node dist/index.js"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^20.0.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
@@ -19,6 +20,8 @@
     "@vitejs/plugin-react": "^5.1.2",
     "autoprefixer": "^10.4.23",
     "concurrently": "^8.0.0",
+    "framer-motion": "^12.23.26",
+    "lucide-react": "^0.562.0",
     "nodemon": "^3.0.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18",
@@ -27,6 +30,7 @@
     "webpack": "^5.103.0"
   },
   "dependencies": {
+    "@transcendence/core": "1.0.0",
     "envalid": "^8.1.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

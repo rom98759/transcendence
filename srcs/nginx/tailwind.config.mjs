@@ -5,7 +5,11 @@ const config = {
     './src/**/*.{ts,tsx,js,jsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'quantico': ['Quantico', 'sans-serif'],
+      },
+    },
   },
   plugins: [],
 };
