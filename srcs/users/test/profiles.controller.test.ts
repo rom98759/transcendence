@@ -80,8 +80,10 @@ describe('Profile Controller unit tests', () => {
       expect(response.statusCode).toBe(400);
     });
 
-    test('Should return 500 if service throws unhandled error', async () => {
-      vi.spyOn(profileService, 'getByUsername').mockRejectedValue(new Error('DB crashed'));
+    test('Should return 500 if service throws server side error', async () => {
+      vi.spyOn(profileService, 'getByUsername').mockRejectedValue(
+        new AppError(ERR_DEFS.SERVICE_GENERIC, {}),
+      );
 
       const response = await app.inject({
         method: 'GET',
