@@ -1,19 +1,57 @@
-// import { OpenAPISchema } from 'src/types/swagger.js'
-import { createProfile, getProfileByUsername } from '../controllers/um.controller.js';
-import {
-  addFriend,
-  getFriendsByUserId,
-  removeFriend,
-  updateFriend,
-} from '../controllers/friends.controller.js';
+import { profileController } from '../controllers/um.controller.js';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
-/*import { z } from 'zod';
-import { UsernameParams, Profile, ProfileCreateIn } from '@transcendence/core';
-import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';*/
+import { z } from 'zod';
+import {
+  UserNameSchema,
+  ProfileSchema,
+  ProfileCreateInSchema,
+  ErrorSchema,
+  ValidationErrorSchema,
+} from '@transcendence/core';
+import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 
-export async function umRoutes(app: FastifyInstance) {
+export const healthCheckSchema = {
+  tags: ['health'],
+  summary: 'Health check endpoint',
+  description: 'Returns the health status of the service',
+  response: {
+    200: z.object({
+      status: z.string(),
+    }),
+  },
+} as const;
+
+const getProfileByUsernameSchema = {
+  tags: ['users'],
+  summary: 'Get user profile by username',
+  description: 'Returns the profile of a user for the given username',
+  params: UserNameSchema,
+  response: {
+    200: ProfileSchema,
+    400: ValidationErrorSchema,
+    404: ErrorSchema.describe('Profile not found'),
+  },
+} as const;
+
+export const createProfileSchema = {
+  tags: ['users'],
+  summary: 'Create user profile',
+  description: 'Creates a new user profile linked to an authId',
+  body: ProfileCreateInSchema,
+  response: {
+    201: ProfileSchema,
+    400: ValidationErrorSchema,
+    409: ErrorSchema.describe('Profile already exists'),
+  },
+} as const;
+
+export const umRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     '/health',
+    {
+      config: { skipAuth: true },
+      schema: healthCheckSchema,
+    },
     async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
       return reply.code(200).send({ status: 'healthy new' });
     },
@@ -21,63 +59,9 @@ export async function umRoutes(app: FastifyInstance) {
 
   app.get(
     '/:username',
-    /* {
-      schema: {
-        tags: ['users'],
-        summary: 'Get user profile by username',
-        description: 'Returns the profile of a user for the given username',
-        params: UsernameParams,
-        response: {
-          200: Profile,
-          400: z
-            .object({
-              message: z.string(),
-            })
-            .describe('Validation error'),
-          404: z
-            .object({
-              message: z.string(),
-            })
-            .describe('Profile not found'),
-        },
-      },
-    }, */
-    getProfileByUsername,
+    { schema: getProfileByUsernameSchema },
+    profileController.getProfileByUsername,
   );
 
-  /*app.post(
-    '/',
-    {
-      schema: {
-        tags: ['users'],
-        summary: 'Create user profile',
-        description: 'Creates a new user profile linked to an authId',
-        body: ProfileCreateIn,
-        response: {
-          201: Profile,
-          400: z
-            .object({
-              message: z.string(),
-            })
-            .describe('Validation error'),
-          409: z
-            .object({
-              message: z.string(),
-            })
-            .describe('User already exists'),
-        },
-      },
-    },
-    createProfile,
-  );*/
-
-  app.post('/', createProfile);
-
-  app.get('/users/:username', getProfileByUsername);
-  app.get('/users/friends/', getFriendsByUserId);
-  app.post('/users/friends', addFriend);
-  app.delete('/users/friends/:targetId', removeFriend);
-  app.put('/users/friends/:targetId', updateFriend);
-
-  app.post('/users', createProfile);
-}
+  app.post('/', { schema: createProfileSchema }, profileController.createProfile);
+};

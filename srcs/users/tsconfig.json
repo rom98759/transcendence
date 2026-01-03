@@ -23,6 +23,8 @@
     "noPropertyAccessFromIndexSignature": true, // duplicate ESLint ? can't use obj.key if not defined explicitely
     "exactOptionalPropertyTypes": true,
     "sourceMap": true, // debug
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "inlineSources": true
   },
   "include": ["src/**/*", "test/**/*", "prisma/prisma.config.ts"],

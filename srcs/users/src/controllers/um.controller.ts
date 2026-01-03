@@ -1,34 +1,27 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import * as umService from '../services/um.service.js';
+import { profileService } from '../services/um.service.js';
 import * as mappers from '../utils/mappers.js';
-import { API_ERRORS, LOG_EVENTS } from '../utils/messages.js';
-import { ProfileCreateInDTO } from '@transcendence/core';
+import { LOG_ACTIONS, LOG_RESOURCES, ProfileCreateInDTO, UserNameDTO } from '@transcendence/core';
 
-export async function getProfileByUsername(
-  req: FastifyRequest<{ Params: { username: string } }>,
-  reply: FastifyReply,
-) {
-  const { username } = req.params;
-  req.log.info({ event: LOG_EVENTS.GET_PROFILE_BY_USERNAME, username });
+export class ProfileController {
+  async getProfileByUsername(
+    req: FastifyRequest<{ Params: { username: string } }>,
+    reply: FastifyReply,
+  ) {
+    const { username } = req.params as UserNameDTO;
+    req.log.trace({ event: `${LOG_ACTIONS.READ}_${LOG_RESOURCES.PROFILE}`, param: username });
 
-  const profileDTO = await umService.findByUsername(username);
-  if (!profileDTO) {
-    return reply.status(404).send({ message: API_ERRORS.USER.NOT_FOUND });
+    const profileDTO = await profileService.findByUsername(username);
+    return reply.status(200).send(profileDTO);
   }
-  return reply.status(200).send(profileDTO);
-}
 
-export async function createProfile(req: FastifyRequest, reply: FastifyReply) {
-  req.log.info({ event: LOG_EVENTS.CREATE_PROFILE, payload: req.body });
+  async createProfile(req: FastifyRequest, reply: FastifyReply) {
+    req.log.trace({ event: `${LOG_ACTIONS.CREATE}_${LOG_RESOURCES.PROFILE}`, payload: req.body });
 
-  try {
-    const profile = await umService.createProfile(req.body as ProfileCreateInDTO);
+    const profile = await profileService.createProfile(req.body as ProfileCreateInDTO);
     const profileDTO = mappers.mapProfileToDTO(profile);
     return reply.status(201).send(profileDTO);
-  } catch (error) {
-    req.log.error(error);
-    return reply.status(409).send({
-      message: API_ERRORS.USER.CREATE_FAILED,
-    });
   }
 }
+
+export const profileController = new ProfileController();

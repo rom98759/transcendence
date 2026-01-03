@@ -24,17 +24,6 @@ export const API_ERRORS = {
   UNKNOWN: 'Unknown error',
 } as const;
 
-export const LOG_EVENTS = {
-  INVALID_REQUEST: 'invalid_request',
-  GET_PROFILE_BY_USERNAME: 'get_profile_by_username',
-  CREATE_PROFILE: 'create_profile',
-  REDIS_CONNECT: 'Redis connected',
-  GET_FRIENDS: 'get_friends_by_user_id',
-  ADD_FRIEND: 'add_friend',
-  REMOVE_FRIEND: 'remove_friend',
-  UPDATE_FRIEND: 'Friend nickname update',
-};
-
 export const REDIS = {
   MATCH_FINISHED: 'match_finished',
 };

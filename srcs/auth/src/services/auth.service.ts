@@ -35,7 +35,7 @@ export async function createUser(user: {
 
   try {
     userId = db.createUser({ username: user.username, email: user.email || null, password: hash });
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (err instanceof DataError) {
       if (err.meta?.field === 'email') {
         throw new ServiceError(APP_ERRORS.REG_EMAIL_EXISTS, { details: user.email });

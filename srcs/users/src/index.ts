@@ -1,21 +1,19 @@
 import fastify from 'fastify';
+import fastifySwagger from '@fastify/swagger';
 import ScalarApiReference from '@scalar/fastify-api-reference';
-import { umRoutes } from './routes/um.routes.js';
-import { appenv } from './config/env.js';
-import { loggerConfig } from './config/logger.config.js';
-
 import {
   jsonSchemaTransform,
   serializerCompiler,
   validatorCompiler,
   ZodTypeProvider,
 } from 'fastify-type-provider-zod';
-import fastifySwagger from '@fastify/swagger';
 
-const app = fastify({
-  logger: loggerConfig,
-  disableRequestLogging: false,
-});
+import { umRoutes } from './routes/um.routes.js';
+import { authPlugin } from './plugins/auth.plugin.js';
+import { errorHandler } from './utils/error-handler.js';
+import { appenv } from './config/env.js';
+import { loggerConfig } from './config/logger.config.js';
+import { friendsRoutes } from './routes/friends.routes.js';
 
 export async function buildApp() {
   const app = fastify({
@@ -26,8 +24,12 @@ export async function buildApp() {
   await app.setValidatorCompiler(validatorCompiler);
   await app.setSerializerCompiler(serializerCompiler);
 
+  app.setErrorHandler(errorHandler);
+
+  await app.register(authPlugin);
+
   if (appenv.NODE_ENV !== 'test') {
-    await app.register(fastifySwagger as any, {
+    await app.register(fastifySwagger, {
       openapi: {
         info: {
           title: 'User API documentation',
@@ -39,11 +41,7 @@ export async function buildApp() {
       transform: jsonSchemaTransform,
     });
 
-    // app.get('/doc/json', (req, reply) => {
-    //   reply.send(app.swagger());
-    // });
-
-    await app.register(ScalarApiReference as any, {
+    await app.register(ScalarApiReference, {
       routePrefix: '/doc',
       configuration: {
         theme: 'purple',
@@ -51,14 +49,15 @@ export async function buildApp() {
     });
   }
 
-  await app.register(umRoutes);
-
   return app;
 }
+
+const app = await buildApp();
 
 export const logger = app.log;
 
 app.register(umRoutes, { prefix: '/' });
+app.register(friendsRoutes, { prefix: '/friends/' });
 
 app.listen(
   { host: '0.0.0.0', port: appenv.UM_SERVICE_PORT },

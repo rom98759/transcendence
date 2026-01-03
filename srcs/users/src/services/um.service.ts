@@ -1,14 +1,47 @@
 import { UserProfile } from '@prisma/client';
-import * as data from '../data/um.data.js';
-import { ProfileCreateInDTO, ProfileDTO } from '@transcendence/core';
-import { logger } from '../index.js';
+import {
+  ERR_DEFS,
+  LOG_RESOURCES,
+  type ProfileCreateInDTO,
+  type ProfileDTO,
+  AppError,
+} from '@transcendence/core';
+import { Trace } from '../utils/decorators.js';
+import { profileRepository } from '../data/um.data.js';
 
-export async function findByUsername(username: string): Promise<ProfileDTO | null> {
-  logger.info({ msg: 'find profile in service', payload: username });
-  return await data.findProfileByUsername(username);
+export class ProfileService {
+  @Trace
+  async findByUsername(username: string): Promise<ProfileDTO | null> {
+    const profile = await profileRepository.findProfileByUsername(username);
+    if (!profile) {
+      throw new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {
+        details: {
+          resource: LOG_RESOURCES.PROFILE,
+          username: username,
+        },
+      });
+    }
+    return profile;
+  }
+
+  @Trace
+  async findById(userId: number): Promise<ProfileDTO | null> {
+    const profile = await profileRepository.findProfileById(userId);
+    if (!profile) {
+      throw new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {
+        details: {
+          resource: LOG_RESOURCES.PROFILE,
+          id: userId,
+        },
+      });
+    }
+    return profile;
+  }
+
+  @Trace
+  async createProfile(payload: ProfileCreateInDTO): Promise<UserProfile> {
+    return await profileRepository.createProfile(payload);
+  }
 }
 
-export async function createProfile(payload: ProfileCreateInDTO): Promise<UserProfile> {
-  logger.info({ msg: 'create profile in service', payload: payload });
-  return await data.createProfile(payload);
-}
+export const profileService = new ProfileService();

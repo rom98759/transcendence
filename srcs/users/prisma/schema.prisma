@@ -13,22 +13,23 @@ model UserProfile {
   createdAt DateTime @default(now())
   email     String?  @unique
   username  String   @unique
-  avatarUrl String
+  avatarUrl String?
 
-  requestedFriendships Friendship[] @relation("user")
-  receivedFriendships  Friendship[] @relation("friend")
+  requestedFriendships Friendship[] @relation("requester")
+  receivedFriendships  Friendship[] @relation("receiver")
 }
 
 model Friendship {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
   nickname  String?
+  status    String
   
-  userId    Int
-  user UserProfile @relation("user", fields: [userId], references: [id], onDelete: Cascade)
+  requesterId    Int
+  requester UserProfile @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
 
-  friendId  Int
-  friend  UserProfile @relation("friend", fields: [friendId], references: [id], onDelete: Cascade)
+  receiverId  Int
+  receiver  UserProfile @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   
-  @@unique([userId, friendId])
+  @@unique([requesterId, receiverId])
 }

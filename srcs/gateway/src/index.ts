@@ -94,6 +94,7 @@ app.decorate('fetchInternal', async (request: any, url: string, init: any = {}) 
   const headers = Object.assign({}, init.headers || {}, {
     'x-user-name': userName,
     'x-user-id': String(userId),
+    'x-user-role': request.user?.role || 'USER',
     cookie: request.headers?.cookie || '',
   });
 

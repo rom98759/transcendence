@@ -1,160 +1,103 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import * as friendsService from '../services/friends.service.js';
-import { ValidationSchemas } from '../schemas/schemas.js';
-import z from 'zod';
-import { API_ERRORS, LOG_EVENTS } from '../utils/messages.js';
+import { friendshipService } from '../services/friends.service.js';
+import {
+  FriendshipUpdateNicknameDTO,
+  FriendshipUpdateStatusDTO,
+  IdDTO,
+  LOG_ACTIONS,
+  LOG_RESOURCES,
+} from '@transcendence/core';
 
-function handleInvalidRequest<T>(
-  req: FastifyRequest,
-  reply: FastifyReply,
-  validation: z.ZodSafeParseError<T>,
-) {
-  req.log.warn({ event: LOG_EVENTS.INVALID_REQUEST, request: req });
-  return reply.status(400).send({
-    error: API_ERRORS.USER.INVALID_FORMAT,
-    details: z.treeifyError(validation.error),
-  });
-}
+export class FriendshipController {
+  // GET /users/friends/
+  async getFriendsByUserId(req: FastifyRequest, reply: FastifyReply) {
+    const userId = req.user.id;
+    req.log.info({ event: `${LOG_ACTIONS.READ}_${LOG_RESOURCES.FRIEND}`, userId });
 
-// GET /users/friends/
-export async function getFriendsByUserId(req: FastifyRequest, reply: FastifyReply) {
-  const userId = (req as any).user?.id;
-
-  if (!userId) {
-    return reply.status(401).send({ message: 'Unauthorized' });
-  }
-
-  req.log.info({ event: LOG_EVENTS.GET_FRIENDS, userId });
-
-  const validation = ValidationSchemas['FriendGet'].safeParse({
-    idUser: userId,
-  });
-  if (!validation.success) {
-    return handleInvalidRequest(req, reply, validation);
-  }
-
-  try {
-    const friends = await friendsService.getFriendsByUserId(userId);
-    if (!friends || friends.length === 0) {
-      return reply.status(200).send({ message: 'User not found or has no friends' });
-    }
+    const friends = await friendshipService.getFriendsByUserId(userId);
     return reply.status(200).send(friends);
-  } catch (error) {
-    req.log.error(error);
-    return reply.status(500).send({ message: API_ERRORS.UNKNOWN });
-  }
-}
-
-// POST /users/friends
-export async function addFriend(
-  req: FastifyRequest<{
-    Body: { targetId: number };
-  }>,
-  reply: FastifyReply,
-) {
-  const { targetId } = req.body;
-  const userId = (req as any).user?.id;
-
-  if (!userId) {
-    return reply.status(401).send({ message: 'Unauthorized' });
   }
 
-  if (userId === targetId) {
-    return reply.status(400).send({ message: 'Cannot add yourself as friend' });
-  }
-
-  req.log.info({ event: LOG_EVENTS.ADD_FRIEND, userId, targetId });
-
-  const validation = ValidationSchemas['FriendAdd'].safeParse({
-    targetId,
-  });
-  if (!validation.success) {
-    return handleInvalidRequest(req, reply, validation);
-  }
-
-  try {
-    const friendship = await friendsService.addFriend(userId, targetId);
-    return reply.status(201).send({
-      relationId: friendship.id,
-      user1Id: friendship.userId,
-      user2Id: friendship.friendId,
+  // POST /users/friends
+  async createFriend(req: FastifyRequest<{ Body: IdDTO }>, reply: FastifyReply) {
+    const { id: targetId } = req.body;
+    const userId = req.user.id;
+    req.log.info({
+      event: `${LOG_ACTIONS.CREATE}_${LOG_RESOURCES.FRIEND}`,
+      userId,
+      body: req.body,
     });
-  } catch (error: unknown) {
-    req.log.error(error);
-    const errorMsg = error instanceof Error ? error.message : String(error);
 
-    if (errorMsg.includes('do not exist')) {
-      return reply.status(400).send({ message: 'One or both users do not exist' });
-    }
-    if (errorMsg.includes('already exist')) {
-      return reply.status(409).send({ message: API_ERRORS.USER.FRIEND.ALREADY_FRIENDS });
-    }
-    if (errorMsg.includes('Friend limit reached')) {
-      return reply.status(400).send({ message: 'Maximum 10 friends allowed' });
-    }
-    return reply.status(500).send({ message: API_ERRORS.USER.FRIEND.ADD_FAILED });
-  }
-}
-
-// DELETE /users/friends/:targetId
-export async function removeFriend(
-  req: FastifyRequest<{ Params: { targetId: string } }>,
-  reply: FastifyReply,
-) {
-  const targetId = parseInt(req.params.targetId, 10);
-  const userId = (req as any).user?.id;
-
-  if (!userId) {
-    return reply.status(401).send({ message: 'Unauthorized' });
+    const friendship = await friendshipService.addFriend(userId, targetId);
+    return reply.status(201).send(friendship);
   }
 
-  req.log.info({ event: LOG_EVENTS.REMOVE_FRIEND, userId, targetId });
-
-  const validation = ValidationSchemas['FriendDelete'].safeParse({ targetId });
-  if (!validation.success) {
-    return handleInvalidRequest(req, reply, validation);
-  }
-
-  try {
-    const result = await friendsService.removeFriend(userId, targetId);
-    if (!result) {
-      return reply.status(404).send({ message: API_ERRORS.USER.FRIEND.NOT_FRIENDS });
-    }
-    return reply.status(200).send({ message: 'Friend removed successfully' });
-  } catch (error) {
-    req.log.error(error);
-    return reply.status(500).send({ message: API_ERRORS.USER.FRIEND.DELETE_FAILED });
-  }
-}
-
-// PUT /users/friends/:targetId
-export async function updateFriend(
-  req: FastifyRequest<{
-    Params: { targetId: string };
-    Body: { nickname: string };
-  }>,
-  reply: FastifyReply,
-) {
-  const targetId = parseInt(req.params.targetId, 10);
-  const userId = (req as any).user?.id;
-  const { nickname } = req.body;
-  const validation = ValidationSchemas['FriendUpdate'].safeParse({ nickname });
-  if (!userId) return reply.status(401).send({ message: 'Unauthorized' });
-  if (!validation.success) {
-    return handleInvalidRequest(req, reply, validation);
-  }
-  try {
-    const result = await friendsService.updateFriend(userId, targetId, nickname);
-    if (!result) return reply.status(404).send({ message: API_ERRORS.USER.FRIEND.NOT_FRIENDS });
-    req.log.info({ event: LOG_EVENTS.UPDATE_FRIEND, userId, targetId });
-    return reply.status(200).send({
-      relationId: result.id,
-      user1Id: result.userId,
-      user2Id: result.friendId,
-      nickname: result.nickname,
+  // DELETE /users/friends/:targetId
+  async removeFriend(req: FastifyRequest<{ Params: { targetId: number } }>, reply: FastifyReply) {
+    const { targetId } = req.params;
+    const userId = req.user.id;
+    req.log.info({
+      event: `${LOG_ACTIONS.DELETE}_${LOG_RESOURCES.FRIEND}`,
+      userId,
+      param: targetId,
+      body: req.body,
     });
-  } catch (error) {
-    req.log.error(error);
-    return reply.status(500).send({ message: API_ERRORS.USER.INVALID_FORMAT });
+
+    const removedFriendship = await friendshipService.removeFriend(userId, targetId);
+    return reply.status(200).send(removedFriendship);
+  }
+
+  // PATCH /users/friends/:targetId/status
+  async updateFriendStatus(
+    req: FastifyRequest<{
+      Params: IdDTO;
+      Body: FriendshipUpdateStatusDTO;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const targetId = req.params.id;
+    const userId = req.user.id;
+    const { status } = req.body;
+    req.log.info({
+      event: `${LOG_ACTIONS.UPDATE}_${LOG_RESOURCES.FRIEND}`,
+      userId,
+      param: req.params,
+      body: req.body,
+    });
+
+    const updatedFriendship = await friendshipService.updateFriendshipStatus(
+      userId,
+      targetId,
+      status,
+    );
+    return reply.status(200).send(updatedFriendship);
+  }
+
+  // PATCH /users/friends/:targetId/nickname
+  async updateFriendNickname(
+    req: FastifyRequest<{
+      Params: IdDTO;
+      Body: FriendshipUpdateNicknameDTO;
+    }>,
+    reply: FastifyReply,
+  ) {
+    const targetId = req.params.id;
+    const userId = req.user.id;
+    const { nickname } = req.body;
+    req.log.info({
+      event: `${LOG_ACTIONS.UPDATE}_${LOG_RESOURCES.FRIEND}`,
+      userId,
+      param: req.params,
+      body: req.body,
+    });
+
+    const updatedFriendship = await friendshipService.updateFriendshipNickname(
+      userId,
+      targetId,
+      nickname,
+    );
+    return reply.status(200).send(updatedFriendship);
   }
 }
+
+export const friendshipController = new FriendshipController();

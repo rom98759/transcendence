@@ -1,57 +1,102 @@
-import * as friendsData from '../data/friends.data.js';
-import * as umData from '../data/um.data.js';
+import {
+  ERR_DEFS,
+  LOG_RESOURCES,
+  AppError,
+  CONFIG,
+  FriendshipFullDTO,
+  FriendshipUnifiedDTO,
+  statusUpdateDTO,
+} from '@transcendence/core';
+import { friendshipRepository } from '../data/friends.data.js';
+import { profileService } from './um.service.js';
+import { Friendship } from '@prisma/client';
 
-export async function addFriend(userId: number, friendId: number) {
-  const userExists = await umData.findUserById(userId);
-  const friendExists = await umData.findUserById(friendId);
-
-  if (!userExists || !friendExists) {
-    throw new Error('One or both users do not exist');
+function checkFriendshipAbsence(friendship: Friendship | null, userId: number, targetId: number) {
+  if (friendship) {
+    throw new AppError(ERR_DEFS.RESOURCE_ALREADY_EXIST, {
+      userId: userId,
+      details: {
+        resource: LOG_RESOURCES.FRIEND,
+        id: friendship.id,
+        status: friendship.status,
+        targetId: targetId,
+      },
+    });
   }
-
-  const existingFriendship = await friendsData.findFriendship(userId, friendId);
-  if (existingFriendship) {
-    throw new Error('Friendship already exists');
-  }
-
-  const friendCount = await friendsData.countFriends(userId);
-  if (friendCount >= 10) {
-    throw new Error('Friend limit reached');
-  }
-
-  return await friendsData.createFriendship(userId, friendId);
 }
 
-export async function getFriendsByUserId(userId: number) {
-  const friendships = await friendsData.findFriendshipsByUser(userId);
-
-  return friendships.map((f: any) => {
-    const friendProfile = f.userId === userId ? f.friend : f.user;
-    return {
-      id: f.id,
-      userId: friendProfile.id,
-      username: friendProfile.username,
-      avatar_url: friendProfile.avatarUrl,
-      createdAt: f.createdAt,
-      nickname: f.nickname,
-    };
-  });
-}
-
-export async function removeFriend(userId: number, targetId: number) {
-  const friendship = await friendsData.findFriendshipAnyDirection(userId, targetId);
-
+function checkFriendshipExistence(
+  friendship: Friendship | null,
+  userId: number,
+  targetId: number,
+): asserts friendship is Friendship {
   if (!friendship) {
-    return null;
+    throw new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {
+      userId: userId,
+      details: {
+        resource: LOG_RESOURCES.FRIEND,
+        targetId: targetId,
+      },
+    });
+  }
+}
+export class FriendshipService {
+  async addFriend(userId: number, targetId: number): Promise<FriendshipFullDTO> {
+    await profileService.findById(userId);
+    await profileService.findById(targetId);
+
+    const existingFriendship = await friendshipRepository.findFriendshipBetween(userId, targetId);
+    checkFriendshipAbsence(existingFriendship, userId, targetId);
+
+    const friendCount = await friendshipRepository.countFriendships(userId);
+    if (friendCount >= CONFIG.MAX_FRIENDS) {
+      throw new AppError(ERR_DEFS.RESOURCE_LIMIT_REACHED, {
+        details: { ressource: LOG_RESOURCES.FRIEND, max: CONFIG.MAX_FRIENDS },
+      });
+    }
+
+    return await friendshipRepository.createFriendship(userId, targetId);
   }
 
-  return await friendsData.deleteFriendshipById(friendship.id);
+  async getFriendsByUserId(userId: number): Promise<FriendshipUnifiedDTO[]> {
+    const friendships = await friendshipRepository.findFriendshipsByUser(userId);
+
+    return friendships.map((f: FriendshipFullDTO) => {
+      const friendProfile = f.receiver.id === userId ? f.requester : f.receiver;
+      return {
+        id: f.id,
+        status: f.status,
+        nickname: f.nickname,
+        friend: friendProfile,
+      };
+    });
+  }
+
+  async updateFriendshipNickname(
+    userId: number,
+    targetId: number,
+    nickname: string,
+  ): Promise<FriendshipFullDTO | null> {
+    const friendship = await friendshipRepository.findFriendshipBetween(userId, targetId);
+    checkFriendshipExistence(friendship, userId, targetId);
+    return await friendshipRepository.updateFriendshipNickname(friendship.id, nickname);
+  }
+
+  async updateFriendshipStatus(
+    userId: number,
+    targetId: number,
+    status: statusUpdateDTO,
+  ): Promise<FriendshipFullDTO | null> {
+    const friendship = await friendshipRepository.findFriendshipBetween(userId, targetId);
+    checkFriendshipExistence(friendship, userId, targetId);
+    return await friendshipRepository.updateFriendshipStatus(friendship.id, status);
+  }
+
+  async removeFriend(userId: number, targetId: number): Promise<FriendshipFullDTO> {
+    const friendship = await friendshipRepository.findFriendshipBetween(userId, targetId);
+    checkFriendshipExistence(friendship, userId, targetId);
+    return await friendshipRepository.deleteFriendshipById(friendship.id);
+  }
 }
 
-export async function updateFriend(userId: number, targetId: number, _nickname: string) {
-  const friendship = await friendsData.findFriendshipAnyDirection(userId, targetId);
-  if (!friendship) {
-    return null;
-  }
-  return await friendsData.updateFriendshipNickname(friendship.id, _nickname);
-}
+export const friendshipService = new FriendshipService();
