@@ -13,11 +13,11 @@ import { authPlugin } from './plugins/auth.plugin.js';
 import { errorHandler } from './utils/error-handler.js';
 import { appenv } from './config/env.js';
 import { friendsRoutes } from './routes/friends.routes.js';
-import { logger } from './utils/logger.js';
+import { loggerConfig } from './config/logger.config.js';
 
 export async function buildApp() {
   const app = fastify({
-    logger: logger as unknown as FastifyBaseLogger,
+    logger: loggerConfig,
     disableRequestLogging: false,
   }).withTypeProvider<ZodTypeProvider>();
 

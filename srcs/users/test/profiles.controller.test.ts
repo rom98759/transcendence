@@ -30,7 +30,9 @@ describe('Profile Controller unit tests', () => {
     });
 
     afterAll(async () => {
-      await app.close();
+      if (app) {
+        await app.close();
+      }
     });
 
     afterEach(() => {
