@@ -42,6 +42,17 @@ function checkFriendshipExistence(
 }
 export class FriendshipService {
   async createFriend(userId: number, targetId: number): Promise<FriendshipFullDTO> {
+    if (userId == targetId) {
+      throw new AppError(ERR_DEFS.RESOURCE_INVALID_STATE, {
+        details: {
+          ressource: LOG_RESOURCES.FRIEND,
+          issue: 'self binding relation',
+          userId,
+          targetId,
+        },
+      });
+    }
+
     await profileService.getById(userId);
     await profileService.getById(targetId);
 

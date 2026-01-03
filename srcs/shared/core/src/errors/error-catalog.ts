@@ -154,4 +154,10 @@ export const ERR_DEFS = {
     'Resource limit reached',
     422,
   ),
+  RESOURCE_INVALID_STATE: serviceError(
+    ERROR_CODES.CONFLICT,
+    LOG_REASONS.CONFLICT.STATE_VIOLATION,
+    'Resource cannot be in invalid state',
+    422,
+  ),
 } as const;

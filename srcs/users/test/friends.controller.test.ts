@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, test, vi } from 'vitest';
 import { buildApp, logger } from '../src/index.js';
 import { FastifyInstance } from 'fastify/types/instance.js';
+import { mockProfileDTO, mockProfileDTO2 } from './fixtures/profiles.fixtures.js';
 
 vi.mock('../src/services/friends.service.js', () => ({
   friendshipService: {
@@ -13,7 +14,6 @@ vi.mock('../src/services/friends.service.js', () => ({
 }));
 
 import { friendshipService } from '../src/services/friends.service.js';
-import { mockProfileDTO, mockProfileDTO2 } from './profiles.controller.test.js';
 import {
   AppError,
   ERR_DEFS,
@@ -22,24 +22,12 @@ import {
   LOG_RESOURCES,
 } from '@transcendence/core';
 
-describe('Friends Controller tests', () => {
+describe('Friends Controller unit tests', () => {
   let app: FastifyInstance;
 
   beforeAll(async () => {
     process.env['NODE_ENV'] = 'test';
     app = await buildApp();
-
-    // app.addHook('preHandler', async (req) => {
-    //   const userId = req.headers['x-user-id'];
-    //   const role = req.headers['x-user-role'];
-    //   if (userId) {
-    //     req.user = {
-    //       id: parseInt(userId as string, 10),
-    //       role: role || 'USER',
-    //     };
-    //   }
-    // });
-
     await app.ready();
   });
 
@@ -50,6 +38,19 @@ describe('Friends Controller tests', () => {
   afterEach(() => {
     vi.clearAllMocks();
   });
+
+  // TODO Integration test
+  // test('Should allow admin to delete any friendship', async () => {
+  //   vi.spyOn(friendshipService, 'removeFriend').mockResolvedValue(mockFriendshipDTO as any);
+
+  //   const response = await app.inject({
+  //     method: 'DELETE',
+  //     url: '/friends/2',
+  //     headers: { 'x-user-id': '15', 'x-user-role': 'ADMIN' },
+  //   });
+
+  //   expect(response.statusCode).toBe(200);
+  // });
 
   const mockFriendshipFullDTO = {
     id: 1,
@@ -77,91 +78,89 @@ describe('Friends Controller tests', () => {
 
   const mockManyFriendshipUnifiedDTO = generateMockFriendshipUnifiedDTOs(10);
 
-  // describe('POST /users/friends', () => {
-  //   test('Should add friend successfully - 201', async () => {
-  //     vi.spyOn(friendshipService, 'createFriend').mockResolvedValue(mockFriendshipFullDTO as FriendshipFullDTO);
+  describe('POST /users/friends', () => {
+    test('Should add friend successfully - 201', async () => {
+      vi.spyOn(friendshipService, 'createFriend').mockResolvedValue(
+        mockFriendshipFullDTO as FriendshipFullDTO,
+      );
 
-  //     const response = await app.inject({
-  //       method: 'POST',
-  //       url: '/users/friends',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { targetId: 2 },
-  //     });
+      const response = await app.inject({
+        method: 'POST',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { id: 2 },
+      });
 
-  //     // expect(friendshipService.createFriend).toHaveBeenCalledWith(1, 2);
-  //     expect(response.statusCode).toBe(201);
-  //     // expect(JSON.parse(response.payload)).toEqual(mockFriendshipFullDTO);
-  //   });
+      expect(response.statusCode).toBe(201);
+    });
 
-  //   test('Should return 401 if userId is missing', async () => {
-  //     const response = await app.inject({
-  //       method: 'POST',
-  //       url: '/users/friends',
-  //       payload: { targetId: 2 },
-  //     });
+    test('Should return 401 if userId is missing', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/friends',
+        headers: { 'x-user-name': 'toto' },
+        payload: { id: 2 },
+      });
 
-  //     expect(response.statusCode).toBe(401);
-  //     // expect(JSON.parse(response.payload)).toEqual({
-  //     //   message: 'Unauthorized',
-  //     // });
-  //   });
+      expect(response.statusCode).toBe(401);
+    });
 
-  //   test('Should return 400 if userId equals targetId', async () => {
-  //     const response = await app.inject({
-  //       method: 'POST',
-  //       url: '/users/friends',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { targetId: 1 },
-  //     });
+    test('Should return 422 if user adds himself', async () => {
+      vi.spyOn(friendshipService, 'createFriend').mockRejectedValue(
+        new AppError(ERR_DEFS.RESOURCE_INVALID_STATE, {}),
+      );
 
-  //     expect(response.statusCode).toBe(400);
-  //     // expect(JSON.parse(response.payload)).toEqual({
-  //     //   message: 'Cannot add yourself as friend',
-  //     // });
-  //   });
+      const response = await app.inject({
+        method: 'POST',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { id: 1 },
+      });
 
-  //   test('Should return 400 for invalid targetId', async () => {
-  //     const response = await app.inject({
-  //       method: 'POST',
-  //       url: '/users/friends',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { targetId: -1 },
-  //     });
+      expect(response.statusCode).toBe(422);
+    });
 
-  //     expect(response.statusCode).toBe(400);
-  //   });
+    test('Should return 400 for invalid targetId', async () => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { id: -1 },
+      });
 
-  //   test('Should return 400 if users do not exist', async () => {
-  //     vi.spyOn(friendshipService, 'createFriend').mockRejectedValue(
-  //       new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {})
-  //     );
+      expect(response.statusCode).toBe(400);
+    });
 
-  //     const response = await app.inject({
-  //       method: 'POST',
-  //       url: '/users/friends',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { targetId: 999 },
-  //     });
+    test('Should return 404 if target user is not found', async () => {
+      vi.spyOn(friendshipService, 'createFriend').mockRejectedValue(
+        new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {}),
+      );
 
-  //     expect(response.statusCode).toBe(400);
-  //     // expect(JSON.parse(response.payload).message).toContain('do not exist');
-  //   });
+      const response = await app.inject({
+        method: 'POST',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { id: 999 },
+      });
 
-  //   test('Should return 409 if already friends', async () => {
-  //     vi.spyOn(friendshipService, 'createFriend').mockRejectedValue(
-  //       new Error('Friendship already exists'),
-  //     );
+      expect(response.statusCode).toBe(404);
+    });
 
-  //     const response = await app.inject({
-  //       method: 'POST',
-  //       url: '/users/friends',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { targetId: 2 },
-  //     });
+    test('Should return 409 if already friends', async () => {
+      vi.spyOn(friendshipService, 'createFriend').mockRejectedValue(
+        new AppError(ERR_DEFS.RESOURCE_ALREADY_EXIST, {}),
+      );
 
-  //     expect(response.statusCode).toBe(409);
-  //   });
-  // });
+      const response = await app.inject({
+        method: 'POST',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { id: 2 },
+      });
+
+      expect(response.statusCode).toBe(409);
+    });
+  });
 
   describe('DELETE /friends/:id', () => {
     test('Should delete friendship - 200', async () => {
@@ -176,7 +175,6 @@ describe('Friends Controller tests', () => {
       });
       logger.error(response);
 
-      // expect(friendshipService.removeFriend).toHaveBeenCalledWith(1, 2);
       expect(response.statusCode).toBe(200);
     });
 
@@ -199,18 +197,6 @@ describe('Friends Controller tests', () => {
 
       expect(response.statusCode).toBe(404);
     });
-
-    // test('Should allow admin to delete any friendship', async () => {
-    //   vi.spyOn(friendshipService, 'removeFriend').mockResolvedValue(mockFriendshipDTO as any);
-
-    //   const response = await app.inject({
-    //     method: 'DELETE',
-    //     url: '/friends/2',
-    //     headers: { 'x-user-id': '15', 'x-user-role': 'ADMIN' },
-    //   });
-
-    //   expect(response.statusCode).toBe(200);
-    // });
 
     test('Should return 404 if profile not found', async () => {
       vi.spyOn(friendshipService, 'removeFriend').mockRejectedValue(
@@ -243,86 +229,87 @@ describe('Friends Controller tests', () => {
     });
   });
 
-  // describe('GET /friends', () => {
-  //   test('Should return friends list - 200', async () => {
-  //     vi.spyOn(friendshipService, 'getFriendsByUserId').mockResolvedValue(mockManyFriendshipUnifiedDTO as FriendshipUnifiedDTO[]);
+  describe('GET /friends', () => {
+    test('Should return friends list - 200', async () => {
+      vi.spyOn(friendshipService, 'getFriendsByUserId').mockResolvedValue(
+        mockManyFriendshipUnifiedDTO as FriendshipUnifiedDTO[],
+      );
 
-  //     const response = await app.inject({
-  //       method: 'GET',
-  //       url: '/friends',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //     });
+      const response = await app.inject({
+        method: 'GET',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+      });
 
-  //     expect(response.statusCode).toBe(200);
-  //   });
+      expect(response.statusCode).toBe(200);
+    });
 
-  //   test('Should return 200 if no friends found', async () => {
-  //     vi.spyOn(friendshipService, 'getFriendsByUserId').mockResolvedValue([]);
+    test('Should return 200 if no friends found', async () => {
+      vi.spyOn(friendshipService, 'getFriendsByUserId').mockResolvedValue([]);
 
-  //     const response = await app.inject({
-  //       method: 'GET',
-  //       url: '/friends',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //     });
-  //     logger.warn(response);
+      const response = await app.inject({
+        method: 'GET',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+      });
+      logger.warn(response);
 
-  //     expect(response.statusCode).toBe(200);
-  //   });
-  // });
+      expect(response.statusCode).toBe(200);
+    });
+  });
 
-  // describe('PATCH /friends/:id/nickname', () => {
-  //   test('Should update friend nickname - 200', async () => {
-  //     const updatedFriendship = { ...mockFriendshipFullDTO, nickname: 'newNick' };
-  //     vi.mocked(friendshipService.updateFriendshipNickname).mockResolvedValue(
-  //       updatedFriendship as FriendshipFullDTO,
-  //     );
+  describe('PATCH /friends/:id/nickname', () => {
+    test('Should update friend nickname - 200', async () => {
+      const updatedFriendship = { ...mockFriendshipFullDTO, nickname: 'newNick' };
+      vi.mocked(friendshipService.updateFriendshipNickname).mockResolvedValue(
+        updatedFriendship as FriendshipFullDTO,
+      );
 
-  //     const response = await app.inject({
-  //       method: 'PATCH',
-  //       url: `/friends/2/nickname`,
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { nickname: 'newNick' },
-  //     });
+      const response = await app.inject({
+        method: 'PATCH',
+        url: `/friends/2/nickname`,
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { nickname: 'newNick' },
+      });
 
-  //     expect(response.statusCode).toBe(200);
-  //     // expect(JSON.parse(response.payload).relationId).toBe(1);
-  //   });
+      expect(response.statusCode).toBe(200);
+    });
 
-  //   test('Should return 404 if friendship not found', async () => {
-  //     vi.spyOn(friendshipService, 'updateFriendshipNickname').mockRejectedValue(
-  //       new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {}),
-  //     );
+    test('Should return 404 if friendship not found', async () => {
+      vi.spyOn(friendshipService, 'updateFriendshipNickname').mockRejectedValue(
+        new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {}),
+      );
 
-  //     const response = await app.inject({
-  //       method: 'PATCH',
-  //       url: '/friends/2/nickname',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { nickname: 'newNick' },
-  //     });
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/friends/2/nickname',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { nickname: 'newNick' },
+      });
 
-  //     expect(response.statusCode).toBe(404);
-  //   });
+      expect(response.statusCode).toBe(404);
+    });
 
-  //   test('Should return 401 if userId is missing', async () => {
-  //     const response = await app.inject({
-  //       method: 'PATCH',
-  //       url: '/friends/2/nickname',
-  //       headers: { 'x-user-name': 'toto' },
-  //       payload: { nickname: 'newNick' },
-  //     });
+    test('Should return 401 if userId is missing', async () => {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/friends/2/nickname',
+        headers: { 'x-user-name': 'toto' },
+        payload: { nickname: 'newNick' },
+      });
 
-  //     expect(response.statusCode).toBe(401);
-  //   });
+      expect(response.statusCode).toBe(401);
+    });
 
-  //   test('Should return 400 for invalid nickname', async () => {
-  //     const response = await app.inject({
-  //       method: 'PATCH',
-  //       url: '/friends/2/nickname',
-  //       headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-  //       payload: { nickname: 'a'.repeat(51) },
-  //     });
+    test('Should return 400 for invalid nickname', async () => {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/friends/2/nickname',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { nickname: 'a'.repeat(51) },
+      });
 
-  //     expect(response.statusCode).toBe(400);
-  //   });
-  // });
+      expect(response.statusCode).toBe(400);
+    });
+  });
 });
