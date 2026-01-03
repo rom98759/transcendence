@@ -59,7 +59,7 @@ const app = await buildApp();
 
 export const logger = app.log;
 
-if (appenv.NODE_ENV !== 'test') {
+if (appenv.NODE_ENV !== 'development') {
   app.listen(
     { host: '0.0.0.0', port: appenv.UM_SERVICE_PORT },
     (err: Error | null, address: string) => {
