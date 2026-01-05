@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { proxyRequest } from '../utils/proxy.js';
 import { logger } from '../utils/logger.js';
+import { CatchAllParams } from '../types/params.types.js';
 
 const AUTH_SERVICE_URL = 'http://auth-service:3001';
 
@@ -13,35 +14,38 @@ export function registerAuthRoutes(app: FastifyInstance) {
   });
 
   // Proxy toutes les autres requêtes vers le service auth
-  app.all('/*', async (request: FastifyRequest, reply: FastifyReply) => {
-    const rawPath = (request.params as any)['*'];
-    const cleanPath = rawPath.replace(/^api\/auth\//, '');
-    const url = `${AUTH_SERVICE_URL}/${cleanPath}`;
-    const queryString = new URL(request.url, 'http://localhost').search;
-    const fullUrl = `${url}${queryString}`;
+  app.all(
+    '/*',
+    async (request: FastifyRequest<{ Params: CatchAllParams }>, reply: FastifyReply) => {
+      const rawPath = request.params['*'];
+      const cleanPath = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
+      const url = `${AUTH_SERVICE_URL}/${cleanPath}`;
+      const queryString = new URL(request.url, 'http://localhost').search;
+      const fullUrl = `${url}${queryString}`;
 
-    const rawUser = request.headers['x-user-name'] as string | string[] | undefined;
-    const user = Array.isArray(rawUser) ? rawUser[0] : (rawUser ?? null);
+      const rawUser = request.headers['x-user-name'] as string | string[] | undefined;
+      const user = Array.isArray(rawUser) ? rawUser[0] : (rawUser ?? null);
 
-    logger.info({
-      event: 'auth_proxy_request',
-      rawPath,
-      method: request.method,
-      user,
-    });
+      logger.info({
+        event: 'auth_proxy_request',
+        rawPath,
+        method: request.method,
+        user,
+      });
 
-    const init: RequestInit = {
-      method: request.method,
-      headers: {},
-    };
+      const init: RequestInit = {
+        method: request.method,
+        headers: {},
+      };
 
-    if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
-      (init.headers as Record<string, string>)['content-type'] =
-        request.headers['content-type'] || 'application/json';
-      init.body = JSON.stringify(request.body);
-    }
+      if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
+        (init.headers as Record<string, string>)['content-type'] =
+          request.headers['content-type'] || 'application/json';
+        init.body = JSON.stringify(request.body);
+      }
 
-    const res = await proxyRequest(app, request, reply, fullUrl, init);
-    return res;
-  });
+      const res = await proxyRequest(app, request, reply, fullUrl, init);
+      return res;
+    },
+  );
 }

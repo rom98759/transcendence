@@ -1,3 +1,5 @@
+#!/bin/sh
+
 # add modified files to commit message
 # should not be triggered for merge commits
 
@@ -6,6 +8,6 @@ COMMIT_SOURCE=$2
 SHA1=$3
 
 if [ -z "$COMMIT_SOURCE" ]; then
-    echo "\n\n# --- Modified files --" >> "$COMMIT_MSG_FILE"
+    printf "\n\n# --- Modified files ---\n" >> "$COMMIT_MSG_FILE"
     git diff --cached --name-only >> "$COMMIT_MSG_FILE"
 fi
