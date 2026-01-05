@@ -14,4 +14,22 @@ model UserProfile {
   email     String?  @unique
   username  String   @unique
   avatarUrl String?
+
+  requestedFriendships Friendship[] @relation("requester")
+  receivedFriendships  Friendship[] @relation("receiver")
+}
+
+model Friendship {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  nickname  String?
+  status    String
+  
+  requesterId    Int
+  requester UserProfile @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+
+  receiverId  Int
+  receiver  UserProfile @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  @@unique([requesterId, receiverId])
 }

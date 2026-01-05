@@ -1,9 +1,24 @@
-import type { UserProfile } from '@prisma/client';
-import { ProfileDTO } from '@transcendence/core';
+import { UserProfile } from '@prisma/client';
+import { FriendshipFullDTO, FriendshipUnifiedDTO, ProfileDTO } from '@transcendence/core';
 
-export function mapUserProfileToDTO(model: UserProfile): ProfileDTO {
+export function mapProfileToDTO(profile: UserProfile): ProfileDTO {
   return {
-    username: model.username,
-    avatarUrl: model.avatarUrl,
+    authId: profile.authId,
+    username: profile.username,
+    avatarUrl: profile.avatarUrl,
+  };
+}
+
+export function mapFriendshipToDTO(
+  friendship: FriendshipFullDTO,
+  currentUserId: number,
+): FriendshipUnifiedDTO {
+  const friendProfile =
+    friendship.receiver.authId === currentUserId ? friendship.requester : friendship.receiver;
+  return {
+    id: friendship.id,
+    status: friendship.status,
+    nickname: friendship.nickname,
+    friend: friendProfile,
   };
 }

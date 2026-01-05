@@ -85,12 +85,14 @@ ENV HUSKY=0
 # Install production dependencies (workspace resolution works because structure matches)
 RUN npm ci --omit=dev
 
-# Generate Prisma client in production
-WORKDIR /app/srcs/users
-RUN npx prisma generate
+# Generate Prisma client
+RUN cd /app/srcs/users && npx prisma generate
 
 # Create data directory and set permissions (only for /app/srcs/users)
-RUN mkdir -p ./data && chown -R appuser:appgroup ./
+RUN mkdir -p /app/srcs/users/data && chown -R appuser:appgroup /app
+
+# Change to users service directory
+WORKDIR /app/srcs/users
 
 # Copy entrypoint
 COPY --from=builder /app/srcs/users/entrypoint.sh ./entrypoint.sh
@@ -98,6 +100,6 @@ RUN chmod +x ./entrypoint.sh
 
 USER appuser
 
-ENTRYPOINT [ "/app/srcs/users/entrypoint.sh" ]
+ENTRYPOINT [ "./entrypoint.sh" ]
 
 CMD ["node", "dist/index.js"]

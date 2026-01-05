@@ -1,7 +1,8 @@
-import { logger } from '../index.js';
 import { appenv } from '../config/env.js';
-import { API_ERRORS, LOG_EVENTS } from '../utils/messages.js';
+import { API_ERRORS } from '../utils/messages.js';
 import { Redis } from 'ioredis';
+import { LOG_EVENTS } from '@transcendence/core';
+import { logger } from '../utils/logger.js';
 
 const REDIS_HOST = appenv.REDIS_SERVICE_NAME;
 
@@ -30,7 +31,7 @@ export class RedisManager {
       try {
         await this.pub.connect();
         await this.sub.connect();
-        logger.info({ event: LOG_EVENTS.REDIS_CONNECT });
+        logger.info({ event: LOG_EVENTS.LIFECYCLE.REDIS_CONNECT });
         return;
       } catch (error) {
         logger.warn({ event: API_ERRORS.REDIS.CONNECT_RETRY, error });
