@@ -12,8 +12,8 @@ services:
       dockerfile: Dockerfile
     container_name: ${PROXY_SERVICE_NAME}
     ports:
-      - "8080:80"
-      - "4430:443"
+      - '8080:80'
+      - '4430:443'
     networks:
       - app-network
     volumes:
@@ -24,16 +24,16 @@ services:
         condition: service_started
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'https://localhost/health']
 
   # Main Fastify API
   api-gateway:
     build:
       context: ..
-      dockerfile: "srcs/gateway/Dockerfile"
-    container_name: "${API_GATEWAY_NAME}"
+      dockerfile: 'srcs/gateway/Dockerfile'
+    container_name: '${API_GATEWAY_NAME}'
     expose:
-      - "${API_GATEWAY_PORT}"
+      - '${API_GATEWAY_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.gateway
@@ -49,9 +49,9 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: "${AUTH_SERVICE_NAME}"
+    container_name: '${AUTH_SERVICE_NAME}'
     expose:
-      - "${AUTH_SERVICE_PORT}"
+      - '${AUTH_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.auth
@@ -65,16 +65,24 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${AUTH_SERVICE_PORT}/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${AUTH_SERVICE_PORT}/health',
+        ]
 
   # Blockchain service
   blockchain-service:
     build:
       context: ./blockchain
       dockerfile: Dockerfile
-    container_name: "${BK_SERVICE_NAME}"
+    container_name: '${BK_SERVICE_NAME}'
     expose:
-      - "${BK_SERVICE_PORT}"
+      - '${BK_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.blockchain
@@ -85,7 +93,15 @@ services:
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${BK_SERVICE_PORT}/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${BK_SERVICE_PORT}/health',
+        ]
 
   game-service:
     build:
@@ -93,7 +109,7 @@ services:
       dockerfile: Dockerfile
     container_name: ${GAME_SERVICE_NAME}
     expose:
-      - "${GAME_SERVICE_PORT}"
+      - '${GAME_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.game
@@ -102,15 +118,23 @@ services:
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${GAME_SERVICE_PORT}/health"]
-  
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${GAME_SERVICE_PORT}/health',
+        ]
+
   redis-broker:
     build:
       context: ./redis
       dockerfile: Dockerfile
     container_name: ${REDIS_SERVICE_NAME}
     expose:
-      - "${REDIS_SERVICE_PORT}"
+      - '${REDIS_SERVICE_PORT}'
     networks:
       - app-network
     restart: unless-stopped
@@ -121,7 +145,7 @@ services:
       dockerfile: srcs/users/Dockerfile
     container_name: ${UM_SERVICE_NAME}
     expose:
-      - "${UM_SERVICE_PORT}"
+      - '${UM_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.um
@@ -132,7 +156,15 @@ services:
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${UM_SERVICE_PORT}/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${UM_SERVICE_PORT}/health',
+        ]
 
 networks:
   app-network:

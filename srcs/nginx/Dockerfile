@@ -33,5 +33,5 @@ COPY ./src      /usr/share/nginx/src
 # Create directory for uploads
 RUN mkdir -p /usr/share/nginx/html/uploads
 
-EXPOSE 8080 4430
+EXPOSE 80 443
 CMD ["nginx", "-g", "daemon off;"]

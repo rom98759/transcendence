@@ -9,7 +9,11 @@ export async function createUserProfile(payload: CreateProfileDTO): Promise<User
     logger.info({ msg: `calling POST ${UM_SERVICE_URL}/`, payload: payload });
     const response = await fetch(`${UM_SERVICE_URL}/`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-user-id': String(payload.authId),
+        'x-user-name': payload.username,
+      },
       body: JSON.stringify(payload),
     });
 

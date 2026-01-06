@@ -1,4 +1,4 @@
-import './types/types.js';
+import type { UserPayload } from './types/types.js';
 import fastify, { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
@@ -55,9 +55,9 @@ app.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) =>
   if (!url.startsWith('/api')) return;
 
   // Routes publiques
-  // if (GATEWAY_CONFIG.PUBLIC_ROUTES.includes(url)) {
-  //   return;
-  // }
+  if (GATEWAY_CONFIG.PUBLIC_ROUTES.includes(url as any)) {
+    return;
+  }
   if (request.routeOptions.config?.isPublic) {
     logger.logAuth({ url, user: request.user?.username }, true);
     return;
