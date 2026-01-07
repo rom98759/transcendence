@@ -4,9 +4,8 @@
   "exec": "node --enable-source-maps --loader ts-node/esm src/server.ts",
   "legacyWatch": true,
   "delay": 300,
-  "ignore": ["node_modules/**"],
+  "ignore": ["node_modules/**", "src/public/**"],
   "env": {
     "NODE_ENV": "development"
   }
 }
-

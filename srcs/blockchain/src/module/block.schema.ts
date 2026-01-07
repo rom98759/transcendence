@@ -2,7 +2,7 @@
 export const blockIdSchema = {
   type: 'object',
   properties: {
-    tx_id: { type: 'number' },
+    id: { type: 'number' },
   },
   required: ['id'],
 } as const;
@@ -16,12 +16,12 @@ export const blockSchema = {
     snap_hash: { type: 'string' },
     block_timestamp: { type: 'integer' },
     tour_id: { type: 'integer', minimum: 1 },
-    player1_id: { type: 'integer', minimum: 1 },
-    player2_id: { type: 'integer', minimum: 1 },
-    player3_id: { type: 'integer', minimum: 1 },
-    player4_id: { type: 'integer', minimum: 1 },
+    player1: { type: 'integer', minimum: 1 },
+    player2: { type: 'integer', minimum: 1 },
+    player3: { type: 'integer', minimum: 1 },
+    player4: { type: 'integer', minimum: 1 },
   },
-  required: ['id', 'tour_id', 'player1_id', 'player2_id', 'player3_id', 'player4_id'],
+  required: ['tour_id', 'player1', 'player2', 'player3', 'player4'],
   additionalProperties: false,
 } as const;
 

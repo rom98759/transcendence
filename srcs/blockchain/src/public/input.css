@@ -1,0 +1,9 @@
+@import 'tailwindcss';
+
+/* Déclaration explicite des sources à scanner */
+@source "../views/**/*.ejs";
+@source "../**/*.ts";
+
+/* CSS métier / spécifique */
+@import './style-block.css';
+/* @import "./style.css"; */

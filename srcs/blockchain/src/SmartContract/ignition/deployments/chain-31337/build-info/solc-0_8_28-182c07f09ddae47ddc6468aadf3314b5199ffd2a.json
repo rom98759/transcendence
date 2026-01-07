@@ -1,6 +1,6 @@
 {
   "_format": "hh3-sol-build-info-1",
-  "id": "solc-0_8_28-53526d54fb3d1ff804fdc8cbb00001178ca06998",
+  "id": "solc-0_8_28-182c07f09ddae47ddc6468aadf3314b5199ffd2a",
   "solcVersion": "0.8.28",
   "solcLongVersion": "0.8.28+commit.7893614a",
   "userSourceNameMap": {
@@ -16,21 +16,11 @@
       },
       "outputSelection": {
         "*": {
-          "": [
-            "ast"
-          ],
-          "*": [
-            "abi",
-            "evm.bytecode",
-            "evm.deployedBytecode",
-            "evm.methodIdentifiers",
-            "metadata"
-          ]
+          "": ["ast"],
+          "*": ["abi", "evm.bytecode", "evm.deployedBytecode", "evm.methodIdentifiers", "metadata"]
         }
       },
-      "remappings": [
-        "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.4.0/"
-      ]
+      "remappings": ["project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.4.0/"]
     },
     "sources": {
       "npm/@openzeppelin/contracts@5.4.0/access/Ownable.sol": {
@@ -40,7 +30,7 @@
         "content": "// SPDX-License-Identifier: MIT\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\n\npragma solidity ^0.8.20;\n\n/**\n * @dev Provides information about the current execution context, including the\n * sender of the transaction and its data. While these are generally available\n * via msg.sender and msg.data, they should not be accessed in such a direct\n * manner, since when dealing with meta-transactions the account sending and\n * paying for execution may not be the actual sender (as far as an application\n * is concerned).\n *\n * This contract is only required for intermediate, library-like contracts.\n */\nabstract contract Context {\n    function _msgSender() internal view virtual returns (address) {\n        return msg.sender;\n    }\n\n    function _msgData() internal view virtual returns (bytes calldata) {\n        return msg.data;\n    }\n\n    function _contextSuffixLength() internal view virtual returns (uint256) {\n        return 0;\n    }\n}\n"
       },
       "project/contracts/GameStorage.sol": {
-        "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.28;\n\nimport {Ownable} from \"@openzeppelin/contracts/access/Ownable.sol\";\n\ncontract GameStorage is Ownable {\n    constructor(address initialOwner) Ownable(initialOwner) {}\n\n    struct Tournament {\n        uint8 player1;\n        uint8 player2;\n        uint8 player3;\n        uint8 player4;\n        uint32 timestamp;\n    }\n\n    mapping(uint8 => Tournament) public tournaments;\n\n    event TournamentStored(uint8 match_id, uint8 player1, uint8 player2, uint8 player3, uint8 player4);\n\n    function storeTournament(uint8 id, uint8 p1, uint8 p2, uint8 p3, uint8 p4) external onlyOwner {\n        require(tournaments[id].timestamp == 0, \"ID already used\");\n        tournaments[id] = Tournament(p1, p2, p3, p4, uint32(block.timestamp));\n        emit TournamentStored(id, p1, p2, p3, p4);\n    }\n\n    function getTournament(uint8 id) external view returns (Tournament memory){\n        require(tournaments[id].timestamp != 0, \"Tournament does not exist\");\n        return tournaments[id];\n    }\n}\n"
+        "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.28;\n\nimport {Ownable} from \"@openzeppelin/contracts/access/Ownable.sol\";\n\ncontract GameStorage is Ownable {\n    constructor(address initialOwner) Ownable(initialOwner) {}\n\n    struct Tournament {\n        uint32 player1;\n        uint32 player2;\n        uint32 player3;\n        uint32 player4;\n        uint32 timestamp;\n    }\n    mapping(uint32 => Tournament) public tournaments;\n    uint256[] public tournamentIds;\n    mapping(uint32 => bool) public exists;\n\n    event TournamentStored(\n        uint32 tour_id,\n        uint32 player1,\n        uint32 player2,\n        uint32 player3,\n        uint32 player4,\n        uint32 ts,\n        bytes32 snapshotHash\n    );\n\n    function storeTournament(uint32 tour_id, uint32 player1, uint32 player2, uint32 player3, uint32 player4) external onlyOwner {\n        require(!exists[tour_id], \"Tournament already stored!\");\n        uint32 ts = uint32(block.timestamp);\n        exists[tour_id] = true;\n        tournaments[tour_id] = Tournament(player1, player2, player3, player4, ts);\n        bytes32 snapshotHash = keccak256(abi.encode(tour_id, player1, player2, player3, player4, ts));\n        emit TournamentStored(tour_id, player1, player2, player3, player4, ts, snapshotHash);\n        tournamentIds.push(tour_id); \n    }\n\n    function getTournament(uint32 tour_id) external view returns (Tournament memory){\n        require(exists[tour_id], \"Tournament does not exist!\");\n        return tournaments[tour_id];\n    }\n    \n    function getNbTournamentStored() external view returns (uint256){\n        return tournamentIds.length;\n    }\n}\n"
       }
     }
   }

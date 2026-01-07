@@ -51,14 +51,12 @@ const insertSnapTournamentStmt = db.prepare(
 );
 const listSnapStmt = db.prepare(`SELECT * FROM snapshot`);
 const getSnapTournamentStmt = db.prepare(`SELECT * FROM snapshot WHERE id = ?`);
-// const updateTournamentStmt = db.prepare(
-//   `UPDATE snapshot SET tx_hash = ?, snap_hash = ?, block_timestamp = ? WHERE id = ?`,
-// );
 const truncateSnapshotStmt = db.prepare(`DELETE FROM snapshot`);
 
 const updateTournamentStmt = db.prepare(`
 UPDATE snapshot
 SET
+  tx_hash = ?,
   verify_status = ?,
   snapshot_hash = ?,
   block_number = ?,
@@ -114,20 +112,10 @@ export function getSnapTournament(id: number): BlockTournamentInput | null {
   }
 }
 
-// export function updateTournament(id: number, tx_hash: string, snap_hash: string, date: number) {
-//   try {
-//     updateTournamentStmt.run(tx_hash, snap_hash, date, id);
-//   } catch (err) {
-//     const error: any = new Error(
-//       `Error storing tx_hash in DB: ${(err as any)?.message || String(err)}`,
-//     );
-//     error.code = 'DB_REGISTER_HASH_ERROR';
-//     throw error;
-//   }
-// }
 export function updateTournament(data: SnapshotRow) {
   try {
     updateTournamentStmt.run(
+      data.tx_hash,
       data.verify_status,
       data.snapshot_hash,
       data.block_number,

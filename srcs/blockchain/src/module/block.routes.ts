@@ -17,7 +17,6 @@ async function blockRoutes(app: FastifyInstance) {
   app.get('/tournaments', listTournament);
   app.post('/tournaments', { schema: { body: blockSchema } }, addTournament);
   app.get('/tournaments/:id', { schema: { params: blockIdSchema } }, getTournamentView);
-  app.get('/cwd', chekCwd);
 }
 
 async function healthRoutes(app: FastifyInstance) {
@@ -27,10 +26,4 @@ async function healthRoutes(app: FastifyInstance) {
       return reply.code(200).send({ status: 'healthy', hotReload: 'ok fdac!' });
     },
   );
-}
-
-async function chekCwd() {
-  return {
-    cwd: process.cwd(),
-  };
 }

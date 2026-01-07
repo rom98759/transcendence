@@ -25,7 +25,6 @@ export async function storeTournament(
     error.code = 'BLOCKCHAIN_NO_SMART_CONTRACT_ERR';
     throw error;
   }
-
   try {
     const tx = await gamestorage.storeTournament(
       tournament.tour_id,
@@ -40,7 +39,6 @@ export async function storeTournament(
       throw new Error('Transaction receipt missing');
     }
     const event = extractTournamentStoredEvent(receipt, gamestorage);
-
     if (!event) {
       throw new Error('TournamentStored event not found');
     }

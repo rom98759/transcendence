@@ -6,3 +6,10 @@
   user-select: none;
   mix-blend-mode: difference;
 }
+
+.success {
+  color: green;
+}
+.error {
+  color: #b91c1c;
+}

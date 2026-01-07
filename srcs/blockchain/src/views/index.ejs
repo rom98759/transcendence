@@ -1,59 +1,35 @@
 <%- include('header.ejs', {title}) %>
 <div class="text-center my-4">
-    <h1 class="fw-bold"><%= message %></h1>
+    <h3 class="fw-bold"><%= message %></h3>
 </div>
-<div class="container">
-    <div class="card">
-        <h2>Enregistrement par formulaire</h2>
-        <form action="" method="post">
-            <div class="mb-2">
-                <label for="tx_id">tx_id</label>
-                <input type="number" class="form-control" id="id" name="id" />
-            </div>
-            <div class="mb-2">
-                <label for="tour_id">tour</label>
-                <input type="number" class="form-control" id="tour_id" name="tour_id" />
-            </div>
-            <div class="mb-2">
-                <label for="player1_id">player1_id</label>
-                <input type="number" class="form-control" id="player1_id" name="player1_id" />
-            </div>
-            <div class="mb-2">
-                <label for="player2_id">player2_id</label>
-                <input type="number" class="form-control" id="player2_id" name="player2_id" />
-            </div>
-            <div class="mb-2">
-                <label for="player3_id">player3_id</label>
-                <input type="number" class="form-control" id="player3_id" name="player3_id" />
-            </div>
-            <div class="mb-2">
-                <label for="player4_id">player4_id</label>
-                <input type="number" class="form-control" id="player4_id" name="player4_id" />
-            </div>
-            <button class="btn btn-primary">New data</button>
-        </form>
-    </div>
+<div class="max-w-6xl mx-auto px-4 space-y-6">
 
     <!-- Carte d'enregistrement snapshot blockchain -->
-    <div class="card" id="registerCard">
-        <h2>Enregistrement par JSON SPA</h2>
-        <form id="registerForm">
-            <label for="regtxId">id</label>
-            <input id="regtxId" name="tx_id" type="text" />
-            <label for="regmId">tour_id</label>
-            <input id="regmId" name="tour_id" type="text" />
-            <label for="regp1Id">player1_id</label>
-            <input id="regp1Id" name="player1_id" type="text" />
-            <label for="regp2Id">player2_id</label>
-            <input id="regp2Id" name="player2_id" type="text" />
-            <label for="regp3Id">player3_id</label>
-            <input id="regp3Id" name="player3_id" type="text" />
-            <label for="regp4Id">player4_id</label>
-            <input id="regp4Id" name="player4_id" type="text" />
-            <button class="btn btn-primary mt-3" type="submit" id="regBtn">S'inscrire</button>
-            <div class="msg" id="regMsg"></div>
-            <div class="small">Envoi POST vers: <code>/register</code></div>
-        </form>
+    <div class="rounded-xl border bg-white shadow-sm border-gray-200" id="registerCard">
+        <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
+            <h2 class="text-lg font-semibold">Adding manually a tournament</h2>
+        </div>
+        <div class="spx-6 p-4">
+            <form class="space-y-4" id="registerForm">
+                <div class="flex flex-col gap-1">
+                    <label class="text-sm font-medium" for="regmId">tour_id</label>
+                    <input id="regmId" name="tour_id" type="text"
+                    class="rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-blue-200 border-gray-200"/>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <% for (let i = 1; i <= 4; i++) { %>
+                  <div class="flex flex-col gap-1">
+                    <label class="text-sm font-medium">player<%= i %></label>
+                    <input id="regp<%= i %>Id" type="text"
+                           class="rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring focus:ring-blue-200 border-gray-200" />
+                  </div>
+                  <% } %>
+                </div>
+                <button class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50" type="submit" id="regBtn">S'inscrire</button>
+                <div class="text-xs" id="regMsg"></div>
+                <div class="text-xs text-gray-500">Envoi POST vers: <code class="font-mono">/register</code></div>
+            </form>
+        </div>
     </div>
     <script>
         // Code de la carte d'enregistrement snapshot blockchain
@@ -81,14 +57,13 @@
             regMsg.textContent = "";
             regMsg.className = "msg";
             regBtn.disabled = true;
-            const id = document.getElementById("regtxId").value;
             const tour_id = document.getElementById("regmId").value;
-            const player1_id = document.getElementById("regp1Id").value;
-            const player2_id = document.getElementById("regp2Id").value;
-            const player3_id = document.getElementById("regp3Id").value;
-            const player4_id = document.getElementById("regp4Id").value;
+            const player1 = document.getElementById("regp1Id").value;
+            const player2 = document.getElementById("regp2Id").value;
+            const player3 = document.getElementById("regp3Id").value;
+            const player4 = document.getElementById("regp4Id").value;
             try {
-                const result = await postJson("/tournaments", { id, tour_id, player1_id, player2_id,player3_id,player4_id  });
+                const result = await postJson("/tournaments", { tour_id, player1, player2,player3,player4  });
                 if (result.ok) {
                     regMsg.textContent = "Inscription réussie";
                     regMsg.classList.add("success");
@@ -106,49 +81,56 @@
         });
     </script>
 
-    <div class="card">
-        <table class="tabletable-striped">
-            <thead>
+    <div class="overflow-x-auto rounded-xl border bg-white shadow-sm border-gray-200">
+        <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
+            <h2 class="text-lg font-semibold">List of tournaments in snapshot</h2>
+        </div>
+    
+    <div>
+        <table class="min-w-full text-sm">
+            <thead class="bg-gray-50 text-xs uppercase text-gray-500">
                 <tr>
-                    <th scope="col">id</th>
-                    <th scope="col">tx_hash</th>
-                    <th scope="col">snap_hash</th>
-                    <th scope="col">block_timestamp</th>
-                    <th scope="col">t_id</th>
-                    <th scope="col">p1_id</th>
-                    <th scope="col">p2_id</th>
-                    <th scope="col">p3_id</th>
-                    <th scope="col">p4_id</th>
+                    <th class="px-4 py-3 text-left">id</th>
+                    <th class="px-4 py-3">tx_hash</th>
+                    <th class="px-4 py-3">snap_hash</th>
+                    <th class="px-4 py-3">block_timestamp</th>
+                    <th class="px-4 py-3">t_id</th>
+                    <th class="px-4 py-3">p1_id</th>
+                    <th class="px-4 py-3">p2_id</th>
+                    <th class="px-4 py-3">p3_id</th>
+                    <th class="px-4 py-3">p4_id</th>
                 </tr>
             </thead>
+            <tbody class="divide-y">
             <% for (const row of snapshots) { %>
-            <tr>
-                <td><%= row.id %></td>
-                <td><%= row.tx_hash %></td>
-                <td><%= row.snap_hash %></td>
-                <td><%= row.block_timestamp %></td>
-                <td><%= row.tour_id %></td>
-                <td><%= row.player1_id %></td>
-                <td><%= row.player2_id %></td>
-                <td><%= row.player3_id %></td>
-                <td><%= row.player4_id %></td>
+            <tr class="hover:bg-gray-50 border-gray-200">
+                <td class="px-4 py-2"><%= row.id %></td>
+                <td class="px-4 py-2 font-mono text-xs truncate max-w-xs"><%= row.tx_hash %></td>
+                <td class="px-4 py-2 font-mono text-xs truncate max-w-xs"><%= row.snap_hash %></td>
+                <td class="px-4 py-2"><%= row.block_timestamp %></td>
+                <td class="px-4 py-2"><%= row.tour_id %></td>
+                <td class="px-4 py-2"><%= row.player1_id %></td>
+                <td class="px-4 py-2"><%= row.player2_id %></td>
+                <td class="px-4 py-2"><%= row.player3_id %></td>
+                <td class="px-4 py-2"><%= row.player4_id %></td>
             </tr>
             <% } %>
+            </tbody>
         </table>
+    </div>
     </div>
 
     <!-- Carte Me -->
-    <div class="card" id="me">
-        <div class="card-body">
-            <h2 class="card-title">Liste des Users</h2>
-
-            <div class="d-flex gap-2 mb-3">
-                <button id="meBtn" class="btn btn-primary">Obtenir les informations</button>
-                <button id="clearBtn" class="btn btn-secondary">Clear</button>
+    <div class="rounded-xl border bg-white shadow-sm border-gray-200" id="me">
+            <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
+                <h2 class="text-lg font-semibold">Liste des Users</h2>
+            </div>
+            <div class="d-flex gap-2 m-4">
+                <button id="meBtn" class="rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">Obtenir les informations</button>
+                <button id="clearBtn" class="rounded-md bg-gray-200 px-4 py-2 text-sm hover:bg-gray-300">Clear</button>
             </div>
 
-            <div id="meMsg"></div>
-        </div>
+            <div id="meMsg" class="space-y-2"></div>
     </div>
 
     <script>
@@ -186,11 +168,11 @@
                     if (Array.isArray(data)) {
                         // Construction de la liste Bootstrap
                         const ul = document.createElement("ul");
-                        ul.className = "list-group";
+                        ul.className = "divide-y rounded-md border border-gray-200 m-4";
 
                         data.forEach((item) => {
                             const li = document.createElement("li");
-                            li.className = "list-group-item d-flex justify-content-between align-items-center";
+                            li.className = "px-4 py-2 flex justify-between text-sm border-gray-200";
                             li.innerHTML = `
 							<span><strong>Tour ID:</strong> ${item.tour_id} winner is => ${item.player1_id}</span>
 						`;
@@ -215,6 +197,7 @@
             }
         });
     </script>
+<%- include('snapshots.ejs') %>
 </div>
 
 <%- include('footer.ejs') %>

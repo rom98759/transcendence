@@ -13,7 +13,7 @@ export async function listTournamentView(_request: FastifyRequest, reply: Fastif
   const snapshots = db.listSnap();
   return reply.view('index', {
     title: 'Blockchain Service',
-    message: 'Hello from Fastify + EJS + TypeScript',
+    message: "It's better when there's proof!",
     snapshots,
   });
 }
@@ -27,14 +27,14 @@ export async function getTournamentView(
   request: FastifyRequest<{ Params: { id: number } }>,
   reply: FastifyReply,
 ) {
-  const snapshots = db.getSnapTournament(request.params.id);
-  if (snapshots === undefined) {
+  const snapshot = db.getSnapTournament(request.params.id);
+  if (snapshot === undefined) {
     throw new RecordNotFoundError(`No data with id ${request.params.id}`);
   }
-  return reply.view('data', {
-    title: 'My data is',
-    message: 'My data is',
-    snapshots,
+  return reply.view('snapshot-details', {
+    title: 'Tournament details',
+    message: 'proof of tournament',
+    snapshot,
   });
 }
 

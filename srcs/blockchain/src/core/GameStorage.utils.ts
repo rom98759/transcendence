@@ -1,6 +1,7 @@
 import { ContractTransactionReceipt, LogDescription } from 'ethers';
 import { keccak256, AbiCoder } from 'ethers';
 import { TournamentStoredEvent } from '../module/block.type.js';
+import { Contract } from 'ethers';
 
 const abi = AbiCoder.defaultAbiCoder();
 
@@ -22,7 +23,7 @@ export function computeSnapshotHash(
 
 export function extractTournamentStoredEvent(
   receipt: ContractTransactionReceipt,
-  gameStorage: any,
+  gameStorage: Contract,
 ): TournamentStoredEvent {
   for (const log of receipt.logs) {
     let parsed: LogDescription | null = null;
@@ -43,8 +44,8 @@ export function extractTournamentStoredEvent(
       player2: Number(args.player2),
       player3: Number(args.player3),
       player4: Number(args.player4),
-      ts: Number(args.timestamp),
-      snapshotHash: args.businessHash as string,
+      ts: Number(args.ts),
+      snapshotHash: args.snapshotHash as string,
     };
   }
 
