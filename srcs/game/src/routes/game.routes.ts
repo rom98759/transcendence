@@ -18,7 +18,7 @@ export async function gameRoutes(app: FastifyInstance) {
   app.get('/:sessionId', { websocket: true }, webSocketConnect);
 
   // RL API
-  app.post('/rl/reset', resetGame);
-  app.post('/rl/step', stepGame);
-  app.get('/rl/state', getGameState);
+  // app.post('/rl/reset', resetGame);
+  // app.post('/rl/step', stepGame);
+  // app.get('/rl/state', getGameState);
 }

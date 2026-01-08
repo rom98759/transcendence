@@ -9,8 +9,8 @@ dev: volumes colima-dev
 	$(D_COMPOSE_DEV) up --build -d
 
 volumes:
-	@mkdir -p $(VOLUMES_PATH) #???
-	@mkdir -p $(UPLOADS_PATH) #???
+	@mkdir -p $(VOLUMES_PATH)
+	@mkdir -p $(UPLOADS_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
 
 start :

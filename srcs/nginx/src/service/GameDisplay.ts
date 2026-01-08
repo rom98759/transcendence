@@ -106,6 +106,9 @@ export class GameDisplay {
          <button id="exit-btn" class="flex-1 bg-red-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
             Exit to main page
          </button>
+         <button id="create-ai-game-btn" class="flex-1 bg-blue-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+            Create game with AI
+         </button>
       </div>
       `;
   }
@@ -261,6 +264,12 @@ export class GameDisplay {
     }
   }
 
+  async askForAIGameSession(): Promise<void> {
+    if (this.sessionId) return;
+    this.askForGameSession();
+    this.sessionId = 'AI-' + this.sessionId;
+  }
+
   async joinSession(sessionId: string) {
     if (this.sessionId) return;
     try {
@@ -370,6 +379,7 @@ export class GameDisplay {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.id === 'create-game-btn') this.askForGameSession();
+      if (target.id === 'create-ai-game-btn') this.askForAIGameSession();
       if (target.id === 'exit-btn') this.exitGame();
       if (target.id === 'stop-btn' || target.id === 'stop2-btn') {
         this.stopGame();
