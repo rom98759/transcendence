@@ -16,16 +16,8 @@ else
 endif
 UPLOADS_PATH := $(VOLUMES_PATH)/uploads
 
-# --- Docker or Podman ---
-JM := $(findstring Jean, $(shell uname -a))
-
-ifeq ($(JM), Jean)
-  CONTAINER_CMD := podman
-  COMPOSE_CMD   := podman-compose
-else
-  CONTAINER_CMD := docker
-  COMPOSE_CMD   := docker compose
-endif
+CONTAINER_CMD := docker
+COMPOSE_CMD   := docker compose
 
 # --- Shortcuts ---
 N_BUILD_WK := npm run build --workspace srcs

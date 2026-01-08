@@ -38,25 +38,6 @@ export async function getTournamentView(
   });
 }
 
-export async function addTournamentForm(
-  this: FastifyInstance,
-  request: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const { tour_id, player1, player2, player3, player4 } = request.body as BlockTournamentInput;
-  const rowId = db.insertSnapTournament(request.body as BlockTournamentInput);
-  this.log.info({
-    event: 'register_success',
-    tour_id,
-    player1,
-    player2,
-    player3,
-    player4,
-    rowId,
-  });
-  return reply.redirect('/');
-}
-
 export async function addTournament(
   this: FastifyInstance,
   request: FastifyRequest,
