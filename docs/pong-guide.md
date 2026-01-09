@@ -1,5 +1,16 @@
 # game service
 
+## WebSocket Error Managment
+
+```
+    websocket.close(code, reason)
+```
+
+    **code -> reason**
+    4001 -> game over
+    4002 -> A player has quit the game
+    4003 -> Session is full ( 2 players max)
+
 ## Memory management:
 
     export const gameSessions = new Map<string, {

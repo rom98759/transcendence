@@ -9,8 +9,8 @@ RUN apk add --no-cache python3 make g++ wget
 COPY package*.json ./
 RUN npm install
 
-# Copy source code
-COPY . .
+# Copy source code --> volume mounted from src to /app ! NO COPY from src
+# COPY . .
 
 # Verify files (debugging)
 RUN ls -la /app && ls -la /app/src

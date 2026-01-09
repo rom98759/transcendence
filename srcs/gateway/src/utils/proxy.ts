@@ -108,7 +108,7 @@ function handleErrorAndDisconnection(
       code,
       reason: reason.toString(),
     });
-    upstreamWs.close();
+    upstreamWs.close(code, reason);
   });
 }
 

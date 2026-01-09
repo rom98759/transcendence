@@ -27,6 +27,7 @@ export class GameDisplay {
   websocket: WebSocket | null = null;
   pingInterval: number | null = null;
   settingsTimeout: number | null = null;
+  player: string | null = null;
 
   constructor() {
     this.gameLogs = document.createElement('div');
@@ -55,22 +56,38 @@ export class GameDisplay {
 
     this.buildElements();
   }
-
   showPanel(panel: 'settings' | 'game-logs' | 'game-sessions') {
+    const visiblePanels = panel === 'game-sessions' ? ['game-sessions'] : ['settings', 'game-logs'];
+
     ['settings', 'game-logs', 'game-sessions'].forEach((id) => {
       const el = document.getElementById(id);
       if (el) {
-        el.classList.toggle('hidden', id !== panel);
+        el.classList.toggle('hidden', !visiblePanels.includes(id));
       }
     });
+
     if (panel === 'game-sessions') {
-      // this.loadSessions()
       this.sessionsInterval = window.setInterval(() => this.loadSessions(), 2000);
     } else if (this.sessionsInterval) {
       clearInterval(this.sessionsInterval);
       this.sessionsInterval = null;
     }
   }
+
+  // showPanel(panel: 'settings' | 'game-logs' | 'game-sessions') {
+  //   ['settings', 'game-logs', 'game-sessions'].forEach((id) => {
+  //     const el = document.getElementById(id);
+  //     if (el) {
+  //       el.classList.toggle('hidden', id !== panel);
+  //     }
+  //   });
+  //   if (panel === 'game-sessions') {
+  //     this.sessionsInterval = window.setInterval(() => this.loadSessions(), 2000);
+  //   } else if (this.sessionsInterval) {
+  //     clearInterval(this.sessionsInterval);
+  //     this.sessionsInterval = null;
+  //   }
+  // }
 
   makeResultDialog() {
     this.resultDialog.innerHTML = `
@@ -210,9 +227,6 @@ export class GameDisplay {
               <div id="game-log" class="h-24 overflow-y-auto space-y-1 text-left text-sm font-mono text-gray-300"></div>
             </div>
           </div>
-        <button id="stop2-btn" class="flex-1 striped-disabled bg-orange-600 hover:bg-green-700 text-white font-bold rounded transition">
-            STOP
-        </button>
     `;
   }
 
@@ -222,9 +236,9 @@ export class GameDisplay {
     this.makeGameArena();
     this.makePanel();
     this.makeGameLogs();
-    this.panel.appendChild(this.gameSessions);
-    this.panel.appendChild(this.settings);
     this.panel.appendChild(this.gameLogs);
+    this.panel.appendChild(this.settings);
+    this.panel.appendChild(this.gameSessions);
     this.main.appendChild(this.panel);
     this.main.appendChild(this.gameArena);
     // this.main.appendChild(this.settings)
@@ -236,6 +250,7 @@ export class GameDisplay {
 
   async askForGameSession(): Promise<void> {
     if (this.sessionId) return;
+    this.clearGameLogs();
     try {
       const response = await fetch('/api/game/create-session', {
         method: 'POST',
@@ -263,10 +278,12 @@ export class GameDisplay {
 
   async joinSession(sessionId: string) {
     if (this.sessionId) return;
+    this.clearGameLogs();
     try {
       this.sessionId = sessionId;
       await this.openWebSocket(this.sessionId);
       this.showPanel('game-logs');
+      this.gameArena.classList.remove('hidden');
     } catch (error) {
       console.error('Failed to join session (bad session ?):', error);
       this.sessionId = undefined;
@@ -371,7 +388,7 @@ export class GameDisplay {
       const target = e.target as HTMLElement;
       if (target.id === 'create-game-btn') this.askForGameSession();
       if (target.id === 'exit-btn') this.exitGame();
-      if (target.id === 'stop-btn' || target.id === 'stop2-btn') {
+      if (target.id === 'stop-btn') {
         this.stopGame();
         this.showPanel('game-sessions');
       }
@@ -391,7 +408,7 @@ export class GameDisplay {
     // Close WebSocket
     this.stopPingInterval();
     if (this.websocket) {
-      this.websocket.close(1000, 'User exited game');
+      this.websocket.close(4002, 'User exited game');
       this.websocket = null;
     }
     this.updateConnectionStatus(false, 'Disconnected');
@@ -399,6 +416,7 @@ export class GameDisplay {
     this.gameState = null;
     this.drawWaitingScreen();
     console.log('Game stoped');
+    this.clearGameLogs();
     // this.showSessions()
   }
 
@@ -407,7 +425,7 @@ export class GameDisplay {
     this.stopGame();
     document.getElementById('first-screen')?.classList.remove('hidden');
     this.screen.classList.add('hidden');
-    this.addGameLog('Disconnected from game', 'warning');
+    // this.addGameLog('Disconnected from game', 'warning');
     console.log('Exited game');
     if (this.sessionsInterval) {
       console.log('clear interval');
@@ -463,7 +481,12 @@ export class GameDisplay {
       this.addGameLog(`Error: ${error}`, 'error');
     }
   }
+  private clearGameLogs(): void {
+    const logContainer = document.getElementById('game-log');
+    if (!logContainer) return;
 
+    logContainer.innerHTML = '';
+  }
   private addGameLog(
     message: string,
     type: 'info' | 'success' | 'error' | 'warning' = 'info',
@@ -516,7 +539,11 @@ export class GameDisplay {
           this.gameState = message.data;
           console.log('Session ID:', message.sessionId);
           this.sessionId = message.sessionId;
-          this.addGameLog(`Connected to new session: ${this.sessionId}`, 'success');
+          this.addGameLog(
+            `Connected to new session: ${this.sessionId} as player ${message.message}`,
+            'success',
+          );
+          this.player = message.message;
           if (this.gameState.status === 'waiting') {
             this.drawPreview();
           } else if (this.gameState.status === 'playing') {
@@ -555,7 +582,7 @@ export class GameDisplay {
         break;
 
       case 'gameOver':
-        this.addGameLog(`Game Over! ${message.message || ''}`, 'warning');
+        this.addGameLog(`Game over ${message.message || ''}`, 'warning');
         const startBtn = document.getElementById('start-game-btn');
         if (startBtn) {
           (startBtn as HTMLButtonElement).disabled = false;
@@ -716,7 +743,7 @@ export class GameDisplay {
 
       this.websocket.onclose = (event) => {
         clearTimeout(connectionTimeout);
-        if (event.code !== 1000) {
+        if (event.code !== 1000 && event.code < 4000) {
           // 1000 = normal closure
           this.addGameLog(
             `Connection closed: ${event.code} - ${event.reason || 'Unknown reason'}`,
@@ -732,7 +759,7 @@ export class GameDisplay {
             );
           }
         } else {
-          this.addGameLog('Connection closed normally', 'info');
+          this.addGameLog(`Connection closed: ${event.code}: ${event.reason}`, 'info');
         }
         this.updateConnectionStatus(false, 'Disconnected');
         this.stopPingInterval();

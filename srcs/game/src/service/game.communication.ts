@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyRequest } from 'fastify';
 import { gameSessions } from '../core/game.state.js';
 import { ServerMessage, ClientMessage } from '../core/game.types.js';
 import { addPlayerConnection, cleanupConnection } from './game.connections.js';
-
+import { WS_CLOSE } from '../core/game.state.js';
 // Broadcast state to all clients in a session
 export function broadcastToSession(sessionId: string, message: ServerMessage) {
   const currentSession = gameSessions.get(sessionId);
@@ -26,6 +26,14 @@ export function handleClientMessage(this: FastifyInstance, ws: any, sessionId: s
     ws.send(JSON.stringify({ type: 'error', message: 'No game at this session' } as ServerMessage));
     return;
   }
+  if (!currentSession.players || currentSession.players.size === 0)
+    ws.send(JSON.stringify({ type: 'connected', message: 'Player A' }));
+  else if (currentSession.players.size === 1)
+    ws.send(JSON.stringify({ type: 'connected', message: 'Player B' }));
+  else {
+    ws.close(WS_CLOSE.SESSION_FULL, 'session is full');
+    return;
+  }
   addPlayerConnection.call(this, ws, sessionId);
   const game = currentSession.game;
   // Handle incoming messages
@@ -44,16 +52,20 @@ export function handleClientMessage(this: FastifyInstance, ws: any, sessionId: s
             this.log.info(`[${sessionId}] Game started`);
           }
           break;
-        case 'stop': // Should be 'quit' it mean quit & disconnect
+        case 'stop': // Should be 'quit' -> it mean quit & disconnect but the game still running (even with no players)
           if (game) {
-            broadcastToSession(sessionId, {
-              type: 'gameOver',
-              message: 'Game stopped',
-              data: game.getState(),
-            });
-            game.stop();
-            cleanupConnection(ws, currentSession.id);
-            this.log.info(`[${sessionId}] Game stopped`);
+            // broadcastToSession(sessionId, {
+            //   type: 'gameOver',
+            //   message: 'Game stopped',
+            //   data: game.getState(),
+            // });
+            // game.stop();
+            cleanupConnection(
+              ws,
+              currentSession.id,
+              WS_CLOSE.PLAYER_QUIT,
+              'A player has quit the game',
+            );
           }
           break;
         case 'paddle':
@@ -104,7 +116,9 @@ export function defineCommunicationInterval(sessionId: string): any {
         type: 'gameOver',
         data: currentSessionData.game.getState(),
       });
-      cleanupConnection(null, sessionId);
+      //at game over, cleanup all WS connexions + delete the gameSession
+      cleanupConnection(null, sessionId, 4001, 'Game Over');
+      gameSessions.delete(sessionId);
     } else if (status === 'waiting') {
       broadcastToSession(sessionId, {
         type: 'state',

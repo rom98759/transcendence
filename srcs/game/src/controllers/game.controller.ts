@@ -1,9 +1,10 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { randomUUID } from 'crypto';
 import { gameSessions } from '../core/game.state.js';
-import { getGame } from '../service/game.init.js';
+import { getGame as getSessionData } from '../service/game.init.js';
 import { handleClientMessage } from '../service/game.communication.js';
 import { GameSettings } from '../core/game.types.js';
+import { WS_CLOSE } from '../core/game.state.js';
 
 // Controller - get sessionId from body
 export async function gameSettings(this: FastifyInstance, req: FastifyRequest) {
@@ -44,6 +45,13 @@ export async function gameSettings(this: FastifyInstance, req: FastifyRequest) {
     };
   }
 
+  if (sessionData.game.status != 'waiting') {
+    this.log.warn({ sessionId }, 'Session is running or finished');
+    return {
+      status: 'failure',
+      message: `game session cannot be changed (certainly running)`,
+    };
+  }
   // Apply settings
   sessionData.game.applySettings(settings as GameSettings);
   this.log.info({ sessionId, settings }, 'Game settings applied successfully');
@@ -58,7 +66,7 @@ export async function gameSettings(this: FastifyInstance, req: FastifyRequest) {
 
 export async function newGameSession(this: FastifyInstance) {
   const sessionId = randomUUID();
-  const sessionData = getGame.call(this, null, sessionId);
+  const sessionData = getSessionData.call(this, null, sessionId);
   if (sessionData.game) sessionData.game.preview();
   return {
     status: 'success',
@@ -96,5 +104,11 @@ export async function webSocketConnect(this: FastifyInstance, socket: any, req: 
   console.log('get to the sessions id by WS');
   const params = req.params as { sessionId: string };
   const sessionId = params.sessionId;
+
+  // const sessionData = getSessionData.call(this, null, sessionId);
+  // if (sessionData && sessionData.player.size === 2) {
+  //  socket.close(WS_CLOSE.SESSION_FULL, 'Game session is full');
+  //  return
+  // }
   handleClientMessage.call(this, socket, sessionId);
 }
