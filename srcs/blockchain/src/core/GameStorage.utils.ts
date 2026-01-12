@@ -2,6 +2,7 @@ import { ContractTransactionReceipt, LogDescription } from 'ethers';
 import { keccak256, AbiCoder } from 'ethers';
 import { TournamentStoredEvent } from '../module/block.type.js';
 import { Contract } from 'ethers';
+import { AppLogger } from './logger.js';
 
 const abi = AbiCoder.defaultAbiCoder();
 
@@ -22,9 +23,19 @@ export function computeSnapshotHash(
 }
 
 export function extractTournamentStoredEvent(
+  logger: AppLogger,
   receipt: ContractTransactionReceipt,
   gameStorage: Contract,
 ): TournamentStoredEvent {
+  logger.info({
+    event: 'tx_receipt_debug',
+    txHash: receipt.hash,
+    logsCount: receipt.logs.length,
+    logs: receipt.logs.map((l) => ({
+      address: l.address,
+      topics: l.topics,
+    })),
+  });
   for (const log of receipt.logs) {
     let parsed: LogDescription | null = null;
 

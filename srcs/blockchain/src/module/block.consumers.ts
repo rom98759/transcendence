@@ -1,5 +1,11 @@
-export async function startTournamentConsumer(fastify) {
-  const redis = fastify.redis;
+import { FastifyInstance } from 'fastify';
+
+export async function startTournamentConsumer(app: FastifyInstance) {
+  if (!app.redis) {
+    app.log.warn('Redis not available, tournament consumer disabled');
+    return;
+  }
+  const redis = app.redis;
 
   try {
     await redis.xgroup('CREATE', 'tournament.results', 'blockchain-group', '$', 'MKSTREAM');
@@ -8,7 +14,7 @@ export async function startTournamentConsumer(fastify) {
   }
 
   const consume = async () => {
-    while (!fastify.closing) {
+    while (!app.closing) {
       const streams = await redis.xreadgroup(
         'GROUP',
         'blockchain-group',

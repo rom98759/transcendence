@@ -7,3 +7,8 @@ declare module 'fastify' {
     redis: Redis;
   }
 }
+declare module 'fastify' {
+  interface FastifyInstance {
+    closing: boolean;
+  }
+}

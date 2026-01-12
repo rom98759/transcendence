@@ -1,12 +1,19 @@
 import fp from 'fastify-plugin';
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
+// import { REDIS_URL } from '../core/config.js';
 
-export default fp(async (fastify) => {
-  const redis = new Redis(process.env.REDIS_URL);
+export default fp(async (app) => {
+  const url = process.env.REDIS_URL;
 
-  fastify.decorate('redis', redis);
+  if (!url) {
+    app.log.warn('REDIS_URL not set, redis plugin disabled');
+    return;
+  }
+  const redis = new Redis(url);
 
-  fastify.addHook('onClose', async () => {
+  app.decorate('redis', redis);
+
+  app.addHook('onClose', async () => {
     await redis.quit();
   });
 });

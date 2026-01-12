@@ -7,11 +7,12 @@ import {
   tournamentsData,
   tournamentBlockData,
 } from './mockData.js';
-import app from '../app.js';
+import { buildApp } from '../app.js';
 import * as db from '../core/database.js';
 import { parse } from 'node:path';
 
 const blockchainReady = process.env.BLOCKCHAIN_READY === 'true';
+const app = await buildApp();
 
 describe('TEST blockchain without Smart Contract', () => {
   test('Blockchain page respond', async () => {

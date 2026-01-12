@@ -17,6 +17,7 @@ export async function storeTournament(
     AVALANCHE_RPC_URL: !!process.env.AVALANCHE_RPC_URL,
   });
 
+  console.log('111111111111111111111111111111111111111111111111111111111111111111111111111111');
   const gamestorage = getGameStorage(logger);
   if (!gamestorage) {
     const error: any = new Error(
@@ -38,7 +39,7 @@ export async function storeTournament(
     if (!receipt) {
       throw new Error('Transaction receipt missing');
     }
-    const event = extractTournamentStoredEvent(receipt, gamestorage);
+    const event = extractTournamentStoredEvent(logger, receipt, gamestorage);
     if (!event) {
       throw new Error('TournamentStored event not found');
     }

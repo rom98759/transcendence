@@ -1,4 +1,3 @@
-// import { db } from "../core/database.js";
 import * as db from '../core/database.js';
 import { errorEventMap, RecordNotFoundError } from '../core/error.js';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
@@ -47,7 +46,7 @@ export async function addTournament(
   try {
     const rowSnapId = addTournamentSnapDB(this.log, data);
     const blockchainReady = process.env.BLOCKCHAIN_READY === 'true';
-
+    this.log.info('!@#$%^&');
     if (blockchainReady) {
       const dataStored = await addTournamentBlockchain(this.log, data, rowSnapId);
       updateTournamentSnapDB(this.log, dataStored);
