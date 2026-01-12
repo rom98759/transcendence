@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { idSchema, usernameSchema } from './base.schema.js';
+import { UserDTO } from './auth.schema.js';
 
 export const ProfileCreateInSchema = z.object({
   authId: idSchema,
@@ -27,3 +28,4 @@ export const ProfileSchema = z.object({
 export type ProfileCreateInDTO = z.output<typeof ProfileCreateInSchema>;
 export type ProfileDataDTO = z.output<typeof ProfileDataSchema>;
 export type ProfileDTO = z.output<typeof ProfileSchema>;
+export type ProfileAuthDTO = UserDTO & ProfileDTO;

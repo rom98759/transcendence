@@ -1,4 +1,4 @@
-import { ProfileDTO } from '@transcendence/core';
+import { ProfileAuthDTO } from '@transcendence/core';
 import { AvatarSize } from '../../types/react-types';
 import Avatar from '../atoms/Avatar';
 
@@ -6,7 +6,7 @@ import Avatar from '../atoms/Avatar';
  * @todo guards for avatar url format
  */
 interface Props {
-  user: ProfileDTO;
+  user: ProfileAuthDTO;
   avatarSize: AvatarSize;
 }
 

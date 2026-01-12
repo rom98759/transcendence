@@ -65,4 +65,9 @@ export type {
   FriendshipUpdateStatusDTO,
   FriendshipUpdateNicknameDTO,
 } from './schemas/friend.schema.js';
-export type { ProfileDTO, ProfileDataDTO, ProfileCreateInDTO } from './schemas/profile.schema.js';
+export type {
+  ProfileDTO,
+  ProfileAuthDTO,
+  ProfileDataDTO,
+  ProfileCreateInDTO,
+} from './schemas/profile.schema.js';

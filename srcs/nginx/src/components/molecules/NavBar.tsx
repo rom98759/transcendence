@@ -1,9 +1,8 @@
 import { UserRow } from './UserRow';
-import { useCallback, useEffect, useState } from 'react';
-import { getErrorMessage } from '../../utils/errors';
-import { UserProfileDTO } from '../../schemas/profile.schema';
 import MenuElement from '../atoms/MenuElement';
-import { MenuActions } from '../../core/react-types';
+import { MenuActions } from '../../types/react-types';
+import { useAuth } from '../helpers/AuthProvider';
+import { DevLoginButtons } from '../atoms/DevLogin';
 
 const playItems = [
   { label: 'Play with friend', href: '#friends' },
@@ -19,49 +18,7 @@ const profileItems = [
 const homeItems = [{ label: 'Home', href: '#' }];
 
 export const NavBar = () => {
-  const [user, setUser] = useState<UserProfileDTO | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = {
-        username: 'toto',
-        avatarUrl: 'default.png',
-      };
-      setUser(data);
-    } catch (err: unknown) {
-      const message = getErrorMessage(err);
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="h-12 w-12 rounded-full bg-slate-800 animate-pulse"></div>
-        <div className="h-4 w-40 bg-slate-800 rounded animate-pulse"></div>
-      </div>
-    );
-  }
-
-  if (!user || error) {
-    return (
-      <div className="space-y-3">
-        <p className="text-red-400">Unable to load your profile</p>
-        <p className="text=xs text-slate-400">{error}</p>
-        <button className="px-3 py-1"></button>
-      </div>
-    );
-  }
+  const { user, isLoggedIn } = useAuth();
 
   return (
     <nav className="mb-3 bg-teal-800/30 p-2 w-full flex flex-row justify-evenly">
@@ -73,7 +30,8 @@ export const NavBar = () => {
       <MenuElement action={MenuActions.HOME} items={homeItems}></MenuElement>
       <MenuElement action={MenuActions.PLAY} items={playItems}></MenuElement>
       <MenuElement action={MenuActions.PROFILE} items={profileItems}></MenuElement>
-      <UserRow avatarSize="sm" user={user}></UserRow>
+      <DevLoginButtons></DevLoginButtons>
+      {user && isLoggedIn && <UserRow avatarSize="sm" user={user}></UserRow>}
     </nav>
   );
 };

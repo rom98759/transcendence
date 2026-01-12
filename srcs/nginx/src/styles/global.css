@@ -3,3 +3,9 @@
 @theme {
   --font-quantico: 'Quantico', sans-serif;
 }
+
+/* @layer components { */
+.ts-form-title {
+  @apply text-gray-500 font-bold;
+}
+/* } */

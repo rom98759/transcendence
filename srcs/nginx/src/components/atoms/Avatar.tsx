@@ -1,4 +1,3 @@
-import defaultAvatar from '../../assets/avatars/default.png';
 import { AvatarSize } from '../../types/react-types';
 
 interface AvatarProps {
@@ -10,7 +9,7 @@ interface AvatarProps {
 }
 
 const Avatar = ({
-  src = defaultAvatar,
+  src = 'default.png',
   alt = 'User avatar',
   size = 'md',
   className = '',
@@ -21,6 +20,12 @@ const Avatar = ({
     lg: 'w-24 h-24',
   };
 
+  const getImageUrl = (name: string) => {
+    return new URL(`../../assets/avatars/${name}`, import.meta.url).href;
+  };
+
+  const displaySrc = getImageUrl(src);
+
   return (
     <div
       className={`
@@ -30,7 +35,7 @@ const Avatar = ({
         ${className}
       `}
     >
-      <img src={src} alt={alt} className="w-full h-full object-cover" />
+      <img src={displaySrc} alt={alt} className="w-full h-full object-cover" />
     </div>
   );
 };
