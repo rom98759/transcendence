@@ -8,8 +8,8 @@ services:
   # Nginx reverse proxy
   nginx-proxy:
     build:
-      context: ./nginx
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: srcs/nginx/Dockerfile
     container_name: ${PROXY_SERVICE_NAME}
     ports:
       - '8080:80'
@@ -174,7 +174,7 @@ volumes:
   data:
     driver: local
     driver_opts:
-      device: ${HOST_VOLUME_PATH}/data
+      device: ${HOST_VOLUME_PATH}/database
       o: bind
       type: none
   uploads:

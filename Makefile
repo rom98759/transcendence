@@ -9,9 +9,10 @@ dev: volumes colima-dev
 	$(D_COMPOSE_DEV) up --build -d
 
 volumes:
-	@mkdir -p $(VOLUMES_PATH)
+	@mkdir -p $(DATABASE_PATH)
 	@mkdir -p $(UPLOADS_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
+	@chmod -R 777 $(UPLOADS_PATH)
 
 start :
 	$(D_COMPOSE) start
@@ -166,7 +167,7 @@ fclean: clean
 	fi
 	@echo "Volume folder cleaned (structure preserved)"
 
-re : fclean all
+re : fclean volumes all
 
 clean-packages:
 	@echo "Cleaning local build artifacts..."

@@ -14,6 +14,7 @@ ifdef VOLUME_NAME
 else
   VOLUMES_PATH := $(PROJECT_PATH)/data
 endif
+DATABASE_PATH := $(VOLUMES_PATH)/database
 UPLOADS_PATH := $(VOLUMES_PATH)/uploads
 
 # --- Docker or Podman ---

@@ -26,7 +26,7 @@ COPY srcs/users/package-lock.json ./srcs/users/package-lock.json
 # Install dependencies for workspace (this links @transcendence/core)
 RUN npm ci
 
-# Copy and build shared core first
+# Copy and build shared core first - done before in Makefile yet 
 COPY srcs/shared/core/src ./srcs/shared/core/src
 RUN npm run build --workspace srcs/shared/core
 
