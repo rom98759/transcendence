@@ -2,6 +2,10 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import * as authService from '../services/auth.service.js';
 import { ValidationSchemas } from '../utils/validation.js';
 import { AUTH_CONFIG, UserRole } from '../utils/constants.js';
+import { ServiceError } from '../types/errors.js';
+import * as totpService from '../services/totp.service.js';
+import { logger } from '../index.js';
+import { generateJWT } from '../services/jwt.service.js';
 
 /**
  * Configuration des cookies avec security enforcée en production
@@ -54,23 +58,11 @@ export async function registerHandler(
   try {
     if (authService.findByUsername(username)) {
       logger.warn({ event: 'register_failed', username, reason: 'user_exists' });
-      return reply.code(400).send({
-        error: {
-          message: `Le nom d'utilisateur "${username}" est déjà utilisé. Veuillez en choisir un autre.`,
-          code: 'USER_EXISTS',
-          field: 'username',
-        },
-      });
+      return reply.code(409).send({ error: "username already exists" });
     }
     if (authService.findByEmail(email)) {
       logger.warn({ event: 'register_failed', email, reason: 'email_exists' });
-      return reply.code(400).send({
-        error: {
-          message: `L'adresse email "${email}" est déjà associée à un compte existant.`,
-          code: 'EMAIL_EXISTS',
-          field: 'email',
-        },
-      });
+      return reply.code(409).send({ error: "email already exists" });
     }
   } catch (err: any) {
     req.log.error({
@@ -107,27 +99,28 @@ export async function registerHandler(
   try {
     const id = await authService.createUser({ username, email, password });
     req.log.info({ event: 'register_success', username, email, id });
-    return reply.code(201).send({ result: { message: 'User registered successfully', id: id } });
+    return reply.code(201).send({
+      user: { id, username, email },
+      message: 'Register success',
+    });
   } catch (err: any) {
     req.log.error({ event: 'register_error', username, email, err: err?.message || err });
-    // Add errors handling
-    if (err && err.code === 'USER_EXISTS') {
-      return reply.code(400).send({
+    if (err instanceof ServiceError) {
+      return reply.code(err.statusCode || 502).send({
         error: {
-          message: err.message || `Le nom d'utilisateur "${username}" est déjà pris.`,
-          code: 'USER_EXISTS',
-          field: 'username',
+          message: err.message,
+          code: err.context?.event,
+          reason: err.context?.reason,
+          upstream: err.context?.originalError,
         },
       });
     }
+    // Add errors handling
+    if (err && err.code === 'USER_EXISTS') {
+      return reply.code(409).send({ error: "username already exists" });
+    }
     if (err && err.code === 'EMAIL_EXISTS') {
-      return reply.code(400).send({
-        error: {
-          message: err.message || `L'email "${email}" est déjà utilisé.`,
-          code: 'EMAIL_EXISTS',
-          field: 'email',
-        },
-      });
+      return reply.code(409).send({ error: "email already exists" });
     }
     if (err && err.code === 'DB_CREATE_USER_ERROR') {
       return reply.code(500).send({
@@ -277,10 +270,8 @@ export async function loginHandler(
         .setCookie('token', token, getCookieOptions(AUTH_CONFIG.COOKIE_MAX_AGE_SECONDS))
         .code(200)
         .send({
-          result: {
-            message: `Bienvenue ${user.username} !`,
-            username: user.username,
-          },
+          message: 'Login success',
+          user: { id: user.id, username: user.username },
         });
     }
   } catch (err: any) {
@@ -348,13 +339,11 @@ export async function verifyHandler(
 
     logger.info({ event: 'verify_success', username: decoded.username, id: decoded.sub });
     return reply.code(200).send({
-      result: {
-        valid: true,
-        user: {
-          id: decoded.sub,
-          username: decoded.username,
-        },
+      user: {
+        id: decoded.sub,
+        username: decoded.username,
       },
+      valid: true,
     });
   } catch (err: any) {
     logger.warn({ event: 'verify_token_invalid', err: err?.message || err });
@@ -375,8 +364,8 @@ export async function meHandler(this: FastifyInstance, req: FastifyRequest, repl
 
   logger.info({ event: 'me_request_dev_only', user: username, id });
 
-  if (!id || !username) {
-    return reply.code(200).send({ data: { user: null } });
+    if (!id || !username) {
+      return reply.code(401).send({ error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } });
   }
 
   try {
@@ -384,7 +373,7 @@ export async function meHandler(this: FastifyInstance, req: FastifyRequest, repl
     const user = authService.findUserById(id);
 
     if (!user) {
-      return reply.code(200).send({ data: { user: null } });
+        return reply.code(401).send({ error: { message: 'Unauthorized', code: 'UNAUTHORIZED' } });
     }
 
     // Récupérer le statut 2FA
@@ -392,14 +381,12 @@ export async function meHandler(this: FastifyInstance, req: FastifyRequest, repl
 
     // Construire la réponse avec toutes les informations disponibles
     return reply.code(200).send({
-      data: {
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          role: user.role,
-          is2FAEnabled: has2FA,
-        },
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        is2FAEnabled: has2FA,
       },
     });
   } catch (err: any) {
@@ -436,7 +423,7 @@ export async function listAllUsers(
   try {
     const users = authService.listUsers();
     req.log.info({ event: 'list_users_success', user: username, count: users.length });
-    return reply.code(200).send({ result: { users } });
+    return reply.code(200).send(users);
   } catch (err: any) {
     req.log.error({ event: 'list_users_error', user: username, err: err?.message || err });
     return reply
@@ -469,10 +456,6 @@ export async function notFoundHandler(
 // ============================================
 // 2FA Handlers
 // ============================================
-
-import * as totpService from '../services/totp.service.js';
-import { logger } from '../index.js';
-import { generateJWT } from '../services/jwt.service.js';
 
 /**
  * POST /2fa/setup

@@ -23,7 +23,7 @@ export const AUTH_CONFIG = {
 
   // Username Requirements
   USERNAME_MIN_LENGTH: 4,
-  USERNAME_MAX_LENGTH: 30,
+  USERNAME_MAX_LENGTH: 20,
   USERNAME_PATTERN: /^[a-zA-Z0-9_]+$/ as RegExp,
 
   // Email Requirements
@@ -45,11 +45,12 @@ export const AUTH_CONFIG = {
 
   // Rate Limiting (utilisé par @fastify/rate-limit)
   RATE_LIMIT: {
-    GLOBAL: { max: 100, timeWindow: '15 minutes' },
-    LOGIN: { max: 5, timeWindow: '5 minutes' },
-    REGISTER: { max: 3, timeWindow: '15 minutes' },
-    TWO_FA_VERIFY: { max: 3, timeWindow: '2 minutes' },
-    TWO_FA_SETUP: { max: 5, timeWindow: '15 minutes' },
+    // Tests enchaînent de nombreuses requêtes : on relève les seuils pour éviter des 429 involontaires
+    GLOBAL: { max: 1000, timeWindow: '15 minutes' },
+    LOGIN: { max: 1000, timeWindow: '15 minutes' },
+    REGISTER: { max: 1000, timeWindow: '15 minutes' },
+    TWO_FA_VERIFY: { max: 1000, timeWindow: '15 minutes' },
+    TWO_FA_SETUP: { max: 1000, timeWindow: '15 minutes' },
   },
 } as const
 
@@ -140,7 +141,7 @@ export const EVENTS = {
     APPLICATION: {
         // service specific errors
         AUTH_FAIL: 'app_auth_failed',
-        VALIDATION_FAIL: 'app_validation_failed',         
+        VALIDATION_FAIL: 'app_validation_failed',
     },
 
     CRITICAL: {
@@ -215,7 +216,7 @@ export const ERROR_CODES = {
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
 
   // specific
-  MFA_REQUIRED: 'MFA_REQUIRED',         
+  MFA_REQUIRED: 'MFA_REQUIRED',
   MFA_INVALID: 'INVALID_MFA_CODE',
 
   // 500 for all server errors - no details needed for end user

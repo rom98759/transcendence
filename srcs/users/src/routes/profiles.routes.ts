@@ -53,7 +53,7 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: healthCheckSchema,
     },
     async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
-      return reply.code(200).send({ status: 'healthy new' });
+      return reply.code(200).send({ status: 'healthy' });
     },
   );
 

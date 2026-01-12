@@ -159,3 +159,4 @@ vite.config.ts.timestamp-*
 *.txt
 .DS_Store
 **/*.js
+*.pyc
