@@ -17,7 +17,6 @@ export async function storeTournament(
     AVALANCHE_RPC_URL: !!process.env.AVALANCHE_RPC_URL,
   });
 
-  console.log('111111111111111111111111111111111111111111111111111111111111111111111111111111');
   const gamestorage = getGameStorage(logger);
   if (!gamestorage) {
     const error: any = new Error(
@@ -104,7 +103,3 @@ export function updateTournamentSnapDB(logger: AppLogger, data: SnapshotRow) {
   const rowBlockId = db.updateTournament(data);
   logger.info({ event: 'snapshot_update_success', tournament: data, rowBlockId });
 }
-
-// export async function listBlockchainTournaments(): Promise<map<string, string>> {
-//
-// }

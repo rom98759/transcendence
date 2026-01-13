@@ -91,6 +91,25 @@ test-user: build-core
 test-coverage-user: build-core
 	cd srcs/users && npx vitest run --coverage --config vite.config.mjs
 
+test-block:
+    @gnome-terminal -- bash -c "cd srcs/blockchain/src/SmartContract && npx hardhat node" &
+    sleep 2
+    @echo "Deploying contract and updating .env.test.blockchain..."
+    @cd srcs/blockchain/src/SmartContract && \
+    CONTRACT_OUTPUT=$$(npx hardhat ignition deploy ignition/modules/GameStorage.ts --network localhost 2>&1) && \
+    echo "$$CONTRACT_OUTPUT" && \
+    CONTRACT_ADDR=$$(echo "$$CONTRACT_OUTPUT" | grep -o '0x[a-fA-F0-9]\{40\}' | tail -1) && \
+    if [ -n "$$CONTRACT_ADDR" ]; then \
+        echo "Contract deployed at: $$CONTRACT_ADDR" && \
+        sed -i "s/^GAME_STORAGE_ADDRESS=.*/GAME_STORAGE_ADDRESS=$$CONTRACT_ADDR/" ../../.env.test.blockchain && \
+        echo "Updated .env.test.blockchain with address: $$CONTRACT_ADDR"; \
+    else \
+        echo "Failed to extract contract address"; \
+    fi
+    sleep 2
+    cd srcs/blockchain && \
+    npm run dev:block
+
 # --- DB ---
 redis-cli:
 	$(CONTAINER_CMD) exec -it $(REDIS_SERVICE_NAME) redis-cli

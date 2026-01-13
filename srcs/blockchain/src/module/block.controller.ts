@@ -46,7 +46,6 @@ export async function addTournament(
   try {
     const rowSnapId = addTournamentSnapDB(this.log, data);
     const blockchainReady = process.env.BLOCKCHAIN_READY === 'true';
-    this.log.info('!@#$%^&');
     if (blockchainReady) {
       const dataStored = await addTournamentBlockchain(this.log, data, rowSnapId);
       updateTournamentSnapDB(this.log, dataStored);
