@@ -79,6 +79,97 @@ export function listUsers() {
   return db.listUsers();
 }
 
+export async function createUserAsAdmin(userData: {
+  username: string;
+  email?: string | null;
+  password: string;
+  role?: string;
+}): Promise<number> {
+  const hash = await bcrypt.hash(userData.password, SALT_ROUNDS);
+
+  try {
+    const userId = db.createUser({
+      username: userData.username,
+      email: userData.email || null,
+      password: hash,
+    });
+
+    // Définir le rôle si spécifié
+    if (userData.role && userData.role !== 'user') {
+      db.updateUserRole(userId, userData.role as UserRole);
+    }
+
+    // Créer le profil utilisateur si ce n'est pas un utilisateur spécial
+    if (![ADMIN_USERNAME, INVITE_USERNAME].includes(userData.username)) {
+      try {
+        await createUserProfile({
+          authId: userId,
+          email: userData.email || '',
+          username: userData.username,
+        });
+      } catch (error) {
+        logger.warn({
+          event: EVENTS.DEPENDENCY.ROLLBACK,
+          userId,
+          reason: REASONS.NETWORK.UPSTREAM_ERROR,
+        });
+        db.deleteUser(userId);
+        throw error;
+      }
+    }
+
+    return userId;
+  } catch (err: unknown) {
+    if (err instanceof DataError) {
+      if (err.meta?.field === 'email') {
+        throw new ServiceError(APP_ERRORS.REG_EMAIL_EXISTS, { details: userData.email });
+      }
+      if (err.meta?.field === 'username') {
+        throw new ServiceError(APP_ERRORS.REG_USERNAME_TAKEN, { details: userData.username });
+      }
+    }
+    throw err;
+  }
+}
+
+export function updateUserAsAdmin(
+  userId: number,
+  userData: { username: string; email: string; role: string },
+) {
+  try {
+    db.updateUser(userId, userData);
+  } catch (err: unknown) {
+    if (err instanceof DataError) {
+      if (err.meta?.field === 'email') {
+        throw new ServiceError(APP_ERRORS.REG_EMAIL_EXISTS, { details: userData.email });
+      }
+      if (err.meta?.field === 'username') {
+        throw new ServiceError(APP_ERRORS.REG_USERNAME_TAKEN, { details: userData.username });
+      }
+    }
+    throw err;
+  }
+}
+
+export function deleteUserAsAdmin(userId: number) {
+  try {
+    db.deleteUser(userId);
+  } catch (err: unknown) {
+    if (err instanceof DataError) {
+      throw new ServiceError(APP_ERRORS.LOGIN_USER_NOT_FOUND);
+    }
+    throw err;
+  }
+}
+
+export function adminDisable2FA(userId: number) {
+  try {
+    db.disable2FA(userId);
+  } catch (err: unknown) {
+    throw err;
+  }
+}
+
 export type UserRow = ReturnType<typeof db.findUserByIdentifier>;
 
 // ============================================

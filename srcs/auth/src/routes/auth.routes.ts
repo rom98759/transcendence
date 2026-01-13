@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import {
   meHandler,
   loginHandler,
@@ -11,23 +11,27 @@ import {
   verify2FASetupHandler,
   verify2FAHandler,
   disable2FAHandler,
-} from '../controllers/auth.controller.js'
-import { AUTH_CONFIG } from '../utils/constants.js'
+  createUserHandler,
+  updateUserHandler,
+  deleteUserHandler,
+  adminDisable2FAHandler,
+} from '../controllers/auth.controller.js';
+import { AUTH_CONFIG } from '../utils/constants.js';
 
 export async function authRoutes(app: FastifyInstance) {
   app.get(
     '/',
     async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      return { message: 'Auth service is running' }
+      return { message: 'Auth service is running' };
     },
-  )
+  );
 
   app.get(
     '/health',
     async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      return reply.code(200).send({ status: 'healthy' })
+      return reply.code(200).send({ status: 'healthy' });
     },
-  )
+  );
 
   // Register avec rate limiting strict
   app.post(
@@ -41,7 +45,7 @@ export async function authRoutes(app: FastifyInstance) {
       },
     },
     registerHandler,
-  )
+  );
 
   // Login avec rate limiting strict
   app.post(
@@ -55,16 +59,71 @@ export async function authRoutes(app: FastifyInstance) {
       },
     },
     loginHandler,
-  )
+  );
 
-  app.post('/logout', logoutHandler)
+  app.post('/logout', logoutHandler);
 
-  app.get('/verify', verifyHandler)
+  app.get('/verify', verifyHandler);
 
   // DEV ONLY - À supprimer en production
-  app.get('/me', meHandler)
+  app.get('/me', meHandler);
 
-  app.get('/list', listAllUsers)
+  app.get('/list', listAllUsers);
+
+  // Routes admin - CRUD utilisateurs
+  app.get('/admin/users', listAllUsers);
+
+  app.post(
+    '/admin/users',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+        },
+      },
+    },
+    createUserHandler,
+  );
+
+  app.put(
+    '/admin/users/:id',
+    {
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: '1 minute',
+        },
+      },
+    },
+    updateUserHandler,
+  );
+
+  app.delete(
+    '/admin/users/:id',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+        },
+      },
+    },
+    deleteUserHandler,
+  );
+
+  app.post(
+    '/admin/users/:id/disable-2fa',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '1 minute',
+        },
+      },
+    },
+    adminDisable2FAHandler,
+  );
 
   // Routes 2FA avec rate limiting
   app.post(
@@ -78,7 +137,7 @@ export async function authRoutes(app: FastifyInstance) {
       },
     },
     setup2FAHandler,
-  )
+  );
 
   app.post(
     '/2fa/setup/verify',
@@ -91,7 +150,7 @@ export async function authRoutes(app: FastifyInstance) {
       },
     },
     verify2FASetupHandler,
-  )
+  );
 
   app.post(
     '/2fa/verify',
@@ -104,10 +163,10 @@ export async function authRoutes(app: FastifyInstance) {
       },
     },
     verify2FAHandler,
-  )
+  );
 
-  app.post('/2fa/disable', disable2FAHandler)
+  app.post('/2fa/disable', disable2FAHandler);
 
   // Gestion des routes inconnues (doit être en dernier)
-  app.all('/*', notFoundHandler)
+  app.all('/*', notFoundHandler);
 }

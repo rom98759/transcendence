@@ -902,3 +902,451 @@ export async function disable2FAHandler(
     });
   }
 }
+
+// ADMIN ONLY - Créer un nouvel utilisateur
+export async function createUserHandler(
+  this: FastifyInstance,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const idHeader = (req.headers as any)['x-user-id'];
+  const userId = idHeader ? Number(idHeader) : null;
+  const username = (req.headers as any)['x-user-name'] || null;
+
+  logger.info({ event: 'admin_create_user_attempt', user: username, userId });
+
+  // Vérifier que l'utilisateur existe et a le rôle admin
+  if (!userId || !authService.hasRole(userId, UserRole.ADMIN)) {
+    logger.warn({ event: 'admin_create_user_forbidden', user: username, userId });
+    return reply.code(403).send({
+      error: {
+        message: 'Forbidden - Admin role required',
+        code: 'FORBIDDEN',
+      },
+    });
+  }
+
+  // Validation des données
+  const validation = ValidationSchemas.register.safeParse(req.body);
+  if (!validation.success) {
+    this.log.warn({
+      event: 'admin_create_user_validation_failed',
+      errors: validation.error.issues,
+    });
+
+    const fieldErrors: Record<string, string[]> = {};
+    validation.error.issues.forEach((issue: any) => {
+      const field = (issue.path[0] as string) || 'general';
+      if (!fieldErrors[field]) fieldErrors[field] = [];
+      fieldErrors[field].push(issue.message);
+    });
+
+    return reply.code(400).send({
+      error: {
+        message: 'Données invalides',
+        code: 'VALIDATION_ERROR',
+        details: validation.error.issues,
+        fields: fieldErrors,
+      },
+    });
+  }
+
+  const { username: newUsername, email, password } = validation.data;
+  const role = (req.body as any).role || 'user';
+
+  try {
+    const newUserId = await authService.createUserAsAdmin({
+      username: newUsername,
+      email,
+      password,
+      role,
+    });
+
+    logger.info({
+      event: 'admin_create_user_success',
+      user: username,
+      newUserId,
+      newUsername: newUsername,
+      role,
+    });
+
+    return reply.code(201).send({
+      user: {
+        id: newUserId,
+        username: newUsername,
+        email,
+        role,
+        is2FAEnabled: false,
+      },
+    });
+  } catch (err: any) {
+    logger.error({
+      event: 'admin_create_user_error',
+      user: username,
+      newUsername: newUsername,
+      err: err?.message || err,
+    });
+
+    if (err instanceof ServiceError) {
+      if (err.definition.code === 'CONFLICT') {
+        // C'est probablement une erreur d'email ou username existant
+        if (err.message.toLowerCase().includes('email')) {
+          return reply.code(409).send({
+            error: {
+              message: 'Email is already taken',
+              code: 'EMAIL_EXISTS',
+              field: 'email',
+            },
+          });
+        } else if (err.message.toLowerCase().includes('username')) {
+          return reply.code(409).send({
+            error: {
+              message: 'Username is already taken',
+              code: 'USERNAME_EXISTS',
+              field: 'username',
+            },
+          });
+        }
+      }
+    }
+
+    return reply.code(500).send({
+      error: {
+        message: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
+      },
+    });
+  }
+}
+
+// ADMIN ONLY - Mettre à jour un utilisateur
+export async function updateUserHandler(
+  this: FastifyInstance,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const idHeader = (req.headers as any)['x-user-id'];
+  const adminUserId = idHeader ? Number(idHeader) : null;
+  const adminUsername = (req.headers as any)['x-user-name'] || null;
+  const targetUserId = Number((req.params as any).id);
+
+  logger.info({
+    event: 'admin_update_user_attempt',
+    admin: adminUsername,
+    adminUserId,
+    targetUserId,
+  });
+
+  // Vérifier que l'utilisateur existe et a le rôle admin
+  if (!adminUserId || !authService.hasRole(adminUserId, UserRole.ADMIN)) {
+    logger.warn({
+      event: 'admin_update_user_forbidden',
+      admin: adminUsername,
+      adminUserId,
+      targetUserId,
+    });
+    return reply.code(403).send({
+      error: {
+        message: 'Forbidden - Admin role required',
+        code: 'FORBIDDEN',
+      },
+    });
+  }
+
+  if (!targetUserId || isNaN(targetUserId)) {
+    return reply.code(400).send({
+      error: {
+        message: 'Invalid user ID',
+        code: 'INVALID_USER_ID',
+      },
+    });
+  }
+
+  // Validation des données
+  const { username: newUsername, email, role } = req.body as any;
+
+  if (!newUsername || !email || !role) {
+    return reply.code(400).send({
+      error: {
+        message: 'Username, email, and role are required',
+        code: 'MISSING_FIELDS',
+      },
+    });
+  }
+
+  if (!['user', 'admin'].includes(role)) {
+    return reply.code(400).send({
+      error: {
+        message: 'Role must be either "user" or "admin"',
+        code: 'INVALID_ROLE',
+      },
+    });
+  }
+
+  try {
+    // Vérifier que l'utilisateur existe
+    const targetUser = authService.findUserById(targetUserId);
+    if (!targetUser) {
+      return reply.code(404).send({
+        error: {
+          message: 'User not found',
+          code: 'USER_NOT_FOUND',
+        },
+      });
+    }
+
+    authService.updateUserAsAdmin(targetUserId, {
+      username: newUsername,
+      email,
+      role,
+    });
+
+    // Récupérer les informations mises à jour
+    const updatedUser = authService.findUserById(targetUserId);
+    const has2FA = totpService.isTOTPEnabled(targetUserId);
+
+    logger.info({
+      event: 'admin_update_user_success',
+      admin: adminUsername,
+      targetUserId,
+      newUsername: newUsername,
+    });
+
+    return reply.code(200).send({
+      user: {
+        id: updatedUser!.id,
+        username: updatedUser!.username,
+        email: updatedUser!.email,
+        role: updatedUser!.role,
+        is2FAEnabled: has2FA,
+      },
+    });
+  } catch (err: any) {
+    logger.error({
+      event: 'admin_update_user_error',
+      admin: adminUsername,
+      targetUserId,
+      err: err?.message || err,
+    });
+
+    if (err instanceof ServiceError) {
+      if (err.definition.code === 'CONFLICT') {
+        // C'est probablement une erreur d'email ou username existant
+        if (err.message.toLowerCase().includes('email')) {
+          return reply.code(409).send({
+            error: {
+              message: 'Email is already taken',
+              code: 'EMAIL_EXISTS',
+              field: 'email',
+            },
+          });
+        } else if (err.message.toLowerCase().includes('username')) {
+          return reply.code(409).send({
+            error: {
+              message: 'Username is already taken',
+              code: 'USERNAME_EXISTS',
+              field: 'username',
+            },
+          });
+        }
+      }
+    }
+
+    return reply.code(500).send({
+      error: {
+        message: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
+      },
+    });
+  }
+}
+
+// ADMIN ONLY - Supprimer un utilisateur
+export async function deleteUserHandler(
+  this: FastifyInstance,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const idHeader = (req.headers as any)['x-user-id'];
+  const adminUserId = idHeader ? Number(idHeader) : null;
+  const adminUsername = (req.headers as any)['x-user-name'] || null;
+  const targetUserId = Number((req.params as any).id);
+
+  logger.info({
+    event: 'admin_delete_user_attempt',
+    admin: adminUsername,
+    adminUserId,
+    targetUserId,
+  });
+
+  // Vérifier que l'utilisateur existe et a le rôle admin
+  if (!adminUserId || !authService.hasRole(adminUserId, UserRole.ADMIN)) {
+    logger.warn({
+      event: 'admin_delete_user_forbidden',
+      admin: adminUsername,
+      adminUserId,
+      targetUserId,
+    });
+    return reply.code(403).send({
+      error: {
+        message: 'Forbidden - Admin role required',
+        code: 'FORBIDDEN',
+      },
+    });
+  }
+
+  if (!targetUserId || isNaN(targetUserId)) {
+    return reply.code(400).send({
+      error: {
+        message: 'Invalid user ID',
+        code: 'INVALID_USER_ID',
+      },
+    });
+  }
+
+  // Empêcher l'auto-suppression
+  if (targetUserId === adminUserId) {
+    return reply.code(400).send({
+      error: {
+        message: 'Cannot delete your own account',
+        code: 'SELF_DELETION_FORBIDDEN',
+      },
+    });
+  }
+
+  try {
+    // Vérifier que l'utilisateur existe avant de le supprimer
+    const targetUser = authService.findUserById(targetUserId);
+    if (!targetUser) {
+      return reply.code(404).send({
+        error: {
+          message: 'User not found',
+          code: 'USER_NOT_FOUND',
+        },
+      });
+    }
+
+    const targetUsername = targetUser.username;
+    authService.deleteUserAsAdmin(targetUserId);
+
+    logger.info({
+      event: 'admin_delete_user_success',
+      admin: adminUsername,
+      targetUserId,
+      targetUsername,
+    });
+
+    return reply.code(200).send({
+      message: 'User deleted successfully',
+    });
+  } catch (err: any) {
+    logger.error({
+      event: 'admin_delete_user_error',
+      admin: adminUsername,
+      targetUserId,
+      err: err?.message || err,
+    });
+
+    return reply.code(500).send({
+      error: {
+        message: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
+      },
+    });
+  }
+}
+
+// ADMIN ONLY - Désactiver la 2FA d'un utilisateur
+export async function adminDisable2FAHandler(
+  this: FastifyInstance,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const idHeader = (req.headers as any)['x-user-id'];
+  const adminUserId = idHeader ? Number(idHeader) : null;
+  const adminUsername = (req.headers as any)['x-user-name'] || null;
+  const targetUserId = Number((req.params as any).id);
+
+  logger.info({
+    event: 'admin_disable_2fa_attempt',
+    admin: adminUsername,
+    adminUserId,
+    targetUserId,
+  });
+
+  // Vérifier que l'utilisateur existe et a le rôle admin
+  if (!adminUserId || !authService.hasRole(adminUserId, UserRole.ADMIN)) {
+    logger.warn({
+      event: 'admin_disable_2fa_forbidden',
+      admin: adminUsername,
+      adminUserId,
+      targetUserId,
+    });
+    return reply.code(403).send({
+      error: {
+        message: 'Forbidden - Admin role required',
+        code: 'FORBIDDEN',
+      },
+    });
+  }
+
+  if (!targetUserId || isNaN(targetUserId)) {
+    return reply.code(400).send({
+      error: {
+        message: 'Invalid user ID',
+        code: 'INVALID_USER_ID',
+      },
+    });
+  }
+
+  try {
+    // Vérifier que l'utilisateur existe
+    const targetUser = authService.findUserById(targetUserId);
+    if (!targetUser) {
+      return reply.code(404).send({
+        error: {
+          message: 'User not found',
+          code: 'USER_NOT_FOUND',
+        },
+      });
+    }
+
+    // Vérifier si la 2FA est activée
+    const has2FA = totpService.isTOTPEnabled(targetUserId);
+    if (!has2FA) {
+      return reply.code(400).send({
+        error: {
+          message: '2FA is not enabled for this user',
+          code: '2FA_NOT_ENABLED',
+        },
+      });
+    }
+
+    authService.adminDisable2FA(targetUserId);
+
+    logger.info({
+      event: 'admin_disable_2fa_success',
+      admin: adminUsername,
+      targetUserId,
+      targetUsername: targetUser.username,
+    });
+
+    return reply.code(200).send({
+      message: '2FA disabled successfully',
+    });
+  } catch (err: any) {
+    logger.error({
+      event: 'admin_disable_2fa_error',
+      admin: adminUsername,
+      targetUserId,
+      err: err?.message || err,
+    });
+
+    return reply.code(500).send({
+      error: {
+        message: 'Internal server error',
+        code: 'INTERNAL_SERVER_ERROR',
+      },
+    });
+  }
+}
