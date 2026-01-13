@@ -1,0 +1,4 @@
+requests
+Pillow
+pyzbar  # Requires system library: sudo apt-get install libzbar0
+pyotp

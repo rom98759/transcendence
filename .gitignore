@@ -156,6 +156,7 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .DS_Store
-*.txt
 .DS_Store
 **/*.js
+*.pyc
+__pycache__

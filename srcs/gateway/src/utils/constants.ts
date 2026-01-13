@@ -11,6 +11,7 @@ export const GATEWAY_CONFIG = {
     '/api/auth/2fa/setup/verify',
     '/api/game/sessions',
     '/api/auth/health',
+    '/api/users/health',
     '/api/game/health',
     '/api/block/health',
   ],

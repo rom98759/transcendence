@@ -43,12 +43,27 @@ app.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) =>
     }
 });
 
-app.setErrorHandler((error: AppBaseError, req, _reply) => {
-  req.log.error({
-    err: error, 
-    event: error?.context?.event || EVENTS.CRITICAL.BUG,
-    reason: error?.context?.reason || REASONS.UNKNOWN,
-  }, 'Error');
+app.setErrorHandler((error: AppBaseError, req, reply) => {
+  const statusCode = (error as any)?.statusCode || 500;
+
+  req.log.error(
+    {
+      err: error,
+      event: error?.context?.event || EVENTS.CRITICAL.BUG,
+      reason: error?.context?.reason || REASONS.UNKNOWN,
+    },
+    'Error',
+  );
+
+  if (reply.sent) return;
+
+  reply.code(statusCode).send({
+    error: {
+      message: (error as any)?.message || 'Internal server error',
+      code: (error as any)?.code || EVENTS.CRITICAL.BUG,
+      reason: error?.context?.reason || REASONS.UNKNOWN,
+    },
+  });
 });
 
 // Register shared plugins once
