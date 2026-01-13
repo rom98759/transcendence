@@ -22,6 +22,27 @@ down :
 down-dev :
 	$(D_COMPOSE_DEV) down
 
+# --- Env files ---
+envs:
+	@echo "Creating .env files from examples…"
+	@secret=$$(openssl rand -hex 32); \
+	for f in srcs/.env*.example; do \
+		envfile=$${f%.example}; \
+		if [ ! -f "$$envfile" ]; then \
+			cp "$$f" "$$envfile"; \
+			echo "Copied $$f → $$envfile"; \
+		else \
+			echo "$$envfile already exists"; \
+		fi; \
+		if grep -q '^JWT_SECRET=' "$$envfile" 2>/dev/null; then \
+			sed -i.bak "s|^JWT_SECRET=.*|JWT_SECRET=$$secret|" "$$envfile"; \
+			rm -f "$$envfile.bak"; \
+			echo "Set JWT_SECRET in $$envfile"; \
+		fi; \
+	done; \
+	echo "JWT_SECRET applied to all files"
+
+
 include make/colima.mk
 
 # --- Linters ---
