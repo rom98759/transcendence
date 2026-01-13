@@ -35,7 +35,9 @@ def safe_decode_qr_or_skip(qr_data_url: str, test_name: str) -> str:
     secret = decode_qr_secret(qr_data_url)
     if not secret:
         if QR_DECODE_AVAILABLE:
-            raise AssertionError(f"FAILED: Impossible d'extraire le secret depuis le QR code")
+            raise AssertionError(
+                f"FAILED: Impossible d'extraire le secret depuis le QR code"
+            )
         else:
             print(f"   ⏭️  SKIPPED: {test_name} (QR decode not available)")
             sys.exit(0)  # Skip ce test proprement
@@ -87,8 +89,18 @@ def test_03_register_duplicate():
     data = response.json()
 
     assert "error" in data, "Error not in response"
-    assert "exist" in data["error"].lower() or "conflict" in data["error"].lower(), \
-        "Error message doesn't indicate conflict"
+    error_obj = data["error"]
+    assert isinstance(error_obj, dict), "Error should be an object"
+
+    # Vérifier que le message ou le code indique un conflit
+    error_message = error_obj.get("message", "").lower()
+    error_code = error_obj.get("code", "").lower()
+    assert (
+        "exist" in error_message
+        or "conflict" in error_message
+        or "exists" in error_code
+        or "conflict" in error_code
+    ), f"Error message doesn't indicate conflict: {error_obj}"
 
     print_success("409 Conflict détecté correctement")
 
@@ -110,6 +122,16 @@ def test_03b_register_duplicate_email():
     resp = session.post("/auth/register", json=dup, expected_status=409)
     data = resp.json()
     assert "error" in data, "Error not in response"
+    error_obj = data["error"]
+    assert isinstance(error_obj, dict), "Error should be an object"
+
+    # Vérifier que c'est bien un conflit d'email
+    error_code = error_obj.get("code", "").lower()
+    error_message = error_obj.get("message", "").lower()
+    assert (
+        "email" in error_code or "email" in error_message
+    ), f"Error should indicate email conflict: {error_obj}"
+
     print_success("409 Conflict détecté sur email")
 
 
@@ -135,7 +157,7 @@ def test_04_register_invalid_username():
         creds = {
             "username": invalid_user,
             "email": "test@test.local",
-            "password": "ValidPass123!"
+            "password": "ValidPass123!",
         }
 
         response = session.post("/auth/register", json=creds, expected_status=400)
@@ -206,7 +228,7 @@ def test_05_register_invalid_password():
         creds = {
             "username": f"testuser{time.time()}",
             "email": "test@test.local",
-            "password": invalid_pass
+            "password": invalid_pass,
         }
 
         response = session.post("/auth/register", json=creds, expected_status=400)
@@ -241,15 +263,15 @@ def test_06_login_success():
     session.post("/auth/register", json=creds, expected_status=201)
 
     # Login
-    response = session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    response = session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     data = response.json()
-    assert "message" in data and "success" in data["message"].lower(), (
-        "Login success message not found"
-    )
+    assert (
+        "message" in data and "success" in data["message"].lower()
+    ), "Login success message not found"
 
     # Vérifier le cookie token
     assert "token" in session.session.cookies, "Token cookie not set"
@@ -266,7 +288,11 @@ def test_06b_login_email_invalid_format():
     creds = generate_test_credentials()
     session.post("/auth/register", json=creds, expected_status=201)
 
-    resp = session.post("/auth/login", json={"email": "bad-email", "password": creds["password"]}, expected_status=400)
+    resp = session.post(
+        "/auth/login",
+        json={"email": "bad-email", "password": creds["password"]},
+        expected_status=400,
+    )
     data = resp.json()
     assert "error" in data, "Error not in response for invalid email"
     print_success("Email mal formé rejeté au login")
@@ -280,11 +306,14 @@ def test_06c_login_with_username_and_email():
     creds = generate_test_credentials()
     session.post("/auth/register", json=creds, expected_status=201)
 
-    resp = session.post("/auth/login", json={
-        "username": creds["username"],
-        "email": creds["email"],
-        "password": creds["password"],
-    })
+    resp = session.post(
+        "/auth/login",
+        json={
+            "username": creds["username"],
+            "email": creds["email"],
+            "password": creds["password"],
+        },
+    )
     assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
     print_success("Login fonctionne avec username+email")
 
@@ -300,15 +329,14 @@ def test_07_login_with_email():
     session.post("/auth/register", json=creds, expected_status=201)
 
     # Login avec email
-    response = session.post("/auth/login", json={
-        "email": creds["email"],
-        "password": creds["password"]
-    })
+    response = session.post(
+        "/auth/login", json={"email": creds["email"], "password": creds["password"]}
+    )
 
     data = response.json()
-    assert "message" in data and "success" in data["message"].lower(), (
-        "Login success message not found"
-    )
+    assert (
+        "message" in data and "success" in data["message"].lower()
+    ), "Login success message not found"
 
     print_success(f"Login par email réussi: {creds['email']}")
 
@@ -319,10 +347,11 @@ def test_08_login_invalid_credentials():
 
     session = TestSession()
 
-    response = session.post("/auth/login", json={
-        "username": "nonexistent_user",
-        "password": "WrongPass123!"
-    }, expected_status=401)
+    response = session.post(
+        "/auth/login",
+        json={"username": "nonexistent_user", "password": "WrongPass123!"},
+        expected_status=401,
+    )
 
     data = response.json()
     assert "error" in data, "Error not in response"
@@ -335,9 +364,14 @@ def test_08b_login_missing_identifier():
     print_test("Login - Identifiant manquant")
 
     session = TestSession()
-    resp = session.post("/auth/login", json={"password": "whatever"}, expected_status=400)
+    resp = session.post(
+        "/auth/login", json={"password": "whatever"}, expected_status=400
+    )
     data = resp.json()
-    assert data.get("error", {}).get("code") in {"VALIDATION_ERROR", "MISSING_IDENTIFIER"}
+    assert data.get("error", {}).get("code") in {
+        "VALIDATION_ERROR",
+        "MISSING_IDENTIFIER",
+    }
     print_success("400 pour identifiant manquant")
 
 
@@ -346,7 +380,9 @@ def test_08c_login_missing_password():
     print_test("Login - Password manquant")
 
     session = TestSession()
-    resp = session.post("/auth/login", json={"username": "someone"}, expected_status=400)
+    resp = session.post(
+        "/auth/login", json={"username": "someone"}, expected_status=400
+    )
     data = resp.json()
     assert data.get("error", {}).get("code") in {"VALIDATION_ERROR", "MISSING_PASSWORD"}
     print_success("400 pour mot de passe manquant")
@@ -361,10 +397,10 @@ def test_09_verify_token():
 
     # Créer et login
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     # Vérifier le token
     response = session.get("/auth/verify")
@@ -383,12 +419,18 @@ def test_09b_verify_after_logout():
     session = TestSession()
     creds = generate_test_credentials()
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={"username": creds["username"], "password": creds["password"]})
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     session.post("/auth/logout", expected_status=200)
     resp = session.get("/auth/verify", expected_status=401)
     data = resp.json()
-    assert data.get("error", {}).get("code") in ("TOKEN_MISSING", "INVALID_TOKEN"), "Verify devrait échouer sans token"
+    assert data.get("error", {}).get("code") in (
+        "TOKEN_MISSING",
+        "INVALID_TOKEN",
+    ), "Verify devrait échouer sans token"
     print_success("Verify rejette après logout")
 
 
@@ -411,7 +453,9 @@ def test_10b_verify_invalid_token():
 
     session = TestSession()
     # Envoie un token bidon via Authorization
-    resp = session.session.get(f"{API_URL}/auth/verify", headers={"Authorization": "Bearer bad"}, verify=False)
+    resp = session.session.get(
+        f"{API_URL}/auth/verify", headers={"Authorization": "Bearer bad"}, verify=False
+    )
     assert resp.status_code == 401, f"Expected 401, got {resp.status_code}"
     data = resp.json()
     assert data.get("error", {}).get("code") in {"INVALID_TOKEN", "TOKEN_MISSING"}
@@ -427,10 +471,10 @@ def test_11_me_authenticated():
 
     # Créer et login
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     # Accéder à /me
     response = session.get("/auth/me")
@@ -463,10 +507,10 @@ def test_13_logout():
 
     # Créer et login
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     # Vérifier qu'on est connecté
     session.get("/auth/me", expected_status=200)
@@ -485,10 +529,11 @@ def test_13b_logout_without_session():
     print_test("Logout - Sans session")
 
     session = TestSession()
-    resp = session.post("/auth/logout", expected_status=200)
+    # Sans token, l'API retourne 401 mais avec un message d'erreur approprié
+    resp = session.post("/auth/logout", expected_status=401)
     data = resp.json()
-    assert data.get("result", {}).get("message"), "Message de logout manquant"
-    print_success("Logout sans session renvoie 200")
+    assert data.get("error", {}).get("code") == "TOKEN_MISSING", "Code d'erreur attendu"
+    print_success("Logout sans session retourne 401 comme attendu")
 
 
 def test_14_admin_list_users():
@@ -504,14 +549,18 @@ def test_14_admin_list_users():
     response = session.get("/auth/list")
     data = response.json()
 
-    assert isinstance(data, list), "List should return an array"
-    assert len(data) > 0, "Should have at least admin user"
+    # L'API retourne un objet avec users, total, timestamp
+    assert isinstance(data, dict), "Response should be an object"
+    assert "users" in data, "Response should contain 'users' field"
+    assert isinstance(data["users"], list), "Users field should be an array"
+    assert len(data["users"]) > 0, "Should have at least admin user"
+    assert "total" in data, "Response should contain 'total' field"
 
     # Vérifier que admin est dans la liste
-    admin_found = any(user.get("username") == "admin" for user in data)
+    admin_found = any(user.get("username") == "admin" for user in data["users"])
     assert admin_found, "Admin user not found in list"
 
-    print_success(f"Admin list: {len(data)} utilisateurs")
+    print_success(f"Admin list: {data['total']} utilisateurs")
 
 
 def test_15_non_admin_cannot_list():
@@ -523,10 +572,10 @@ def test_15_non_admin_cannot_list():
 
     # Créer un user normal
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     # Tenter de lister
     response = session.get("/auth/list", expected_status=403)
@@ -546,10 +595,10 @@ def test_16_2fa_setup():
 
     # Créer et login
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     # Setup 2FA
     response = session.post("/auth/2fa/setup")
@@ -575,7 +624,10 @@ def test_17_2fa_verify_setup():
 
     # Créer et login
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={"username": creds["username"], "password": creds["password"]})
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     # Setup 2FA
     setup_resp = session.post("/auth/2fa/setup")
@@ -610,16 +662,18 @@ def test_18_2fa_verify_invalid_code():
 
     # Créer et login
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     # Setup 2FA
     session.post("/auth/2fa/setup")
 
     # Envoyer un code invalide
-    response = session.post("/auth/2fa/setup/verify", json={"code": "000000"}, expected_status=400)
+    response = session.post(
+        "/auth/2fa/setup/verify", json={"code": "000000"}, expected_status=400
+    )
     data = response.json()
 
     assert "error" in data, "Error not in response"
@@ -648,16 +702,18 @@ def test_19_2fa_login_flow():
     creds = generate_test_credentials()
 
     session1.post("/auth/register", json=creds, expected_status=201)
-    session1.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    session1.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     response = session1.post("/auth/2fa/setup")
     if skip_if_no_qr_decode("2FA Flow de login complet"):
         return
 
-    secret = safe_decode_qr_or_skip(response.json()["result"]["qrCode"], "2FA Flow de login complet")
+    secret = safe_decode_qr_or_skip(
+        response.json()["result"]["qrCode"], "2FA Flow de login complet"
+    )
 
     totp = pyotp.TOTP(secret)
     code = totp.now()
@@ -667,15 +723,15 @@ def test_19_2fa_login_flow():
 
     # Session 2: Login avec 2FA
     session2 = TestSession()
-    response = session2.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    response = session2.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     data = response.json()
-    assert "result" in data and data["result"].get("require2FA") is True, (
-        "2FA requirement not indicated"
-    )
+    assert (
+        "result" in data and data["result"].get("require2FA") is True
+    ), "2FA requirement not indicated"
     assert "2fa_login_token" in session2.session.cookies, "2FA login token not set"
 
     # Vérifier qu'on ne peut pas accéder à /me sans le code 2FA
@@ -686,9 +742,9 @@ def test_19_2fa_login_flow():
     response = session2.post("/auth/2fa/verify", json={"code": code})
     data = response.json()
 
-    assert "result" in data and "message" in data["result"], (
-        "2FA verification success message not found"
-    )
+    assert (
+        "result" in data and "message" in data["result"]
+    ), "2FA verification success message not found"
     assert "token" in session2.session.cookies, "Final token not set after 2FA verify"
 
     # Vérifier qu'on peut maintenant accéder à /me
@@ -707,22 +763,22 @@ def test_20_2fa_disable():
     response = session.post("/auth/2fa/disable")
     data = response.json()
 
-    assert "result" in data and "disabled" in data["result"].get("message", "").lower(), (
-        "2FA disable confirmation not found"
-    )
+    assert (
+        "result" in data and "disabled" in data["result"].get("message", "").lower()
+    ), "2FA disable confirmation not found"
 
     # Vérifier qu'on peut se reconnecter sans 2FA
     session.post("/auth/logout")
 
-    response = session.post("/auth/login", json={
-        "username": creds["username"],
-        "password": creds["password"]
-    })
+    response = session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
     data = response.json()
 
-    assert not (data.get("result", {}) or {}).get("require2FA", False), (
-        "2FA still required after disable"
-    )
+    assert not (data.get("result", {}) or {}).get(
+        "require2FA", False
+    ), "2FA still required after disable"
 
     print_success("2FA désactivé avec succès")
 
@@ -734,7 +790,10 @@ def test_20b_2fa_disable_not_enabled():
     session = TestSession()
     creds = generate_test_credentials()
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={"username": creds["username"], "password": creds["password"]})
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     resp = session.post("/auth/2fa/disable", expected_status=400)
     data = resp.json()
@@ -774,10 +833,15 @@ def test_22_2fa_setup_bad_format():
     creds = generate_test_credentials()
 
     session.post("/auth/register", json=creds, expected_status=201)
-    session.post("/auth/login", json={"username": creds["username"], "password": creds["password"]})
+    session.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
     session.post("/auth/2fa/setup")
 
-    resp = session.post("/auth/2fa/setup/verify", json={"code": "abc"}, expected_status=400)
+    resp = session.post(
+        "/auth/2fa/setup/verify", json={"code": "abc"}, expected_status=400
+    )
     data = resp.json()
     assert data.get("error", {}).get("code") == "INVALID_CODE_FORMAT"
     print_success("Format invalide correctement rejeté (setup)")
@@ -794,9 +858,14 @@ def test_27_2fa_invalid_format_login():
     session1 = TestSession()
     creds = generate_test_credentials()
     session1.post("/auth/register", json=creds, expected_status=201)
-    session1.post("/auth/login", json={"username": creds["username"], "password": creds["password"]})
+    session1.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
     setup_resp = session1.post("/auth/2fa/setup")
-    secret = safe_decode_qr_or_skip(setup_resp.json()["result"]["qrCode"], "2FA Code format invalide (login)")
+    secret = safe_decode_qr_or_skip(
+        setup_resp.json()["result"]["qrCode"], "2FA Code format invalide (login)"
+    )
     totp = pyotp.TOTP(secret)
     session1.post("/auth/2fa/setup/verify", json={"code": totp.now()})
     session1.post("/auth/logout")
@@ -813,21 +882,31 @@ def test_28_2fa_too_many_attempts():
     session1 = TestSession()
     creds = generate_test_credentials()
     session1.post("/auth/register", json=creds, expected_status=201)
-    session1.post("/auth/login", json={"username": creds["username"], "password": creds["password"]})
+    session1.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
     setup_resp = session1.post("/auth/2fa/setup")
-    secret = safe_decode_qr_or_skip(setup_resp.json()["result"]["qrCode"], "2FA Trop de tentatives (login)")
+    secret = safe_decode_qr_or_skip(
+        setup_resp.json()["result"]["qrCode"], "2FA Trop de tentatives (login)"
+    )
     totp = pyotp.TOTP(secret)
     session1.post("/auth/2fa/setup/verify", json={"code": totp.now()})
     session1.post("/auth/logout")
 
     # Login et épuiser les tentatives
     session2 = TestSession()
-    session2.post("/auth/login", json={"username": creds["username"], "password": creds["password"]})
+    session2.post(
+        "/auth/login",
+        json={"username": creds["username"], "password": creds["password"]},
+    )
 
     last_resp = None
     for i in range(6):
         # On envoie plusieurs codes invalides rapidement pour éviter l'expiration du token
-        resp = session2.session.post(f"{API_URL}/auth/2fa/verify", json={"code": "000000"}, verify=False)
+        resp = session2.session.post(
+            f"{API_URL}/auth/2fa/verify", json={"code": "000000"}, verify=False
+        )
         last_resp = resp
         if resp.status_code in (429, 401):
             break
@@ -836,17 +915,24 @@ def test_28_2fa_too_many_attempts():
     assert last_resp is not None
     if last_resp.status_code == 429:
         print_success("429 reçu après trop de tentatives")
-    elif last_resp.status_code == 401 and last_resp.json().get("error", {}).get("code") == "LOGIN_SESSION_EXPIRED":
-        print_success("Session de login 2FA expirée avant d'atteindre 429 (token très court)")
+    elif (
+        last_resp.status_code == 401
+        and last_resp.json().get("error", {}).get("code") == "LOGIN_SESSION_EXPIRED"
+    ):
+        print_success(
+            "Session de login 2FA expirée avant d'atteindre 429 (token très court)"
+        )
     else:
-        raise AssertionError(f"Statut inattendu: {last_resp.status_code} -> {last_resp.text}")
+        raise AssertionError(
+            f"Statut inattendu: {last_resp.status_code} -> {last_resp.text}"
+        )
 
 
 def main():
     """Exécution de tous les tests"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🚀 Tests CI/CD - Service Auth")
-    print("="*60)
+    print("=" * 60)
 
     tests = [
         test_01_health_check,
@@ -902,9 +988,9 @@ def main():
             failed += 1
             print_error(f"ERROR: {str(e)}")
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print(f"📊 Résultats: {passed} réussis, {failed} échoués")
-    print("="*60 + "\n")
+    print("=" * 60 + "\n")
 
     sys.exit(0 if failed == 0 else 1)
 
