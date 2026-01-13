@@ -19,7 +19,7 @@ export const env = cleanEnv(process.env, {
   BLOCKCHAIN_READY: bool({ default: false }),
   REDIS_SERVICE_NAME: str({ default: 'redis-broker' }),
   REDIS_URL: str({
-    choices: ['redis://127.0.0.1:6379', ''],
+    choices: ['redis://127.0.0.1:6379', 'redis://redis-broker:6379'],
     default: '',
   }),
 });

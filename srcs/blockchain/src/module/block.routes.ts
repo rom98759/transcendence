@@ -27,7 +27,7 @@ async function healthRoutes(app: FastifyInstance) {
   app.get(
     '/',
     async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
-      return reply.code(200).send({ status: 'healthy', hotReload: 'ok fdac!' });
+      return reply.code(200).send({ status: 'healthy', hotReload: 'ok' });
     },
   );
 }
