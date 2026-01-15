@@ -1,8 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { proxyRequest } from '../utils/proxy.js';
 import { CatchAllParams } from '../types/params.types.js';
-
-const UM_SERVICE_URL = 'http://user-service:3002';
+import { GATEWAY_CONFIG } from '../utils/constants.js';
 
 interface UserParams {
   username: string;
@@ -11,13 +10,13 @@ interface UserParams {
 export function registerUsersRoutes(app: FastifyInstance) {
   app.get('/health', async (request, reply) => {
     app.log.info({ event: 'um_health', remote: 'user-service', url: '/health' });
-    const res = await proxyRequest(app, request, reply, `${UM_SERVICE_URL}/health`);
+    const res = await proxyRequest(app, request, reply, `${GATEWAY_CONFIG.SERVICES.USERS}/health`);
     return res;
   });
 
   app.post('/', async (request: FastifyRequest, reply: FastifyReply) => {
     app.log.info({ event: 'um_new', remote: 'user-service', url: '/' });
-    const res = await proxyRequest(app, request, reply, `${UM_SERVICE_URL}/`, {
+    const res = await proxyRequest(app, request, reply, `${GATEWAY_CONFIG.SERVICES.USERS}/`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(request.body),
@@ -34,7 +33,7 @@ export function registerUsersRoutes(app: FastifyInstance) {
         username,
         url: request.url,
       });
-      const targetUrl = `${UM_SERVICE_URL}/${username}`;
+      const targetUrl = `${GATEWAY_CONFIG.SERVICES.USERS}/${username}`;
       return proxyRequest(app, request, reply, targetUrl);
     },
   );
@@ -44,7 +43,7 @@ export function registerUsersRoutes(app: FastifyInstance) {
     async (request: FastifyRequest, reply: FastifyReply) => {
       const rawPath = (request.params as CatchAllParams)['*'];
       const cleanPath = rawPath.replace(/^api\/users\//, '');
-      const url = `${UM_SERVICE_URL}/${cleanPath}`;
+      const url = `${GATEWAY_CONFIG.SERVICES.USERS}/${cleanPath}`;
       const queryString = new URL(request.url, 'http://localhost').search;
       const fullUrl = `${url}${queryString}`;
 

@@ -2,14 +2,14 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { DataError } from '../types/errors.js';
-import { DATA_ERROR } from '../utils/constants.js';
+import { DATA_ERROR, UserRole } from '../utils/constants.js';
 import { DBUser } from '../types/models.js';
 import crypto from 'crypto';
 import { AUTH_CONFIG } from '../utils/constants.js';
+import { authenv } from '../config/env.js';
 
-// DB path
-const DEFAULT_DIR = path.join(process.cwd(), 'data');
-const DB_PATH = process.env.AUTH_DB_PATH || path.join(DEFAULT_DIR, 'auth.db');
+// DB path from validated environment
+const DB_PATH = authenv.AUTH_DB_PATH;
 
 // Check dir
 try {
@@ -29,7 +29,7 @@ try {
       username TEXT UNIQUE,
       email TEXT UNIQUE,
       password TEXT,
-      role TEXT DEFAULT 'user',
+      role TEXT DEFAULT '${UserRole.USER}',
       is_2fa_enabled INTEGER DEFAULT 0,
       totp_secret TEXT
     );
@@ -511,7 +511,7 @@ export function cleanExpiredTokens(): void {
 export function getUserRole(userId: number): string {
   try {
     const result = getUserRoleStmt.get(userId) as { role: string } | undefined;
-    return result?.role || 'user';
+    return result?.role || UserRole.USER;
   } catch (err) {
     const error: any = new Error(
       `Error getting user role: ${(err as any)?.message || String(err)}`,

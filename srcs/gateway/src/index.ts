@@ -9,6 +9,7 @@ import { apiRoutes, publicRoutes } from './routes/gateway.routes.js';
 import { logger, optimizeErrorHandler } from './utils/logger.js';
 import { verifyRequestJWT } from './utils/jwt.service.js';
 import { GATEWAY_CONFIG, ERROR_CODES } from './utils/constants.js';
+import { gatewayenv } from './config/env.js';
 
 const app = fastify({
   logger: false, // Utiliser notre logger
@@ -19,18 +20,12 @@ const app = fastify({
 app.register(fastifyCookie);
 
 // Register fastify-jwt
-const JWT_SECRET = process?.env?.JWT_SECRET;
-if (!JWT_SECRET || JWT_SECRET === 'supersecretkey') {
-  console.error('❌ CRITICAL: JWT_SECRET must be defined and cannot be the default value');
-  console.error('   Set a secure JWT_SECRET in environment variables');
-  process?.exit?.(1);
-}
-app.register(fastifyJwt, { secret: JWT_SECRET });
+app.register(fastifyJwt, { secret: gatewayenv.JWT_SECRET });
 
 // Rate limiting global
 app.register(fastifyRateLimit, {
-  max: GATEWAY_CONFIG.RATE_LIMIT.GLOBAL.max,
-  timeWindow: GATEWAY_CONFIG.RATE_LIMIT.GLOBAL.timeWindow,
+  max: gatewayenv.RATE_LIMIT_MAX,
+  timeWindow: gatewayenv.RATE_LIMIT_WINDOW,
   keyGenerator: (request: FastifyRequest) => {
     // Rate limit par IP
     return request.ip || 'unknown';
@@ -133,7 +128,7 @@ app.setErrorHandler((error: FastifyError, request: FastifyRequest, reply: Fastif
   });
 
   const status = error?.statusCode || 500;
-  const isDev = process?.env?.NODE_ENV === 'development';
+  const isDev = gatewayenv.NODE_ENV === 'development';
   const errorResponse = optimizeErrorHandler(error, isDev);
 
   reply.code(status).send({ error: errorResponse });
@@ -152,20 +147,23 @@ app.register(apiRoutes, { prefix: '/api' });
 app.register(publicRoutes);
 
 // Start the server
-app.listen({ host: '0.0.0.0', port: 3000 }, (err: Error | null, address: string) => {
-  if (err) {
-    logger.error({
-      event: 'server_startup_failed',
-      err: err.message,
-      stack: err.stack,
-    });
-    process?.exit?.(1);
-  }
+app.listen(
+  { host: '0.0.0.0', port: gatewayenv.API_GATEWAY_PORT },
+  (err: Error | null, address: string) => {
+    if (err) {
+      logger.error({
+        event: 'server_startup_failed',
+        err: err.message,
+        stack: err.stack,
+      });
+      process?.exit?.(1);
+    }
 
-  logger.info({
-    event: 'server_started',
-    address,
-    port: 3000,
-    environment: process?.env?.NODE_ENV || 'unknown',
-  });
-});
+    logger.info({
+      event: 'server_started',
+      address,
+      port: gatewayenv.API_GATEWAY_PORT,
+      environment: gatewayenv.NODE_ENV,
+    });
+  },
+);

@@ -4,7 +4,7 @@ import { createUserProfile } from './external/um.service.js';
 import { DataError, ServiceError } from '../types/errors.js';
 import { APP_ERRORS } from '../utils/error-catalog.js';
 import { EVENTS, REASONS, UserRole } from '../utils/constants.js';
-import { ADMIN_USERNAME, INVITE_USERNAME } from '../config/env.js';
+import { authenv } from '../config/env.js';
 import { logger } from '../index.js';
 
 const SALT_ROUNDS = 10;
@@ -47,7 +47,7 @@ export async function createUser(user: {
     throw err;
   }
 
-  if ([ADMIN_USERNAME, INVITE_USERNAME].includes(user.username)) return userId;
+  if ([authenv.ADMIN_USERNAME, authenv.INVITE_USERNAME].includes(user.username)) return userId;
 
   logger.info('created in auth DB');
   try {
@@ -95,12 +95,12 @@ export async function createUserAsAdmin(userData: {
     });
 
     // Définir le rôle si spécifié
-    if (userData.role && userData.role !== 'user') {
+    if (userData.role && userData.role !== UserRole.USER) {
       db.updateUserRole(userId, userData.role as UserRole);
     }
 
     // Créer le profil utilisateur si ce n'est pas un utilisateur spécial
-    if (![ADMIN_USERNAME, INVITE_USERNAME].includes(userData.username)) {
+    if (![authenv.ADMIN_USERNAME, authenv.INVITE_USERNAME].includes(userData.username)) {
       try {
         await createUserProfile({
           authId: userId,

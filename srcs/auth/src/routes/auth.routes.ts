@@ -1,20 +1,17 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { HTTP_STATUS } from '../utils/constants.js';
 import {
   meHandler,
   loginHandler,
   registerHandler,
   logoutHandler,
   verifyHandler,
-  listAllUsers,
   notFoundHandler,
   setup2FAHandler,
   verify2FASetupHandler,
   verify2FAHandler,
   disable2FAHandler,
-  createUserHandler,
-  updateUserHandler,
-  deleteUserHandler,
-  adminDisable2FAHandler,
+  heartbeatHandler,
 } from '../controllers/auth.controller.js';
 import { AUTH_CONFIG } from '../utils/constants.js';
 
@@ -29,7 +26,7 @@ export async function authRoutes(app: FastifyInstance) {
   app.get(
     '/health',
     async function (this: FastifyInstance, request: FastifyRequest, reply: FastifyReply) {
-      return reply.code(200).send({ status: 'healthy' });
+      return reply.code(HTTP_STATUS.OK).send({ status: 'healthy' });
     },
   );
 
@@ -68,61 +65,18 @@ export async function authRoutes(app: FastifyInstance) {
   // DEV ONLY - À supprimer en production
   app.get('/me', meHandler);
 
-  app.get('/list', listAllUsers);
-
-  // Routes admin - CRUD utilisateurs
-  app.get('/admin/users', listAllUsers);
-
+  // Heartbeat endpoint - pour tracker les présences
   app.post(
-    '/admin/users',
+    '/heartbeat',
     {
       config: {
         rateLimit: {
           max: 10,
-          timeWindow: '1 minute',
+          timeWindow: '10 seconds',
         },
       },
     },
-    createUserHandler,
-  );
-
-  app.put(
-    '/admin/users/:id',
-    {
-      config: {
-        rateLimit: {
-          max: 20,
-          timeWindow: '1 minute',
-        },
-      },
-    },
-    updateUserHandler,
-  );
-
-  app.delete(
-    '/admin/users/:id',
-    {
-      config: {
-        rateLimit: {
-          max: 10,
-          timeWindow: '1 minute',
-        },
-      },
-    },
-    deleteUserHandler,
-  );
-
-  app.post(
-    '/admin/users/:id/disable-2fa',
-    {
-      config: {
-        rateLimit: {
-          max: 10,
-          timeWindow: '1 minute',
-        },
-      },
-    },
-    adminDisable2FAHandler,
+    heartbeatHandler,
   );
 
   // Routes 2FA avec rate limiting

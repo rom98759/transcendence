@@ -3,9 +3,9 @@
  * Utiliser ces valeurs dans tout le code pour maintenir la cohérence
  */
 
-export const UM_SERVICE_NAME = process.env['UM_SERVICE_NAME'] || 'user-service';
-export const UM_SERVICE_PORT = process.env['UM_SERVICE_PORT'] || '3002';
-export const UM_SERVICE_URL = `http://${UM_SERVICE_NAME}:${UM_SERVICE_PORT}`
+import { authenv, UM_SERVICE_URL } from '../config/env.js';
+
+export { UM_SERVICE_URL };
 
 export const AUTH_CONFIG = {
   // JWT Configuration
@@ -33,7 +33,7 @@ export const AUTH_CONFIG = {
   TOTP_WINDOW: 1, // ±30 secondes
   TOTP_STEP: 30, // Période de rotation (30 secondes standard)
   TOTP_DIGITS: 6, // Code à 6 chiffres
-  TOTP_ISSUER: process.env.APP_NAME || 'Transcendence',
+  TOTP_ISSUER: authenv.APP_NAME,
   TOTP_SETUP_EXPIRATION_SECONDS: 120, // Expiration du secret temporaire en secondes
 
   // Maintenance
@@ -52,7 +52,7 @@ export const AUTH_CONFIG = {
     TWO_FA_VERIFY: { max: 1000, timeWindow: '15 minutes' },
     TWO_FA_SETUP: { max: 1000, timeWindow: '15 minutes' },
   },
-} as const
+} as const;
 
 /**
  * Rôles utilisateur pour RBAC (Role-Based Access Control)
@@ -61,6 +61,77 @@ export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
 }
+
+/**
+ * Codes HTTP standardisés pour les réponses
+ */
+export const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+/**
+ * Messages d'erreur standardisés
+ */
+export const ERROR_MESSAGES = {
+  // Auth errors
+  UNAUTHORIZED: 'Unauthorized - Authentication required',
+  FORBIDDEN: 'Forbidden - Admin role required',
+  INVALID_CREDENTIALS: 'Invalid credentials',
+
+  // User errors
+  USER_NOT_FOUND: 'User not found',
+  INVALID_USER_ID: 'Invalid user ID',
+
+  // Role errors
+  INVALID_ROLE: 'Role must be either "user" or "admin"',
+
+  // Field errors
+  MISSING_FIELDS: 'Username, email, and role are required',
+  INVALID_DATA: 'Données invalides',
+
+  // Conflict errors
+  EMAIL_EXISTS: 'Email is already taken',
+  USERNAME_EXISTS: 'Username is already taken',
+
+  // 2FA errors
+  TWO_FA_NOT_ENABLED: '2FA is not enabled for this user',
+
+  // Deletion errors
+  SELF_DELETION_FORBIDDEN: 'Cannot delete your own account',
+
+  // Generic
+  INTERNAL_SERVER_ERROR: 'Internal server error',
+  FAILED_HEARTBEAT: 'Failed to record heartbeat',
+} as const;
+
+/**
+ * Codes d'erreur pour les réponses API
+ */
+export const ERROR_RESPONSE_CODES = {
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  INVALID_USER_ID: 'INVALID_USER_ID',
+  INVALID_ROLE: 'INVALID_ROLE',
+  MISSING_FIELDS: 'MISSING_FIELDS',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  EMAIL_EXISTS: 'EMAIL_EXISTS',
+  USERNAME_EXISTS: 'USERNAME_EXISTS',
+  TWO_FA_NOT_ENABLED: '2FA_NOT_ENABLED',
+  SELF_DELETION_FORBIDDEN: 'SELF_DELETION_FORBIDDEN',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  HEARTBEAT_ERROR: 'HEARTBEAT_ERROR',
+} as const;
 
 /**
  * Noms d'utilisateur réservés qui ne peuvent pas être enregistrés
@@ -75,7 +146,7 @@ export const RESERVED_USERNAMES: readonly string[] = [
   'support',
   'service',
   'daemon',
-]
+];
 
 /**
  * Champs sensibles à ne jamais logger en clair
@@ -93,12 +164,12 @@ export const SENSITIVE_FIELDS = [
   '2fa_setup_token',
   'access_token',
   'refresh_token',
-] as const
+] as const;
 
 export const REDACT_PATHS = [
-    'req.headers.authorization',
-    'req.headers.cookie',
-    ...SENSITIVE_FIELDS.map((field) => `*.${field}`)
+  'req.headers.authorization',
+  'req.headers.cookie',
+  ...SENSITIVE_FIELDS.map((field) => `*.${field}`),
 ] as const;
 
 /**
@@ -111,44 +182,44 @@ export const REDACT_PATHS = [
  * NB : except validation, application level does not need events that can be inferred from caught error status (401, 403, etc)
  */
 export const EVENTS = {
-    LIFECYCLE: {
-        UP: 'lc_service_up',
-        DOWN: 'lc_service_down',
-        // infra
-        REDIS_CONNECT: "lc_redis_connected",
-        REDIS_DISCONNECT: 'lc_redis_disconnected',
-        DB_CONNECT: 'lc_db_connected',
-        // auth
-        AUTH_REGISTER_SUCCESS: 'lc_auth_registered',
-        AUTH_LOGIN_SUCCESS: 'lc_auth_logged_in',
-        AUTH_TOKEN_SUCCESS: 'lc_auth_token_valid',       // token check ok
-        // user management
-        UM_FRIEND_ADD: 'lc_um_friend_added',
-        UM_FRIEND_REMOVE: 'lc_um_friend_removed',
-        // game
-        GAME_MATCH_START: 'lc_game_match_started',
-        GAME_MATCH_END: 'lc_game_match_ended',
-        GAME_MATCH_ABORT: 'lc_game_match_aborted',
-    },
+  LIFECYCLE: {
+    UP: 'lc_service_up',
+    DOWN: 'lc_service_down',
+    // infra
+    REDIS_CONNECT: 'lc_redis_connected',
+    REDIS_DISCONNECT: 'lc_redis_disconnected',
+    DB_CONNECT: 'lc_db_connected',
+    // auth
+    AUTH_REGISTER_SUCCESS: 'lc_auth_registered',
+    AUTH_LOGIN_SUCCESS: 'lc_auth_logged_in',
+    AUTH_TOKEN_SUCCESS: 'lc_auth_token_valid', // token check ok
+    // user management
+    UM_FRIEND_ADD: 'lc_um_friend_added',
+    UM_FRIEND_REMOVE: 'lc_um_friend_removed',
+    // game
+    GAME_MATCH_START: 'lc_game_match_started',
+    GAME_MATCH_END: 'lc_game_match_ended',
+    GAME_MATCH_ABORT: 'lc_game_match_aborted',
+  },
 
-    DEPENDENCY: {
-        SLOW: 'dep_slow_response',
-        FAIL: 'dep_failure',             // 500 received
-        UNAVAILABLE: 'dep_unavailable',  // Connection refused
-        ROLLBACK: 'dep_rollback',        // when transaction fails : ensure consistency between services
-    },
+  DEPENDENCY: {
+    SLOW: 'dep_slow_response',
+    FAIL: 'dep_failure', // 500 received
+    UNAVAILABLE: 'dep_unavailable', // Connection refused
+    ROLLBACK: 'dep_rollback', // when transaction fails : ensure consistency between services
+  },
 
-    APPLICATION: {
-        // service specific errors
-        AUTH_FAIL: 'app_auth_failed',
-        VALIDATION_FAIL: 'app_validation_failed',
-    },
+  APPLICATION: {
+    // service specific errors
+    AUTH_FAIL: 'app_auth_failed',
+    VALIDATION_FAIL: 'app_validation_failed',
+  },
 
-    CRITICAL: {
-        BUG: 'crit_logic_bug',           // 500 Unhandled exception
-        PANIC: 'crit_panic',             // uncaught by Fastify - process.on('uncaughtException', (err) => {})
-    }
-}
+  CRITICAL: {
+    BUG: 'crit_logic_bug', // 500 Unhandled exception
+    PANIC: 'crit_panic', // uncaught by Fastify - process.on('uncaughtException', (err) => {})
+  },
+};
 
 /**
  * technical reasons behind log events
@@ -181,18 +252,16 @@ export const REASONS = {
   NETWORK: {
     TIMEOUT: 'network_timeout',
     UNREACHABLE: 'network_unreachable',
-    UPSTREAM_ERROR: 'network_upstream_service_error',     // 4xx or 5xx from service
+    UPSTREAM_ERROR: 'network_upstream_service_error', // 4xx or 5xx from service
   },
   INFRA: {
     DB_INIT_ERROR: 'infra_db_init_error',
     DB_CLOSE_ERROR: 'infra_db_close_error',
-    DB_QUERY_FAIL: 'infra_db_query',                      // other than uniqueness violation
+    DB_QUERY_FAIL: 'infra_db_query', // other than uniqueness violation
     REDIS_ERROR: 'infra_redis_error',
   },
-  UNKNOWN: 'unknown_reason'
+  UNKNOWN: 'unknown_reason',
 } as const;
-
-
 
 /**
  * Standardized errors, defining what will be displayed to end user
@@ -206,7 +275,7 @@ export const ERROR_CODES = {
   INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
 
   // 403 Access
-  FORBIDDEN: 'FORBIDDEN',           // if admin role is required
+  FORBIDDEN: 'FORBIDDEN', // if admin role is required
 
   // 404 - 409 Resources
   NOT_FOUND: 'NOT_FOUND',
@@ -221,18 +290,18 @@ export const ERROR_CODES = {
 
   // 500 for all server errors - no details needed for end user
   INTERNAL_ERROR: 'INTERNAL_ERROR',
-} as const
+} as const;
 
 /**
  * Error codes for data layer only
  */
 export const DATA_ERROR = {
-    DUPLICATE: 'duplicate_entry',
-    NOT_FOUND: 'not_found',
-    CONNECTION_FAIL: 'connection_fail',
-    CONSTRAINT_VIOLATION: 'constraint_violation',
-    INTERNAL_ERROR: 'internal_error'
-} as const
+  DUPLICATE: 'duplicate_entry',
+  NOT_FOUND: 'not_found',
+  CONNECTION_FAIL: 'connection_fail',
+  CONSTRAINT_VIOLATION: 'constraint_violation',
+  INTERNAL_ERROR: 'internal_error',
+} as const;
 
 /**
  * Standard error messages

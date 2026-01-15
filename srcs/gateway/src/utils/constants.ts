@@ -2,6 +2,14 @@
  * Constantes centralisées pour le service Gateway
  */
 
+import {
+  gatewayenv,
+  AUTH_SERVICE_URL,
+  UM_SERVICE_URL,
+  GAME_SERVICE_URL,
+  BK_SERVICE_URL,
+} from '../config/env.js';
+
 export const GATEWAY_CONFIG = {
   // Routes publiques : pas de vérification JWT requise
   PUBLIC_ROUTES: [
@@ -18,17 +26,21 @@ export const GATEWAY_CONFIG = {
 
   // Rate Limiting
   RATE_LIMIT: {
-    GLOBAL: { max: 1000, timeWindow: '1 minute' }, // Plus permissif car c'est un gateway (agrège plusieurs services)
+    GLOBAL: {
+      max: gatewayenv.RATE_LIMIT_MAX,
+      timeWindow: gatewayenv.RATE_LIMIT_WINDOW,
+    },
   },
 
   // Proxy Configuration
-  PROXY_TIMEOUT_MS: 5000, // 5 secondes
+  PROXY_TIMEOUT_MS: gatewayenv.PROXY_TIMEOUT_MS,
 
   // Services URLs
   SERVICES: {
-    AUTH: 'http://auth-service:3001',
-    GAME: 'http://game-service:3003',
-    BLOCK: 'http://blockchain-service:3002',
+    AUTH: AUTH_SERVICE_URL,
+    USERS: UM_SERVICE_URL,
+    GAME: GAME_SERVICE_URL,
+    BLOCK: BK_SERVICE_URL,
   },
 } as const;
 

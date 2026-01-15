@@ -71,6 +71,121 @@
 </head>
 
 <body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+
+    <!-- ======================================== -->
+    <!-- Heartbeat System - Doit être défini AVANT les cartes -->
+    <!-- ======================================== -->
+    <script>
+        // Configuration du heartbeat
+        const HEARTBEAT_INTERVAL = 15000; // 15 secondes
+        let heartbeatTimer = null;
+        let isTabVisible = true;
+
+        /**
+         * Vérifie si l'utilisateur est connecté
+         * Comme le cookie est httpOnly, on utilise localStorage comme indicateur
+         */
+        function isUserLoggedIn() {
+            // Vérifier le flag dans localStorage
+            return localStorage.getItem('isLoggedIn') === 'true';
+        }
+
+        /**
+         * Envoie un heartbeat au serveur pour indiquer que l'utilisateur est actif
+         */
+        async function sendHeartbeat() {
+            // Ne pas envoyer si l'utilisateur n'est pas connecté
+            if (!isUserLoggedIn()) {
+                return;
+            }
+
+            // Ne pas envoyer si l'onglet n'est pas visible (optimisation)
+            if (!isTabVisible) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/auth/heartbeat', {
+                    method: 'POST',
+                    credentials: 'include', // Important pour envoyer les cookies
+                });
+
+                if (response.ok) {
+                    console.debug('Heartbeat sent successfully');
+                } else if (response.status === 401) {
+                    // Session expirée, arrêter le heartbeat
+                    console.log('Session expired, stopping heartbeat');
+                    stopHeartbeat();
+                    localStorage.removeItem('isLoggedIn');
+                }
+            } catch (error) {
+                console.error('Failed to send heartbeat:', error);
+            }
+        }
+
+        /**
+         * Démarre le système de heartbeat
+         */
+        function startHeartbeat() {
+            // Ne pas démarrer si déjà actif
+            if (heartbeatTimer) {
+                return;
+            }
+
+            console.log('Starting heartbeat system');
+
+            // Envoyer immédiatement un premier heartbeat
+            sendHeartbeat();
+
+            // Puis continuer périodiquement
+            heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+        }
+
+        /**
+         * Arrête le système de heartbeat
+         */
+        function stopHeartbeat() {
+            if (heartbeatTimer) {
+                console.log('Stopping heartbeat system');
+                clearInterval(heartbeatTimer);
+                heartbeatTimer = null;
+            }
+        }
+
+        /**
+         * Gestion de la visibilité de l'onglet
+         * Utilise l'API Page Visibility pour détecter si l'onglet est actif
+         */
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('Tab hidden');
+                isTabVisible = false;
+            } else {
+                console.log('Tab visible');
+                isTabVisible = true;
+                // Envoyer un heartbeat immédiatement quand l'onglet redevient visible
+                if (isUserLoggedIn()) {
+                    sendHeartbeat();
+                }
+            }
+        });
+
+        /**
+         * Démarrer automatiquement le heartbeat si l'utilisateur est déjà connecté
+         * (utile après un refresh de page)
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            if (isUserLoggedIn()) {
+                startHeartbeat();
+            }
+        });
+
+        // Nettoyer à la fermeture de la page
+        window.addEventListener('beforeunload', function() {
+            stopHeartbeat();
+        });
+    </script>
+
     <div id="first-screen" class="container mx-auto px-4 max-w-7xl">
         <div class="text-center mb-8">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">Transcendence super Platform</h1>
@@ -247,6 +362,7 @@
                   `
                             } else {
                                 // Connexion réussie
+                                localStorage.setItem('isLoggedIn', 'true');
                                 loginMsg.innerHTML = `
                     <div class="text-green-700 font-medium mb-2">✓ ${resultData.message || 'Connexion réussie'}</div>
                     ${resultData.username ? `<div class="text-gray-600 text-sm">Connecté en tant que: <strong>${resultData.username}</strong></div>` : ''}
@@ -256,6 +372,8 @@
                                     loginForm.reset()
                                     loginMsg.innerHTML = ''
                                 }, 3000)
+                                // Démarrer le heartbeat
+                                startHeartbeat();
                             }
                         } else {
                             loginMsg.innerHTML = formatErrorMessage(result)
@@ -450,6 +568,8 @@
                             credentials: 'include',
                         })
                         if (res.ok) {
+                            localStorage.removeItem('isLoggedIn');
+                            stopHeartbeat();
                             logoutMsg.innerHTML =
                                 '<div class="text-green-700 font-medium">✓ Déconnexion réussie</div>'
                         } else {
@@ -922,6 +1042,8 @@
                         }
 
                         if (res.ok) {
+                            localStorage.setItem('isLoggedIn', 'true');
+                            startHeartbeat();
                             verifyLogin2FAMsg.innerHTML =
                                 '<div class="text-green-700 font-medium">✓ Connexion réussie avec 2FA !</div>'
                             login2FACode.value = ''
@@ -1302,6 +1424,7 @@
                 }
             })
         </script>
+
         <script src="app.js"></script>
     </div>
 </body>

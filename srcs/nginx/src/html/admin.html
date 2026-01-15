@@ -292,6 +292,40 @@
 		.loading-overlay.show {
 			display: flex;
 		}
+
+		/* Indicateur de refresh */
+		.refresh-indicator {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: rgba(59, 130, 246, 0.95);
+			color: white;
+			padding: 0.75rem 1rem;
+			border-radius: 0.75rem;
+			font-size: 0.875rem;
+			display: none;
+			align-items: center;
+			gap: 0.5rem;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			animation: slideIn 0.3s ease-out;
+		}
+
+		.refresh-indicator.show {
+			display: flex;
+		}
+
+		@keyframes slideIn {
+			from {
+				transform: translateY(100px);
+				opacity: 0;
+			}
+
+			to {
+				transform: translateY(0);
+				opacity: 1;
+			}
+		}
 	</style>
 </head>
 
@@ -369,19 +403,34 @@
 		</div>
 
 		<!-- Stats Cards -->
-		<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+		<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
 			<div class="stats-card">
 				<div class="flex items-center">
 					<div class="p-3 bg-blue-100 rounded-full">
 						<svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239">
+								d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
 							</path>
 						</svg>
 					</div>
 					<div class="ml-4">
 						<p class="text-sm font-medium text-gray-600">Total Utilisateurs</p>
 						<p id="total-users" class="text-3xl font-bold text-gray-900">-</p>
+					</div>
+				</div>
+			</div>
+			<div class="stats-card">
+				<div class="flex items-center">
+					<div class="p-3 bg-green-100 rounded-full">
+						<svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z">
+							</path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<p class="text-sm font-medium text-gray-600">En ligne</p>
+						<p id="online-count" class="text-3xl font-bold text-green-600">-</p>
 					</div>
 				</div>
 			</div>
@@ -402,8 +451,8 @@
 			</div>
 			<div class="stats-card">
 				<div class="flex items-center">
-					<div class="p-3 bg-green-100 rounded-full">
-						<svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<div class="p-3 bg-indigo-100 rounded-full">
+						<svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
 								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
 						</svg>
@@ -423,7 +472,7 @@
 						</svg>
 					</div>
 					<div class="ml-4">
-						<p class="text-sm font-medium text-gray-600">Utilisateurs Standards</p>
+						<p class="text-sm font-medium text-gray-600">Utilisateurs</p>
 						<p id="user-count" class="text-3xl font-bold text-gray-900">-</p>
 					</div>
 				</div>
@@ -437,18 +486,11 @@
 					<h2 class="text-xl font-bold text-gray-900 flex items-center">
 						<svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239">
+								d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
 							</path>
 						</svg>
 						Gestion des Utilisateurs
 					</h2>
-					<button onclick="showCreateUserModal()" class="btn btn-primary">
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-						</svg>
-						Nouvel Utilisateur
-					</button>
 				</div>
 
 				<!-- Search and Filters -->
@@ -470,6 +512,11 @@
 						<option value="">Tous</option>
 						<option value="true">2FA Activée</option>
 						<option value="false">2FA Désactivée</option>
+					</select>
+					<select id="online-filter" class="form-input" style="max-width: 200px;">
+						<option value="">Tous (Statut)</option>
+						<option value="true">En ligne</option>
+						<option value="false">Hors ligne</option>
 					</select>
 				</div>
 			</div>
@@ -508,90 +555,6 @@
 		</div>
 	</div>
 
-	<!-- Create User Modal -->
-	<div id="create-user-modal" class="modal">
-		<div class="modal-content">
-			<div class="flex justify-between items-center mb-6">
-				<h3 class="text-xl font-bold text-gray-900 flex items-center">
-					<svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-							d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
-						</path>
-					</svg>
-					Créer un Nouvel Utilisateur
-				</h3>
-				<button onclick="hideCreateUserModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
-						</path>
-					</svg>
-				</button>
-			</div>
-
-			<form id="create-user-form" onsubmit="createUser(event)">
-				<div class="space-y-6">
-					<div>
-						<label for="create-username" class="block text-sm font-semibold text-gray-700 mb-2">
-							Nom d'utilisateur *
-						</label>
-						<input type="text" id="create-username" required class="form-input"
-							placeholder="Entrez le nom d'utilisateur" minlength="3" maxlength="30"
-							pattern="[a-zA-Z0-9_-]+" title="Lettres, chiffres, tirets et underscores uniquement">
-						<div id="create-username-error" class="field-error" style="display: none;"></div>
-					</div>
-					<div>
-						<label for="create-email" class="block text-sm font-semibold text-gray-700 mb-2">
-							Adresse Email *
-						</label>
-						<input type="email" id="create-email" required class="form-input" placeholder="nom@exemple.com">
-						<div id="create-email-error" class="field-error" style="display: none;"></div>
-					</div>
-					<div>
-						<label for="create-password" class="block text-sm font-semibold text-gray-700 mb-2">
-							Mot de passe *
-						</label>
-						<input type="password" id="create-password" required minlength="8" class="form-input"
-							placeholder="Minimum 8 caractères">
-						<div class="mt-1 text-xs text-gray-500">
-							Minimum 8 caractères, incluant majuscules, minuscules, chiffres et symboles
-						</div>
-						<div id="create-password-error" class="field-error" style="display: none;"></div>
-					</div>
-					<div>
-						<label for="create-role" class="block text-sm font-semibold text-gray-700 mb-2">
-							Rôle *
-						</label>
-						<select id="create-role" required class="form-input">
-							<option value="">Sélectionnez un rôle</option>
-							<option value="user">Utilisateur</option>
-							<option value="admin">Administrateur</option>
-						</select>
-						<div class="mt-1 text-xs text-gray-500">
-							Les administrateurs ont accès à toutes les fonctionnalités de gestion
-						</div>
-						<div id="create-role-error" class="field-error" style="display: none;"></div>
-					</div>
-				</div>
-
-				<div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-					<button type="button" onclick="hideCreateUserModal()" class="btn btn-secondary">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"></path>
-						</svg>
-						Annuler
-					</button>
-					<button type="submit" id="create-user-btn" class="btn btn-primary">
-						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-								d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-						</svg>
-						Créer l'Utilisateur
-					</button>
-				</div>
-			</form>
-		</div>
-	</div>
 
 	<!-- Edit User Modal -->
 	<div id="edit-user-modal" class="modal">
@@ -621,7 +584,7 @@
 							Nom d'utilisateur *
 						</label>
 						<input type="text" id="edit-username" required class="form-input" minlength="3" maxlength="30"
-							pattern="[a-zA-Z0-9_-]+" title="Lettres, chiffres, tirets et underscores uniquement">
+							pattern="[a-zA-Z0-9_\-]+" title="Lettres, chiffres, tirets et underscores uniquement">
 						<div id="edit-username-error" class="field-error" style="display: none;"></div>
 					</div>
 					<div>
@@ -685,64 +648,67 @@
 		</div>
 	</div>
 
+	<!-- Indicateur de refresh -->
+	<div id="refresh-indicator" class="refresh-indicator">
+		<div class="loading"></div>
+		<span>Mise à jour...</span>
+	</div>
+
 	<script>
-		// State management
+		// === Configuration ===
+		const API_BASE = '';
+		const AUTO_REFRESH_INTERVAL = 20000;
+
+		// === State Management ===
 		let users = [];
 		let currentUser = null;
 		let filteredUsers = [];
+		let autoRefreshTimer = null;
 
-		// API Base URL
-		const API_BASE = '';
-
-		// Initialize
+		// === Initialization ===
 		document.addEventListener('DOMContentLoaded', async function () {
-			// Show loading overlay
-			document.getElementById('loading-overlay').style.display = 'flex';
+			document.getElementById('loading-overlay').classList.add('show');
+
+			// Réinitialiser les filtres
+			document.getElementById('search-input').value = '';
+			document.getElementById('role-filter').value = '';
+			document.getElementById('2fa-filter').value = '';
+			if (document.getElementById('online-filter')) {
+				document.getElementById('online-filter').value = '';
+			}
 
 			await checkAuthentication();
 			await checkSystemHealth();
 			await loadUsers();
 
-			// Hide loading overlay and show main content
-			document.getElementById('loading-overlay').style.display = 'none';
+			document.getElementById('loading-overlay').classList.remove('show');
 			document.getElementById('main-content').style.display = 'block';
 
 			setupEventListeners();
+			startAutoRefresh();
 		});
 
+		// === Event Listeners ===
 		function setupEventListeners() {
-			// Search and filter listeners
 			document.getElementById('search-input').addEventListener('input', filterUsers);
 			document.getElementById('role-filter').addEventListener('change', filterUsers);
 			document.getElementById('2fa-filter').addEventListener('change', filterUsers);
+			document.getElementById('online-filter').addEventListener('change', filterUsers);
 
-			// Close modals when clicking outside
-			document.getElementById('create-user-modal').addEventListener('click', function (e) {
-				if (e.target === this) {
-					hideCreateUserModal();
-				}
-			});
 
 			document.getElementById('edit-user-modal').addEventListener('click', function (e) {
-				if (e.target === this) {
-					hideEditUserModal();
-				}
+				if (e.target === this) hideEditUserModal();
 			});
 
-			// Form validation
-			document.getElementById('create-username').addEventListener('input', validateCreateForm);
-			document.getElementById('create-email').addEventListener('input', validateCreateForm);
-			document.getElementById('create-password').addEventListener('input', validateCreateForm);
 
 			document.getElementById('edit-username').addEventListener('input', validateEditForm);
 			document.getElementById('edit-email').addEventListener('input', validateEditForm);
 		}
 
-		// System Health Check
+		// === System Health Check ===
 		async function checkSystemHealth() {
 			const container = document.getElementById('health-cards-container');
 
-			// Configuration des services avec leurs icônes et couleurs
 			const serviceConfig = {
 				auth: {
 					name: 'Service Auth',
@@ -751,7 +717,7 @@
 				},
 				user: {
 					name: 'Service Users',
-					icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
+					icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
 					color: 'text-green-600'
 				},
 				game: {
@@ -785,9 +751,6 @@
 
 				if (response.ok) {
 					const healthData = await response.json();
-					console.log('Health data received:', healthData);
-
-					// Générer les cartes dynamiquement basées sur la réponse de l'API
 					const cardsHTML = Object.entries(healthData).map(([serviceName, status]) => {
 						const config = serviceConfig[serviceName] || {
 							name: `Service ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}`,
@@ -818,12 +781,8 @@
 					}).join('');
 
 					container.innerHTML = cardsHTML;
-				} else {
-					throw new Error('Health check failed');
 				}
 			} catch (error) {
-				console.error('Health check error:', error);
-				// Afficher un message d'erreur
 				container.innerHTML = `
 					<div class="stats-card col-span-full">
 						<div class="flex items-center justify-center h-24">
@@ -837,7 +796,7 @@
 			}
 		}
 
-		// Authentication
+		// === Authentication ===
 		async function checkAuthentication() {
 			try {
 				const response = await fetch('/api/auth/me', {
@@ -855,16 +814,13 @@
 
 				// Check admin role
 				if (currentUser.role !== 'admin') {
-					showAlert('Accès refusé. Vous devez être administrateur pour accéder à cette page.', 'error');
-					setTimeout(() => {
-						window.location.href = '/';
-					}, 3000);
+					showAlert('Accès refusé. Vous devez être administrateur.', 'error');
+					setTimeout(() => window.location.href = '/', 3000);
 					return;
 				}
 
 				document.getElementById('current-user').textContent = `${currentUser.username} (${currentUser.role})`;
 			} catch (error) {
-				console.error('Auth error:', error);
 				window.location.href = '/';
 			}
 		}
@@ -875,33 +831,39 @@
 					method: 'POST',
 					credentials: 'include'
 				});
-			} catch (error) {
-				console.error('Logout error:', error);
-			}
+			} catch (error) { }
 			window.location.href = '/';
 		}
 
-		// Users management
-		async function loadUsers() {
+		// === Users Management ===
+		async function loadUsers(silent = false) {
+			if (silent) {
+				document.getElementById('refresh-indicator').classList.add('show');
+			}
+
 			try {
 				const response = await fetch('/api/auth/admin/users', {
 					method: 'GET',
 					credentials: 'include'
 				});
 
-				if (!response.ok) {
-					throw new Error('Failed to load users');
-				}
+				if (!response.ok) throw new Error('Failed to load users');
 
 				const data = await response.json();
 				users = data.users || [];
-				filteredUsers = [...users];
 
+				filterUsers();
 				updateStats();
-				renderUsersTable();
 			} catch (error) {
-				console.error('Load users error:', error);
-				showAlert('Erreur lors du chargement des utilisateurs', 'error');
+				if (!silent) {
+					showAlert('Erreur lors du chargement des utilisateurs', 'error');
+				}
+			} finally {
+				if (silent) {
+					setTimeout(() => {
+						document.getElementById('refresh-indicator').classList.remove('show');
+					}, 1000);
+				}
 			}
 		}
 
@@ -910,8 +872,10 @@
 			const adminCount = users.filter(user => user.role === 'admin').length;
 			const userCount = users.filter(user => user.role === 'user').length;
 			const twoFaCount = users.filter(user => user.is2FAEnabled).length;
+			const onlineCount = users.filter(user => user.online).length;
 
 			document.getElementById('total-users').textContent = totalUsers;
+			document.getElementById('online-count').textContent = onlineCount;
 			document.getElementById('admin-count').textContent = adminCount;
 			document.getElementById('user-count').textContent = userCount;
 			document.getElementById('2fa-count').textContent = twoFaCount;
@@ -921,14 +885,16 @@
 			const searchTerm = document.getElementById('search-input').value.toLowerCase();
 			const roleFilter = document.getElementById('role-filter').value;
 			const twoFaFilter = document.getElementById('2fa-filter').value;
+			const onlineFilter = document.getElementById('online-filter').value;
 
 			filteredUsers = users.filter(user => {
 				const matchesSearch = user.username.toLowerCase().includes(searchTerm) ||
 					user.email.toLowerCase().includes(searchTerm);
 				const matchesRole = !roleFilter || user.role === roleFilter;
 				const matches2FA = twoFaFilter === '' || user.is2FAEnabled.toString() === twoFaFilter;
+				const matchesOnline = onlineFilter === '' || (user.online !== undefined && user.online.toString() === onlineFilter);
 
-				return matchesSearch && matchesRole && matches2FA;
+				return matchesSearch && matchesRole && matches2FA && matchesOnline;
 			});
 
 			renderUsersTable();
@@ -1004,7 +970,7 @@
                             ` : `
                                 <button class="btn btn-secondary btn-sm" disabled title="Suppression non autorisée">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 18M5.636 5.636L6 6"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                     </svg>
                                 </button>
                             `}
@@ -1015,57 +981,17 @@
 			}).join('');
 		}
 
-		// Modal management
-		function showCreateUserModal() {
-			document.getElementById('create-user-modal').classList.add('show');
-			document.getElementById('create-user-form').reset();
-		}
-
-		function hideCreateUserModal() {
-			document.getElementById('create-user-modal').classList.remove('show');
-		}
 
 		function showEditUserModal() {
+			stopAutoRefresh();
 			document.getElementById('edit-user-modal').classList.add('show');
 		}
 
 		function hideEditUserModal() {
 			document.getElementById('edit-user-modal').classList.remove('show');
+			startAutoRefresh();  // Redémarre le refresh
 		}
 
-		// CRUD operations
-		async function createUser(event) {
-			event.preventDefault();
-
-			const username = document.getElementById('create-username').value;
-			const email = document.getElementById('create-email').value;
-			const password = document.getElementById('create-password').value;
-			const role = document.getElementById('create-role').value;
-
-			try {
-				const response = await fetch('/api/auth/admin/users', {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					credentials: 'include',
-					body: JSON.stringify({ username, email, password, role })
-				});
-
-				const data = await response.json();
-
-				if (!response.ok) {
-					throw new Error(data.error?.message || 'Erreur lors de la création');
-				}
-
-				showAlert('Utilisateur créé avec succès', 'success');
-				hideCreateUserModal();
-				loadUsers();
-			} catch (error) {
-				console.error('Create user error:', error);
-				showAlert(error.message, 'error');
-			}
-		}
 
 		async function editUser(userId) {
 			const user = users.find(u => u.id === userId);
@@ -1258,59 +1184,6 @@
 			return protectedAccounts.includes(username.toLowerCase());
 		}
 
-		// Form validation functions
-		function validateCreateForm() {
-			clearValidationErrors('create');
-
-			const username = document.getElementById('create-username').value.trim();
-			const email = document.getElementById('create-email').value.trim();
-			const password = document.getElementById('create-password').value;
-			const role = document.getElementById('create-role').value;
-
-			let isValid = true;
-
-			// Username validation
-			if (username.length < 3) {
-				showValidationError('create-username', 'Le nom d\'utilisateur doit contenir au moins 3 caractères');
-				isValid = false;
-			} else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
-				showValidationError('create-username', 'Le nom d\'utilisateur ne peut contenir que des lettres, chiffres, tirets et underscores');
-				isValid = false;
-			} else if (users.some(user => user.username.toLowerCase() === username.toLowerCase())) {
-				showValidationError('create-username', 'Ce nom d\'utilisateur est déjà utilisé');
-				isValid = false;
-			}
-
-			// Email validation
-			if (!isValidEmail(email)) {
-				showValidationError('create-email', 'Veuillez entrer une adresse email valide');
-				isValid = false;
-			} else if (users.some(user => user.email.toLowerCase() === email.toLowerCase())) {
-				showValidationError('create-email', 'Cette adresse email est déjà utilisée');
-				isValid = false;
-			}
-
-			// Password validation
-			if (password.length < 8) {
-				showValidationError('create-password', 'Le mot de passe doit contenir au moins 8 caractères');
-				isValid = false;
-			} else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-				showValidationError('create-password', 'Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre');
-				isValid = false;
-			}
-
-			// Role validation
-			if (!role) {
-				showValidationError('create-role', 'Veuillez sélectionner un rôle');
-				isValid = false;
-			}
-
-			// Enable/disable submit button
-			const submitBtn = document.getElementById('create-user-btn');
-			if (submitBtn) submitBtn.disabled = !isValid;
-
-			return isValid;
-		}
 
 		function validateEditForm() {
 			clearValidationErrors('edit');
@@ -1411,6 +1284,32 @@
 			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 			return emailRegex.test(email);
 		}
+
+		/**
+		 * Démarre le refresh automatique des utilisateurs
+		 */
+		function startAutoRefresh() {
+			if (autoRefreshTimer) return;
+
+			autoRefreshTimer = setInterval(async () => {
+				await loadUsers(true);
+			}, AUTO_REFRESH_INTERVAL);
+		}
+
+		/**
+		 * Arrête le refresh automatique
+		 */
+		function stopAutoRefresh() {
+			if (autoRefreshTimer) {
+				clearInterval(autoRefreshTimer);
+				autoRefreshTimer = null;
+			}
+		}
+
+		// Nettoyer à la fermeture de la page
+		window.addEventListener('beforeunload', function () {
+			stopAutoRefresh();
+		});
 	</script>
 </body>
 
