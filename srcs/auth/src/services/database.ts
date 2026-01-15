@@ -281,7 +281,7 @@ export function getDatabasePath() {
 }
 
 /**
- * @todo dev only - delete before prod
+ * Liste tous les utilisateurs dans la base de données
  */
 export function listUsers(): DBUser[] {
   try {

@@ -74,62 +74,12 @@ export function validateUser(identifier: string, password: string) {
   return bcrypt.compareSync(password, user.password);
 }
 
-// DEV ONLY - À supprimer en production
+// ============================================
+// Admin User Management Functions
+// ============================================
+
 export function listUsers() {
   return db.listUsers();
-}
-
-export async function createUserAsAdmin(userData: {
-  username: string;
-  email?: string | null;
-  password: string;
-  role?: string;
-}): Promise<number> {
-  const hash = await bcrypt.hash(userData.password, SALT_ROUNDS);
-
-  try {
-    const userId = db.createUser({
-      username: userData.username,
-      email: userData.email || null,
-      password: hash,
-    });
-
-    // Définir le rôle si spécifié
-    if (userData.role && userData.role !== UserRole.USER) {
-      db.updateUserRole(userId, userData.role as UserRole);
-    }
-
-    // Créer le profil utilisateur si ce n'est pas un utilisateur spécial
-    if (![authenv.ADMIN_USERNAME, authenv.INVITE_USERNAME].includes(userData.username)) {
-      try {
-        await createUserProfile({
-          authId: userId,
-          email: userData.email || '',
-          username: userData.username,
-        });
-      } catch (error) {
-        logger.warn({
-          event: EVENTS.DEPENDENCY.ROLLBACK,
-          userId,
-          reason: REASONS.NETWORK.UPSTREAM_ERROR,
-        });
-        db.deleteUser(userId);
-        throw error;
-      }
-    }
-
-    return userId;
-  } catch (err: unknown) {
-    if (err instanceof DataError) {
-      if (err.meta?.field === 'email') {
-        throw new ServiceError(APP_ERRORS.REG_EMAIL_EXISTS, { details: userData.email });
-      }
-      if (err.meta?.field === 'username') {
-        throw new ServiceError(APP_ERRORS.REG_USERNAME_TAKEN, { details: userData.username });
-      }
-    }
-    throw err;
-  }
 }
 
 export function updateUserAsAdmin(
