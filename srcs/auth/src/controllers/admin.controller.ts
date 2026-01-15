@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import * as authService from '../services/auth.service.js';
 import * as totpService from '../services/totp.service.js';
+import * as presenceService from '../services/presence.service.js';
 import { UserRole, HTTP_STATUS, ERROR_MESSAGES, ERROR_RESPONSE_CODES } from '../utils/constants.js';
 import { ServiceError } from '../types/errors.js';
 import { logger } from '../index.js';
@@ -34,13 +35,18 @@ export async function listAllUsers(
   try {
     const users = authService.listUsers();
 
-    // Enrichir avec l'état 2FA
+    // Récupérer les statuts de présence de tous les utilisateurs
+    const userIds = users.map((user) => user.id!).filter((id) => id !== undefined);
+    const onlineStatusMap = await presenceService.getBulkOnlineStatus(userIds);
+
+    // Enrichir avec l'état 2FA et la présence
     const enrichedUsers = users.map((user: DBUser) => ({
       id: user.id,
       username: user.username,
       email: user.email,
       role: user.role,
       is2FAEnabled: totpService.isTOTPEnabled(user.id!),
+      online: onlineStatusMap.get(user.id!) || false,
     }));
 
     logger.info({ event: 'list_all_users_success', user: username, count: enrichedUsers.length });

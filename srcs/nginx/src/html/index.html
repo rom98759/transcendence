@@ -110,11 +110,8 @@
                     credentials: 'include', // Important pour envoyer les cookies
                 });
 
-                if (response.ok) {
-                    console.debug('Heartbeat sent successfully');
-                } else if (response.status === 401) {
+                if (response.status === 401) {
                     // Session expirée, arrêter le heartbeat
-                    console.log('Session expired, stopping heartbeat');
                     stopHeartbeat();
                     localStorage.removeItem('isLoggedIn');
                 }
@@ -132,8 +129,6 @@
                 return;
             }
 
-            console.log('Starting heartbeat system');
-
             // Envoyer immédiatement un premier heartbeat
             sendHeartbeat();
 
@@ -146,7 +141,6 @@
          */
         function stopHeartbeat() {
             if (heartbeatTimer) {
-                console.log('Stopping heartbeat system');
                 clearInterval(heartbeatTimer);
                 heartbeatTimer = null;
             }
@@ -158,10 +152,8 @@
          */
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                console.log('Tab hidden');
                 isTabVisible = false;
             } else {
-                console.log('Tab visible');
                 isTabVisible = true;
                 // Envoyer un heartbeat immédiatement quand l'onglet redevient visible
                 if (isUserLoggedIn()) {
@@ -459,7 +451,6 @@
                             setTimeout(() => {
                                 registerForm.reset()
                             }, 2000)
-                            console.log('Données reçues:', result.data)
                         } else {
                             regMsg.innerHTML = formatErrorMessage(result)
                         }
@@ -617,7 +608,6 @@
 
                     let html = '<div class="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl mt-3 border border-gray-200 shadow-sm">'
                     if (data.user) {
-                        console.log('User data received:', data.user)
                         const user = data.user
                         const isAdmin = user.role === 'admin'
                         const has2FA = user.isTwoFactorAuthEnabled || user.is2FAEnabled
@@ -1215,7 +1205,6 @@
             const listUsersMsg = document.getElementById('listUsersMsg')
 
             function formatUserList(data) {
-                console.log('List data received:', data)
                 if (!data || !data.users || !Array.isArray(data.users)) {
                     return `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
                 }
