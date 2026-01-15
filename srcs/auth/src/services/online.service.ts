@@ -2,9 +2,9 @@ import { Redis } from 'ioredis';
 import { logger } from '../index.js';
 import { authenv } from '../config/env.js';
 
-// Constantes pour la présence
-const PRESENCE_TTL = 45; // secondes - temps avant qu'un utilisateur soit considéré offline
-const PRESENCE_KEY_PREFIX = 'presence:';
+// Constantes pour le statut en ligne
+const ONLINE_TTL = 45; // secondes - temps avant qu'un utilisateur soit considéré offline
+const ONLINE_KEY_PREFIX = 'online:';
 const ONLINE_USERS_SET = 'online_users';
 
 // Client Redis singleton
@@ -56,19 +56,19 @@ export function getRedisClient(): Redis {
 
 /**
  * Enregistre un heartbeat pour un utilisateur
- * Met à jour la présence et ajoute l'utilisateur au SET des utilisateurs en ligne
+ * Met à jour le statut en ligne et ajoute l'utilisateur au SET des utilisateurs en ligne
  */
 export async function recordHeartbeat(userId: number): Promise<void> {
   const redis = getRedisClient();
-  const presenceKey = `${PRESENCE_KEY_PREFIX}${userId}`;
+  const onlineKey = `${ONLINE_KEY_PREFIX}${userId}`;
   const timestamp = Date.now();
 
   try {
     // Pipeline pour exécuter les deux commandes atomiquement
     const pipeline = redis.pipeline();
 
-    // 1. Mettre à jour la présence avec TTL
-    pipeline.setex(presenceKey, PRESENCE_TTL, timestamp.toString());
+    // 1. Mettre à jour le statut en ligne avec TTL
+    pipeline.setex(onlineKey, ONLINE_TTL, timestamp.toString());
 
     // 2. Ajouter l'utilisateur au SET des utilisateurs en ligne
     pipeline.sadd(ONLINE_USERS_SET, userId.toString());
@@ -95,10 +95,10 @@ export async function recordHeartbeat(userId: number): Promise<void> {
  */
 export async function isUserOnline(userId: number): Promise<boolean> {
   const redis = getRedisClient();
-  const presenceKey = `${PRESENCE_KEY_PREFIX}${userId}`;
+  const onlineKey = `${ONLINE_KEY_PREFIX}${userId}`;
 
   try {
-    const exists = await redis.exists(presenceKey);
+    const exists = await redis.exists(onlineKey);
     return exists === 1;
   } catch (error: any) {
     logger.error({
@@ -145,8 +145,8 @@ export async function getBulkOnlineStatus(userIds: number[]): Promise<Map<number
     const pipeline = redis.pipeline();
 
     userIds.forEach((userId) => {
-      const presenceKey = `${PRESENCE_KEY_PREFIX}${userId}`;
-      pipeline.exists(presenceKey);
+      const onlineKey = `${ONLINE_KEY_PREFIX}${userId}`;
+      pipeline.exists(onlineKey);
     });
 
     const results = await pipeline.exec();
@@ -184,12 +184,12 @@ export async function cleanupOfflineUsers(): Promise<void> {
       return;
     }
 
-    // Vérifier quels utilisateurs n'ont plus de présence
+    // Vérifier quels utilisateurs ne sont plus en ligne
     const pipeline = redis.pipeline();
 
     userIds.forEach((userId: string) => {
-      const presenceKey = `${PRESENCE_KEY_PREFIX}${userId}`;
-      pipeline.exists(presenceKey);
+      const onlineKey = `${ONLINE_KEY_PREFIX}${userId}`;
+      pipeline.exists(onlineKey);
     });
 
     const results = await pipeline.exec();

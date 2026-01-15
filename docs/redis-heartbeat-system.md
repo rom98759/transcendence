@@ -1,8 +1,8 @@
-# Redis - Système de Heartbeat et Présence
+# Redis - Système de Heartbeat et Statut en Ligne
 
 ## 🎯 Vue d'ensemble
 
-Le système de présence utilise **Redis** comme store de données en mémoire pour gérer efficacement les statuts "en ligne" des utilisateurs en temps réel. Redis est choisi pour sa rapidité, ses structures de données optimisées et ses fonctionnalités d'expiration automatique.
+Le système de statut en ligne utilise **Redis** comme store de données en mémoire pour gérer efficacement les statuts "en ligne" des utilisateurs en temps réel. Redis est choisi pour sa rapidité, ses structures de données optimisées et ses fonctionnalités d'expiration automatique.
 
 ## 🏗️ Architecture Redis
 
@@ -11,7 +11,7 @@ Le système de présence utilise **Redis** comme store de données en mémoire p
 ```
 Redis Database
 ├── SET: "online_users"           → {userId1, userId2, userId3...}
-└── Keys: "presence:{userId}"     → timestamp (avec TTL: 45s)
+└── Keys: "online:{userId}"     → timestamp (avec TTL: 45s)
 ```
 
 **Avantages de cette approche :**
@@ -23,13 +23,13 @@ Redis Database
 
 ## ⚡ Fonctionnalités principales
 
-### 1. Enregistrement de présence
+### 1. Enregistrement de statut
 
-**Principe :** Chaque heartbeat client met à jour la présence utilisateur dans Redis.
+**Principe :** Chaque heartbeat client met à jour le statut en ligne utilisateur dans Redis.
 
 **Opérations Redis :**
 
-- `SETEX presence:{userId} 45 {timestamp}` - Enregistre avec expiration 45s
+- `SETEX online:{userId} 45 {timestamp}` - Enregistre avec expiration 45s
 - `SADD online_users {userId}` - Ajoute à la liste des utilisateurs en ligne
 
 **Comportement :**
@@ -44,7 +44,7 @@ Redis Database
 
 **Opérations Redis :**
 
-- `EXISTS presence:{userId}` - Vérifie l'existence de la clé
+- `EXISTS online:{userId}` - Vérifie l'existence de la clé
 - Si la clé existe → utilisateur en ligne
 - Si la clé n'existe pas → utilisateur hors ligne
 
@@ -76,7 +76,7 @@ Redis Database
 
 **Problème résolu :**
 
-- Les clés `presence:{userId}` expirent automatiquement (TTL)
+- Les clés `online:{userId}` expirent automatiquement (TTL)
 - Mais le SET `online_users` conserve les entrées orphelines
 - Solution : job de nettoyage qui synchronise les deux
 
@@ -92,21 +92,21 @@ Redis Database
 
 ```
 T+0s    User envoie heartbeat
-        ├── SETEX presence:123 45 1705234567
+        ├── SETEX online:123 45 1705234567
         └── SADD online_users 123
 
 T+15s   Heartbeat suivant
-        ├── SETEX presence:123 45 1705234582  (renouvelle TTL)
+        ├── SETEX online:123 45 1705234582  (renouvelle TTL)
         └── SADD online_users 123            (déjà présent, pas d'effet)
 
 T+45s   User ferme son navigateur (pas de heartbeat)
-        └── TTL expire → clé presence:123 supprimée automatiquement
+        └── TTL expire → clé online:123 supprimée automatiquement
 
 T+60s   Job de nettoyage s'exécute
         ├── SMEMBERS online_users → [123, 456, 789]
-        ├── EXISTS presence:123 → false
-        ├── EXISTS presence:456 → true
-        ├── EXISTS presence:789 → true
+        ├── EXISTS online:123 → false
+        ├── EXISTS online:456 → true
+        ├── EXISTS online:789 → true
         └── SREM online_users 123       (supprime l'entrée orpheline)
 ```
 
@@ -139,7 +139,7 @@ T+60s   Job de nettoyage s'exécute
 
 **Consommation par utilisateur :**
 
-- Clé `presence:{userId}` : ~80 bytes
+- Clé `online:{userId}` : ~80 bytes
 - Entrée dans SET : ~10 bytes
 - **Total :** ~90 bytes par utilisateur en ligne
 
@@ -169,4 +169,4 @@ save 900 1
 - `INFO memory` - Consommation mémoire
 - `INFO stats` - Opérations par seconde
 - `DBSIZE` - Nombre de clés actives
-- `TTL presence:*` - Vérifier les expirations
+- `TTL online:*` - Vérifier les expirations

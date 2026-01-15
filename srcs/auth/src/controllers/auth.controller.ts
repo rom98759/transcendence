@@ -10,7 +10,7 @@ import {
 } from '../utils/constants.js';
 import { ServiceError } from '../types/errors.js';
 import * as totpService from '../services/totp.service.js';
-import * as presenceService from '../services/presence.service.js';
+import * as onlineService from '../services/online.service.js';
 import { logger } from '../index.js';
 import { generateJWT } from '../services/jwt.service.js';
 
@@ -853,7 +853,7 @@ export async function disable2FAHandler(
 }
 
 /**
- * Handler pour le heartbeat - met à jour la présence de l'utilisateur
+ * Handler pour le heartbeat - met à jour le statut en ligne de l'utilisateur
  */
 export async function heartbeatHandler(
   this: FastifyInstance,
@@ -875,7 +875,7 @@ export async function heartbeatHandler(
 
   try {
     // Enregistrer le heartbeat dans Redis
-    await presenceService.recordHeartbeat(userId);
+    await onlineService.recordHeartbeat(userId);
 
     return reply.code(HTTP_STATUS.OK).send({
       success: true,
@@ -892,6 +892,61 @@ export async function heartbeatHandler(
       error: {
         message: ERROR_MESSAGES.FAILED_HEARTBEAT,
         code: ERROR_RESPONSE_CODES.HEARTBEAT_ERROR,
+      },
+    });
+  }
+}
+
+/**
+ * Handler pour vérifier si un utilisateur est en ligne
+ * GET /is-online/:name
+ */
+export async function isUserOnlineHandler(
+  this: FastifyInstance,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const params = req.params as { name?: string };
+  const userName = params.name || null;
+
+  // Validation des paramètres
+  if (!userName) {
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
+      error: {
+        message: 'User name is required',
+        code: 'MISSING_USER_NAME',
+      },
+    });
+  }
+
+  try {
+    const user = authService.findByUsername(userName);
+    if (!user || !user.id) {
+      return reply.code(HTTP_STATUS.NOT_FOUND).send({
+        error: {
+          message: ERROR_MESSAGES.USER_NOT_FOUND,
+          code: ERROR_RESPONSE_CODES.USER_NOT_FOUND,
+        },
+      });
+    }
+    const userId = user.id;
+
+    // Vérifier le statut en ligne
+    const isOnline = await onlineService.isUserOnline(userId);
+    return reply.code(HTTP_STATUS.OK).send({
+      username: userName,
+      isOnline,
+    });
+  } catch (error: any) {
+    logger.error({
+      event: 'check_user_online_error',
+      userName,
+      error: error?.message || error,
+    });
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
+      error: {
+        message: ERROR_MESSAGES.FAILED_CHECK_USER_ONLINE,
+        code: ERROR_RESPONSE_CODES.CHECK_USER_ONLINE_ERROR,
       },
     });
   }

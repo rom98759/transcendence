@@ -6,7 +6,7 @@ import { authRoutes } from './routes/auth.routes.js';
 import { adminRoutes } from './routes/admin.routes.js';
 import { initAdminUser, initInviteUser } from './utils/init-users.js';
 import * as totpService from './services/totp.service.js';
-import * as presenceService from './services/presence.service.js';
+import * as onlineService from './services/online.service.js';
 import { loggerConfig } from './config/logger.config.js';
 import { AUTH_CONFIG, ERROR_CODES, EVENTS, REASONS } from './utils/constants.js';
 import { AppBaseError } from './types/errors.js';
@@ -88,8 +88,8 @@ app.register(adminRoutes, { prefix: '/admin' });
     await initAdminUser();
     await initInviteUser();
 
-    // Initialiser le client Redis pour les présences
-    presenceService.initRedisClient();
+    // Initialiser le client Redis pour les statuts en ligne
+    onlineService.initRedisClient();
 
     // Nettoyer les sessions expirées au démarrage
     totpService.cleanupExpiredSessions();
@@ -99,8 +99,8 @@ app.register(adminRoutes, { prefix: '/admin' });
       totpService.cleanupExpiredSessions();
     }, AUTH_CONFIG.CLEANUP_INTERVAL_MS);
 
-    // Démarrer le job de nettoyage des présences (toutes les 60 secondes)
-    presenceService.startCleanupJob(60000);
+    // Démarrer le job de nettoyage des statuts en ligne (toutes les 60 secondes)
+    onlineService.startCleanupJob(60000);
 
     logger.info({
       event: 'service_ready',

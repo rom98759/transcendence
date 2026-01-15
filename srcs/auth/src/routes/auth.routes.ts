@@ -12,6 +12,7 @@ import {
   verify2FAHandler,
   disable2FAHandler,
   heartbeatHandler,
+  isUserOnlineHandler,
 } from '../controllers/auth.controller.js';
 import { AUTH_CONFIG } from '../utils/constants.js';
 
@@ -65,7 +66,7 @@ export async function authRoutes(app: FastifyInstance) {
   // DEV ONLY - À supprimer en production
   app.get('/me', meHandler);
 
-  // Heartbeat endpoint - pour tracker les présences
+  // Heartbeat endpoint - pour tracker les statuts en ligne
   app.post(
     '/heartbeat',
     {
@@ -120,6 +121,19 @@ export async function authRoutes(app: FastifyInstance) {
   );
 
   app.post('/2fa/disable', disable2FAHandler);
+
+  app.get(
+    '/is-online/:name',
+    {
+      config: {
+        rateLimit: {
+          max: AUTH_CONFIG.RATE_LIMIT.IS_USER_ONLINE.max,
+          timeWindow: AUTH_CONFIG.RATE_LIMIT.IS_USER_ONLINE.timeWindow,
+        },
+      },
+    },
+    isUserOnlineHandler,
+  );
 
   // Gestion des routes inconnues (doit être en dernier)
   app.all('/*', notFoundHandler);

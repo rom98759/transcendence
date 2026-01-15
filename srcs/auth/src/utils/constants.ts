@@ -51,6 +51,7 @@ export const AUTH_CONFIG = {
     REGISTER: { max: 1000, timeWindow: '15 minutes' },
     TWO_FA_VERIFY: { max: 1000, timeWindow: '15 minutes' },
     TWO_FA_SETUP: { max: 1000, timeWindow: '15 minutes' },
+    IS_USER_ONLINE: { max: 100, timeWindow: '1 minute' },
   },
 } as const;
 
@@ -112,6 +113,8 @@ export const ERROR_MESSAGES = {
   // Generic
   INTERNAL_SERVER_ERROR: 'Internal server error',
   FAILED_HEARTBEAT: 'Failed to record heartbeat',
+  FAILED_FETCH_USER: 'Failed to fetch user information',
+  FAILED_CHECK_USER_ONLINE: 'Failed to check user online status',
 } as const;
 
 /**
@@ -131,6 +134,8 @@ export const ERROR_RESPONSE_CODES = {
   SELF_DELETION_FORBIDDEN: 'SELF_DELETION_FORBIDDEN',
   INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
   HEARTBEAT_ERROR: 'HEARTBEAT_ERROR',
+  FETCH_USER_ERROR: 'FETCH_USER_ERROR',
+  CHECK_USER_ONLINE_ERROR: 'CHECK_USER_ONLINE_ERROR',
 } as const;
 
 /**

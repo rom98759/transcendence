@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import * as authService from '../services/auth.service.js';
 import * as totpService from '../services/totp.service.js';
-import * as presenceService from '../services/presence.service.js';
+import * as onlineService from '../services/online.service.js';
 import { UserRole, HTTP_STATUS, ERROR_MESSAGES, ERROR_RESPONSE_CODES } from '../utils/constants.js';
 import { ServiceError } from '../types/errors.js';
 import { logger } from '../index.js';
@@ -35,11 +35,11 @@ export async function listAllUsers(
   try {
     const users = authService.listUsers();
 
-    // Récupérer les statuts de présence de tous les utilisateurs
+    // Récupérer les statuts en ligne de tous les utilisateurs
     const userIds = users.map((user) => user.id!).filter((id) => id !== undefined);
-    const onlineStatusMap = await presenceService.getBulkOnlineStatus(userIds);
+    const onlineStatusMap = await onlineService.getBulkOnlineStatus(userIds);
 
-    // Enrichir avec l'état 2FA et la présence
+    // Enrichir avec l'état 2FA et le statut en ligne
     const enrichedUsers = users.map((user: DBUser) => ({
       id: user.id,
       username: user.username,
