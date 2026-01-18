@@ -1,4 +1,5 @@
 include make/config.mk
+export SHARED_GID := 204
 
 # === Global ===
 
@@ -9,10 +10,8 @@ dev: volumes colima-dev
 	$(D_COMPOSE_DEV) up --build -d
 
 volumes:
-	@mkdir -p $(DATABASE_PATH)
-	@mkdir -p $(UPLOADS_PATH)
-	@chmod -R 777 $(VOLUMES_PATH)
-	@chmod -R 777 $(UPLOADS_PATH)
+	@mkdir -p $(DATABASE_PATH) $(UPLOADS_PATH)
+	@docker run --rm -v $(VOLUMES_PATH):/tmp/v alpine sh -c "chown -R 1001:204 /tmp/v && chmod -R 775 /tmp/v"
 
 start :
 	$(D_COMPOSE) start
@@ -118,6 +117,9 @@ shell-block:
 
 # --- Logs and status ---
 
+prisma-user:
+	$(CONTAINER_CMD) exec -it $(USER_SERVICE_NAME) npx prisma studio --browser none
+
 logs:
 	$(D_COMPOSE) logs -f
 # generic rule : replace % with service name
@@ -161,13 +163,11 @@ fclean: clean
 	@echo "Removing volumes and networks…"
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
-	@echo "Cleaning volume contents…"
-	@if [ -d "$(VOLUMES_PATH)" ] && [ "$(VOLUMES_PATH)" != "/" ]; then \
-		find $(VOLUMES_PATH) -mindepth 1 -delete || true; \
-	fi
+	@echo "Cleaning volume contents with Docker"
+	@docker run --rm -v $(VOLUMES_PATH):/tmp/volumes alpine sh -c "rm -rf /tmp/volumes/data/* /tmp/volumes/uploads/*"
 	@echo "Volume folder cleaned (structure preserved)"
 
-re : fclean volumes all
+re : fclean all
 
 clean-packages:
 	@echo "Cleaning local build artifacts..."

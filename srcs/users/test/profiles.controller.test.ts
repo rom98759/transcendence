@@ -22,7 +22,7 @@ import { profileService } from '../src/services/profiles.service.js';
 describe('Profile Controller unit tests', () => {
   let app: FastifyInstance;
 
-  describe('GET /:username', () => {
+  describe('GET /username/:username', () => {
     beforeAll(async () => {
       process.env['NODE_ENV'] = 'test';
       app = await buildApp();
@@ -45,7 +45,7 @@ describe('Profile Controller unit tests', () => {
       const response = await app.inject({
         method: 'GET',
         headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-        url: '/toto',
+        url: '/username/toto',
       });
 
       expect(profileService.getByUsername).toHaveBeenCalledWith('toto');
@@ -65,7 +65,7 @@ describe('Profile Controller unit tests', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: '/unknown',
+        url: '/username/unknown',
         headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
       });
 
@@ -75,7 +75,7 @@ describe('Profile Controller unit tests', () => {
     test('Should reject admin as username', async () => {
       const response = await app.inject({
         method: 'GET',
-        url: '/admin',
+        url: '/username/admin',
         headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
       });
 
@@ -89,7 +89,7 @@ describe('Profile Controller unit tests', () => {
 
       const response = await app.inject({
         method: 'GET',
-        url: '/unknown',
+        url: '/username/toto',
         headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
       });
 

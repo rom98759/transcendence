@@ -38,10 +38,10 @@ COPY srcs/users/entrypoint.sh ./srcs/users/entrypoint.sh
 
 # Copy Prisma files
 COPY srcs/users/prisma ./srcs/users/prisma
-COPY srcs/users/prisma.config.* ./srcs/users/
+COPY srcs/users/prisma.config.ts ./srcs/users/prisma.config.ts
 
-WORKDIR /app/srcs/users
 # Generate Prisma client
+WORKDIR /app/srcs/users
 RUN npx prisma generate
 
 # Build → dist/
@@ -56,9 +56,12 @@ FROM node:20-alpine AS runner
 # Keep the same workspace root as builder
 WORKDIR /app
 
+ENV USER_ID=1001
+ENV GROUP_ID=204
+
 RUN apk add --no-cache wget python3 make g++ \
-    && addgroup -S appgroup \
-    && adduser -S appuser -G appgroup
+    && addgroup -g ${GROUP_ID} -S appgroup \
+    && adduser -u ${USER_ID} -S -G appgroup appuser
 
 # Shared core package
 COPY --from=builder /app/srcs/shared/core/package.json ./srcs/shared/core/package.json
@@ -89,7 +92,8 @@ COPY --from=builder /app/srcs/users/prisma.config.ts ./srcs/users/prisma.config.
 ENV HUSKY=0
 
 # Create data directory and set permissions (only for /app/srcs/users)
-RUN mkdir -p /app/srcs/users/data && chown -R appuser:appgroup /app/srcs/users/data
+RUN mkdir -p /app/data && chown -R appuser:appgroup /app/data
+RUN mkdir -p /app/uploads && chown -R appuser:appgroup /app/uploads
 
 # Change to users service directory
 WORKDIR /app/srcs/users
@@ -97,6 +101,7 @@ WORKDIR /app/srcs/users
 # Copy entrypoint
 COPY --from=builder /app/srcs/users/entrypoint.sh ./entrypoint.sh
 RUN chmod +x ./entrypoint.sh
+RUN chown -R appuser:appgroup /app/srcs/users
 
 USER appuser
 

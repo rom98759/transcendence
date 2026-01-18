@@ -75,7 +75,7 @@ class GatewayLogger implements Logger {
 
   private initializeConfig(): void {
     try {
-      // @ts-ignore - globalThis.process existe au runtime Node.js
+      // @ts-ignore - globalThis.process
       const env = globalThis.process?.env || {};
       this.logLevel = env.LOG_LEVEL || 'info';
       this.isDevelopment = env.NODE_ENV !== 'production';

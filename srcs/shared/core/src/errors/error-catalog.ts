@@ -160,4 +160,11 @@ export const ERR_DEFS = {
     'Resource cannot be in invalid state',
     422,
   ),
+  // Validation
+  RESSOURCE_INVALID_TYPE: serviceError(
+    ERROR_CODES.VALIDATION_ERROR,
+    LOG_REASONS.VALIDATION.INVALID_FORMAT,
+    'Invalid type',
+    400,
+  ),
 } as const;

@@ -105,6 +105,7 @@ export const LOG_REASONS = {
     DB_CLOSE_ERROR: 'infra_db_close_error',
     DB_QUERY_FAIL: 'infra_db_query', // other than uniqueness violation
     REDIS_ERROR: 'infra_redis_error',
+    FILE_WRITE_ERROR: 'infra_file_write_error',
   },
   UNKNOWN: 'unknown_reason',
 } as const;

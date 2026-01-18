@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import * as authService from '../services/auth.service.js';
 import { ValidationSchemas } from '../utils/validation.js';
-import { AUTH_CONFIG, UserRole } from '../utils/constants.js';
+import { AUTH_CONFIG, ERROR_CODES, UserRole } from '../utils/constants.js';
 
 /**
  * Configuration des cookies avec security enforcée en production
@@ -10,12 +10,12 @@ function getCookieOptions(maxAgeSeconds: number = AUTH_CONFIG.COOKIE_MAX_AGE_SEC
   const env = (globalThis as any).process?.env || {};
   const isProduction = env.NODE_ENV === 'production';
   const forceSecure = isProduction || env.FORCE_SECURE_COOKIE === 'true';
-
+  const sameSitePolicy = isProduction ? ('strict' as const) : ('lax' as const);
   return {
+    path: '/',
     httpOnly: true,
     secure: forceSecure,
-    sameSite: 'strict' as const,
-    path: '/',
+    sameSite: sameSitePolicy,
     maxAge: maxAgeSeconds,
   };
 }
@@ -95,6 +95,7 @@ export async function registerHandler(
         },
       });
     }
+    logger.error(err);
     return reply.code(500).send({
       error: {
         message: "Une erreur interne s'est produite. Veuillez réessayer plus tard.",

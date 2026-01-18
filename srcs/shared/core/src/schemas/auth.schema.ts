@@ -3,7 +3,7 @@ import { idSchema, passwordSchema, usernameSchema } from './base.schema.js';
 
 export const UserRegisterSchema = z.object({
   username: usernameSchema,
-  email: z.email(),
+  email: z.email().optional(),
   password: passwordSchema,
 });
 

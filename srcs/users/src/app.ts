@@ -7,9 +7,9 @@ import {
   validatorCompiler,
   ZodTypeProvider,
 } from 'fastify-type-provider-zod';
+import multipart from '@fastify/multipart';
 
 import { umRoutes } from './routes/profiles.routes.js';
-import { authPlugin } from './plugins/auth.plugin.js';
 import { errorHandler } from './utils/error-handler.js';
 import { appenv } from './config/env.js';
 import { friendsRoutes } from './routes/friends.routes.js';
@@ -26,7 +26,17 @@ export async function buildApp() {
 
   app.setErrorHandler(errorHandler);
 
-  await app.register(authPlugin);
+  app.register(multipart, {
+    limits: {
+      fieldNameSize: 100,
+      fieldSize: 100,
+      fields: 10,
+      fileSize: 5 * 1024 * 1024, // 5MB max file size
+      files: 1, // Only 1 file at a time
+      headerPairs: 2000,
+    },
+    attachFieldsToBody: false, // Keep files separate from body
+  });
 
   if (appenv.NODE_ENV !== 'test') {
     await app.register(fastifySwagger, {

@@ -8,6 +8,7 @@ import {
   usernameDTO,
   UserNameDTO,
 } from '@transcendence/core';
+import { MultipartFile } from '@fastify/multipart';
 
 export class ProfileController {
   async createProfile(req: FastifyRequest, reply: FastifyReply) {
@@ -27,16 +28,25 @@ export class ProfileController {
   }
 
   async updateProfileAvatar(req: FastifyRequest, reply: FastifyReply) {
+    const data = (await req.file()) as MultipartFile;
     const { username } = req.params as {
       username: usernameDTO;
     };
-    const { avatarUrl } = req.body as { avatarUrl: string };
+
+    if (!data) {
+      return reply.code(400).send({
+        error: {
+          message: 'No file uploaded',
+          code: 'NO_FILE',
+        },
+      });
+    }
+
     req.log.trace({
       event: `${LOG_ACTIONS.UPDATE}_${LOG_RESOURCES.PROFILE}`,
       param: username,
-      body: avatarUrl,
     });
-    const profileDTO = await profileService.updateAvatarUrl(username, avatarUrl);
+    const profileDTO = await profileService.updateAvatar(username, data);
     return reply.status(200).send(profileDTO);
   }
 

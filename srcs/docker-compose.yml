@@ -5,6 +5,13 @@ x-healthcheck-template: &healthcheck-template
   start_period: 10s
 
 services:
+  init-permissions:
+    image: alpine
+    volumes:
+      - data:/app/data
+      - uploads:/app/uploads
+    command: sh -c "chown -R 1001:204 /app/data /app/uploads && chmod -R 775 /app/data /app/uploads"
+
   # Nginx reverse proxy
   nginx-proxy:
     build:
@@ -18,7 +25,6 @@ services:
       - app-network
     volumes:
       - uploads:/usr/share/nginx/html/uploads
-      # - ./secrets/ssl:/etc/nginx/ssl:ro
     restart: unless-stopped
     depends_on:
       api-gateway:
@@ -38,6 +44,8 @@ services:
     env_file:
       - path: ./.env
       - path: ./.env.gateway
+    # volumes:
+    #   - uploads:/app/uploads
     networks:
       - app-network
     restart: unless-stopped
@@ -151,7 +159,10 @@ services:
       - path: ./.env
       - path: ./.env.um
     volumes:
-      - data:/data
+      - data:/app/data
+      - uploads:/app/uploads
+    ports:
+      - '5555:5555'
     networks:
       - app-network
     restart: unless-stopped

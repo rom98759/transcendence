@@ -1,11 +1,12 @@
+import path from 'node:path';
 import { appenv } from './src/config/env';
 
 import { defineConfig } from 'prisma/config';
 
 export default defineConfig({
-  schema: 'prisma/schema.prisma',
+  schema: path.join(__dirname, 'prisma', 'schema.prisma'),
   migrations: {
-    path: 'prisma/migrations',
+    path: path.join(__dirname, 'prisma', 'migrations'),
   },
   datasource: {
     url: appenv.UM_DB_URL,

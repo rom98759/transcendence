@@ -48,9 +48,9 @@ const getProfileByUsernameSchema = {
 const updateProfileAvatarSchema = {
   tags: ['users'],
   summary: 'Update profile avatar',
-  description: "Updates the profile's avatar",
+  consumes: ['multipart/form-data'],
+  description: 'Stores the avatar in uploads, updates profile with new url',
   params: UserNameSchema,
-  body: z.object({ avatarUrl: z.string() }),
   response: {
     200: ProfileSchema,
     400: ValidationErrorSchema,
@@ -91,7 +91,7 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
   );
 
   app.patch(
-    '/username/:username',
+    '/username/:username/avatar',
     { schema: updateProfileAvatarSchema },
     profileController.updateProfileAvatar,
   );
