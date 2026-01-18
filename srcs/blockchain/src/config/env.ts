@@ -3,7 +3,7 @@ import { bool, cleanEnv, port, str } from 'envalid';
 export const env = cleanEnv(process.env, {
   NODE_ENV: str({
     choices: ['development', 'test', 'production', 'staging'],
-    default: 'developement',
+    default: 'development',
   }),
   LOG_ENABLED: bool({ default: true }),
   LOG_LEVEL: str({
