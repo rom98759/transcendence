@@ -11,7 +11,7 @@
     "dotenv-cli": "^11.0.0",
     "nodemon": "^3.1.11",
     "postcss": "^8.5.6",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "prettier-plugin-ejs": "^1.0.3",
     "supertest": "^7.1.4",
     "tailwindcss": "^4.1.18",
@@ -30,9 +30,10 @@
     "coverage": "vitest run --coverage",
     "dev:css": "tailwindcss -i ./src/public/input.css -o ./src/public/output.css --watch",
     "build:css": "tailwindcss -i ./src/public/input.css -o ./src/public/output.css --minify",
+    "dev:ts": "tsc -p tsconfig.json --watch",
     "dev:service": "nodemon",
     "dev": "concurrently \"npm run dev:css\" \"npm run dev:service\"",
-    "dev:block": "dotenv -e .env.test.blockchain concurrently \"npm run dev:css\" \"nodemon\"",
+    "dev:block": "dotenv -e .env.test.blockchain concurrently \"npm run dev:css\" \"npm run dev:ts\" \"nodemon\"",
     "build": "tsc -p tsconfig.json && npm run build:css",
     "start": "node dist/server.js"
   },
@@ -44,8 +45,11 @@
     "@fastify/static": "^8.3.0",
     "@fastify/view": "^11.1.1",
     "better-sqlite3": "^12.4.1",
+    "dotenv": "^17.2.3",
     "ejs": "^3.1.10",
+    "envalid": "^8.1.1",
     "ethers": "^6.16.0",
-    "fastify": "^5.6.2"
+    "fastify": "^5.6.2",
+    "ioredis": "^5.9.1"
   }
 }

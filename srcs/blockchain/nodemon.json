@@ -1,7 +1,7 @@
 {
   "watch": ["src"],
   "ext": "ts",
-  "exec": "node --enable-source-maps --loader ts-node/esm src/server.ts",
+  "exec": "npm run build && node --enable-source-maps dist/server.js",
   "legacyWatch": true,
   "delay": 300,
   "ignore": ["node_modules/**", "src/public/**"],

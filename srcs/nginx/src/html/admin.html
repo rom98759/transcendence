@@ -133,49 +133,49 @@
           // Fonction utilitaire pour formater les erreurs
           function formatErrorMessage(result) {
             if (!result.data || typeof result.data !== 'object') {
-              return `<div class="text-red-700">Erreur (${result.status}): ${result.data || 'Inconnue'}</div>`
+              return `<div class="text-red-700">Erreur (${result.status}): ${result.data || 'Inconnue'}</div>`;
             }
 
-            const error = result.data.error
+            const error = result.data.error;
             if (!error) {
-              return `<div class="text-red-700">Erreur (${result.status}): ${JSON.stringify(result.data)}</div>`
+              return `<div class="text-red-700">Erreur (${result.status}): ${JSON.stringify(result.data)}</div>`;
             }
 
-            let html = `<div class="text-red-700 font-medium mb-2">❌ ${error.message}</div>`
+            let html = `<div class="text-red-700 font-medium mb-2">❌ ${error.message}</div>`;
 
             // Afficher un hint si disponible
             if (error.hint) {
-              html += `<div class="text-orange-600 text-sm mb-2 flex items-start gap-1">`
-              html += `<span>💡</span><span>${error.hint}</span>`
-              html += `</div>`
+              html += `<div class="text-orange-600 text-sm mb-2 flex items-start gap-1">`;
+              html += `<span>💡</span><span>${error.hint}</span>`;
+              html += `</div>`;
             }
 
             // Afficher des informations complémentaires
             if (error.details && typeof error.details === 'string') {
-              html += `<div class="text-gray-600 text-sm mb-2">${error.details}</div>`
+              html += `<div class="text-gray-600 text-sm mb-2">${error.details}</div>`;
             }
 
             // Afficher les erreurs de validation détaillées
             if (error.details && Array.isArray(error.details)) {
-              html += '<div class="error-details mt-3">'
+              html += '<div class="error-details mt-3">';
               html +=
-                '<div class="text-xs font-semibold text-gray-700 mb-2">Détails des erreurs :</div>'
+                '<div class="text-xs font-semibold text-gray-700 mb-2">Détails des erreurs :</div>';
               error.details.forEach((detail) => {
                 const field =
-                  detail.path && detail.path[0] ? `<strong>${detail.path[0]}</strong>: ` : ''
-                html += `<div class="error-item">`
-                html += `<span class="error-icon">•</span>`
-                html += `<span>${field}${detail.message}</span>`
-                html += `</div>`
-              })
-              html += '</div>'
+                  detail.path && detail.path[0] ? `<strong>${detail.path[0]}</strong>: ` : '';
+                html += `<div class="error-item">`;
+                html += `<span class="error-icon">•</span>`;
+                html += `<span>${field}${detail.message}</span>`;
+                html += `</div>`;
+              });
+              html += '</div>';
             }
 
             // Afficher les erreurs par champ si disponibles (format structuré)
             if (error.fields && typeof error.fields === 'object') {
-              html += '<div class="error-details mt-3">'
+              html += '<div class="error-details mt-3">';
               html +=
-                '<div class="text-xs font-semibold text-gray-700 mb-2">Problèmes à corriger :</div>'
+                '<div class="text-xs font-semibold text-gray-700 mb-2">Problèmes à corriger :</div>';
               Object.entries(error.fields).forEach(([field, messages]) => {
                 const fieldLabel =
                   {
@@ -184,46 +184,46 @@
                     password: '🔒 Mot de passe',
                     code: '🔢 Code',
                     general: '⚠️ Général',
-                  }[field] || field
+                  }[field] || field;
 
                 if (Array.isArray(messages)) {
                   messages.forEach((msg) => {
-                    html += `<div class="error-item">`
-                    html += `<span class="error-icon">•</span>`
-                    html += `<span><strong>${fieldLabel}</strong>: ${msg}</span>`
-                    html += `</div>`
-                  })
+                    html += `<div class="error-item">`;
+                    html += `<span class="error-icon">•</span>`;
+                    html += `<span><strong>${fieldLabel}</strong>: ${msg}</span>`;
+                    html += `</div>`;
+                  });
                 }
-              })
-              html += '</div>'
+              });
+              html += '</div>';
             }
 
             // Afficher le champ concerné si disponible
             if (error.field && !error.fields) {
-              html += `<div class="text-gray-500 text-xs mt-2">Champ: ${error.field}</div>`
+              html += `<div class="text-gray-500 text-xs mt-2">Champ: ${error.field}</div>`;
             }
 
             // Afficher les tentatives restantes si disponible
             if (typeof error.remainingAttempts === 'number') {
-              const color = error.remainingAttempts <= 1 ? 'text-red-600' : 'text-orange-600'
-              html += `<div class="${color} text-sm mt-2 font-medium">`
-              html += `⚠️ ${error.remainingAttempts} tentative(s) restante(s)`
-              html += `</div>`
+              const color = error.remainingAttempts <= 1 ? 'text-red-600' : 'text-orange-600';
+              html += `<div class="${color} text-sm mt-2 font-medium">`;
+              html += `⚠️ ${error.remainingAttempts} tentative(s) restante(s)`;
+              html += `</div>`;
             }
 
             // Afficher l'expiration si disponible
             if (error.expiresIn || result.data.result?.expiresIn) {
-              const expires = error.expiresIn || result.data.result?.expiresIn
-              html += `<div class="text-gray-500 text-xs mt-2">⏱️ Expire dans ${expires} secondes</div>`
+              const expires = error.expiresIn || result.data.result?.expiresIn;
+              html += `<div class="text-gray-500 text-xs mt-2">⏱️ Expire dans ${expires} secondes</div>`;
             }
 
-            return html
+            return html;
           }
 
           // Code de la carte de connexion
-          const loginForm = document.getElementById('loginForm')
-          const loginMsg = document.getElementById('loginMsg')
-          const loginBtn = document.getElementById('loginBtn')
+          const loginForm = document.getElementById('loginForm');
+          const loginMsg = document.getElementById('loginMsg');
+          const loginBtn = document.getElementById('loginBtn');
 
           async function postJson(url, body) {
             const res = await fetch(url, {
@@ -231,26 +231,26 @@
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify(body),
-            })
-            const text = await res.text()
+            });
+            const text = await res.text();
             try {
-              return { ok: res.ok, status: res.status, data: JSON.parse(text) }
+              return { ok: res.ok, status: res.status, data: JSON.parse(text) };
             } catch {
-              return { ok: res.ok, status: res.status, data: text }
+              return { ok: res.ok, status: res.status, data: text };
             }
           }
 
           loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault()
-            loginMsg.innerHTML = ''
-            loginMsg.className = 'msg mt-3'
-            loginBtn.disabled = true
-            const username = document.getElementById('loginUsername').value.trim()
-            const password = document.getElementById('loginPassword').value
+            e.preventDefault();
+            loginMsg.innerHTML = '';
+            loginMsg.className = 'msg mt-3';
+            loginBtn.disabled = true;
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
             try {
-              const result = await postJson('/api/auth/login', { username, password })
+              const result = await postJson('/api/auth/login', { username, password });
               if (result.ok) {
-                const resultData = result.data?.result || {}
+                const resultData = result.data?.result || {};
 
                 if (resultData.require2FA) {
                   // 2FA requise
@@ -261,28 +261,28 @@
                     <div class="text-sm mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                       📱 Utilisez la carte "Vérification 2FA" ci-dessous pour entrer votre code
                     </div>
-                  `
+                  `;
                 } else {
                   // Connexion réussie
                   loginMsg.innerHTML = `
                     <div class="text-green-700 font-medium mb-2">✓ ${resultData.message || 'Connexion réussie'}</div>
                     ${resultData.username ? `<div class="text-gray-600 text-sm">Connecté en tant que: <strong>${resultData.username}</strong></div>` : ''}
-                  `
+                  `;
                   // Réinitialiser le formulaire après succès
                   setTimeout(() => {
-                    loginForm.reset()
-                    loginMsg.innerHTML = ''
-                  }, 3000)
+                    loginForm.reset();
+                    loginMsg.innerHTML = '';
+                  }, 3000);
                 }
               } else {
-                loginMsg.innerHTML = formatErrorMessage(result)
+                loginMsg.innerHTML = formatErrorMessage(result);
               }
             } catch (err) {
-              loginMsg.innerHTML = `<div class="text-red-700">❌ Connexion impossible: ${err.message}</div>`
+              loginMsg.innerHTML = `<div class="text-red-700">❌ Connexion impossible: ${err.message}</div>`;
             } finally {
-              loginBtn.disabled = false
+              loginBtn.disabled = false;
             }
-          })
+          });
         </script>
 
         <!-- Carte d'inscription -->
@@ -364,43 +364,43 @@
         </div>
         <script>
           // Code de la carte d'inscription
-          const registerForm = document.getElementById('registerForm')
-          const regMsg = document.getElementById('regMsg')
-          const regBtn = document.getElementById('regBtn')
+          const registerForm = document.getElementById('registerForm');
+          const regMsg = document.getElementById('regMsg');
+          const regBtn = document.getElementById('regBtn');
 
           registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault()
-            regMsg.innerHTML = ''
-            regMsg.className = 'msg mt-3'
-            regBtn.disabled = true
-            const username = document.getElementById('regUsername').value.trim()
-            const email = document.getElementById('regEmail').value.trim()
-            const password = document.getElementById('regPassword').value
+            e.preventDefault();
+            regMsg.innerHTML = '';
+            regMsg.className = 'msg mt-3';
+            regBtn.disabled = true;
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
             try {
-              const result = await postJson('/api/auth/register', { username, email, password })
+              const result = await postJson('/api/auth/register', { username, email, password });
               if (result.ok) {
-                const resultData = result.data?.result || {}
+                const resultData = result.data?.result || {};
                 regMsg.innerHTML = `
                   <div class="text-green-700 font-medium mb-2">✓ ${resultData.message || 'Inscription réussie !'}</div>
                   ${resultData.username ? `<div class="text-gray-600 text-sm mb-2">Compte créé: <strong>${resultData.username}</strong></div>` : ''}
                   <div class="text-sm mt-2 p-3 bg-green-50 border border-green-200 rounded">
                     👉 Vous pouvez maintenant vous connecter avec la carte "Connexion" ci-dessus
                   </div>
-                `
+                `;
                 // Réinitialiser le formulaire après succès
                 setTimeout(() => {
-                  registerForm.reset()
-                }, 2000)
-                console.log('Données reçues:', result.data)
+                  registerForm.reset();
+                }, 2000);
+                console.log('Données reçues:', result.data);
               } else {
-                regMsg.innerHTML = formatErrorMessage(result)
+                regMsg.innerHTML = formatErrorMessage(result);
               }
             } catch (err) {
-              regMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              regMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              regBtn.disabled = false
+              regBtn.disabled = false;
             }
-          })
+          });
         </script>
 
         <!-- Carte de statut des services -->
@@ -428,31 +428,31 @@
         <script>
           // Code de la carte de statut des services
           async function loadHealthAll() {
-            const container = document.getElementById('healthList')
-            container.innerHTML = '<div class="text-gray-500 text-sm">Chargement...</div>'
+            const container = document.getElementById('healthList');
+            container.innerHTML = '<div class="text-gray-500 text-sm">Chargement...</div>';
             try {
-              const res = await fetch('/public/healthAll', { credentials: 'include' })
-              const text = await res.text()
-              let data
+              const res = await fetch('/public/healthAll', { credentials: 'include' });
+              const text = await res.text();
+              let data;
               try {
-                data = JSON.parse(text)
+                data = JSON.parse(text);
               } catch {
-                data = text
+                data = text;
               }
 
               if (!res.ok) {
-                container.innerHTML = `<div class="text-red-600 text-sm">Erreur (${res.status}): ${JSON.stringify(data)}</div>`
-                return
+                container.innerHTML = `<div class="text-red-600 text-sm">Erreur (${res.status}): ${JSON.stringify(data)}</div>`;
+                return;
               }
 
               if (typeof data === 'object' && data !== null) {
-                container.innerHTML = ''
+                container.innerHTML = '';
                 for (const [service, status] of Object.entries(data)) {
-                  const div = document.createElement('div')
-                  const s = String(status).toLowerCase()
-                  const healthy = s.includes('healthy') || s === 'ok' || s === 'healthy'
+                  const div = document.createElement('div');
+                  const s = String(status).toLowerCase();
+                  const healthy = s.includes('healthy') || s === 'ok' || s === 'healthy';
 
-                  div.className = `service-status ${healthy ? 'status-healthy' : 'status-unhealthy'}`
+                  div.className = `service-status ${healthy ? 'status-healthy' : 'status-unhealthy'}`;
                   div.innerHTML = `
 								<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
 									${
@@ -463,19 +463,19 @@
 								</svg>
 								<span class="font-medium">${service}:</span>
 								<span class="ml-1">${status}</span>
-							`
-                  container.appendChild(div)
+							`;
+                  container.appendChild(div);
                 }
               } else {
-                container.innerHTML = `<div class="text-gray-600 text-sm">${typeof data === 'string' ? data : JSON.stringify(data)}</div>`
+                container.innerHTML = `<div class="text-gray-600 text-sm">${typeof data === 'string' ? data : JSON.stringify(data)}</div>`;
               }
             } catch (err) {
-              container.innerHTML = `<div class="text-red-600 text-sm">Inaccessible: ${err.message}</div>`
+              container.innerHTML = `<div class="text-red-600 text-sm">Inaccessible: ${err.message}</div>`;
             }
           }
-          loadHealthAll()
+          loadHealthAll();
           // Rafraîchir le statut toutes les 30 secondes
-          setInterval(loadHealthAll, 30000)
+          setInterval(loadHealthAll, 30000);
         </script>
 
         <!-- Carte de déconnexion -->
@@ -509,35 +509,35 @@
         <script>
           // Code de la carte de déconnexion
           document.getElementById('logoutBtn').addEventListener('click', async () => {
-            const logoutMsg = document.getElementById('logoutMsg')
-            const logoutBtn = document.getElementById('logoutBtn')
-            logoutMsg.innerHTML = ''
-            logoutMsg.className = 'msg mt-3'
-            logoutBtn.disabled = true
+            const logoutMsg = document.getElementById('logoutMsg');
+            const logoutBtn = document.getElementById('logoutBtn');
+            logoutMsg.innerHTML = '';
+            logoutMsg.className = 'msg mt-3';
+            logoutBtn.disabled = true;
             try {
               const res = await fetch('/api/auth/logout', {
                 method: 'POST',
                 credentials: 'include',
-              })
+              });
               if (res.ok) {
                 logoutMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ Déconnexion réussie</div>'
+                  '<div class="text-green-700 font-medium">✓ Déconnexion réussie</div>';
               } else {
-                const text = await res.text()
-                let data
+                const text = await res.text();
+                let data;
                 try {
-                  data = JSON.parse(text)
+                  data = JSON.parse(text);
                 } catch {
-                  data = text
+                  data = text;
                 }
-                logoutMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                logoutMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
               }
             } catch (err) {
-              logoutMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              logoutMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              logoutBtn.disabled = false
+              logoutBtn.disabled = false;
             }
-          })
+          });
         </script>
 
         <!-- Carte Me -->
@@ -570,13 +570,13 @@
         </div>
         <script>
           // Code de la carte Me
-          const meBtn = document.getElementById('meBtn')
-          const meMsg = document.getElementById('meMsg')
+          const meBtn = document.getElementById('meBtn');
+          const meMsg = document.getElementById('meMsg');
 
           function formatUserData(data) {
-            if (!data || typeof data !== 'object') return JSON.stringify(data)
+            if (!data || typeof data !== 'object') return JSON.stringify(data);
 
-            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">'
+            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">';
             if (data.user) {
               const user = data.user
               html += '<div class="space-y-2">'
@@ -587,41 +587,41 @@
               html += `<div><span class="font-medium text-gray-700">Role:</span> <span class="text-gray-900">${user.role || 'N/A'}</span></div>`
               html += '</div>'
             } else {
-              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
             }
-            html += '</div>'
-            return html
+            html += '</div>';
+            return html;
           }
 
           meBtn.addEventListener('click', async () => {
-            meMsg.innerHTML = ''
-            meMsg.className = 'msg'
-            meBtn.disabled = true
+            meMsg.innerHTML = '';
+            meMsg.className = 'msg';
+            meBtn.disabled = true;
             try {
               const res = await fetch('/api/auth/me', {
                 method: 'GET',
                 credentials: 'include',
-              })
-              const text = await res.text()
-              let data
+              });
+              const text = await res.text();
+              let data;
               try {
-                data = JSON.parse(text)
+                data = JSON.parse(text);
               } catch {
-                data = text
+                data = text;
               }
               if (res.ok) {
                 meMsg.innerHTML =
                   '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
-                  formatUserData(data)
+                  formatUserData(data);
               } else {
-                meMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                meMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
               }
             } catch (err) {
-              meMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              meMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              meBtn.disabled = false
+              meBtn.disabled = false;
             }
-          })
+          });
         </script>
 
         <!-- Carte Game -->
@@ -787,65 +787,65 @@
         </div>
         <script>
           // Code de la carte Configuration 2FA
-          const setup2FABtn = document.getElementById('setup2FABtn')
-          const verify2FABtn = document.getElementById('verify2FABtn')
-          const setup2FAMsg = document.getElementById('setup2FAMsg')
-          const qrCodeSection = document.getElementById('qrCodeSection')
-          const qrCodeImg = document.getElementById('qrCodeImg')
-          const totpSecret = document.getElementById('totpSecret')
-          const verify2FACode = document.getElementById('verify2FACode')
+          const setup2FABtn = document.getElementById('setup2FABtn');
+          const verify2FABtn = document.getElementById('verify2FABtn');
+          const setup2FAMsg = document.getElementById('setup2FAMsg');
+          const qrCodeSection = document.getElementById('qrCodeSection');
+          const qrCodeImg = document.getElementById('qrCodeImg');
+          const totpSecret = document.getElementById('totpSecret');
+          const verify2FACode = document.getElementById('verify2FACode');
 
           setup2FABtn.addEventListener('click', async () => {
-            setup2FAMsg.innerHTML = ''
-            setup2FAMsg.className = 'msg mt-3'
-            setup2FABtn.disabled = true
-            qrCodeSection.classList.add('hidden')
+            setup2FAMsg.innerHTML = '';
+            setup2FAMsg.className = 'msg mt-3';
+            setup2FABtn.disabled = true;
+            qrCodeSection.classList.add('hidden');
 
             try {
               const res = await fetch('/api/auth/2fa/setup', {
                 method: 'POST',
                 credentials: 'include',
-              })
-              const text = await res.text()
-              let data
+              });
+              const text = await res.text();
+              let data;
               try {
-                data = JSON.parse(text)
+                data = JSON.parse(text);
               } catch {
-                data = text
+                data = text;
               }
 
               if (res.ok && data.result) {
-                const result = data.result
+                const result = data.result;
 
                 // Afficher le QR code (le secret est stocké côté serveur)
-                qrCodeImg.src = result.qrCode
-                totpSecret.textContent = 'Secret stocké de manière sécurisée côté serveur'
-                qrCodeSection.classList.remove('hidden')
+                qrCodeImg.src = result.qrCode;
+                totpSecret.textContent = 'Secret stocké de manière sécurisée côté serveur';
+                qrCodeSection.classList.remove('hidden');
 
-                const expiresIn = result.expiresIn || 120
+                const expiresIn = result.expiresIn || 120;
                 setup2FAMsg.innerHTML = `<div class="text-green-700 font-medium">✓ QR Code généré avec succès<br>
-                  <span class="text-sm">Session valide ${expiresIn} secondes</span></div>`
+                  <span class="text-sm">Session valide ${expiresIn} secondes</span></div>`;
               } else {
-                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
               }
             } catch (err) {
-              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              setup2FABtn.disabled = false
+              setup2FABtn.disabled = false;
             }
-          })
+          });
 
           verify2FABtn.addEventListener('click', async () => {
-            const code = verify2FACode.value.trim()
+            const code = verify2FACode.value.trim();
             if (!code || code.length !== 6) {
               setup2FAMsg.innerHTML =
-                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>'
-              return
+                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>';
+              return;
             }
 
-            setup2FAMsg.innerHTML = ''
-            setup2FAMsg.className = 'msg mt-3'
-            verify2FABtn.disabled = true
+            setup2FAMsg.innerHTML = '';
+            setup2FAMsg.className = 'msg mt-3';
+            verify2FABtn.disabled = true;
 
             try {
               const res = await fetch('/api/auth/2fa/setup/verify', {
@@ -856,29 +856,29 @@
                   code: code,
                   // Le secret n'est PAS envoyé, il est déjà stocké côté serveur
                 }),
-              })
-              const text = await res.text()
-              let data
+              });
+              const text = await res.text();
+              let data;
               try {
-                data = JSON.parse(text)
+                data = JSON.parse(text);
               } catch {
-                data = text
+                data = text;
               }
 
               if (res.ok) {
                 setup2FAMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ 2FA activée avec succès ! Vous êtes maintenant connecté.</div>'
-                qrCodeSection.classList.add('hidden')
-                verify2FACode.value = ''
+                  '<div class="text-green-700 font-medium">✓ 2FA activée avec succès ! Vous êtes maintenant connecté.</div>';
+                qrCodeSection.classList.add('hidden');
+                verify2FACode.value = '';
               } else {
-                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
               }
             } catch (err) {
-              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              verify2FABtn.disabled = false
+              verify2FABtn.disabled = false;
             }
-          })
+          });
         </script>
 
         <!-- Carte Vérification 2FA (Login) -->
@@ -943,23 +943,23 @@
         </div>
         <script>
           // Code de la carte Vérification 2FA (Login)
-          const verifyLogin2FABtn = document.getElementById('verifyLogin2FABtn')
-          const verifyLogin2FAMsg = document.getElementById('verifyLogin2FAMsg')
-          const login2FACode = document.getElementById('login2FACode')
+          const verifyLogin2FABtn = document.getElementById('verifyLogin2FABtn');
+          const verifyLogin2FAMsg = document.getElementById('verifyLogin2FAMsg');
+          const login2FACode = document.getElementById('login2FACode');
 
           verifyLogin2FABtn.addEventListener('click', async () => {
-            const code = login2FACode.value.trim()
+            const code = login2FACode.value.trim();
 
             if (!code || code.length !== 6) {
               verifyLogin2FAMsg.innerHTML =
-                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>'
-              verifyLogin2FAMsg.className = 'msg mt-3'
-              return
+                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>';
+              verifyLogin2FAMsg.className = 'msg mt-3';
+              return;
             }
 
-            verifyLogin2FAMsg.innerHTML = ''
-            verifyLogin2FAMsg.className = 'msg mt-3'
-            verifyLogin2FABtn.disabled = true
+            verifyLogin2FAMsg.innerHTML = '';
+            verifyLogin2FAMsg.className = 'msg mt-3';
+            verifyLogin2FABtn.disabled = true;
 
             try {
               const res = await fetch('/api/auth/2fa/verify', {
@@ -967,32 +967,32 @@
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
                 body: JSON.stringify({ code: code }),
-              })
-              const text = await res.text()
-              let data
+              });
+              const text = await res.text();
+              let data;
               try {
-                data = JSON.parse(text)
+                data = JSON.parse(text);
               } catch {
-                data = text
+                data = text;
               }
 
               if (res.ok) {
                 verifyLogin2FAMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ Connexion réussie avec 2FA !</div>'
-                login2FACode.value = ''
+                  '<div class="text-green-700 font-medium">✓ Connexion réussie avec 2FA !</div>';
+                login2FACode.value = '';
               } else {
                 verifyLogin2FAMsg.innerHTML = formatErrorMessage({
                   ok: false,
                   status: res.status,
                   data,
-                })
+                });
               }
             } catch (err) {
-              verifyLogin2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              verifyLogin2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              verifyLogin2FABtn.disabled = false
+              verifyLogin2FABtn.disabled = false;
             }
-          })
+          });
         </script>
 
         <!-- Carte Désactivation 2FA -->
@@ -1045,47 +1045,47 @@
         </div>
         <script>
           // Code de la carte Désactivation 2FA
-          const disable2FABtn = document.getElementById('disable2FABtn')
-          const disable2FAMsg = document.getElementById('disable2FAMsg')
+          const disable2FABtn = document.getElementById('disable2FABtn');
+          const disable2FAMsg = document.getElementById('disable2FAMsg');
 
           disable2FABtn.addEventListener('click', async () => {
             if (!confirm('Êtes-vous sûr de vouloir désactiver la double authentification ?')) {
-              return
+              return;
             }
 
-            disable2FAMsg.innerHTML = ''
-            disable2FAMsg.className = 'msg mt-3'
-            disable2FABtn.disabled = true
+            disable2FAMsg.innerHTML = '';
+            disable2FAMsg.className = 'msg mt-3';
+            disable2FABtn.disabled = true;
 
             try {
               const res = await fetch('/api/auth/2fa/disable', {
                 method: 'POST',
                 credentials: 'include',
-              })
-              const text = await res.text()
-              let data
+              });
+              const text = await res.text();
+              let data;
               try {
-                data = JSON.parse(text)
+                data = JSON.parse(text);
               } catch {
-                data = text
+                data = text;
               }
 
               if (res.ok) {
                 disable2FAMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ 2FA désactivée avec succès</div>'
+                  '<div class="text-green-700 font-medium">✓ 2FA désactivée avec succès</div>';
               } else {
                 disable2FAMsg.innerHTML = formatErrorMessage({
                   ok: false,
                   status: res.status,
                   data,
-                })
+                });
               }
             } catch (err) {
-              disable2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              disable2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              disable2FABtn.disabled = false
+              disable2FABtn.disabled = false;
             }
-          })
+          });
         </script>
 
         <!-- Carte Blockchain-->
@@ -1118,168 +1118,168 @@
         </div>
         <script>
           // Code de la carte blockchain
-          const blockBtn = document.getElementById('blockBtn')
-          const blockMsg = document.getElementById('blockMsg')
+          const blockBtn = document.getElementById('blockBtn');
+          const blockMsg = document.getElementById('blockMsg');
 
           function formatUserData(data) {
-            if (!data || typeof data !== 'object') return JSON.stringify(data)
+            if (!data || typeof data !== 'object') return JSON.stringify(data);
 
-            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">'
+            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">';
             if (data.user) {
-              const user = data.user
-              html += '<div class="space-y-2">'
-              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`
-              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`
-              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`
-              html += '</div>'
+              const user = data.user;
+              html += '<div class="space-y-2">';
+              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`;
+              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`;
+              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`;
+              html += '</div>';
             } else {
-              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
             }
-            html += '</div>'
-            return html
+            html += '</div>';
+            return html;
           }
 
           blockBtn.addEventListener('click', async () => {
-            blockMsg.innerHTML = ''
-            blockMsg.className = 'msg'
-            blockBtn.disabled = true
+            blockMsg.innerHTML = '';
+            blockMsg.className = 'msg';
+            blockBtn.disabled = true;
             try {
-              const res = await fetch('/api/block/list', {
+              const res = await fetch('/api/block/tournaments', {
                 method: 'GET',
                 credentials: 'include',
-              })
-              const text = await res.text()
-              let data
+              });
+              const text = await res.text();
+              let data;
               try {
-                data = JSON.parse(text)
+                data = JSON.parse(text);
               } catch {
-                data = text
+                data = text;
               }
               if (res.ok) {
                 blockMsg.innerHTML =
                   '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
-                  formatUserData(data)
+                  formatUserData(data);
               } else {
-                blockMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                blockMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
               }
             } catch (err) {
-              blockMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+              blockMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
             } finally {
-              blockBtn.disabled = false
+              blockBtn.disabled = false;
             }
-          })
+          });
         </script>
       </div>
 
       <script>
         // Code de la carte Liste des utilisateurs
-        const listUsersBtn = document.getElementById('listUsersBtn')
-        const listUsersMsg = document.getElementById('listUsersMsg')
+        const listUsersBtn = document.getElementById('listUsersBtn');
+        const listUsersMsg = document.getElementById('listUsersMsg');
 
         function formatUserList(data) {
           if (!data || !data.result || !data.result.users || !Array.isArray(data.result.users)) {
-            return `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+            return `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
           }
 
-          const users = data.result.users
-          let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">'
-          html += `<div class="flex items-center justify-between mb-4">`
-          html += `<div class="text-sm font-medium text-gray-700">${users.length} utilisateur(s) trouvé(s):</div>`
-          html += `<div class="text-xs text-gray-500">👑 Interface Administrateur</div>`
-          html += `</div>`
-          html += '<div class="space-y-4">'
+          const users = data.result.users;
+          let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">';
+          html += `<div class="flex items-center justify-between mb-4">`;
+          html += `<div class="text-sm font-medium text-gray-700">${users.length} utilisateur(s) trouvé(s):</div>`;
+          html += `<div class="text-xs text-gray-500">👑 Interface Administrateur</div>`;
+          html += `</div>`;
+          html += '<div class="space-y-4">';
 
           users.forEach((user, index) => {
-            const userId = `user-${user.id || index}`
-            html += `<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">`
+            const userId = `user-${user.id || index}`;
+            html += `<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">`;
 
             // Header avec infos principales
-            html += `<div class="bg-gray-50 px-4 py-3 border-b">`
-            html += `<div class="flex items-center justify-between">`
-            html += `<div class="flex items-center space-x-3">`
-            html += `<div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">`
-            html += `${(user.username || 'U').charAt(0).toUpperCase()}`
-            html += `</div>`
-            html += `<div>`
-            html += `<div class="font-medium text-gray-900">${user.username || 'N/A'}</div>`
-            html += `<div class="text-sm text-gray-600">${user.email || 'Email non disponible'}</div>`
-            html += `</div>`
-            html += `</div>`
-            html += `<div class="flex items-center space-x-2">`
-            html += `<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: ${user.id || 'N/A'}</span>`
-            html += `<button onclick="togglePassword('${userId}')" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded transition-colors">`
-            html += `<span id="toggle-${userId}">Voir hash</span>`
-            html += `</button>`
-            html += `</div>`
-            html += `</div>`
-            html += `</div>`
+            html += `<div class="bg-gray-50 px-4 py-3 border-b">`;
+            html += `<div class="flex items-center justify-between">`;
+            html += `<div class="flex items-center space-x-3">`;
+            html += `<div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">`;
+            html += `${(user.username || 'U').charAt(0).toUpperCase()}`;
+            html += `</div>`;
+            html += `<div>`;
+            html += `<div class="font-medium text-gray-900">${user.username || 'N/A'}</div>`;
+            html += `<div class="text-sm text-gray-600">${user.email || 'Email non disponible'}</div>`;
+            html += `</div>`;
+            html += `</div>`;
+            html += `<div class="flex items-center space-x-2">`;
+            html += `<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: ${user.id || 'N/A'}</span>`;
+            html += `<button onclick="togglePassword('${userId}')" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded transition-colors">`;
+            html += `<span id="toggle-${userId}">Voir hash</span>`;
+            html += `</button>`;
+            html += `</div>`;
+            html += `</div>`;
+            html += `</div>`;
 
             // Section mot de passe (initialement cachée)
-            html += `<div id="password-${userId}" class="hidden px-4 py-3 bg-red-50 border-l-4 border-red-200">`
-            html += `<div class="flex items-start space-x-2">`
-            html += `<svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
-            html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>`
-            html += `</svg>`
-            html += `<div class="flex-1 min-w-0">`
-            html += `<div class="text-xs font-medium text-red-800 mb-1">Hash bcrypt (sensible):</div>`
-            html += `<div class="text-xs font-mono text-red-700 bg-red-100 p-2 rounded border break-all">`
-            html += `${user.password || 'N/A'}`
-            html += `</div>`
-            html += `<div class="text-xs text-red-600 mt-1">⚠️ Information confidentielle - Ne pas partager</div>`
-            html += `</div>`
-            html += `</div>`
-            html += `</div>`
+            html += `<div id="password-${userId}" class="hidden px-4 py-3 bg-red-50 border-l-4 border-red-200">`;
+            html += `<div class="flex items-start space-x-2">`;
+            html += `<svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">`;
+            html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>`;
+            html += `</svg>`;
+            html += `<div class="flex-1 min-w-0">`;
+            html += `<div class="text-xs font-medium text-red-800 mb-1">Hash bcrypt (sensible):</div>`;
+            html += `<div class="text-xs font-mono text-red-700 bg-red-100 p-2 rounded border break-all">`;
+            html += `${user.password || 'N/A'}`;
+            html += `</div>`;
+            html += `<div class="text-xs text-red-600 mt-1">⚠️ Information confidentielle - Ne pas partager</div>`;
+            html += `</div>`;
+            html += `</div>`;
+            html += `</div>`;
 
-            html += `</div>`
-          })
+            html += `</div>`;
+          });
 
-          html += '</div></div>'
-          return html
+          html += '</div></div>';
+          return html;
         }
 
         // Fonction pour toggle l'affichage des mots de passe
         function togglePassword(userId) {
-          const passwordDiv = document.getElementById(`password-${userId}`)
-          const toggleText = document.getElementById(`toggle-${userId}`)
+          const passwordDiv = document.getElementById(`password-${userId}`);
+          const toggleText = document.getElementById(`toggle-${userId}`);
 
           if (passwordDiv.classList.contains('hidden')) {
-            passwordDiv.classList.remove('hidden')
-            toggleText.textContent = 'Cacher hash'
+            passwordDiv.classList.remove('hidden');
+            toggleText.textContent = 'Cacher hash';
           } else {
-            passwordDiv.classList.add('hidden')
-            toggleText.textContent = 'Voir hash'
+            passwordDiv.classList.add('hidden');
+            toggleText.textContent = 'Voir hash';
           }
         }
 
         listUsersBtn.addEventListener('click', async () => {
-          listUsersMsg.innerHTML = ''
-          listUsersMsg.className = 'msg'
-          listUsersBtn.disabled = true
+          listUsersMsg.innerHTML = '';
+          listUsersMsg.className = 'msg';
+          listUsersBtn.disabled = true;
           try {
             const res = await fetch('/api/auth/list', {
               method: 'GET',
               credentials: 'include',
-            })
-            const text = await res.text()
-            let data
+            });
+            const text = await res.text();
+            let data;
             try {
-              data = JSON.parse(text)
+              data = JSON.parse(text);
             } catch {
-              data = text
+              data = text;
             }
             if (res.ok) {
               listUsersMsg.innerHTML =
                 '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
-                formatUserList(data)
+                formatUserList(data);
             } else {
-              listUsersMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+              listUsersMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
             }
           } catch (err) {
-            listUsersMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+            listUsersMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
           } finally {
-            listUsersBtn.disabled = false
+            listUsersBtn.disabled = false;
           }
-        })
+        });
       </script>
       <script src="app.js"></script>
     </div>

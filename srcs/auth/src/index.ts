@@ -7,7 +7,7 @@ import { initAdminUser, initInviteUser } from './utils/init-users.js';
 import * as totpService from './services/totp.service.js';
 import { loggerConfig } from './config/logger.config.js';
 import { AUTH_CONFIG, ERROR_CODES, EVENTS, REASONS } from './utils/constants.js';
-import { AppBaseError, ServiceError } from './types/errors.js';
+import { AppBaseError } from './types/errors.js';
 import { JWT_SECRET } from './config/env.js';
 
 // Validation du JWT_SECRET au démarrage (CRITIQUE)

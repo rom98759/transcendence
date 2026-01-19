@@ -2,6 +2,7 @@
 
 # --- OS ---
 OS := $(shell uname)
+CHIP := $(shell uname -m)
 
 # --- Env ---
 -include srcs/.env

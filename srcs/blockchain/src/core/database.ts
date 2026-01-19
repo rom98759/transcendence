@@ -2,9 +2,11 @@ import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { BlockTournamentInput, SnapshotRow } from '../module/block.type.js';
+import { env } from '../config/env.js';
+
 // DB path
 const DEFAULT_DIR = path.join(process.cwd(), 'data');
-const DB_PATH = process.env.BLOCK_DB_PATH || path.join(DEFAULT_DIR, 'blockchain.db');
+const DB_PATH = env.BLOCK_DB_PATH || path.join(DEFAULT_DIR, 'blockchain.db');
 
 // Check dir
 try {

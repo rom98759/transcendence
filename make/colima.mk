@@ -1,5 +1,6 @@
 colima-dev:
 ifeq ($(OS),Darwin)
+ifneq ($(CHIP), arm64)
 	@echo "Checking Colima status and mounts..."
 	@if ! colima list 2>/dev/null | grep -q "Running"; then \
 		echo "Starting Colima with mount $(PROJECT_PATH)"; \
@@ -15,11 +16,16 @@ ifeq ($(OS),Darwin)
 		fi; \
 	fi
 else
+	@echo "Skipping Colima start: Chip is '$(OS)' (Not x386)"
+endif
+else
 	@echo "Skipping Colima start: OS is '$(OS)' (Not Darwin)"
 endif
 
 colima:
-	@echo "system is : $(OS)"
+	@echo "system is : $(OS) $(CHIP)"
 ifeq ($(OS), Darwin)
+ifneq ($(CHIP), arm64)
 	colima start --mount $(VOLUMES_PATH):w --vm-type vz
+endif
 endif

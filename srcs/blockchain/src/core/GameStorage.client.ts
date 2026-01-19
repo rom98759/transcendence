@@ -2,11 +2,12 @@ import { ethers } from 'ethers';
 import fs from 'fs';
 import path from 'path';
 import { AppLogger } from './logger.js';
+import { env } from '../config/env.js';
 
 let _gameStorage: ethers.Contract | null = null;
 
 export function getGameStorage(logger: AppLogger): ethers.Contract | null {
-  const blockchainReady = process.env.BLOCKCHAIN_READY === 'true';
+  const blockchainReady = env.BLOCKCHAIN_READY;
   if (!blockchainReady) {
     logger.warn({ event: 'blockchain_disabled' });
     return null;
@@ -23,7 +24,7 @@ export function getGameStorage(logger: AppLogger): ethers.Contract | null {
   ] as const;
 
   for (const key of requiredEnv) {
-    if (!process.env[key]) {
+    if (!env[key]) {
       throw new Error(`${key} is not defined`);
     }
   }
@@ -40,10 +41,10 @@ export function getGameStorage(logger: AppLogger): ethers.Contract | null {
     abiLength: GameStorageAbi.length,
   });
 
-  const provider = new ethers.JsonRpcProvider(process.env.AVALANCHE_RPC_URL!);
-  const wallet = new ethers.Wallet(process.env.BLOCKCHAIN_PRIVATE_KEY!, provider);
+  const provider = new ethers.JsonRpcProvider(env.AVALANCHE_RPC_URL!);
+  const wallet = new ethers.Wallet(env.BLOCKCHAIN_PRIVATE_KEY!, provider);
 
-  _gameStorage = new ethers.Contract(process.env.GAME_STORAGE_ADDRESS!, GameStorageAbi, wallet);
+  _gameStorage = new ethers.Contract(env.GAME_STORAGE_ADDRESS!, GameStorageAbi, wallet);
 
   return _gameStorage;
 }

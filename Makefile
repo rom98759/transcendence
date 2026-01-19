@@ -6,8 +6,8 @@ export SHARED_GID := 204
 all : volumes colima build
 	$(D_COMPOSE) up -d
 
-dev: volumes colima-dev
-	$(D_COMPOSE_DEV) up --build -d
+dev: volumes colima-dev build-dev
+	$(D_COMPOSE_DEV) up -d
 
 volumes:
 	@mkdir -p $(DATABASE_PATH) $(UPLOADS_PATH)
@@ -101,6 +101,8 @@ block: build-core build-block
 	$(D_COMPOSE) up -d --build $(BK_SERVICE_NAME)
 build: build-core
 	$(D_COMPOSE) build
+build-dev: build-core
+	$(D_COMPOSE_DEV) build
 
 # --- Test ---
 test: install test-user
@@ -111,6 +113,25 @@ test-user: build-core
 	cd srcs/users && npm install && npx vitest run --config vite.config.mjs
 test-coverage-user: build-core
 	cd srcs/users && npx vitest run --coverage --config vite.config.mjs
+
+test-block:
+	@gnome-terminal -- bash -c "cd srcs/blockchain/src/SmartContract && npx hardhat node" &
+	sleep 2
+	@echo "Deploying contract and updating .env.test.blockchain..."
+	@cd srcs/blockchain/src/SmartContract && \
+	CONTRACT_OUTPUT=$$(npx hardhat ignition deploy ignition/modules/GameStorage.ts --network localhost 2>&1) && \
+	echo "$$CONTRACT_OUTPUT" && \
+	CONTRACT_ADDR=$$(echo "$$CONTRACT_OUTPUT" | grep -o '0x[a-fA-F0-9]\{40\}' | tail -1) && \
+	if [ -n "$$CONTRACT_ADDR" ]; then \
+		echo "Contract deployed at: $$CONTRACT_ADDR" && \
+		sed -i "s/^GAME_STORAGE_ADDRESS=.*/GAME_STORAGE_ADDRESS=$$CONTRACT_ADDR/" ../../.env.test.blockchain && \
+		echo "Updated .env.test.blockchain with address: $$CONTRACT_ADDR"; \
+	else \
+		echo "Failed to extract contract address"; \
+	fi
+	sleep 2
+	cd srcs/blockchain && \
+	npm run dev:b
 
 # --- DB ---
 redis-cli:
@@ -202,11 +223,11 @@ reset-hard: clean clean-packages
 	-$(CONTAINER_CMD) network prune -f
 	-$(CONTAINER_CMD) system prune -a --volumes --force
 ifeq ($(OS), Darwin)
+ifneq ($(CHIP), arm64)
 	@echo "Stopping Colima…"
 	-colima stop
-	rm -rf $(VOLUMES_PATH)
-else
-	rm -rf $(VOLUMES_PATH)
 endif
+endif
+	rm -rf $(VOLUMES_PATH)
 
 .PHONY : all clean fclean re check format core build volumes setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth colima colima-dev
