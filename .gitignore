@@ -6,6 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# NGINX
+srcs/nginx/src/html/app.js
+
 # SSL and secrets
 secrets
 *.pem
