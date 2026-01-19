@@ -1,8 +1,11 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["ES2017", "DOM"],
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
     "module": "ESNext",
+    "moduleResolution": "NodeNext",
+
+    "types": ["node"],
     "strict": true,
     "skipLibCheck": true,
     "esModuleInterop": true

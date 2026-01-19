@@ -4,6 +4,7 @@ import { gameSessions } from '../core/game.state.js';
 import { getGame as getSessionData } from '../service/game.init.js';
 import { handleClientMessage } from '../service/game.communication.js';
 import { GameSettings } from '../core/game.types.js';
+import { WebSocket } from 'ws';
 import { WS_CLOSE } from '../core/game.state.js';
 
 // Controller - get sessionId from body
@@ -100,7 +101,11 @@ export async function listGameSessions() {
   };
 }
 
-export async function webSocketConnect(this: FastifyInstance, socket: any, req: FastifyRequest) {
+export async function webSocketConnect(
+  this: FastifyInstance,
+  socket: WebSocket,
+  req: FastifyRequest,
+) {
   console.log('get to the sessions id by WS');
   const params = req.params as { sessionId: string };
   const sessionId = params.sessionId;

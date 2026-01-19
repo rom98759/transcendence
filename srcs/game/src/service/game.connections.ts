@@ -1,9 +1,10 @@
 import { gameSessions } from '../core/game.state.js';
 import { FastifyInstance } from 'fastify';
 import { WS_CLOSE } from '../core/game.state.js';
+import { WebSocket } from 'ws';
 
 export function cleanupConnection(
-  socket: any | null,
+  socket: WebSocket | null,
   sessionId: string,
   code: number = 1000,
   message: string,
@@ -27,7 +28,7 @@ export function cleanupConnection(
   }
 }
 
-export function addPlayerConnection(this: FastifyInstance, socket: any, sessionId: string) {
+export function addPlayerConnection(this: FastifyInstance, socket: WebSocket, sessionId: string) {
   const currentSession = gameSessions.get(sessionId);
   if (!currentSession || !currentSession.players || !socket) return false;
 

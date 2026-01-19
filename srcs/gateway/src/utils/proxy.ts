@@ -33,6 +33,34 @@ export async function proxyBlockRequest(
   // 🔥 streaming direct backend → client
   await pipeline(res.body, reply.raw);
 }
+
+interface GameState {
+  ball: {
+    x: number;
+    y: number;
+    radius: number;
+  };
+  paddles: {
+    left: {
+      y: number;
+      height: number;
+    };
+    right: {
+      y: number;
+      height: number;
+    };
+  };
+  scores: Scores;
+  status: GameStatus;
+  cosmicBackground: number[][] | null;
+}
+
+type GameStatus = 'waiting' | 'playing' | 'paused' | 'finished';
+
+interface Scores {
+  left: number;
+  right: number;
+}
 // Message types for type safety
 interface ClientMessage {
   type: 'paddle' | 'start' | 'stop' | 'ping';
@@ -43,7 +71,7 @@ interface ClientMessage {
 interface ServerMessage {
   type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong';
   sessionId?: string;
-  data?: any;
+  data?: GameState;
   message?: string;
 }
 

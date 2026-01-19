@@ -3,6 +3,7 @@ import { gameSessions } from '../core/game.state.js';
 import { ServerMessage, ClientMessage } from '../core/game.types.js';
 import { addPlayerConnection, cleanupConnection } from './game.connections.js';
 import { WS_CLOSE } from '../core/game.state.js';
+import { WebSocket } from 'ws';
 // Broadcast state to all clients in a session
 export function broadcastToSession(sessionId: string, message: ServerMessage) {
   const currentSession = gameSessions.get(sessionId);
@@ -20,7 +21,7 @@ export function broadcastToSession(sessionId: string, message: ServerMessage) {
   });
 }
 
-export function handleClientMessage(this: FastifyInstance, ws: any, sessionId: string) {
+export function handleClientMessage(this: FastifyInstance, ws: WebSocket, sessionId: string) {
   let currentSession = gameSessions.get(sessionId);
   if (!currentSession) {
     ws.send(JSON.stringify({ type: 'error', message: 'No game at this session' } as ServerMessage));
@@ -94,7 +95,7 @@ export function handleClientMessage(this: FastifyInstance, ws: any, sessionId: s
   });
 }
 
-export function defineCommunicationInterval(sessionId: string): any {
+export function defineCommunicationInterval(sessionId: string): ReturnType<typeof setInterval> {
   // Create interval and store it
   const interval = setInterval(() => {
     const currentSessionData = gameSessions.get(sessionId);
