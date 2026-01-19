@@ -96,32 +96,6 @@ describe('Friends Controller unit tests', () => {
       expect(response.statusCode).toBe(201);
     });
 
-    // test('Should return 401 if userId is missing', async () => {
-    //   const response = await app.inject({
-    //     method: 'POST',
-    //     url: '/friends',
-    //     headers: { 'x-user-name': 'toto' },
-    //     payload: { id: 2 },
-    //   });
-
-    //   expect(response.statusCode).toBe(401);
-    // });
-
-    test('Should return 422 if user adds himself', async () => {
-      vi.spyOn(friendshipService, 'createFriend').mockRejectedValue(
-        new AppError(ERR_DEFS.RESOURCE_INVALID_STATE, {}),
-      );
-
-      const response = await app.inject({
-        method: 'POST',
-        url: '/friends',
-        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-        payload: { id: 1 },
-      });
-
-      expect(response.statusCode).toBe(422);
-    });
-
     test('Should return 400 for invalid targetId', async () => {
       const response = await app.inject({
         method: 'POST',
@@ -161,6 +135,21 @@ describe('Friends Controller unit tests', () => {
       });
 
       expect(response.statusCode).toBe(409);
+    });
+
+    test('Should return 422 if user adds himself', async () => {
+      vi.spyOn(friendshipService, 'createFriend').mockRejectedValue(
+        new AppError(ERR_DEFS.RESOURCE_INVALID_STATE, {}),
+      );
+
+      const response = await app.inject({
+        method: 'POST',
+        url: '/friends',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { id: 1 },
+      });
+
+      expect(response.statusCode).toBe(422);
     });
   });
 
@@ -218,16 +207,6 @@ describe('Friends Controller unit tests', () => {
 
       expect(response.statusCode).toBe(404);
     });
-
-    // test('Should return 401 if userId is missing', async () => {
-    //   const response = await app.inject({
-    //     method: 'DELETE',
-    //     url: '/friends/2',
-    //     headers: { 'x-user-id': '1' },
-    //   });
-
-    //   expect(response.statusCode).toBe(401);
-    // });
   });
 
   describe('GET /friends', () => {
@@ -275,6 +254,17 @@ describe('Friends Controller unit tests', () => {
       expect(response.statusCode).toBe(200);
     });
 
+    test('Should return 400 for invalid nickname', async () => {
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/friends/2/nickname',
+        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
+        payload: { nickname: 'a'.repeat(51) },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+
     test('Should return 404 if friendship not found', async () => {
       vi.spyOn(friendshipService, 'updateFriendshipNickname').mockRejectedValue(
         new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {}),
@@ -288,28 +278,6 @@ describe('Friends Controller unit tests', () => {
       });
 
       expect(response.statusCode).toBe(404);
-    });
-
-    // test('Should return 401 if userId is missing', async () => {
-    //   const response = await app.inject({
-    //     method: 'PATCH',
-    //     url: '/friends/2/nickname',
-    //     headers: { 'x-user-name': 'toto' },
-    //     payload: { nickname: 'newNick' },
-    //   });
-
-    //   expect(response.statusCode).toBe(401);
-    // });
-
-    test('Should return 400 for invalid nickname', async () => {
-      const response = await app.inject({
-        method: 'PATCH',
-        url: '/friends/2/nickname',
-        headers: { 'x-user-id': '1', 'x-user-name': 'toto' },
-        payload: { nickname: 'a'.repeat(51) },
-      });
-
-      expect(response.statusCode).toBe(400);
     });
   });
 });

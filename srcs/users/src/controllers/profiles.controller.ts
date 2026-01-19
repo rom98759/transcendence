@@ -2,6 +2,8 @@ import { FastifyReply, FastifyRequest } from 'fastify';
 import { profileService } from '../services/profiles.service.js';
 import * as mappers from '../utils/mappers.js';
 import {
+  AppError,
+  ERR_DEFS,
   LOG_ACTIONS,
   LOG_RESOURCES,
   ProfileCreateInDTO,
@@ -34,12 +36,7 @@ export class ProfileController {
     };
 
     if (!data) {
-      return reply.code(400).send({
-        error: {
-          message: 'No file uploaded',
-          code: 'NO_FILE',
-        },
-      });
+      throw new AppError(ERR_DEFS.RESSOURCE_INVALID_TYPE, { field: 'multipart body' });
     }
 
     req.log.trace({

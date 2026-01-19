@@ -164,7 +164,7 @@ export const ERR_DEFS = {
   RESSOURCE_INVALID_TYPE: serviceError(
     ERROR_CODES.VALIDATION_ERROR,
     LOG_REASONS.VALIDATION.INVALID_FORMAT,
-    'Invalid type',
+    'Invalid format',
     400,
   ),
 } as const;
