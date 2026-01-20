@@ -1,13 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 const config = {
-  content: [
-    './index.html',
-    './src/**/*.{ts,tsx,js,jsx}',
-  ],
+  content: ['./index.html', './src/**/*.{ts,tsx,js,jsx}'],
   theme: {
     extend: {
       fontFamily: {
-        'quantico': ['Quantico', 'sans-serif'],
+        quantico: ['Quantico', 'sans-serif'],
       },
     },
   },
