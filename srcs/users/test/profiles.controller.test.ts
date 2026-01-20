@@ -17,14 +17,14 @@ vi.mock('../src/utils/mappers.js', () => ({
   mapProfileToDTO: vi.fn(),
 }));
 
-const authHeaders = { 'x-user-id': '1', 'x-user-name': 'Toto' };
+const authHeaders = { 'x-user-id': '1', 'x-user-name': 'toto' };
 
 const mockUserProfile = {
   id: 1,
   authId: 1,
   createdAt: new Date(),
   email: 'toto@mail.com',
-  username: 'Toto',
+  username: 'toto',
 };
 
 const mockProfileCreateIn = {

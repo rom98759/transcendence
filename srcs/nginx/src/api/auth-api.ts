@@ -1,7 +1,5 @@
 import {
   idDTO,
-  IdSchema,
-  ProfileAuthDTO,
   UserDTO,
   UserLoginDTO,
   UserLoginSchema,
