@@ -8,7 +8,7 @@ WORKDIR /app
 # RUN apk add --no-cache sqlite sqlite-dev bash su-exec
 
 # Copy package.json files first to benefit from Docker cache
-COPY package*.json .
+COPY package*.json ./
 
 # Install production dependencies
 RUN npm install

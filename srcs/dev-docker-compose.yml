@@ -9,18 +9,11 @@ services:
   # Infrastructure Layer
   # ============================================================================
 
-  # init-permissions:
-  #   image: alpine
-  #   volumes:
-  #     - data:/app/data
-  #     - uploads:/app/uploads
-  #   command: sh -c "chown -R 1001:204 /app/data /app/uploads && chmod -R 775 /app/data /app/uploads"
-
   redis-broker:
     build:
       context: ./redis
       dockerfile: Dockerfile
-    container_name: ${REDIS_SERVICE_NAME}
+    container_name: '${REDIS_SERVICE_NAME}-dev'
     expose:
       - '${REDIS_SERVICE_PORT}'
     networks:
@@ -38,7 +31,7 @@ services:
     build:
       context: ..
       dockerfile: srcs/users/Dockerfile
-    container_name: ${UM_SERVICE_NAME}
+    container_name: '${UM_SERVICE_NAME}-dev'
     expose:
       - '${UM_SERVICE_PORT}'
     env_file:
@@ -68,7 +61,7 @@ services:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: ${AUTH_SERVICE_NAME}
+    container_name: '${AUTH_SERVICE_NAME}-dev'
     expose:
       - '${AUTH_SERVICE_PORT}'
     env_file:
@@ -98,7 +91,7 @@ services:
     build:
       context: ./blockchain
       dockerfile: Dockerfile.dev
-    container_name: '${BK_SERVICE_NAME}'
+    container_name: '${BK_SERVICE_NAME}-dev'
     ports:
       - '3005:3005'
     expose:
@@ -135,7 +128,7 @@ services:
     build:
       context: ./game
       dockerfile: Dockerfile
-    container_name: '${GAME_SERVICE_NAME}'
+    container_name: '${GAME_SERVICE_NAME}-dev'
     expose:
       - '${GAME_SERVICE_PORT}'
     env_file:
@@ -143,6 +136,7 @@ services:
       - path: ./.env.game
     volumes:
       - ./game/src:/app/src
+        - /app/node_modules
     networks:
       - app-network
     restart: unless-stopped
@@ -166,7 +160,7 @@ services:
     build:
       context: ../
       dockerfile: 'srcs/gateway/Dockerfile'
-    container_name: '${API_GATEWAY_NAME}'
+    container_name: '${API_GATEWAY_NAME}-dev'
     expose:
       - '${API_GATEWAY_PORT}'
     env_file:
@@ -198,13 +192,13 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
-    container_name: '${PROXY_SERVICE_NAME}'
+    container_name: '${PROXY_SERVICE_NAME}-dev'
     ports:
       - '8080:80'
       - '4430:443'
     volumes:
       - ./nginx/src:/usr/share/nginx/src
-      - uploads:/usr/share/nginx/html/uploads:ro
+      - ${HOST_VOLUME_PATH}:/usr/share/nginx/html/uploads:ro
     networks:
       - app-network
     restart: unless-stopped

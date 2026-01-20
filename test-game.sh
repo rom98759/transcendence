@@ -6,11 +6,11 @@ if ! command -v wscat &> /dev/null; then
   exit 1
 fi
 
-CREATE_SESSION_URL="http://localhost:8080/api/game/create-session"
-LOGIN_URL="http://localhost:8080/api/auth/login"
-WSBASE_URL="ws://localhost:8080"
-BASE_URL="http://localhost:8080"
+WSBASE_URL="wss://localhost:4430"
+BASE_URL="https://localhost:4430"
 API_URL="$BASE_URL/api"
+CREATE_SESSION_URL="$API_URL/game/create-session"
+LOGIN_URL="$API_URL/auth/login"
 WSAPI_URL="$WSBASE_URL/api"
 GATEWAY_URL="$BASE_URL/public"
 
@@ -28,11 +28,10 @@ BOLDEND='\e[0m'
 
 #### TEST 1 # Authentificate user as admin -> creating cookie
 printf "%b" "${BOLD}1. Creating auth cookie as admin user:${BOLDEND}"
-RESPONSE=$(curl -c cookies.txt -H "Content-Type: application/json" \
-	-d '{"username":"admin","password":"Admin123!"}' "${LOGIN_URL}" 2>/dev/null)
+RESPONSE=$(curl -k -c cookies.txt -H "Content-Type: application/json" -d '{"username":"admin","password":"Admin123!"}' "${LOGIN_URL}" 2>/dev/null)
 TOKEN=$(grep token cookies.txt | awk '{print $7}')
 RESPONSE=$(echo "$RESPONSE" | jq -r '.result.message' 2>/dev/null)
-if [ "$RESPONSE" = "Login successful" ]; then
+if [ "$RESPONSE" = "Bienvenue admin !" ]; then
     echo -e "${GREEN}\t✅Login successful${NC}"
 	printf "\tToken: %s...\n" "$(printf "%s" "$TOKEN" | cut -c1-50)"
 else
@@ -41,7 +40,7 @@ fi
 
 #### TEST 2 # Create a new Game Session
 printf "%b" "${BOLD}2. Create game session:${BOLDEND}"
-RESPONSE=$(curl -b cookies.txt \
+RESPONSE=$(curl -k -b cookies.txt \
   -X POST \
   -H "Content-Type: application/json" \
   -H "x-user-name: admin" \
@@ -60,8 +59,9 @@ fi
 
 #### TEST 3 # Connect to the Game Session should work
 printf "%b" "${BOLD}3. WebSocket connect:${BOLDEND}"
-WS_OUTPUT=$({ echo "" & sleep 1; } | wscat -c "$WS_URL" -H "cookie: token=$TOKEN" 2>&1)
-CONNECTION_STATUS=$(echo "$WS_OUTPUT" | jq -r '.type' 2>/dev/null)
+WS_OUTPUT=$({ echo "" & sleep 1; } | wscat -c "$WS_URL" --no-check -H "cookie: token=$TOKEN" 2>&1)
+# CONNECTION_STATUS=$(echo "$WS_OUTPUT" | jq -r '.type' 2>/dev/null)
+CONNECTION_STATUS=$(printf '%s\n' "$WS_OUTPUT" | jq -r 'select(.type == "connected") | .type' | head -n 1)
 if [ "$CONNECTION_STATUS" == "connected" ]; then
   echo -e "${GREEN}\t\t\t✅Connection successful${NC}"
 else
@@ -72,7 +72,7 @@ echo -e "\treceived:\t$WS_OUTPUT" | head -n 1
 
 #### TEST 4 # Connect to wrong Game session should not work
 printf "%b" "${BOLD}4. Connection to invalid session:${BOLDEND}"
-WS_OUTPUT=$({ echo "" & sleep 1; } | wscat -c "${WS_URL}wrong" -H "cookie: token=$TOKEN" 2>&1)
+WS_OUTPUT=$({ echo "" & sleep 1; } | wscat -c "${WS_URL}wrong" --no-check -H "cookie: token=$TOKEN" 2>&1)
 CONNECTION_STATUS=$(echo "$WS_OUTPUT" | jq -r '.type' 2>/dev/null)
 if [ "$CONNECTION_STATUS" == "error" ]; then
   echo -e "${GREEN}\t✅Connection failed${NC}"
@@ -84,7 +84,7 @@ echo -e "\treceived:\t$WS_OUTPUT"
 
 #### TEST 5 # Connect to the Game Session with invalid credential
 printf "%b" "${BOLD}5. WS connect with invalid credential:${BOLDEND}"
-WS_OUTPUT=$({ echo "" & sleep 2; } | wscat -c "$WS_URL" -H "cookie: token='wrongToken" 2>&1)
+WS_OUTPUT=$({ echo "" & sleep 2; } | wscat -c "$WS_URL" --no-check -H "cookie: token='wrongToken" 2>&1)
 ERROR_CODE=$(echo "$WS_OUTPUT" | grep -o -E '[0-9]{3}')
 
 if [ "$ERROR_CODE" == "401" ]; then
@@ -97,7 +97,7 @@ echo -e "\treceived:\t$WS_OUTPUT"
 
 #### TEST 6 # RECONNECT TO OLD SESSION should not work (cleaned)
 printf "%b" "${BOLD}6. WS connect to deleted session:${BOLDEND}"
-WS_OUTPUT=$({ echo "" & sleep 1; } | wscat -c "$WS_URL" -H "cookie: token=$TOKEN" 2>&1)
+WS_OUTPUT=$({ echo "" & sleep 1; } | wscat -c "$WS_URL" --no-check -H "cookie: token=$TOKEN" 2>&1)
 CONNECTION_STATUS=$(echo "$WS_OUTPUT" | jq -r '.type' 2>/dev/null)
 if [ "$CONNECTION_STATUS" == "error" ]; then
   echo -e "${GREEN}\t✅No game for this session${NC}"
