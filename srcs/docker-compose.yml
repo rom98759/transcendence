@@ -39,6 +39,8 @@ services:
       - path: ./.env.um
     volumes:
       - data:/data
+      - ../make/scripts/certs/certs/services/${UM_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -58,6 +60,8 @@ services:
       - path: ./.env.auth
     volumes:
       - data:/data
+      - ../make/scripts/certs/certs/services/${AUTH_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -80,6 +84,8 @@ services:
       - path: ./.env.blockchain
     volumes:
       - data:/data
+      - ../make/scripts/certs/certs/services/${BK_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -97,6 +103,9 @@ services:
     env_file:
       - path: ./.env
       - path: ./.env.game
+    volumes:
+      - ../make/scripts/certs/certs/services/${GAME_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -121,6 +130,9 @@ services:
     env_file:
       - path: ./.env
       - path: ./.env.gateway
+    volumes:
+      - ../make/scripts/certs/certs/services/${API_GATEWAY_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -145,6 +157,8 @@ services:
       - '4430:443'
     volumes:
       - ${HOST_VOLUME_PATH}:/usr/share/nginx/html/uploads:ro
+      - ../make/scripts/certs/certs/nginx:/etc/nginx/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/nginx/ca:ro
     networks:
       - app-network
     restart: unless-stopped

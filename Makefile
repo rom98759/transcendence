@@ -44,6 +44,16 @@ envs:
 	done; \
 	echo "JWT_SECRET applied to all files"
 
+# --- Certificats mTLS---
+CERTS_DIR=./make/scripts/certs/certs
+
+certs:
+	@if [ ! -d "$(CERTS_DIR)/ca" ]; then \
+		echo "Generating TLS certificates..."; \
+		cd make/scripts/certs && ./generate_certs.sh; \
+	else \
+		echo "TLS certificates already exist"; \
+	fi
 
 include make/colima.mk
 

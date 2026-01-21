@@ -1,0 +1,55 @@
+# ============================================================
+# OpenSSL global configuration for Transcendence mTLS
+# ============================================================
+
+[ ca ]
+default_ca = CA_default
+
+[ CA_default ]
+default_md = sha256
+policy = policy_any
+x509_extensions = ca_ext
+
+[ policy_any ]
+countryName             = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+
+# ============================================================
+# Certificate Requests
+# ============================================================
+
+[ req ]
+default_bits       = 2048
+default_md         = sha256
+prompt             = no
+distinguished_name = dn
+
+[ dn ]
+C  = FR
+O  = transcendence
+OU = backend
+
+# ============================================================
+# Extensions
+# ============================================================
+
+[ ca_ext ]
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, keyCertSign, cRLSign
+
+[ server_ext ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth
+
+[ client_ext ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature
+extendedKeyUsage = clientAuth
+
+[ client_server_ext ]
+basicConstraints = CA:FALSE
+keyUsage = critical, digitalSignature, keyEncipherment
+extendedKeyUsage = serverAuth, clientAuth
