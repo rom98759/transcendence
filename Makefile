@@ -97,7 +97,8 @@ api: build-core build-api
 auth: build-core build-auth
 	$(D_COMPOSE) up -d --build $(AUTH_SERVICE_NAME)
 user: build-core build-user
-	$(D_COMPOSE) up -d --build $(UM_SERVICE_NAME)
+	$(D_COMPOSE) build $(UM_SERVICE_NAME)
+	$(D_COMPOSE) up -d $(UM_SERVICE_NAME)
 game: build-core build-game
 	$(D_COMPOSE) up -d --build $(GAME_SERVICE_NAME)
 block: build-core build-block
@@ -209,11 +210,9 @@ fclean: clean
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
 	@echo "Cleaning volume contents with Docker"
+	rm -rf ./srcs/shared/core/dist
+	rm -rf ./srcs/users/dist
 	rm -rf $(VOLUMES_PATH)
-# 	@if [ -d "$(VOLUMES_PATH)" ] && [ "$(VOLUMES_PATH)" != "/" ]; then \
-# 		find $(VOLUMES_PATH) -mindepth 1 -delete || true; \
-# 	fi
-# 	@docker run --rm -v $(VOLUMES_PATH):/tmp/volumes alpine sh -c "rm -rf /tmp/volumes/data/* /tmp/volumes/uploads/*"
 	@echo "Volume folder cleaned (structure preserved)"
 
 re : fclean all
