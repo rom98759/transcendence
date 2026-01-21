@@ -133,20 +133,22 @@ def test_agent(model_path, episodes=5, render=True):
 if __name__ == "__main__":
     import argparse
     
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--mode", choices=["train", "test"], default="train")
-    parser.add_argument("--timesteps", type=int, default=100_000)
-    parser.add_argument("--model", type=str, default="models/pong_moderate/pong_moderate_final")
-    parser.add_argument("--episodes", type=int, default=5)
-    parser.add_argument("--no-render", action="store_true")
-    parser.add_argument("--cpu", action="store_true")
+    parser = argparse.ArgumentParser(description="Train or test Pong AI agent")
+    parser.add_argument("--mode", choices=["train", "test"], default="train", help="Training or testing mode")
+    parser.add_argument("--timesteps", type=int, default=100_000, help="Total training timesteps")
+    parser.add_argument("--save-path", type=str, default="models/pong_moderate", help="Path to save model")
+    parser.add_argument("--model", type=str, default="models/pong_moderate/pong_moderate_final", help="Path to load model for testing")
+    parser.add_argument("--episodes", type=int, default=5, help="Number of test episodes")
+    parser.add_argument("--no-render", action="store_true", help="Disable rendering during test")
+    parser.add_argument("--use-gpu", action="store_true", help="Use GPU for training")
     
     args = parser.parse_args()
     
     if args.mode == "train":
         train_moderate_agent(
             total_timesteps=args.timesteps,
-            use_gpu=not args.cpu
+            save_path=args.save_path,
+            use_gpu=args.use_gpu
         )
     else:
         test_agent(

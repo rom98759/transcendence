@@ -2,11 +2,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Requ
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Dict, Optional
 import numpy as np
+import os
+import json
+import asyncio
 from datetime import datetime
 from stable_baselines3 import PPO
 from pong_env import PongEnv
-import FastAPIRequest 
-
+from ai_player import AIPlayer
 
 
 app = FastAPI(
@@ -104,13 +106,13 @@ class AIService:
             import os
             if os.path.exists(f"{self.model_path}.zip"):
                 self.model = PPO.load(self.model_path)
-                print(f"✅ Model loaded: {self.model_path}")
+                print(f"Model loaded: {self.model_path}")
             else:
-                print(f"⚠️  Model not found: {self.model_path}")
-                print(f"⚠️  Will create new model on first training session")
+                print(f"Model not found: {self.model_path}")
+                print(f"Will create new model on first training session")
                 self.model = None
         except Exception as e:
-            print(f"⚠️  Error loading model: {e}")
+            print(f"Error loading model: {e}")
             self.model = None
     
     def create_session(self, session_id: str) -> GameSession:
@@ -139,27 +141,114 @@ class AIService:
 
 
 ai_service = AIService()
+active_ai_players: Dict[str, AIPlayer] = {}
 
 
 @app.on_event("startup")
 async def startup_event():
-    print("🚀 Pong AI Service started")
+    print("Pong AI Service started")
+
+
+@app.post("/join-game")
+async def join_game(request: Request):
+
+    try:
+        body = await request.json()
+        session_id = body.get("sessionId")
+        
+        if not session_id:
+            raise HTTPException(status_code=400, detail="sessionId is required")
+        
+        print(f"🎮 AI join request for session: {session_id}")
+        
+        # Check if AI is already in this game
+        if session_id in active_ai_players:
+            print(f"AI already playing in session: {session_id}")
+            return {
+                "status": "already_playing",
+                "session_id": session_id,
+                "message": "AI is already in this game"
+            }
+        
+        # Create AI player
+        model_path = "models/pong_moderate/pong_moderate_final"
+        ai_player = AIPlayer(model_path)
+        active_ai_players[session_id] = ai_player
+        
+        print(f"AI player created for session: {session_id}")
+        
+        # Start AI player in background with error handling
+        async def play_with_error_handling():
+            try:
+                await ai_player.play(session_id)
+            except Exception as e:
+                print(f"AI play error: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        asyncio.create_task(play_with_error_handling())
+        
+        print(f"AI player task started for session: {session_id}")
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "message": "AI player joined the game",
+            "paddle": "right"
+        }
+    
+    except Exception as e:
+        print(f"Error in join_game: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+        
+        return {
+            "status": "success",
+            "session_id": session_id,
+            "message": "AI player joined the game",
+            "paddle": "right"
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/invite-pong-ai")
-async def invite(headers: dict):
-    session_id = headers.get("session_id")
-    uri = f"ws://game-service/{session_id}" 
-   #async with connect(uri) as websocket:
-    #    await websocket.send(json.dumps({"type": "start", "session_id": session_id}))
-     #   response = await websocket.recv()
-      #  print("Response from WebSocket server:", response)
-    return {
-        "service": "Pong AI",
-        "version": "1.0.0",
-        "status": response,
-        "stats": ai_service.get_stats()
-    }
+async def invite(request: Request):
+
+    try:
+        # Create a new session on game service
+        import httpx
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "http://game-service:3003/create-session",
+                timeout=5.0
+            )
+            response.raise_for_status()
+            data = response.json()
+            session_id = data.get("sessionId")
+        
+        if not session_id:
+            raise HTTPException(status_code=500, detail="Failed to create game session")
+        
+        # Join the game as AI
+        model_path = "models/pong_moderate/pong_moderate_final"
+        ai_player = AIPlayer(model_path)
+        active_ai_players[session_id] = ai_player
+        
+        # Start AI player in background
+        asyncio.create_task(ai_player.play(session_id))
+        
+        return {
+            "service": "Pong AI",
+            "version": "1.0.0",
+            "session_id": session_id,
+            "message": "AI player created and joined game",
+            "ws_url": f"/game/{session_id}",
+            "stats": ai_service.get_stats()
+        }
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.head("/health")

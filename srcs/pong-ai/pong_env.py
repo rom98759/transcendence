@@ -1,6 +1,7 @@
 import gymnasium as gym
 from gymnasium import spaces
 import requests
+import numpy as np
 
 
 class PongEnv(gym.Env):

@@ -266,10 +266,57 @@ export class GameDisplay {
 
   async askForAIGameSession(): Promise<void> {
     if (this.sessionId) return;
-    //this.askForGameSession();
-    const response = await fetch(`api/pong-ai/invite-pong-ai`);
-    console.log('New');
-    console.log(response);
+
+    console.log('AI game session requested');
+
+    try {
+      const response = await fetch('/api/game/create-session', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Game session created:', data);
+
+      if (!data.sessionId) {
+        throw new Error('No sessionId in response');
+      }
+
+      this.sessionId = data.sessionId;
+      this.gameArena.classList.remove('hidden');
+      await this.openWebSocket(this.sessionId);
+      this.showPanel('settings');
+
+      const aiResponse = await fetch('/api/pong-ai/join-game', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          sessionId: this.sessionId,
+        }),
+      });
+
+      if (!aiResponse.ok) {
+        throw new Error(`Failed to invite AI: ${aiResponse.status}`);
+      }
+
+      const aiData = await aiResponse.json();
+      console.log('AI joined game:', aiData);
+
+      this.addGameLog('AI player has joined as right paddle!', 'success');
+    } catch (error) {
+      console.error('Failed to create AI game session:', error);
+      alert('Failed to connect to AI service. Please try again.');
+      if (this.sessionId) {
+        this.stopGame();
+      }
+    }
   }
 
   async joinSession(sessionId: string) {
