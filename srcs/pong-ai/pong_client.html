@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong AI - Test Client</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .game-container {
+            position: relative;
+            background: #000;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+        
+        canvas {
+            display: block;
+            cursor: none;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-secondary:hover:not(:disabled) {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-danger:hover:not(:disabled) {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .info-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .info-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 15px 0;
+            font-weight: 600;
+        }
+        
+        .status.connected {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+        
+        .status.disconnected {
+            background: #fed7d7;
+            color: #742a2a;
+        }
+        
+        .instructions {
+            background: #f7fafc;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .instructions h3 {
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .instructions li {
+            padding: 8px 0;
+            color: #4a5568;
+        }
+        
+        .instructions li:before {
+            content: "🎮 ";
+            margin-right: 8px;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .connecting {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏓 Pong AI</h1>
+        <p class="subtitle">Play against RL-trained AI opponent</p>
+        
+        <div id="status" class="status disconnected">Disconnected</div>
+        
+        <div class="game-container">
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+        </div>
+        
+        <div class="controls">
+            <button id="connectBtn" class="btn-primary">Connect</button>
+            <button id="resetBtn" class="btn-secondary" disabled>New Game</button>
+            <button id="disconnectBtn" class="btn-danger" disabled>Disconnect</button>
+        </div>
+        
+        <div class="info">
+            <div class="info-card">
+                <div class="info-label">AI Score</div>
+                <div class="info-value" id="scoreAI">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Your Score</div>
+                <div class="info-value" id="scorePlayer">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Latency</div>
+                <div class="info-value" id="latency">-</div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 How to Play</h3>
+            <ul>
+                <li><strong>Mouse:</strong> Move your paddle by moving the mouse up and down</li>
+                <li><strong>Arrow Keys:</strong> Use ↑ and ↓ to control your paddle</li>
+                <li><strong>Goal:</strong> Score points by getting the ball past the AI's paddle</li>
+                <li><strong>AI Level:</strong> Medium difficulty (trained with RL)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const statusEl = document.getElementById('status');
+        const connectBtn = document.getElementById('connectBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const disconnectBtn = document.getElementById('disconnectBtn');
+        const scoreAIEl = document.getElementById('scoreAI');
+        const scorePlayerEl = document.getElementById('scorePlayer');
+        const latencyEl = document.getElementById('latency');
+        
+        // WebSocket connection
+        let ws = null;
+        let sessionId = `session_${Date.now()}`;
+        let gameState = null;
+        let mouseY = canvas.height / 2;
+        let keys = {};
+        let lastPingTime = 0;
+        
+        // Game constants
+        const PADDLE_WIDTH = 15;
+        const PADDLE_HEIGHT = 100;
+        const BALL_RADIUS = 10;
+        
+        // Mouse control
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseY = e.clientY - rect.top;
+        });
+        
+        // Keyboard control
+        document.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+        });
+        
+        document.addEventListener('keyup', (e) => {
+            keys[e.key] = false;
+        });
+        
+        function getPlayerAction() {
+            const targetY = mouseY;
+            const currentY = gameState ? gameState.player_paddle_y + PADDLE_HEIGHT / 2 : canvas.height / 2;
+            const threshold = 20;
+            
+            // Keyboard has priority
+            if (keys['ArrowUp']) return 1;
+            if (keys['ArrowDown']) return 2;
+            
+            // Mouse control
+            if (Math.abs(targetY - currentY) < threshold) return 0;
+            return targetY < currentY ? 1 : 2;
+        }
+        
+        function connect() {
+            statusEl.textContent = 'Connecting...';
+            statusEl.className = 'status connecting';
+            connectBtn.disabled = true;
+            
+            // Create session first
+            fetch(`http://localhost:3006/session/create?session_id=${sessionId}`, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                // Connect to WebSocket
+                ws = new WebSocket(`ws://localhost:3006/ws/game/${sessionId}`);
+                
+                ws.onopen = () => {
+                    statusEl.textContent = 'Connected to AI';
+                    statusEl.className = 'status connected';
+                    disconnectBtn.disabled = false;
+                    resetBtn.disabled = false;
+                    startGameLoop();
+                };
+                
+                ws.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.type === 'connected') {
+                        gameState = data.state;
+                        render();
+                    } else if (data.type === 'state') {
+                        gameState = data.data;
+                        scoreAIEl.textContent = gameState.score_ai;
+                        scorePlayerEl.textContent = gameState.score_player;
+                        
+                        if (data.data.game_over) {
+                            const winner = data.data.score_ai > data.data.score_player ? 'AI' : 'You';
+                            setTimeout(() => alert(`Game Over! ${winner} won!`), 100);
+                        }
+                    } else if (data.type === 'pong') {
+                        const latency = Date.now() - lastPingTime;
+                        latencyEl.textContent = `${latency}ms`;
+                    }
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('WebSocket error:', error);
+                    statusEl.textContent = 'Connection error';
+                    statusEl.className = 'status disconnected';
+                };
+                
+                ws.onclose = () => {
+                    statusEl.textContent = 'Disconnected';
+                    statusEl.className = 'status disconnected';
+                    connectBtn.disabled = false;
+                    disconnectBtn.disabled = true;
+                    resetBtn.disabled = true;
+                };
+            })
+            .catch(err => {
+                console.error('Failed to create session:', err);
+                statusEl.textContent = 'Connection failed';
+                statusEl.className = 'status disconnected';
+                connectBtn.disabled = false;
+            });
+        }
+        
+        function disconnect() {
+            if (ws) {
+                ws.close();
+                ws = null;
+            }
+        }
+        
+        function resetGame() {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'reset' }));
+            }
+        }
+        
+        function startGameLoop() {
+            setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN && gameState && !gameState.game_over) {
+                    const action = getPlayerAction();
+                    ws.send(JSON.stringify({ type: 'move', action }));
+                }
+            }, 1000 / 60); // 60 FPS
+            
+            // Ping for latency check
+            setInterval(() => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    lastPingTime = Date.now();
+                    ws.send(JSON.stringify({ type: 'ping' }));
+                }
+            }, 1000);
+            
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function gameLoop() {
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function render() {
+            // Clear canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            if (!gameState) return;
+            
+            // Draw center line
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 10]);
+            ctx.beginPath();
+            ctx.moveTo(canvas.width / 2, 0);
+            ctx.lineTo(canvas.width / 2, canvas.height);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Draw AI paddle (left)
+            ctx.fillStyle = '#f56565';
+            ctx.fillRect(0, gameState.ai_paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT);
+            
+            // Draw player paddle (right)
+            ctx.fillStyle = '#48bb78';
+            ctx.fillRect(canvas.width - PADDLE_WIDTH, gameState.player_paddle_y, PADDLE_WIDTH, PADDLE_HEIGHT);
+            
+            // Draw ball
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(gameState.ball_x, gameState.ball_y, BALL_RADIUS, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw scores
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(gameState.score_ai, canvas.width / 4, 80);
+            ctx.fillText(gameState.score_player, (canvas.width * 3) / 4, 80);
+        }
+        
+        // Event listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', disconnect);
+        resetBtn.addEventListener('click', resetGame);
+        
+        // Initial render
+        render();
+    </script>
+</body>
+</html>

@@ -319,6 +319,8 @@ export class PongGame {
         x: this.ball.pos.x,
         y: this.ball.pos.y,
         radius: this.ball.radius,
+        vx: this.ball.vel.x, //LUBA
+        vy: this.ball.vel.y, //LUBA
       },
       paddles: {
         left: {

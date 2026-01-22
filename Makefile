@@ -78,6 +78,8 @@ game: build-core build-game
 	$(D_COMPOSE) up -d --build $(GAME_SERVICE_NAME)
 block: build-core build-block
 	$(D_COMPOSE) up -d --build $(BK_SERVICE_NAME)
+pong: build-core
+	$(D_COMPOSE) up -d --build $(PONG_AI_SERVICE_NAME)
 build: build-core
 	$(D_COMPOSE) build
 
@@ -114,6 +116,8 @@ shell-game:
 	$(CONTAINER_CMD) exec -it $(GAME_SERVICE_NAME) /bin/sh
 shell-block:
 	$(CONTAINER_CMD) exec -it $(BK_SERVICE_NAME) /bin/sh
+shell-pong-ai:
+	$(CONTAINER_CMD) exec -it $(PONG_AI_SERVICE_NAME) /bin/sh
 
 # --- Logs and status ---
 
@@ -137,6 +141,8 @@ logs-game:
 	$(CONTAINER_CMD) logs -f $(GAME_SERVICE_NAME)
 logs-block:
 	$(CONTAINER_CMD) logs -f $(BK_SERVICE_NAME)
+logs-pong-ai:
+	$(CONTAINER_CMD) logs -f $(PONG_AI_SERVICE_NAME)
 
 show:
 	$(CONTAINER_CMD) images

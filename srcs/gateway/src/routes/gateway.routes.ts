@@ -5,12 +5,14 @@ import { registerBlockRoutes } from '../controllers/block.controller.js';
 import { healthRoutes } from './health.routes.js';
 import { rootHandler, helpHandler } from '../controllers/gateway.controller.js';
 import { registerUsersRoutes } from '../controllers/um.controller.js';
+import { registerAiRoutes } from '../controllers/pong-ai.controller.js';
 
 export async function apiRoutes(app: FastifyInstance) {
   app.register(registerAuthRoutes, { prefix: '/auth' });
   app.register(registerGameRoutes, { prefix: '/game' });
   app.register(registerBlockRoutes, { prefix: '/block' });
   app.register(registerUsersRoutes, { prefix: '/users' });
+  app.register(registerAiRoutes, { prefix: '/pong-ai' });
 }
 
 /**

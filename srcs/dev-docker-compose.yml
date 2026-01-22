@@ -151,10 +151,29 @@ services:
     healthcheck:
       <<: *healthcheck-template
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${UM_SERVICE_PORT}/health"]
-   
+
+  pong-ai-service:
+    build:
+      context: ./pong-ai
+      dockerfile: Dockerfile
+    container_name: ${PONG_AI_SERVICE_NAME}
+    expose:
+      - '${PONG_AI_SERVICE_PORT}'
+    environment:
+      - MODEL_PATH=/app/models/pong_moderate/pong_moderate_final
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./pong-ai/models:/app/models
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-template
+      test: ["CMD", "curl", "-f", "http://localhost:${PONG_AI_SERVICE_PORT}/health"]
+
 networks:
-    app-network:
-      driver: bridge
+  app-network:
+    driver: bridge
 
 volumes:
   data:

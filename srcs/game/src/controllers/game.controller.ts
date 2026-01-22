@@ -98,3 +98,67 @@ export async function webSocketConnect(this: FastifyInstance, socket: any, req: 
   const sessionId = params.sessionId;
   handleClientMessage.call(this, socket, sessionId);
 }
+
+// RL API: Reset game session
+export async function resetGame(this: FastifyInstance, req: FastifyRequest) {
+  const body = req.body as { sessionId?: string };
+  const sessionId = body.sessionId;
+  if (!sessionId) {
+    return { status: 'failure', message: 'sessionId is required' };
+  }
+  const sessionData = gameSessions.get(sessionId);
+  if (!sessionData) {
+    return { status: 'failure', message: `Session ${sessionId} not found` };
+  }
+  sessionData.game.scores.left = 0;
+  sessionData.game.scores.right = 0;
+  sessionData.game.status = 'waiting';
+  sessionData.game.resetBall();
+  return { status: 'success', state: sessionData.game.getState() };
+}
+
+// RL API: Step (apply action)
+export async function stepGame(this: FastifyInstance, req: FastifyRequest) {
+  const body = req.body as {
+    sessionId?: string;
+    action?: 'up' | 'down' | 'stop';
+    paddle?: 'left' | 'right';
+  };
+  const sessionId = body.sessionId;
+  const action = body.action;
+  const paddle = body.paddle || 'right';
+  if (!sessionId || !action) {
+    return { status: 'failure', message: 'sessionId and action are required' };
+  }
+  const sessionData = gameSessions.get(sessionId);
+  if (!sessionData) {
+    return { status: 'failure', message: `Session ${sessionId} not found` };
+  }
+  sessionData.game.setPaddleDirection(paddle, action);
+  sessionData.game.update();
+  let reward = 0;
+  let done = false;
+  if (sessionData.game.status === 'finished') {
+    done = true;
+    reward = sessionData.game.scores.right > sessionData.game.scores.left ? 1 : -1;
+  }
+  return {
+    status: 'success',
+    state: sessionData.game.getState(),
+    reward,
+    done,
+  };
+}
+
+// RL API: Get current state LUBA
+export async function getGameState(this: FastifyInstance, req: FastifyRequest) {
+  const sessionId = (req.query as any).sessionId || (req.body as any)?.sessionId;
+  if (!sessionId) {
+    return { status: 'failure', message: 'sessionId is required' };
+  }
+  const sessionData = gameSessions.get(sessionId);
+  if (!sessionData) {
+    return { status: 'failure', message: `Session ${sessionId} not found` };
+  }
+  return { status: 'success', state: sessionData.game.getState() };
+}

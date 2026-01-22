@@ -159,3 +159,5 @@ vite.config.ts.timestamp-*
 *.txt
 .DS_Store
 **/*.js
+srcs/pong-ai/__pycache__/
+srcs/pong-ai/models/
