@@ -20,16 +20,17 @@ model UserProfile {
 }
 
 model Friendship {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  nickname  String?
-  status    String
+  id                    Int      @id @default(autoincrement())
+  createdAt             DateTime @default(now())
+  nicknameRequester     String?
+  nicknameReceiver      String?
+  status                String
   
-  requesterId    Int
-  requester UserProfile @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  requesterId           Int
+  requester             UserProfile @relation("requester", fields: [requesterId], references: [id], onDelete: Cascade)
 
-  receiverId  Int
-  receiver  UserProfile @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
+  receiverId            Int
+  receiver              UserProfile @relation("receiver", fields: [receiverId], references: [id], onDelete: Cascade)
   
   @@unique([requesterId, receiverId])
 }

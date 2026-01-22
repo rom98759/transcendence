@@ -1,0 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import 'tailwindcss';
+@theme {
+  --font-quantico: 'Quantico', sans-serif;
+}
+
+/* @layer components { */
+.ts-form-title {
+  @apply text-gray-500 font-bold;
+}
+/* } */

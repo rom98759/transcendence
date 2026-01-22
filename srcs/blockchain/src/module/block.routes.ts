@@ -2,7 +2,6 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { blockIdSchema, blockSchema } from './block.schema.js';
 import {
   addTournament,
-  addTournamentForm,
   getTournamentView,
   listTournament,
   listTournamentView,
@@ -17,21 +16,18 @@ async function blockRoutes(app: FastifyInstance) {
   app.get('/', listTournamentView);
   app.get('/tournaments', listTournament);
   app.post('/tournaments', { schema: { body: blockSchema } }, addTournament);
-  app.get('/tournaments/:tx_id', { schema: { params: blockIdSchema } }, getTournamentView);
-  app.get('/cwd', chekCwd);
+  app.get('/tournaments/:tour_id', { schema: { params: blockIdSchema } }, getTournamentView);
+  app.post('/tournamentspub', async (req, _reply) => {
+    await app.redis.xadd('tournament.results', '*', 'data', JSON.stringify(req.body));
+    return { status: 'published' };
+  });
 }
 
 async function healthRoutes(app: FastifyInstance) {
   app.get(
     '/',
     async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
-      return reply.code(200).send({ status: 'healthy', hotReload: 'ok fdac!' });
+      return reply.code(200).send({ status: 'healthy', hotReload: 'ok' });
     },
   );
-}
-
-async function chekCwd() {
-  return {
-    cwd: process.cwd(),
-  };
 }

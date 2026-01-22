@@ -16,7 +16,7 @@ export async function apiRoutes(app: FastifyInstance) {
 }
 
 /**
- * @abstract /users/doc is managed through nginx
+ * @abstract /doc routes are managed directly through nginx
  */
 export async function publicRoutes(app: FastifyInstance) {
   app.register(healthRoutes);

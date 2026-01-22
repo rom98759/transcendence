@@ -15,7 +15,7 @@ echo "✅ SSL certificates generated"
 
 echo "📁 Preparing Nginx static directory..."
 # Ensure the directory exists
-mkdir -p /usr/share/nginx/src/html
+mkdir -p /usr/share/nginx/src/html/uploads
 
 # Check if index.html exists
 if [ ! -f /usr/share/nginx/src/html/index.html ]; then

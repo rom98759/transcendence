@@ -31,6 +31,7 @@ export class FriendshipRepository {
     const requests = await prisma.friendship.findMany({
       where: { requesterId: userId },
       include: { receiver: true },
+      omit: { nicknameRequester: true },
     });
     return requests as unknown as FriendshipReceiverDTO[];
   }
@@ -39,6 +40,7 @@ export class FriendshipRepository {
     const requests = await prisma.friendship.findMany({
       where: { receiverId: userId },
       include: { requester: true },
+      omit: { nicknameReceiver: true },
     });
     return requests;
   }
@@ -75,13 +77,13 @@ export class FriendshipRepository {
     return requests;
   }
 
-  async updateFriendshipNickname(
+  async updateFriendshipNicknameRequester(
     friendshipId: number,
-    nickname: string,
+    nicknameRequester: string,
   ): Promise<FriendshipFullDTO> {
     const requests = await prisma.friendship.update({
       where: { id: friendshipId },
-      data: { nickname },
+      data: { nicknameRequester },
       include: { requester: true, receiver: true },
     });
     return requests;

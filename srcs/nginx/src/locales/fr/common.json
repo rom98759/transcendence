@@ -1,0 +1,14 @@
+{
+  "tagline": "Ce jeu va vous retourner",
+  "navbar": {
+    "home": "Accueil",
+    "about": "A propos",
+    "play": "Jouer",
+    "stats": "Stats"
+  },
+  "footer": {
+    "copyright": "© 2026 Tous droits réservés.",
+    "privacyPolicy": "Politique de confidentialité",
+    "termsOfService": "Conditions d'utilisation"
+  }
+}

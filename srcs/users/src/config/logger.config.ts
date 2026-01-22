@@ -37,6 +37,9 @@ export const loggerConfig: PinoLoggerOptions = {
   serializers: {
     req(request: FastifyRequest | IncomingMessage) {
       const rawReq = isFastifyRequest(request) ? request.raw : request;
+      if (isFastifyRequest(request) && request.routeOptions.url === '/health') {
+        return { message: 'Health check, logging skipped' }; // or return undefined
+      }
       const serialized = serializer.req(rawReq as IncomingMessage);
       if (isFastifyRequest(request)) {
         return {

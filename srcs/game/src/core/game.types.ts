@@ -46,8 +46,6 @@ export interface GameState {
     x: number;
     y: number;
     radius: number;
-    vx?: number; //LUBA
-    vy?: number; //LUBA
   };
   paddles: {
     left: {

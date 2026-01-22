@@ -11,4 +11,5 @@ export interface LogContext {
   userId?: number | string;
   details?: unknown; // Zod details
   originalError?: unknown;
+  field?: string;
 }

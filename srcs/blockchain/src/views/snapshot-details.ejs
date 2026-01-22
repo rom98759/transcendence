@@ -1,0 +1,81 @@
+<%- include('header.ejs', {title}) %>
+
+
+<div class="max-w-6xl mx-auto px-4 space-y-6">
+<div class="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+  <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
+    <h1 class="text-2xl font-bold">
+      Tournament <%= snapshot.tour_id %>
+    </h1>
+  </div>
+
+  <div class="spx-6 p-4">
+    <section class="mb-6">
+      <h2 class="text-lg font-semibold mb-2">Tournament Data</h2>
+      <ul class="font-mono text-sm space-y-1">
+        <li>Player 1 (winner): <%= snapshot.player1 %></li>
+        <li>Player 2: <%= snapshot.player2 %></li>
+        <li>Player 3: <%= snapshot.player3 %></li>
+        <li>Player 4 (loser): <%= snapshot.player4 %></li>
+      </ul>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-lg font-semibold mb-2">Blockchain Anchor</h2>
+      <ul class="font-mono text-sm space-y-1">
+        <li>
+          Transaction:
+          <a
+            class="text-blue-600 underline"
+            href="https://testnet.snowtrace.io/tx/<%= snapshot.tx_hash %>"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <%= snapshot.tx_hash %>
+          </a>
+        </li>
+        <li>Block number: <%= snapshot.block_number %></li>
+        <li>Block timestamp: <%= snapshot.block_timestamp %></li>
+      </ul>
+    </section>
+
+    <section class="mb-6">
+      <h2 class="text-lg font-semibold mb-2">Verification</h2>
+
+      <% if (snapshot.verify_status === "OK") { %>
+        <p class="text-green-700 font-semibold">
+          ✔ Snapshot verified — data is immutable
+        </p>
+      <% } else if (snapshot.verify_status === "MISMATCH") { %>
+        <p class="text-red-700 font-semibold">
+          ✖ Snapshot mismatch — data integrity compromised
+        </p>
+      <% } else { %>
+        <p class="text-gray-700">
+          Verification pending
+        </p>
+      <% } %>
+
+      <p class="mt-2 font-mono text-sm">
+        Snapshot hash: <%= snapshot.snapshot_hash ?? "—" %>
+      </p>
+
+      <p class="mt-1 text-sm text-gray-600">
+        Verified at:
+        <%= snapshot.verified_at ? new Date(snapshot.verified_at).toISOString() : "—" %>
+      </p>
+    </section>
+
+    <section>
+      <a
+        href="/"
+        class="inline-block px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        Go back
+      </a>
+    </section>
+  </div>
+
+</div>
+</div>
+<%- include('footer.ejs') %>

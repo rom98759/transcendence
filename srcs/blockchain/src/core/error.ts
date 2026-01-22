@@ -6,4 +6,3 @@ export const errorEventMap: Record<string, string> = {
   BLOCKCHAIN_INSERT_TOURNAMENT_ERR: 'blockchain_register_error',
   BLOCKCHAIN_NO_SMART_CONTRACT_ERR: 'blockchain_dont_exist_error',
 };
-

@@ -10,7 +10,12 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": [
+      "../../node_modules/@types", // necessary to check at workspace root
+      "./node_modules/@types", // and in local
+      "./src/types" // custom
+    ]
   },
   "include": ["src/**/*"]
 }

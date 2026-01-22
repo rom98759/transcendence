@@ -1,60 +1,69 @@
-version: '3.8'
-
 x-healthcheck-template: &healthcheck-template
   interval: 10s
   timeout: 5s
   retries: 3
-  start_period: 10s
+  start_period: 30s
 
 services:
-  # Development nginx with hot reload
-  nginx-proxy:
+  # ============================================================================
+  # Infrastructure Layer
+  # ============================================================================
+
+  redis-broker:
     build:
-      context: ./nginx
-      dockerfile: Dockerfile.dev
-    container_name: "${PROXY_SERVICE_NAME}"
-    ports:
-      - "8080:80"
-      - "4430:443"
-    volumes:
-      - ./nginx/src:/usr/share/nginx/src
+      context: ./redis
+      dockerfile: Dockerfile
+    container_name: '${REDIS_SERVICE_NAME}-dev'
+    expose:
+      - '${REDIS_SERVICE_PORT}'
     networks:
       - app-network
     restart: unless-stopped
-    depends_on:
-      api-gateway:
-        condition: service_started
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
-      start_period: 5s
+      test: ['CMD', 'redis-cli', 'ping']
 
-  # Main Fastify API
-  api-gateway:
+  # ============================================================================
+  # Backend Services
+  # ============================================================================
+
+  user-service:
     build:
-      context: ../
-      dockerfile: "srcs/gateway/Dockerfile"
-    container_name: "${API_GATEWAY_NAME}-dev"
+      context: ..
+      dockerfile: srcs/users/Dockerfile
+    container_name: '${UM_SERVICE_NAME}-dev'
     expose:
-      - "${API_GATEWAY_PORT}"
+      - '${UM_SERVICE_PORT}'
     env_file:
       - path: ./.env
-      - path: ./.env.gateway
+      - path: ./.env.um
+    volumes:
+      - data:/app/data
+      - uploads:/app/uploads
+    ports:
+      - '5555:5555'
     networks:
       - app-network
     restart: unless-stopped
-    depends_on:
-      auth-service:
-        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-template
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://127.0.0.1:${UM_SERVICE_PORT}/health',
+        ]
 
-  # Auth service
   auth-service:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: "${AUTH_SERVICE_NAME}"
+    container_name: '${AUTH_SERVICE_NAME}-dev'
     expose:
-      - "${AUTH_SERVICE_PORT}"
+      - '${AUTH_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.auth
@@ -68,18 +77,25 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${AUTH_SERVICE_PORT}/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://127.0.0.1:${AUTH_SERVICE_PORT}/health',
+        ]
 
-  # Blockchain service
   blockchain-service:
     build:
       context: ./blockchain
       dockerfile: Dockerfile.dev
-    container_name: "${BK_SERVICE_NAME}"
+    container_name: '${BK_SERVICE_NAME}-dev'
     ports:
       - '3005:3005'
     expose:
-      - "${BK_SERVICE_PORT}"
+      - '${BK_SERVICE_PORT}'
     environment:
       - NODE_ENV=development
       - BLOCK_DB_PATH=/data/blockchain.db
@@ -95,61 +111,117 @@ services:
       - ./blockchain/nodemon.json:/app/nodemon.json
     networks:
       - app-network
-    restart: "no"
+    restart: 'no'
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${BK_SERVICE_PORT}/health"]
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${BK_SERVICE_PORT}/health',
+        ]
 
-  # Game service with development volume mount
   game-service:
     build:
       context: ./game
       dockerfile: Dockerfile
-    container_name: "${GAME_SERVICE_NAME}"
+    container_name: '${GAME_SERVICE_NAME}-dev'
     expose:
-      - "${GAME_SERVICE_PORT}"
+      - '${GAME_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.game
     volumes:
       - ./game/src:/app/src
+        - /app/node_modules
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${GAME_SERVICE_PORT}/health"]
-  
-  # Redis broker
-  redis-broker:
-    build:
-      context: ./redis
-      dockerfile: Dockerfile
-    container_name: "${REDIS_SERVICE_NAME}"
-    expose:
-      - "${REDIS_SERVICE_PORT}"
-    networks:
-      - app-network
-    restart: unless-stopped
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://localhost:${GAME_SERVICE_PORT}/health',
+        ]
 
-  # User service
-  user-service:
+  # ============================================================================
+  # API Gateway Layer
+  # ============================================================================
+
+  api-gateway:
     build:
-      context: ..
-      dockerfile: srcs/users/Dockerfile
-    container_name: "${UM_SERVICE_NAME}-dev"
+      context: ../
+      dockerfile: 'srcs/gateway/Dockerfile'
+    container_name: '${API_GATEWAY_NAME}-dev'
     expose:
-      - "${UM_SERVICE_PORT}"
+      - '${API_GATEWAY_PORT}'
     env_file:
       - path: ./.env
-      - path: ./.env.um
-    volumes:
-      - data:/data
+      - path: ./.env.gateway
     networks:
       - app-network
     restart: unless-stopped
+    depends_on:
+      auth-service:
+        condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://127.0.0.1:${API_GATEWAY_PORT}/health',
+        ]
+
+  # ============================================================================
+  # Reverse Proxy Layer
+  # ============================================================================
+
+  nginx-proxy:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.dev
+    container_name: '${PROXY_SERVICE_NAME}-dev'
+    ports:
+      - '8080:80'
+      - '4430:443'
+    volumes:
+      - ./nginx/src:/usr/share/nginx/src
+      - ${HOST_VOLUME_PATH}:/usr/share/nginx/html/uploads:ro
+    networks:
+      - app-network
+    restart: unless-stopped
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      blockchain-service:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-template
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          '--no-check-certificate',
+          'https://localhost/health',
+        ]
+
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:${UM_SERVICE_PORT}/health"]
 
   pong-ai-service:
@@ -178,3 +250,13 @@ networks:
 volumes:
   data:
     driver: local
+    driver_opts:
+      device: ${HOST_VOLUME_PATH}/database
+      o: bind
+      type: none
+  uploads:
+    driver: local
+    driver_opts:
+      device: ${HOST_VOLUME_PATH}/uploads
+      o: bind
+      type: none

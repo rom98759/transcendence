@@ -1,11 +1,12 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
-import { BlockTournamentInput } from '../module/block.schema.js';
+import { BlockTournamentInput, SnapshotRow } from '../module/block.type.js';
+import { env } from '../config/env.js';
 
 // DB path
 const DEFAULT_DIR = path.join(process.cwd(), 'data');
-const DB_PATH = process.env.BLOCK_DB_PATH || path.join(DEFAULT_DIR, 'blockchain.db');
+const DB_PATH = env.BLOCK_DB_PATH || path.join(DEFAULT_DIR, 'blockchain.db');
 
 // Check dir
 try {
@@ -24,15 +25,21 @@ console.log('Using SQLite file:', DB_PATH);
 try {
   db.exec(`
 CREATE TABLE IF NOT EXISTS snapshot(
-    tx_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
     tx_hash TEXT UNIQUE,
-    date_confirmed TEXT,
+    snapshot_hash TEXT UNIQUE,
+    block_timestamp INTEGER,
     tour_id INTEGER UNIQUE,
-    player1_id INTEGER NOT NULL,
-    player2_id INTEGER NOT NULL,
-    player3_id INTEGER NOT NULL,
-    player4_id INTEGER NOT NULL
+    player1 INTEGER NOT NULL,
+    player2 INTEGER NOT NULL,
+    player3 INTEGER NOT NULL,
+    player4 INTEGER NOT NULL,
+    block_number INTEGER,
+    verify_status TEXT NOT NULL DEFAULT 'PENDING',
+    verified_at INTEGER
     );
+CREATE INDEX IF NOT EXISTS idx_snapshot_tour_id ON snapshot(tour_id);
+CREATE INDEX IF NOT EXISTS idx_snapshot_block_timestamp ON snapshot(block_timestamp);
   `);
 } catch (err) {
   const e: any = new Error(
@@ -42,24 +49,32 @@ CREATE TABLE IF NOT EXISTS snapshot(
 }
 
 const insertSnapTournamentStmt = db.prepare(
-  `INSERT INTO snapshot(tx_id,tour_id,player1_id,player2_id,player3_id,player4_id) VALUES (?,?,?,?,?,?)`,
+  `INSERT INTO snapshot(tour_id,player1,player2,player3,player4) VALUES (?,?,?,?,?)`,
 );
 const listSnapStmt = db.prepare(`SELECT * FROM snapshot`);
-const getSnapTournamentStmt = db.prepare(`SELECT * FROM snapshot WHERE tx_id = ?`);
-const updateTournamentStmt = db.prepare(
-  `UPDATE snapshot SET tx_hash = ?, date_confirmed = ? WHERE tx_id = ?`,
-);
+const getSnapTournamentStmt = db.prepare(`SELECT * FROM snapshot WHERE tour_id = ?`);
 const truncateSnapshotStmt = db.prepare(`DELETE FROM snapshot`);
+
+const updateTournamentStmt = db.prepare(`
+UPDATE snapshot
+SET
+  tx_hash = ?,
+  verify_status = ?,
+  snapshot_hash = ?,
+  block_number = ?,
+  block_timestamp = ?,
+  verified_at = ?
+WHERE id = ?
+`);
 
 export function insertSnapTournament(block: BlockTournamentInput): number {
   try {
     const idb = insertSnapTournamentStmt.run(
-      block.tx_id,
       block.tour_id,
-      block.player1_id,
-      block.player2_id,
-      block.player3_id,
-      block.player4_id,
+      block.player1,
+      block.player2,
+      block.player3,
+      block.player4,
     );
     return Number(idb.lastInsertRowid);
   } catch (err: any) {
@@ -86,10 +101,10 @@ export function listSnap(): BlockTournamentInput[] {
   }
 }
 
-export function getSnapTournament(tx_id: number): BlockTournamentInput | null {
+export function getSnapTournament(tour_id: number): SnapshotRow | null {
   try {
-    const match = getSnapTournamentStmt.get(tx_id);
-    return (match as BlockTournamentInput) || null;
+    const tour = getSnapTournamentStmt.get(tour_id);
+    return (tour as SnapshotRow) || null;
   } catch (err) {
     const error: any = new Error(
       `Error during BlockTournamentInput lookup by ID: ${(err as any)?.message || String(err)}`,
@@ -99,9 +114,17 @@ export function getSnapTournament(tx_id: number): BlockTournamentInput | null {
   }
 }
 
-export function updateTournament(tx_id: number, tx_hash: string, date: string) {
+export function updateTournament(data: SnapshotRow) {
   try {
-    updateTournamentStmt.run(tx_hash, date, tx_id);
+    updateTournamentStmt.run(
+      data.tx_hash,
+      data.verify_status,
+      data.snapshot_hash,
+      data.block_number,
+      data.block_timestamp,
+      data.verified_at,
+      data.id,
+    );
   } catch (err) {
     const error: any = new Error(
       `Error storing tx_hash in DB: ${(err as any)?.message || String(err)}`,

@@ -1,12 +1,18 @@
 import { describe, afterAll, expect, test } from 'vitest';
 import supertest from 'supertest';
 
-import { badtournamentData, tournamentData, tournamentsData } from './mockData.js';
-import app from '../app.js';
+import {
+  badtournamentData,
+  tournamentData,
+  tournamentsData,
+  tournamentBlockData,
+} from './mockData.js';
+import { buildApp } from '../app.js';
 import * as db from '../core/database.js';
 import { parse } from 'node:path';
 
 const blockchainReady = process.env.BLOCKCHAIN_READY === 'true';
+const app = await buildApp();
 
 describe('TEST blockchain without Smart Contract', () => {
   test('Blockchain page respond', async () => {
@@ -33,10 +39,10 @@ describe('TEST blockchain without Smart Contract', () => {
       const tournament = body[i];
       expect(tournament).toBeDefined();
       expect(tournament.tour_id).toBe(tournamentsData[i].tour_id);
-      expect(tournament.player1_id).toBe(tournamentsData[i].player1_id);
-      expect(tournament.player2_id).toBe(tournamentsData[i].player2_id);
-      expect(tournament.player3_id).toBe(tournamentsData[i].player3_id);
-      expect(tournament.player4_id).toBe(tournamentsData[i].player4_id);
+      expect(tournament.player1).toBe(tournamentsData[i].player1);
+      expect(tournament.player2).toBe(tournamentsData[i].player2);
+      expect(tournament.player3).toBe(tournamentsData[i].player3);
+      expect(tournament.player4).toBe(tournamentsData[i].player4);
     }
   });
 
@@ -53,8 +59,7 @@ describe('TEST blockchain without Smart Contract', () => {
     });
     expect(response.statusCode).toBe(200);
     const html = response.payload;
-    expect(html).toContain('<h1>My data is</h1>');
-    expect(html).toContain('match_id: 5');
+    expect(html).toContain('<title>Tournament details</title>');
   });
 
   test('with HTTP injection: POST bad data', async () => {
@@ -68,7 +73,7 @@ describe('TEST blockchain without Smart Contract', () => {
     expect(response.statusCode).toBe(400);
     const body = response.json() as any;
     expect(body.code).toBe('FST_ERR_VALIDATION');
-    expect(body.validation?.[0]?.message).toBe("must have required property 'tx_id'");
+    expect(body.validation?.[0]?.message).toBe("must have required property 'tour_id'");
     expect(body.validationContext).toBe('body');
   });
 
@@ -87,8 +92,8 @@ describe('TEST blockchain without Smart Contract', () => {
 
     expect(response.statusCode).toBe(406);
     const body = response.json() as any;
-    expect(body.error.code).toBe('DB_INSERT_TOURNAMENT_ERR');
-    expect(body.error.message).toContain('UNIQUE constraint failed');
+    expect(body.error.code).toBe('TOURNAMENT_EXISTS');
+    expect(body.error.message).toContain('is already taken');
   });
 
   test('with HTTP injection: POST good data without active Smart Contract', async () => {
@@ -108,16 +113,13 @@ describe.runIf(blockchainReady)('TEST blockchain with Smart Contract', () => {
     db.truncateSnapshot();
     const response = await app.inject({
       method: 'POST',
-      url: '/tournaments',
-      body: tournamentData,
+      url: '/tournamentspub',
+      body: tournamentBlockData,
     });
 
     expect(response.statusCode).toBe(200);
     const body = response.json() as any;
-    expect(body.error.code).toBe('BLOCKCHAIN_INSERT_TOURNAMENT_ERR');
-    expect(body.error.message).toContain(
-      'Error during Tournament Blockchain storage: AggregateError',
-    );
+    expect(body.status).toBe('published');
   });
 });
 

@@ -2,6 +2,7 @@
 
 # --- OS ---
 OS := $(shell uname)
+CHIP := $(shell uname -m)
 
 # --- Env ---
 -include srcs/.env
@@ -14,18 +15,11 @@ ifdef VOLUME_NAME
 else
   VOLUMES_PATH := $(PROJECT_PATH)/data
 endif
+DATABASE_PATH := $(VOLUMES_PATH)/database
 UPLOADS_PATH := $(VOLUMES_PATH)/uploads
 
-# --- Docker or Podman ---
-JM := $(findstring Jean, $(shell uname -a))
-
-ifeq ($(JM), Jean)
-  CONTAINER_CMD := podman
-  COMPOSE_CMD   := podman-compose
-else
-  CONTAINER_CMD := docker
-  COMPOSE_CMD   := docker compose
-endif
+CONTAINER_CMD := docker
+COMPOSE_CMD   := docker compose
 
 # --- Shortcuts ---
 N_BUILD_WK := npm run build --workspace srcs

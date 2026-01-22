@@ -1,5 +1,5 @@
 import { HealthChecker } from './HealthChecker.js';
-import { GameState, ServerMessage, ClientMessage, Vector2D } from '../core/types.js';
+import { GameState } from '../types/types.js';
 import { GameDisplay } from './GameDisplay.js';
 
 export class DisplayProvider {

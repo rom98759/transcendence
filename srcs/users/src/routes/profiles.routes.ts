@@ -7,6 +7,7 @@ import {
   ProfileCreateInSchema,
   DetailedErrorSchema,
   ValidationErrorSchema,
+  ProfileSimpleSchema,
 } from '@transcendence/core';
 import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 
@@ -18,18 +19,6 @@ export const healthCheckSchema = {
     200: z.object({
       status: z.string(),
     }),
-  },
-} as const;
-
-const getProfileByUsernameSchema = {
-  tags: ['users'],
-  summary: 'Get user profile by username',
-  description: 'Returns the profile of a user for the given username',
-  params: UserNameSchema,
-  response: {
-    200: ProfileSchema,
-    400: ValidationErrorSchema,
-    404: DetailedErrorSchema,
   },
 } as const;
 
@@ -45,6 +34,46 @@ export const createProfileSchema = {
   },
 } as const;
 
+const getProfileByUsernameSchema = {
+  tags: ['users'],
+  summary: 'Get user profile by username',
+  description: 'Returns a full profile if requested by the owner, or a simple one otherwise',
+  params: UserNameSchema,
+  headers: z.object({
+    'x-user-name': z.string().optional(),
+  }),
+  response: {
+    200: z.union([ProfileSchema, ProfileSimpleSchema]),
+    400: ValidationErrorSchema,
+    404: DetailedErrorSchema,
+  },
+} as const;
+
+const updateProfileAvatarSchema = {
+  tags: ['users'],
+  summary: 'Update profile avatar',
+  consumes: ['multipart/form-data'],
+  description: 'Stores the avatar in uploads, updates profile with new url',
+  params: UserNameSchema,
+  response: {
+    200: ProfileSchema,
+    400: ValidationErrorSchema,
+    404: DetailedErrorSchema,
+  },
+} as const;
+
+const deleteProfileSchema = {
+  tags: ['users'],
+  summary: 'Delete a profile',
+  description: 'Delete a profile',
+  params: UserNameSchema,
+  response: {
+    200: ProfileSchema,
+    400: ValidationErrorSchema,
+    404: DetailedErrorSchema,
+  },
+} as const;
+
 export const umRoutes: FastifyPluginAsyncZod = async (app) => {
   app.get(
     '/health',
@@ -53,15 +82,27 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
       schema: healthCheckSchema,
     },
     async function (this: FastifyInstance, _request: FastifyRequest, reply: FastifyReply) {
-      return reply.code(200).send({ status: 'healthy new' });
+      return reply.code(200).send({ status: 'healthy' });
     },
   );
 
+  app.post('/', { schema: createProfileSchema }, profileController.createProfile);
+
   app.get(
-    '/:username',
+    '/username/:username',
     { schema: getProfileByUsernameSchema },
     profileController.getProfileByUsername,
   );
 
-  app.post('/', { schema: createProfileSchema }, profileController.createProfile);
+  app.patch(
+    '/username/:username/avatar',
+    { schema: updateProfileAvatarSchema },
+    profileController.updateProfileAvatar,
+  );
+
+  app.delete(
+    '/username/:username',
+    { schema: deleteProfileSchema },
+    profileController.deleteProfile,
+  );
 };

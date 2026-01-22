@@ -1,55 +1,67 @@
 x-healthcheck-template: &healthcheck-template
   interval: 10s
   timeout: 5s
-  retries: 3
-  start_period: 10s
+  retries: 5
+  start_period: 30s
 
 services:
-  # Nginx reverse proxy
-  nginx-proxy:
+  # ============================================================================
+  # Infrastructure Layer
+  # ============================================================================
+
+  redis-broker:
     build:
-      context: ./nginx
+      context: ./redis
       dockerfile: Dockerfile
-    container_name: ${PROXY_SERVICE_NAME}
-    ports:
-      - '8080:80'
-      - '4430:443'
+    container_name: ${REDIS_SERVICE_NAME}
+    expose:
+      - '${REDIS_SERVICE_PORT}'
     networks:
       - app-network
-    volumes:
-      - ${HOST_VOLUME_PATH}:/usr/share/nginx/html/uploads:ro
     restart: unless-stopped
-    depends_on:
-      api-gateway:
-        condition: service_started
     healthcheck:
       <<: *healthcheck-template
-      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--spider', 'https://localhost/health']
+      test: ['CMD', 'redis-cli', 'ping']
 
-  # Main Fastify API
-  api-gateway:
+  # ============================================================================
+  # Backend Services
+  # ============================================================================
+
+  user-service:
     build:
       context: ..
-      dockerfile: 'srcs/gateway/Dockerfile'
-    container_name: '${API_GATEWAY_NAME}'
+      dockerfile: srcs/users/Dockerfile
+    container_name: ${UM_SERVICE_NAME}
     expose:
-      - '${API_GATEWAY_PORT}'
+      - '${UM_SERVICE_PORT}'
     env_file:
       - path: ./.env
-      - path: ./.env.gateway
+      - path: ./.env.um
+    volumes:
+      - data:/app/data
+      - uploads:/app/uploads
+    ports:
+      - '5555:5555'
     networks:
       - app-network
     restart: unless-stopped
-    depends_on:
-      auth-service:
-        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-template
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          'http://127.0.0.1:${UM_SERVICE_PORT}/health',
+        ]
 
-  # Auth service
   auth-service:
     build:
       context: ./auth
       dockerfile: Dockerfile
-    container_name: '${AUTH_SERVICE_NAME}'
+    container_name: ${AUTH_SERVICE_NAME}
     expose:
       - '${AUTH_SERVICE_PORT}'
     env_file:
@@ -72,15 +84,14 @@ services:
           '--no-verbose',
           '--tries=1',
           '--spider',
-          'http://localhost:${AUTH_SERVICE_PORT}/health',
+          'http://127.0.0.1:${AUTH_SERVICE_PORT}/health',
         ]
 
-  # Blockchain service
   blockchain-service:
     build:
       context: ./blockchain
       dockerfile: Dockerfile
-    container_name: '${BK_SERVICE_NAME}'
+    container_name: ${BK_SERVICE_NAME}
     expose:
       - '${BK_SERVICE_PORT}'
     env_file:
@@ -100,7 +111,7 @@ services:
           '--no-verbose',
           '--tries=1',
           '--spider',
-          'http://localhost:${BK_SERVICE_PORT}/health',
+          'http://127.0.0.1:${BK_SERVICE_PORT}/health',
         ]
 
   game-service:
@@ -116,6 +127,9 @@ services:
     networks:
       - app-network
     restart: unless-stopped
+    depends_on:
+      redis-broker:
+        condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
       test:
@@ -125,35 +139,29 @@ services:
           '--no-verbose',
           '--tries=1',
           '--spider',
-          'http://localhost:${GAME_SERVICE_PORT}/health',
+          'http://127.0.0.1:${GAME_SERVICE_PORT}/health',
         ]
 
-  redis-broker:
-    build:
-      context: ./redis
-      dockerfile: Dockerfile
-    container_name: ${REDIS_SERVICE_NAME}
-    expose:
-      - '${REDIS_SERVICE_PORT}'
-    networks:
-      - app-network
-    restart: unless-stopped
+  # ============================================================================
+  # API Gateway Layer
+  # ============================================================================
 
-  user-service:
+  api-gateway:
     build:
       context: ..
-      dockerfile: srcs/users/Dockerfile
-    container_name: ${UM_SERVICE_NAME}
+      dockerfile: srcs/gateway/Dockerfile
+    container_name: ${API_GATEWAY_NAME}
     expose:
-      - '${UM_SERVICE_PORT}'
+      - '${API_GATEWAY_PORT}'
     env_file:
       - path: ./.env
-      - path: ./.env.um
-    volumes:
-      - data:/data
+      - path: ./.env.gateway
     networks:
       - app-network
     restart: unless-stopped
+    depends_on:
+      auth-service:
+        condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
       test:
@@ -163,7 +171,42 @@ services:
           '--no-verbose',
           '--tries=1',
           '--spider',
-          'http://localhost:${UM_SERVICE_PORT}/health',
+          'http://127.0.0.1:${API_GATEWAY_PORT}/health',
+        ]
+
+  # ============================================================================
+  # Reverse Proxy Layer
+  # ============================================================================
+
+  nginx-proxy:
+    build:
+      context: ..
+      dockerfile: srcs/nginx/Dockerfile
+    container_name: ${PROXY_SERVICE_NAME}
+    ports:
+      - '8080:80'
+      - '4430:443'
+    networks:
+      - app-network
+    volumes:
+      - uploads:/usr/share/nginx/html/uploads
+    restart: unless-stopped
+    depends_on:
+      api-gateway:
+        condition: service_started
+      user-service:
+        condition: service_healthy
+    healthcheck:
+      <<: *healthcheck-template
+      test:
+        [
+          'CMD',
+          'wget',
+          '--no-verbose',
+          '--tries=1',
+          '--spider',
+          '--no-check-certificate',
+          'https://localhost/health',
         ]
         
   pong-ai-service:
@@ -193,6 +236,12 @@ volumes:
   data:
     driver: local
     driver_opts:
-      device: ${HOST_VOLUME_PATH}
+      device: ${HOST_VOLUME_PATH}/database
+      o: bind
+      type: none
+  uploads:
+    driver: local
+    driver_opts:
+      device: ${HOST_VOLUME_PATH}/uploads
       o: bind
       type: none

@@ -36,8 +36,17 @@ contract GameStorageTest is Test{
         vm.startPrank(OWNER);
         game.storeTournament(0,1,2,3,4);
         game.storeTournament(1,1,2,3,4);
-        vm.expectRevert("Tournament does not exist");
+        vm.expectRevert("Tournament does not exist!");
         game.getTournament(2);
+        vm.stopPrank();
+    }
+    
+    function test_GetNumberTournamentsStored() public {
+        vm.startPrank(OWNER);
+        game.storeTournament(0,1,2,3,4);
+        game.storeTournament(1,1,2,3,4);
+        uint256 nb = game.getNbTournamentStored();
+        require(nb == 2, "The number of tournaments should be 2");
         vm.stopPrank();
     }
 
@@ -55,7 +64,7 @@ contract GameStorageTest is Test{
         vm.prank(OWNER);
         game.storeTournament(1, 1, 2, 3, 4);
         vm.prank(OWNER);
-        vm.expectRevert("ID already used");
+        vm.expectRevert("Tournament already stored!");
         game.storeTournament(1, 4, 6, 7, 8);
     }
 
@@ -63,24 +72,25 @@ contract GameStorageTest is Test{
         vm.startPrank(OWNER);
 
         for (uint8 i = 1; i <= 10; i++) {
-            // 1️⃣ On s'attend à l'event EXACT
+            // Figer le temps
+            uint32 ts = uint32(1_700_000_000 + i);
+            vm.warp(ts);
+            // Hash metier
+            bytes32 expectedHash = keccak256(abi.encode(i, i, i, i, i, ts));
+            // on s'attend à l'event EXACT
             vm.expectEmit(true, true, true, true);
-            emit GameStorage.TournamentStored(i, i, i, i, i);
-
-            // 2️⃣ Transaction
+            emit GameStorage.TournamentStored(i, i, i, i, i, ts, expectedHash);
+            // Transaction
             game.storeTournament(i, i, i, i, i);
-
-            // 3️⃣ Lecture du storage
+            // Lecture du storage
             GameStorage.Tournament memory t = game.getTournament(i);
-
-            // 4️⃣ Vérification event ↔ storage
+            // Vérification event ↔ storage
             assertEq(t.player1, i);
             assertEq(t.player2, i);
             assertEq(t.player3, i);
             assertEq(t.player4, i);
-            assertGt(t.timestamp, 0);
+            assertEq(t.timestamp, ts);
         }
-
         vm.stopPrank();
     }
 

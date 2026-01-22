@@ -5,7 +5,8 @@ import { ProfileSchema } from './profile.schema.js';
 export const FriendshipFullSchema = z.object({
   id: idSchema,
   status: z.string(),
-  nickname: nicknameSchema.nullable(),
+  nicknameRequester: nicknameSchema.nullable(),
+  nicknameReceiver: nicknameSchema.nullable(),
   requester: ProfileSchema,
   receiver: ProfileSchema,
 });
@@ -19,10 +20,12 @@ export const FriendshipUnifiedSchema = z.object({
 
 export const FriendshipReceiverSchema = FriendshipFullSchema.omit({
   requester: true,
+  nicknameRequester: true,
 });
 
 export const FriendshipRequesterSchema = FriendshipFullSchema.omit({
   receiver: true,
+  nicknameReceiver: true,
 });
 
 export const FriendshipUpdateStatusSchema = z.object({

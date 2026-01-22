@@ -5,30 +5,30 @@
  * Utilise @fastify/jwt pour la vérification des tokens
  */
 
-import { FastifyRequest } from 'fastify'
-import { logger } from './logger.js'
-import { ERROR_CODES } from './constants.js'
+import { FastifyRequest } from 'fastify';
+import { logger } from './logger.js';
+import { ERROR_CODES } from './constants.js';
 
 export interface JWTPayload {
-  sub: number
-  username: string
-  role: string
-  iat?: number
-  exp?: number
+  sub: number;
+  username: string;
+  role: string;
+  iat?: number;
+  exp?: number;
 }
 
 /**
  * Extrait le token JWT depuis les cookies de la requête
  */
 export function extractTokenFromCookies(request: FastifyRequest): string | null {
-  const cookies = (request as any).cookies
-  const token = cookies?.token
+  const cookies = (request as any).cookies;
+  const token = cookies?.token;
 
   if (!token) {
-    return null
+    return null;
   }
 
-  return token
+  return token;
 }
 
 /**
@@ -39,18 +39,18 @@ export function extractTokenFromCookies(request: FastifyRequest): string | null 
  */
 export function verifyJWT(app: any, token: string): JWTPayload | null {
   try {
-    const decoded = app.jwt.verify(token) as JWTPayload
+    const decoded = app.jwt.verify(token) as JWTPayload;
 
     // Vérification basique du payload
     if (!decoded.sub || !decoded.username) {
       logger.warn({
         event: 'jwt_invalid_payload',
         reason: 'missing_required_fields',
-      })
-      return null
+      });
+      return null;
     }
 
-    return decoded
+    return decoded;
   } catch (err: any) {
     // Gestion des différents types d'erreurs JWT
     if (err.message?.includes('expired')) {
@@ -58,21 +58,21 @@ export function verifyJWT(app: any, token: string): JWTPayload | null {
         event: 'jwt_verification_failed',
         reason: 'token_expired',
         error: err.message,
-      })
+      });
     } else if (err.message?.includes('invalid')) {
       logger.warn({
         event: 'jwt_verification_failed',
         reason: 'invalid_token',
         error: err.message,
-      })
+      });
     } else {
       logger.error({
         event: 'jwt_verification_error',
         error: err?.message || String(err),
-      })
+      });
     }
 
-    return null
+    return null;
   }
 }
 
@@ -84,33 +84,33 @@ export function verifyRequestJWT(
   app: any,
   request: FastifyRequest,
 ): {
-  valid: boolean
-  user?: JWTPayload
-  errorCode?: string
-  errorMessage?: string
+  valid: boolean;
+  user?: JWTPayload;
+  errorCode?: string;
+  errorMessage?: string;
 } {
-  const token = extractTokenFromCookies(request)
+  const token = extractTokenFromCookies(request);
 
   if (!token) {
     return {
       valid: false,
       errorCode: ERROR_CODES.TOKEN_MISSING,
       errorMessage: 'Authentication token is missing',
-    }
+    };
   }
 
-  const payload = verifyJWT(app, token)
+  const payload = verifyJWT(app, token);
 
   if (!payload) {
     return {
       valid: false,
       errorCode: ERROR_CODES.INVALID_TOKEN,
       errorMessage: 'Invalid or expired token',
-    }
+    };
   }
 
   return {
     valid: true,
     user: payload,
-  }
+  };
 }

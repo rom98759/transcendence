@@ -11,13 +11,14 @@ export const GATEWAY_CONFIG = {
     '/api/auth/2fa/setup/verify',
     '/api/game/sessions',
     '/api/auth/health',
+    '/api/users/health',
     '/api/game/health',
     '/api/block/health',
   ],
 
   // Rate Limiting
   RATE_LIMIT: {
-    GLOBAL: { max: 400, timeWindow: '1 minute' }, // Plus permissif car c'est un gateway (agrège plusieurs services)
+    GLOBAL: { max: 2000, timeWindow: '1 minute' }, // Plus permissif car c'est un gateway (agrège plusieurs services)
   },
 
   // Proxy Configuration

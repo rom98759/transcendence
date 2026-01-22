@@ -5,6 +5,6 @@ export interface CreateProfileDTO {
 }
 
 export interface UserProfileDTO {
-  username: string
-  avatarUrl: string
+  username: string;
+  avatarUrl: string;
 }

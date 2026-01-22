@@ -23,28 +23,23 @@ export function registerAuthRoutes(app: FastifyInstance) {
       const queryString = new URL(request.url, 'http://localhost').search;
       const fullUrl = `${url}${queryString}`;
 
-      const rawUser = request.headers['x-user-name'] as string | string[] | undefined;
-      const user = Array.isArray(rawUser) ? rawUser[0] : (rawUser ?? null);
+      // const rawUser = request.headers['x-user-name'] as string | string[] | undefined;
+      // const user = Array.isArray(rawUser) ? rawUser[0] : (rawUser ?? null);
 
-      logger.info({
-        event: 'auth_proxy_request',
-        rawPath,
-        method: request.method,
-        user,
-      });
+      // logger.info({
+      //   event: 'auth_proxy_request',
+      //   rawPath,
+      //   method: request.method,
+      //   user,
+      // });
 
-      const init: RequestInit = {
-        method: request.method,
-        headers: {},
-      };
+      // if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
+      //   (init.headers as Record<string, string>)['content-type'] =
+      //     request.headers['content-type'] || 'application/json';
+      //   init.body = JSON.stringify(request.body);
+      // }
 
-      if (request.method !== 'GET' && request.method !== 'HEAD' && request.body) {
-        (init.headers as Record<string, string>)['content-type'] =
-          request.headers['content-type'] || 'application/json';
-        init.body = JSON.stringify(request.body);
-      }
-
-      const res = await proxyRequest(app, request, reply, fullUrl, init);
+      const res = await proxyRequest(app, request, reply, fullUrl, { method: request.method });
       return res;
     },
   );
