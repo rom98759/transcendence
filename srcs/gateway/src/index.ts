@@ -51,26 +51,6 @@ app.addContentTypeParser('multipart/form-data', function (req, payload, done) {
   done(null, payload); // Pass raw stream through
 });
 
-// app.addContentTypeParser('application/json', (request, payload, done) => {
-//   // for users routes = streaming
-//   if (request.url.includes('/api/users')) {
-//     done(null, payload);
-//   } else {
-//     // for others routes = parsing
-//     let data = '';
-//     payload.on('data', (chunk) => {
-//       data += chunk;
-//     });
-//     payload.on('end', () => {
-//       try {
-//         done(null, JSON.parse(data));
-//       } catch (e) {
-//         done(e as Error);
-//       }
-//     });
-//   }
-// });
-
 // Hook verify JWT routes `/api` sauf les routes publiques
 app.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
   const url = request.url || request.raw?.url || '';
