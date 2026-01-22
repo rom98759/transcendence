@@ -36,6 +36,10 @@ RUN apk add --no-cache --virtual .gyp python3 make g++ \
 
 # Copier build compilé depuis le builder
 COPY --from=builder /app/dist ./dist
+# Copier les fichiers statiques et les vues qui ne sont pas compilés par TSC
+COPY src/views ./dist/views
+COPY src/public ./dist/public
+
 
 EXPOSE 3005
 

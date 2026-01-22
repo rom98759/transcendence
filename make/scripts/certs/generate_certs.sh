@@ -163,7 +163,12 @@ openssl x509 -req \
 # Permissions
 # ============================================================
 
-chmod 644 "$CERTS_DIR"/**/*.key
-chmod 644 "$CERTS_DIR"/**/*.crt
+# On s'assure que les dossiers sont traversables
+find "$CERTS_DIR" -type d -exec chmod 755 {} +
 
-echo "✔ All certificates successfully generated"
+# On rend les certificats et clés lisibles par les conteneurs
+find "$CERTS_DIR" -type f -name "*.crt" -exec chmod 644 {} +
+find "$CERTS_DIR" -type f -name "*.csr" -exec chmod 644 {} +
+find "$CERTS_DIR" -type f -name "*.key" -exec chmod 644 {} +
+
+echo "✔ All certificates successfully generated with correct permissions"
