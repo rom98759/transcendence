@@ -1,5 +1,4 @@
 include make/config.mk
-export SHARED_GID := 204
 
 # === Global ===
 

@@ -52,13 +52,5 @@ export const useAuth = () => {
 
   const isLoggedIn = Boolean(context.user);
 
-  // const isAuthorized = (requiredRole: RoleDTO): boolean => {
-  //   return context.user?.role === requiredRole;
-  // };
-
-  // const isAdmin = (): boolean => {
-  //   return context.user?.role === Roles.ADMIN;
-  // };
-
   return { ...context, isLoggedIn };
 };

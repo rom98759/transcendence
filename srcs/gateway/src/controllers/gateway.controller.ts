@@ -1,14 +1,8 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 
-// const UM_SERVICE_URL = 'http://user-service:3002';
-
 export async function rootHandler(req: FastifyRequest, reply: FastifyReply) {
   return { message: 'Welcome to the Gateway API, check /help' };
 }
-
-// export async function docUsersHandler(req: FastifyRequest, reply: FastifyReply) {
-//   return reply.redirect(302, 'http://user-service:3000/doc');
-// }
 
 export async function helpHandler(req: FastifyRequest, reply: FastifyReply) {
   const routesPublic = {

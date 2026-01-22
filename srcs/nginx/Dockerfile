@@ -10,14 +10,14 @@ WORKDIR /build
 # Copy nginx service package files
 # Install dependencies
 COPY package.json package-lock.json ./
-COPY srcs/shared/core/package*.json ./srcs/shared/core/
-COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/
 COPY srcs/nginx/package.json ./srcs/nginx/
 RUN npm i
 
-# Copy and build shared core first
-COPY srcs/shared/core/ ./srcs/shared/core/
-RUN npm run build -w @transcendence/core
+# Copy and build shared core first - done before in Makefile yet 
+COPY srcs/shared/core/package*.json ./srcs/shared/core/
+COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/
+COPY srcs/shared/core/src ./srcs/shared/core/src
+RUN npm run build --workspace srcs/shared/core
 
 # Copy code and build
 COPY srcs/nginx/. ./srcs/nginx/.
