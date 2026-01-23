@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.16",
-    "@transcendence/core": "1.1.0",
+    "@transcendence/core": "*",
     "axios": "^1.13.2",
     "envalid": "^8.1.1",
     "i18next": "^25.7.4",

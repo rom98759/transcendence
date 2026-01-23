@@ -10,9 +10,7 @@ const __dirname = path.dirname(__filename);
 const packageJsonPath = path.resolve(__dirname, 'package.json');
 const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'));
 
-// /**
-//  * @type {import('vitest/config').UserConfig}
-//  */
+/**  @type {import('vitest/config').UserConfig} */
 export default {
   root: '.',
   build: {
