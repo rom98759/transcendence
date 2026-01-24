@@ -4,6 +4,7 @@ import { NavBar } from '../molecules/NavBar';
 
 interface PageProps {
   children: React.ReactNode;
+  title?: string;
   className?: string;
 }
 
@@ -12,7 +13,7 @@ const colors = {
   end: '#0088ff',
 };
 
-export const Page = ({ children, className }: PageProps) => {
+export const Page = ({ children, title, className }: PageProps) => {
   return (
     <div className={`w-full h-full relative ${className}`}>
       <Background
@@ -24,7 +25,10 @@ export const Page = ({ children, className }: PageProps) => {
         <div className="z-15 lg:absolute top-0 left-0 w-full lg-h-full">
           <NavBar></NavBar>
         </div>
-        <Circle>{children}</Circle>
+        <Circle>
+          {title && <h1 className="mb-6 text-gray-600 font-quantico text-xl">{title}</h1>}
+          {children}
+        </Circle>
       </Background>
     </div>
   );

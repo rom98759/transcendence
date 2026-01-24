@@ -30,7 +30,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const Button = ({
   children,
   variant = 'primary',
-  className = '',
+  className: className = '',
   disabled,
   ...props
 }: ButtonProps) => {
