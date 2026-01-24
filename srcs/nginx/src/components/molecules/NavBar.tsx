@@ -1,9 +1,10 @@
 import { UserRow } from './UserRow';
 import MenuElement from '../atoms/MenuElement';
 import { MenuActions } from '../../types/react-types';
-import { useAuth } from '../helpers/AuthProvider';
 import { DevLoginButtons } from '../atoms/DevLogin';
 import { Link } from 'react-router-dom';
+import { Locale } from '../atoms/Locale';
+import { useAuth } from '../../providers/AuthProvider';
 
 const playItems = [
   { label: 'Play with friend', href: '#friends' },
@@ -46,6 +47,7 @@ export const NavBar = () => {
           </Link>
         </div>
       )}
+      <Locale className="flex items-center" />
     </nav>
   );
 };

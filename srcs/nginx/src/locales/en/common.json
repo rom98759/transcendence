@@ -1,5 +1,19 @@
 {
   "tagline": "This game will turn you upside down",
+  "auth": {
+    "hasAccount": "Already have an account ?",
+    "noAccount": "Don't have an account ?",
+    "signup": "Signup",
+    "login": "Login"
+  },
+  "fieldtype": {
+    "email": "emai",
+    "username": "username",
+    "password": "password",
+    "username-email": "username or email",
+    "username-choose": "choose a username",
+    "password-choose": "choose a password"
+  },
   "navbar": {
     "home": "Home",
     "about": "About",

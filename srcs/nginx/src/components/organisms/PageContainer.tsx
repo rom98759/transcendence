@@ -22,9 +22,11 @@ export const Page = ({ children, title, className }: PageProps) => {
         colorStart={colors.start}
         colorEnd={colors.end}
       >
-        <div className="z-15 lg:absolute top-0 left-0 w-full lg-h-full">
-          <NavBar></NavBar>
-        </div>
+        {
+          <div className="z-15 lg:absolute top-0 left-0 w-full lg-h-full">
+            <NavBar></NavBar>
+          </div>
+        }
         <Circle>
           {title && <h1 className="mb-6 text-gray-600 font-quantico text-xl">{title}</h1>}
           {children}

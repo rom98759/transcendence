@@ -2,11 +2,11 @@ import { useParams } from 'react-router-dom';
 import Toggle from '../components/atoms/Toggle';
 import FileUploader from '../components/molecules/FileUploader';
 import { Page } from '../components/organisms/PageContainer';
-import { useAuth } from '../components/helpers/AuthProvider';
 import Avatar from '../components/atoms/Avatar';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { profileApi } from '../api/profile-api';
 import { useState } from 'react';
+import { useAuth } from '../providers/AuthProvider';
 
 const toggle2FA = () => {};
 

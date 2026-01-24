@@ -1,5 +1,19 @@
 {
   "tagline": "Ce jeu va vous retourner",
+  "auth": {
+    "hasAccount": "Déjà enregistré ?",
+    "noAccount": "Pas encore enregistré ?",
+    "signup": "Créer un compte",
+    "login": "S'identifier"
+  },
+  "fieldtype": {
+    "email": "courriel",
+    "username": "pseudo",
+    "password": "mot de passe",
+    "username-email": "pseudo ou email",
+    "username-choose": "choisissez un pseudo",
+    "password-choose": "choisissez un mot de passe sécurisé"
+  },
   "navbar": {
     "home": "Accueil",
     "about": "A propos",

@@ -1,9 +1,9 @@
 import { RoleDTO } from '@transcendence/core';
 import { Roles } from '../../types/react-types';
 import Button from './Button';
-import { useAuth } from '../helpers/AuthProvider';
 import { authApi } from '../../api/auth-api';
 import { profileApi } from '../../api/profile-api';
+import { useAuth } from '../../providers/AuthProvider';
 
 export const DevLoginButtons = () => {
   const { login, logout } = useAuth();
