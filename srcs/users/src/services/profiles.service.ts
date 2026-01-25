@@ -3,7 +3,7 @@ import {
   ERR_DEFS,
   LOG_RESOURCES,
   type ProfileCreateInDTO,
-  type ProfileDTO,
+  type ProfileSimpleDTO,
   AppError,
 } from '@transcendence/core';
 import { Trace } from '../utils/decorators.js';
@@ -13,7 +13,7 @@ import type { MultipartFile } from '@fastify/multipart';
 import { mkdir } from 'node:fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
 
-async function getProfileOrThrow(username: string): Promise<ProfileDTO> {
+async function getProfileOrThrow(username: string): Promise<ProfileSimpleDTO> {
   const profile = await profileRepository.findProfileByUsername(username);
   if (!profile) {
     throw new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {
@@ -33,13 +33,13 @@ export class ProfileService {
   }
 
   @Trace
-  async getByUsername(username: string): Promise<ProfileDTO | null> {
+  async getByUsername(username: string): Promise<ProfileSimpleDTO | null> {
     const profile = await getProfileOrThrow(username);
     return profile;
   }
 
   @Trace
-  async getById(authId: number): Promise<ProfileDTO | null> {
+  async getById(authId: number): Promise<ProfileSimpleDTO | null> {
     const profile = await profileRepository.findProfileById(authId);
     if (!profile) {
       throw new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {
@@ -53,7 +53,7 @@ export class ProfileService {
   }
 
   @Trace
-  async updateAvatar(username: string, file: MultipartFile): Promise<ProfileDTO> {
+  async updateAvatar(username: string, file: MultipartFile): Promise<ProfileSimpleDTO> {
     const profile = await getProfileOrThrow(username);
 
     const data = await file.toBuffer();
@@ -76,7 +76,7 @@ export class ProfileService {
     return updatedProfile;
   }
 
-  async deleteByUsername(username: string): Promise<ProfileDTO> {
+  async deleteByUsername(username: string): Promise<ProfileSimpleDTO> {
     const profile = await getProfileOrThrow(username);
     const deletedProfile = await profileRepository.deleteProfile(profile.authId);
     return deletedProfile;

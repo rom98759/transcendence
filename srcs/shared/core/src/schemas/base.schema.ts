@@ -21,6 +21,8 @@ export const passwordSchema = z.string().min(8, 'Password must be at least 8 cha
 
 export const roleShema = z.enum(['GUEST', 'USER', 'ADMIN']);
 
+export const emailSchema = z.email();
+
 export const idSchema = z.coerce.number().int().min(1, 'ID must be positive');
 
 export const statusUpdateSchema = z.enum(['ACCEPTED', 'REJECTED']);
@@ -35,6 +37,7 @@ export const TargetUserIdSchema = z.object({
 
 export type statusUpdateDTO = z.output<typeof statusUpdateSchema>;
 export type usernameDTO = z.output<typeof usernameSchema>;
+export type emailDTO = z.output<typeof emailSchema>;
 export type idDTO = z.output<typeof idSchema>;
 
 export type IdDTO = z.output<typeof IdSchema>;

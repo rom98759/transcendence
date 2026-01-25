@@ -1,5 +1,4 @@
 import {
-  idDTO,
   UserDTO,
   UserLoginDTO,
   UserLoginSchema,
@@ -11,10 +10,10 @@ import {
 import api from './api-client';
 
 export const authApi = {
-  register: async (payload: UserRegisterDTO): Promise<idDTO> => {
+  register: async (payload: UserRegisterDTO): Promise<usernameDTO> => {
     UserRegisterSchema.parse(payload);
     const { data } = await api.post(`/auth/register`, payload);
-    return data.result.id;
+    return data.user?.username;
   },
 
   login: async (payload: UserLoginDTO): Promise<usernameDTO> => {

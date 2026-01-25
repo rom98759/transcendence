@@ -3,7 +3,6 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import {
   UserNameSchema,
-  ProfileSchema,
   ProfileCreateInSchema,
   DetailedErrorSchema,
   ValidationErrorSchema,
@@ -28,7 +27,7 @@ export const createProfileSchema = {
   description: 'Creates a new user profile linked to an authId',
   body: ProfileCreateInSchema,
   response: {
-    201: ProfileSchema,
+    201: ProfileSimpleSchema,
     400: ValidationErrorSchema,
     409: DetailedErrorSchema,
   },
@@ -43,7 +42,7 @@ const getProfileByUsernameSchema = {
     'x-user-name': z.string().optional(),
   }),
   response: {
-    200: z.union([ProfileSchema, ProfileSimpleSchema]),
+    200: ProfileSimpleSchema,
     400: ValidationErrorSchema,
     404: DetailedErrorSchema,
   },
@@ -56,7 +55,7 @@ const updateProfileAvatarSchema = {
   description: 'Stores the avatar in uploads, updates profile with new url',
   params: UserNameSchema,
   response: {
-    200: ProfileSchema,
+    200: ProfileSimpleSchema,
     400: ValidationErrorSchema,
     404: DetailedErrorSchema,
   },
@@ -68,7 +67,7 @@ const deleteProfileSchema = {
   description: 'Delete a profile',
   params: UserNameSchema,
   response: {
-    200: ProfileSchema,
+    200: ProfileSimpleSchema,
     400: ValidationErrorSchema,
     404: DetailedErrorSchema,
   },

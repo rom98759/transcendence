@@ -1,4 +1,4 @@
-import { ProfileAuthDTO } from '@transcendence/core';
+import { ProfileSimpleDTO } from '@transcendence/core';
 import { createContext, useContext, useMemo, useState } from 'react';
 import { AuthContextType, AuthProviderProps } from '../types/react-types';
 
@@ -7,12 +7,12 @@ import { AuthContextType, AuthProviderProps } from '../types/react-types';
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<ProfileAuthDTO | null>(() => {
+  const [user, setUser] = useState<ProfileSimpleDTO | null>(() => {
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
   });
 
-  const login = (user: ProfileAuthDTO) => {
+  const login = (user: ProfileSimpleDTO) => {
     setUser(user);
     localStorage.setItem('user', JSON.stringify(user));
   };
@@ -22,11 +22,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     localStorage.removeItem('user');
   };
 
-  const updateUser = (newUser: ProfileAuthDTO) => {
+  const updateUser = (newUser: ProfileSimpleDTO) => {
     setUser((prevUser) => {
       const updated = { ...prevUser, ...newUser };
       localStorage.setItem('user', JSON.stringify(updated));
-      return updated as ProfileAuthDTO;
+      return updated as ProfileSimpleDTO;
     });
   };
 

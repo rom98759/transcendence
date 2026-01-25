@@ -1,14 +1,14 @@
-import { ProfileDTO, ProfileSimpleDTO, usernameDTO, usernameSchema } from '@transcendence/core';
+import { ProfileSimpleDTO, usernameDTO, usernameSchema } from '@transcendence/core';
 import api from './api-client';
 
 export const profileApi = {
-  getMe: async (username: usernameDTO): Promise<ProfileDTO> => {
+  getMe: async (username: usernameDTO): Promise<ProfileSimpleDTO> => {
     usernameSchema.parse(username);
     const { data } = await api.get(`/users/username/${username}`);
     return { ...data };
   },
 
-  getProfileByUsername: async (username: usernameDTO): Promise<ProfileDTO | ProfileSimpleDTO> => {
+  getProfileByUsername: async (username: usernameDTO): Promise<ProfileSimpleDTO> => {
     usernameSchema.parse(username);
     const { data } = await api.get(`/users/username/${username}`);
     return { ...data };
@@ -18,7 +18,7 @@ export const profileApi = {
     username: usernameDTO,
     file: File,
     onProgress?: (percent: number) => void,
-  ): Promise<ProfileDTO> => {
+  ): Promise<ProfileSimpleDTO> => {
     usernameSchema.parse(username);
 
     const formData = new FormData();
@@ -37,7 +37,7 @@ export const profileApi = {
     return { ...data };
   },
 
-  deleteProfile: async (username: usernameDTO): Promise<ProfileDTO> => {
+  deleteProfile: async (username: usernameDTO): Promise<ProfileSimpleDTO> => {
     usernameSchema.parse(username);
     const { data } = await api.delete(`/users/username/${username}`);
     return { ...data };

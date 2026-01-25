@@ -14,14 +14,13 @@ const ICON_MAP = {
 } as const;
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-  className?: string;
+  containerClassName?: string;
   customType?: 'email' | 'password' | 'username';
   errorMessage?: string;
 }
 
 export const Input = ({
-  className: containerClassName = '',
-  className = '',
+  containerClassName = '',
   customType,
   errorMessage,
   id,
@@ -38,7 +37,7 @@ export const Input = ({
     : 'border-gray-300 focus:ring-blue-300';
 
   return (
-    <div className={cn(`mt-3 flex flex-col gap-1.5 w-full`, containerClassName)}>
+    <div className={cn(`mt-3 flex flex-col gap-1.5 w-full bg-white/50`, containerClassName)}>
       <div className="relative flex items-center">
         {Icon && (
           <div
@@ -59,7 +58,7 @@ export const Input = ({
             'ring-offset-1 ring-offset-transparent',
             Icon ? 'pl-10 pr-3' : 'px-3',
             borderClass,
-            className,
+            containerClassName,
           )}
         />
       </div>

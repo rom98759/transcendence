@@ -1,4 +1,4 @@
-import { ProfileAuthDTO } from '@transcendence/core';
+import { ProfileSimpleDTO } from '@transcendence/core';
 import { ReactNode } from 'react';
 
 export type AvatarSize = 'sm' | 'md' | 'lg';
@@ -15,10 +15,10 @@ export enum Roles {
 }
 
 export interface AuthContextType {
-  user: ProfileAuthDTO | null;
-  login: (user: ProfileAuthDTO) => void;
+  user: ProfileSimpleDTO | null;
+  login: (user: ProfileSimpleDTO) => void;
   logout: () => void;
-  updateUser: (newUser: ProfileAuthDTO) => void;
+  updateUser: (newUser: ProfileSimpleDTO) => void;
 }
 
 export interface AuthProviderProps {

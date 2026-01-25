@@ -1,7 +1,6 @@
 import { UserRow } from './UserRow';
 import MenuElement from '../atoms/MenuElement';
 import { MenuActions } from '../../types/react-types';
-import { DevLoginButtons } from '../atoms/DevLogin';
 import { Link } from 'react-router-dom';
 import { Locale } from '../atoms/Locale';
 import { useAuth } from '../../providers/AuthProvider';
@@ -33,21 +32,22 @@ export const NavBar = () => {
         <span className="lowercase inline-block duration-500 group-hover:rotate-180">i</span>
         <span>n Pong</span>
       </div>
-      <MenuElement action={MenuActions.PLAY} items={playItems}></MenuElement>
-      <MenuElement action={MenuActions.STATS} items={statsItems}></MenuElement>
-      <DevLoginButtons></DevLoginButtons>
       {user && isLoggedIn && (
-        <div className="flex items-center">
-          <Link
-            to="/me"
-            className="hover:opacity-80 transition-opacity"
-            style={{ textDecoration: 'non', color: 'inherit' }}
-          >
-            <UserRow key={user.avatarUrl} avatarSize="sm" user={user}></UserRow>
-          </Link>
-        </div>
+        <>
+          <MenuElement action={MenuActions.PLAY} items={playItems} scale={0.7}></MenuElement>
+          <MenuElement action={MenuActions.STATS} items={statsItems}></MenuElement>
+          <div className="flex items-center">
+            <Link
+              to="/me"
+              className="hover:opacity-80 transition-opacity"
+              style={{ textDecoration: 'non', color: 'inherit' }}
+            >
+              <UserRow key={user.avatarUrl} avatarSize="sm" user={user}></UserRow>
+            </Link>
+          </div>
+        </>
       )}
-      <Locale className="flex items-center" />
+      <Locale className="ml-2 flex items-center" />
     </nav>
   );
 };

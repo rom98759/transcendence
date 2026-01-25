@@ -1,21 +1,21 @@
 import { z } from 'zod';
 import { idSchema, nicknameSchema, statusUpdateSchema } from './base.schema.js';
-import { ProfileSchema } from './profile.schema.js';
+import { ProfileSimpleSchema } from './profile.schema.js';
 
 export const FriendshipFullSchema = z.object({
   id: idSchema,
   status: z.string(),
   nicknameRequester: nicknameSchema.nullable(),
   nicknameReceiver: nicknameSchema.nullable(),
-  requester: ProfileSchema,
-  receiver: ProfileSchema,
+  requester: ProfileSimpleSchema,
+  receiver: ProfileSimpleSchema,
 });
 
 export const FriendshipUnifiedSchema = z.object({
   id: idSchema,
   status: z.string(),
   nickname: nicknameSchema.nullable(),
-  friend: ProfileSchema,
+  friend: ProfileSimpleSchema,
 });
 
 export const FriendshipReceiverSchema = FriendshipFullSchema.omit({

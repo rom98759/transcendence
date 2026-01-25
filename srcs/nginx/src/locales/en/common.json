@@ -7,12 +7,15 @@
     "login": "Login"
   },
   "fieldtype": {
-    "email": "emai",
+    "email": "email",
     "username": "username",
     "password": "password",
     "username-email": "username or email",
     "username-choose": "choose a username",
     "password-choose": "choose a password"
+  },
+  "form": {
+    "processing": "processing..."
   },
   "navbar": {
     "home": "Home",

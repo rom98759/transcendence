@@ -14,6 +14,9 @@
     "username-choose": "choisissez un pseudo",
     "password-choose": "choisissez un mot de passe sécurisé"
   },
+  "form": {
+    "processing": "traitement..."
+  },
   "navbar": {
     "home": "Accueil",
     "about": "A propos",

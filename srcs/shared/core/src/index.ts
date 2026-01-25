@@ -34,11 +34,18 @@ export { type LogContext, type EventValue, type ReasonValue } from './logging/lo
 // Zod Schemas
 // ============================================================================
 
-export { idSchema, usernameSchema, IdSchema, roleShema } from './schemas/base.schema.js';
+export {
+  idSchema,
+  usernameSchema,
+  emailSchema,
+  passwordSchema,
+  IdSchema,
+  roleShema,
+} from './schemas/base.schema.js';
 export { UserNameSchema } from './schemas/user.schema.js';
 export { UserSchema, UserLoginSchema, UserRegisterSchema } from './schemas/auth.schema.js';
 export {
-  ProfileSchema,
+  // ProfileSchema,
   ProfileSimpleSchema,
   ProfileCreateInSchema,
 } from './schemas/profile.schema.js';
@@ -61,6 +68,7 @@ export {
 export type {
   idDTO,
   usernameDTO,
+  emailDTO,
   IdDTO,
   RoleDTO,
   TargetUserIdDTO as targetUserIdDTO,
@@ -77,10 +85,10 @@ export type {
   FriendshipUpdateNicknameDTO,
 } from './schemas/friend.schema.js';
 export type {
-  ProfileDTO,
+  // ProfileDTO,
   ProfileSimpleDTO,
-  ProfileAuthDTO,
+  // ProfileAuthDTO,
   ProfileDataDTO,
-  ProfileStoredDTO,
+  // ProfileStoredDTO,
   ProfileCreateInDTO,
 } from './schemas/profile.schema.js';
