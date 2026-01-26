@@ -64,7 +64,10 @@ export async function createUser(user: {
       reason: REASONS.NETWORK.UPSTREAM_ERROR,
     });
     db.deleteUser(userId);
-    throw error;
+    throw new ServiceError(APP_ERRORS.SERVICE_GENERIC, {
+      details: 'um-service',
+      originalError: error,
+    });
   }
 }
 

@@ -16,11 +16,21 @@
       },
       "outputSelection": {
         "*": {
-          "": ["ast"],
-          "*": ["abi", "evm.bytecode", "evm.deployedBytecode", "evm.methodIdentifiers", "metadata"]
+          "": [
+            "ast"
+          ],
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers",
+            "metadata"
+          ]
         }
       },
-      "remappings": ["project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.4.0/"]
+      "remappings": [
+        "project/:@openzeppelin/contracts/=npm/@openzeppelin/contracts@5.4.0/"
+      ]
     },
     "sources": {
       "npm/@openzeppelin/contracts@5.4.0/access/Ownable.sol": {

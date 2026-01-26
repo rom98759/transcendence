@@ -2,9 +2,10 @@
 
 set -e
 
-mkdir -p ./data
+# chown -R appuser:appgroup /app/uploads
+
 echo "Running prisma db push..."
-npx prisma migrate deploy --config=./prisma.config.ts
+npx prisma migrate deploy
 
 echo "Starting app..."
 exec "$@"

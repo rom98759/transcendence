@@ -34,28 +34,33 @@ Service Nginx configuré comme **reverse proxy HTTPS** avec terminaison TLS pour
 ## 🎯 Fonctionnalités
 
 ### 1. **Terminaison TLS**
+
 - HTTPS obligatoire (redirect HTTP → HTTPS)
 - Certificat self-signed (dev) dans `/etc/nginx/ssl/`
 - Support TLS 1.2 et 1.3
 - Ciphers modernes uniquement
 
 ### 2. **Reverse Proxy**
+
 - `/api/*` → API Gateway (REST)
 - `/api/game/*` → API Gateway (WebSocket)
 - `/users/doc/*` → User Service (Swagger)
 - `/public/*` → API Gateway (fichiers publics)
 
 ### 3. **Gestion des cookies**
+
 - Transmission automatique des cookies d'authentification
 - Support `Set-Cookie` depuis les backends
 - Préservation du path des cookies
 
 ### 4. **Fichiers statiques**
+
 - Frontend : `/` (HTML/CSS/JS)
 - Uploads : `/uploads/` (avatars, etc.)
 - Assets : `/assets/` (images, fonts)
 
 ### 5. **Sécurité**
+
 - Suppression des headers forgés (`x-user-name`, `x-user-id`)
 - Pas de listing de répertoires
 - Health check sans logs (`/health`)
@@ -97,6 +102,7 @@ upstream user_service {
 ```
 
 **Avantages :**
+
 - ✅ Connexions keepalive vers les backends
 - ✅ Load balancing possible (ajouter plusieurs `server`)
 - ✅ Évite les résolutions DNS répétées
@@ -107,6 +113,7 @@ upstream user_service {
 ### Timeouts (default.conf)
 
 #### REST API (`/api/`)
+
 ```nginx
 proxy_connect_timeout 10s;   # Connexion au backend
 proxy_send_timeout 60s;      # Envoi de la requête
@@ -114,6 +121,7 @@ proxy_read_timeout 60s;      # Lecture de la réponse
 ```
 
 #### WebSocket (`/api/game/`)
+
 ```nginx
 proxy_connect_timeout 10s;   # Connexion initiale
 proxy_send_timeout 3600s;    # 1h sans envoi = timeout
@@ -172,12 +180,14 @@ docker exec nginx-proxy cat /var/log/nginx/error.log
 ### 502 Bad Gateway
 
 **Causes fréquentes :**
+
 1. Backend down → Vérifier `docker ps`
 2. Mauvais nom de service → Vérifier `docker-compose.yml`
 3. Backend lent → Augmenter les timeouts
 4. DNS Docker instable → Vérifier que `resolver` est bien commenté
 
 **Debug :**
+
 ```bash
 # Ping depuis nginx vers les backends
 docker exec nginx-proxy ping -c 3 api-gateway
@@ -190,12 +200,14 @@ docker exec nginx-proxy cat /etc/nginx/nginx.conf | grep upstream -A 3
 ### Cookies non transmis
 
 **Vérifier :**
+
 1. `proxy_pass_header Set-Cookie` présent
 2. Backend génère bien les cookies (voir logs du service auth)
 3. JWT_SECRET identique entre auth et gateway
 4. `FORCE_SECURE_COOKIE=false` dans `.env.auth` (backend HTTP)
 
 **Test curl :**
+
 ```bash
 curl -v -k -X POST https://localhost:4430/api/auth/login \
   -H "Content-Type: application/json" \
@@ -206,6 +218,7 @@ curl -v -k -X POST https://localhost:4430/api/auth/login \
 ### WebSocket qui déconnecte
 
 **Causes :**
+
 1. Timeouts trop courts → Vérifier `proxy_read_timeout 3600s`
 2. HTTP/2 activé → Doit être commenté : `# http2 on;`
 3. Headers Upgrade manquants → Vérifier `proxy_set_header Upgrade $http_upgrade`
@@ -225,17 +238,20 @@ curl -v -k -X POST https://localhost:4430/api/auth/login \
 ### ❌ DNS Resolver Docker supprimé
 
 **Avant (problématique) :**
+
 ```nginx
 resolver 127.0.0.11 valid=5s;  # ❌ Source de 502 intermittents
 ```
 
 **Maintenant :**
+
 ```nginx
 # Docker gère la résolution au démarrage du container
 # Les upstreams sont résolus UNE FOIS et mis en cache
 ```
 
 **Pourquoi ?**
+
 - Le resolver dynamique peut réévaluer les IPs toutes les 5s
 - Si un container redémarre, Nginx garde l'ancienne IP
 - Résultat : 502 aléatoires jusqu'au reload de Nginx
@@ -243,16 +259,19 @@ resolver 127.0.0.11 valid=5s;  # ❌ Source de 502 intermittents
 ### ✅ Upstreams avec keepalive
 
 **Avant :**
+
 ```nginx
 proxy_pass http://api-gateway:3000;  # ❌ Connexion directe fragile
 ```
 
 **Maintenant :**
+
 ```nginx
 proxy_pass http://api_gateway;  # ✅ Utilise l'upstream stable
 ```
 
 **Avantages :**
+
 - Pool de connexions persistantes (keepalive)
 - Pas de nouvelle connexion TCP à chaque requête
 - Stabilité maximale même sous charge
@@ -291,6 +310,7 @@ curl https://localhost:4430/health
 ```
 
 **Caractéristiques :**
+
 - Pas de logs (`access_log off;`)
 - Réponse instantanée (pas de proxy)
 - Utilisé par Docker health checks

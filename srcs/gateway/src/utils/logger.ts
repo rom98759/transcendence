@@ -75,7 +75,7 @@ class GatewayLogger implements Logger {
 
   private initializeConfig(): void {
     try {
-      // @ts-ignore - globalThis.process existe au runtime Node.js
+      // @ts-ignore - globalThis.process
       const env = globalThis.process?.env || {};
       this.logLevel = env.LOG_LEVEL || 'info';
       this.isDevelopment = env.NODE_ENV !== 'production';
@@ -155,7 +155,7 @@ class GatewayLogger implements Logger {
     const { status } = context;
 
     if (!status) {
-      this.info({ ...context, event: 'proxy_request' });
+      this.debug({ ...context, event: 'proxy_request' });
     } else if (status >= 200 && status < 400) {
       this.info({ ...context, event: 'proxy_success' });
     } else if (status >= 400 && status < 500) {

@@ -1,4 +1,4 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyRequest, FastifyReply } from 'fastify';
 
 export async function rootHandler(req: FastifyRequest, reply: FastifyReply) {
   return { message: 'Welcome to the Gateway API, check /help' };

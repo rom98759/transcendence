@@ -1,8 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import WebSocket from 'ws';
-import { logger, createLogContext } from './logger.js';
+import { logger } from './logger.js';
 import { GATEWAY_CONFIG, ERROR_CODES } from './constants.js';
 import { pipeline } from 'node:stream/promises';
+import { getInternalHeaders } from '../index.js';
 
 export async function proxyBlockRequest(
   app: FastifyInstance,
@@ -33,6 +34,34 @@ export async function proxyBlockRequest(
   // 🔥 streaming direct backend → client
   await pipeline(res.body, reply.raw);
 }
+
+interface GameState {
+  ball: {
+    x: number;
+    y: number;
+    radius: number;
+  };
+  paddles: {
+    left: {
+      y: number;
+      height: number;
+    };
+    right: {
+      y: number;
+      height: number;
+    };
+  };
+  scores: Scores;
+  status: GameStatus;
+  cosmicBackground: number[][] | null;
+}
+
+type GameStatus = 'waiting' | 'playing' | 'paused' | 'finished';
+
+interface Scores {
+  left: number;
+  right: number;
+}
 // Message types for type safety
 interface ClientMessage {
   type: 'paddle' | 'start' | 'stop' | 'ping';
@@ -43,7 +72,7 @@ interface ClientMessage {
 interface ServerMessage {
   type: 'connected' | 'state' | 'gameOver' | 'error' | 'pong';
   sessionId?: string;
-  data?: any;
+  data?: GameState;
   message?: string;
 }
 
@@ -108,7 +137,7 @@ function handleErrorAndDisconnection(
       code,
       reason: reason.toString(),
     });
-    upstreamWs.close();
+    upstreamWs.close(code, reason);
   });
 }
 
@@ -152,6 +181,18 @@ export function webSocketProxyRequest(
 
   handleErrorAndDisconnection(app, downstreamWs, upstreamWs);
   handleErrorAndDisconnection(app, upstreamWs, downstreamWs);
+}
+
+/**
+ * Fast proxy for /users using @fastify/reply-from
+ */
+export async function fastStreamProxy(req: FastifyRequest, reply: FastifyReply, targetUrl: string) {
+  return reply.from(targetUrl, {
+    rewriteRequestHeaders: (originalReq, headers) => ({
+      ...headers,
+      ...getInternalHeaders(req),
+    }),
+  });
 }
 
 export async function proxyRequest(

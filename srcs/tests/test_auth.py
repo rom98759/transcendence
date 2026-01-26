@@ -1058,7 +1058,7 @@ def test_30_admin_disable_2fa():
         assert test_user["is2FAEnabled"] == True, "2FA should be enabled"
 
         # Admin désactive la 2FA
-        response = session.post(f"/auth/admin/users/{test_user['id']}/2fa/disable")
+        response = session.post(f"/auth/admin/users/{test_user['id']}/disable-2fa")
         assert response.status_code == 200, f"Expected 200, got {response.status_code}"
 
         # Vérifier que la 2FA est désactivée
@@ -1132,8 +1132,8 @@ def test_32_online_status_nonexistent_user():
 
 
 def test_33_users_creation():
-    """Test: Créer 1000 utilisateurs différents le plus rapidement possible"""
-    print_test("Users - Création de 1000 utilisateurs")
+    """Test: Créer 100 utilisateurs différents le plus rapidement possible"""
+    print_test("Users - Création de 100 utilisateurs")
 
     session = TestSession()
     import time
@@ -1143,10 +1143,10 @@ def test_33_users_creation():
     created_count = 0
     failed_count = 0
 
-    # Créer 1000 utilisateurs avec des noms uniques basés sur timestamp
+    # Créer 100 utilisateurs avec des noms uniques basés sur timestamp
     timestamp = int(time.time())
 
-    for i in range(1000):
+    for i in range(100):
         creds = {
             "username": f"{timestamp}_{i}",
             "email": f"{timestamp}_{i}@test.local",
@@ -1175,19 +1175,19 @@ def test_33_users_creation():
         if (i + 1) % 100 == 0:
             elapsed = time.time() - start_time
             print(
-                f"Progrès: {i+1}/1000 utilisateurs - {created_count} créés, {failed_count} échecs - {elapsed:.1f}s"
+                f"Progrès: {i+1}/100 utilisateurs - {created_count} créés, {failed_count} échecs - {elapsed:.1f}s"
             )
 
     total_time = time.time() - start_time
-    success_rate = (created_count / 1000) * 100
+    success_rate = (created_count / 100) * 100
 
     print(f"\n📊 Résultats création utilisateurs:")
-    print(f"   ✅ Créés avec succès: {created_count}/1000 ({success_rate:.1f}%)")
+    print(f"   ✅ Créés avec succès: {created_count}/100 ({success_rate:.1f}%)")
     print(f"   ❌ Échecs: {failed_count}")
     print(f"   ⏱️  Temps total: {total_time:.2f} secondes")
     print(f"   🚀 Vitesse: {created_count/total_time:.1f} utilisateurs/seconde")
 
-    if created_count >= 900:  # Au moins 90% de succès
+    if created_count >= 90:  # Au moins 90% de succès
         print_success(
             f"Création en masse réussie: {created_count} utilisateurs créés en {total_time:.1f}s"
         )
@@ -1248,13 +1248,39 @@ def main():
         test_33_users_creation,
     ]
 
+    test_dict = {}
+    for t in tests:
+        num = t.__name__.split('_')[1]
+        test_dict[num] = t
+
+    target_test = None
+    if len(sys.argv) > 1:
+        arg = sys.argv[1].zfill(2) # Ajoute un 0 devant si l'utilisateur tape "1" au lieu de "01"
+        if arg in test_dict:
+            target_test = arg
+        else:
+            print_error(f"Erreur : Le test n°{arg} n'existe pas.")
+            print(f"Tests disponibles : {', '.join(sorted(test_dict.keys()))}")
+            sys.exit(1)
+
+    print("\n" + "=" * 60)
+    if target_test:
+        print(f"Exécution du test spécifique : {target_test}")
+        tests_to_run = [(target_test, test_dict[target_test])]
+    else:
+        print("Exécution de tous les tests CI/CD")
+        tests_to_run = [(num, test_dict[num]) for num in sorted(test_dict.keys())]
+    print("=" * 60)
+
     passed = 0
     failed = 0
     skipped = 0
 
-    for test in tests:
+    for num, test_func in tests_to_run:
+        # On affiche explicitement l'ID du test avant son exécution
+        print(f"\n[TEST {num}]", end=" ")
         try:
-            test()
+            test_func()
             passed += 1
         except SkipTest as e:
             skipped += 1

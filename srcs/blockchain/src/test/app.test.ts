@@ -7,11 +7,12 @@ import {
   tournamentsData,
   tournamentBlockData,
 } from './mockData.js';
-import app from '../app.js';
+import { buildApp } from '../app.js';
 import * as db from '../core/database.js';
 import { parse } from 'node:path';
 
 const blockchainReady = process.env.BLOCKCHAIN_READY === 'true';
+const app = await buildApp();
 
 describe('TEST blockchain without Smart Contract', () => {
   test('Blockchain page respond', async () => {
@@ -112,13 +113,13 @@ describe.runIf(blockchainReady)('TEST blockchain with Smart Contract', () => {
     db.truncateSnapshot();
     const response = await app.inject({
       method: 'POST',
-      url: '/tournaments',
+      url: '/tournamentspub',
       body: tournamentBlockData,
     });
 
     expect(response.statusCode).toBe(200);
     const body = response.json() as any;
-    expect(body.verify_status).toBe('OK');
+    expect(body.status).toBe('published');
   });
 });
 

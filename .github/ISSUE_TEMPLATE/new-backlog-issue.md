@@ -14,6 +14,8 @@ assignees: ''
 
 ## Additional context (screenshots, links, ...)
 
+> [!NOTE]
+
 ---
 
 # Priority and estimates

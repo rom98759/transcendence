@@ -149,6 +149,7 @@ export class PongGame {
     }
     this.gameLoopInterval = setInterval(() => {
       this.updateBackground();
+      this.updatePaddle();
     }, 1000 / 60);
   }
 
@@ -176,7 +177,7 @@ export class PongGame {
     console.log(`[${this.sessionId}] Game Over`);
   }
 
-  paddleMove() {
+  updatePaddle() {
     // Move paddles based on player input
     if (this.paddles.left.moving === 'up') {
       this.paddles.left.y -= this.paddles.left.speed;
@@ -276,7 +277,7 @@ export class PongGame {
     }
 
     this.ball.update();
-    this.paddleMove();
+    this.updatePaddle();
     this.collision();
     this.teleport();
 

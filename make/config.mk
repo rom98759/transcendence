@@ -2,6 +2,7 @@
 
 # --- OS ---
 OS := $(shell uname)
+CHIP := $(shell uname -m)
 
 # --- Env ---
 -include srcs/.env
@@ -14,6 +15,7 @@ ifdef VOLUME_NAME
 else
   VOLUMES_PATH := $(PROJECT_PATH)/data
 endif
+DATABASE_PATH := $(VOLUMES_PATH)/database
 UPLOADS_PATH := $(VOLUMES_PATH)/uploads
 
 CONTAINER_CMD := docker

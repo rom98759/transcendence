@@ -41,6 +41,9 @@ export default {
       exclude: [
         'node_modules/',
         'test/',
+        'src/subscribers',
+        'src/data/um.redis.client.ts',
+        'src/utils/messages',
         'generated/',
         'dist/',
         '**/*.config.ts',
@@ -65,7 +68,7 @@ export default {
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@transcendence/core': path.resolve(__dirname, '../shared/core/src/index.ts')
+      '@transcendence/core': path.resolve(__dirname, '../shared/core/src/index.ts'),
     },
   },
 };

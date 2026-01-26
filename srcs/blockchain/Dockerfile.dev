@@ -14,7 +14,8 @@ RUN npm install
 # Copy source code and configs
 COPY tsconfig.json ./
 COPY nodemon.json ./
-# COPY src ./src
+COPY .env.test ./
+COPY .env.test.blockchain ./
 
 EXPOSE 3005
 

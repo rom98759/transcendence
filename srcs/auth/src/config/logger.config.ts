@@ -4,6 +4,7 @@ import { LoggerOptions, stdSerializers } from 'pino';
 import { hostname } from 'os';
 import { REDACT_PATHS } from '../utils/constants.js';
 import { authenv } from './env.js';
+import { ServiceError } from '../types/errors.js';
 
 const isDev = authenv.NODE_ENV !== 'production';
 
@@ -36,6 +37,9 @@ export const loggerConfig: LoggerOptions = {
   serializers: {
     req(request: FastifyRequest | IncomingMessage) {
       const rawReq = isFastifyRequest(request) ? request.raw : request;
+      if (isFastifyRequest(request) && request.routeOptions.url === '/health') {
+        return { message: 'Health check in auth OK' };
+      }
       const serialized = stdSerializers.req(rawReq);
       if (isFastifyRequest(request)) {
         return {
@@ -48,17 +52,32 @@ export const loggerConfig: LoggerOptions = {
       return serialized;
     },
     err(err: unknown) {
-      if (err instanceof Error) {
-        const serialized = stdSerializers.err(err);
+      if (err instanceof Error || (err && typeof err === 'object' && 'message' in err)) {
+        const serialized = stdSerializers.err(err as Error);
 
-        if (isFastifyError(err)) {
+        const customDetails = {
+          code: 'Server error',
+          statusCode: (err as unknown as ServiceError).statusCode || 500,
+          context: (err as unknown as ServiceError).context || '',
+          details: (err as unknown as ServiceError).context.details || '',
+          originalError: (err as unknown as ServiceError).context.originalError || '',
+        };
+        if (err instanceof ServiceError) {
+          return {
+            ...serialized,
+            ...customDetails,
+          };
+        } else if (isFastifyError(err)) {
           return {
             ...serialized,
             code: err.code,
             statusCode: err.statusCode,
           };
+        } else {
+          return {
+            ...serialized,
+          };
         }
-        return serialized;
       }
       return {
         type: 'UnknownError',

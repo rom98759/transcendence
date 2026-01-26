@@ -1,0 +1,14 @@
+{
+  "tagline": "This game will turn you upside down",
+  "navbar": {
+    "home": "Home",
+    "about": "About",
+    "play": "Play",
+    "stats": "Stats"
+  },
+  "footer": {
+    "copyright": "© 2026 . All rights reserved.",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service"
+  }
+}

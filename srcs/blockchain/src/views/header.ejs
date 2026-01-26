@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title><%= title %></title>
-    <link rel="stylesheet" href="/output.css">
+    <link rel="stylesheet" href="/blockchain/output.css">
   </head>
   <body class="bg-slate-100 text-slate-900">
     <div class="text-center my-4">
@@ -13,5 +13,24 @@
       data-text="Viewing Blockchain">
       Tournament Blockchain Panel
     </h1>
-    <script src="/animation.js"></script>
+    <script>
+      const el = document.querySelector('.scramble');
+      // const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';//₿
+      const chars = '₿𖢻❄£$ᝰ.€';
+      const random = () => chars[Math.floor(Math.random() * chars.length)];
+
+      el.addEventListener('mouseover', () => {
+        const text = el.dataset.text;
+        let i = 0;
+
+        const interval = setInterval(() => {
+          el.textContent = text
+            .split('')
+            .map((char, index) => (index < i ? char : random()))
+            .join('');
+          i++;
+          if (i > text.length) clearInterval(interval);
+        }, 150);
+      });
+    </script>
     </div>

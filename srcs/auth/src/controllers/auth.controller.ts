@@ -21,12 +21,11 @@ function getCookieOptions(maxAgeSeconds: number = AUTH_CONFIG.COOKIE_MAX_AGE_SEC
   const env = (globalThis as any).process?.env || {};
   const isProduction = env.NODE_ENV === 'production';
   const forceSecure = isProduction || env.FORCE_SECURE_COOKIE === 'true';
-
   return {
+    path: '/',
     httpOnly: true,
     secure: forceSecure,
     sameSite: 'strict' as const,
-    path: '/',
     maxAge: maxAgeSeconds,
   };
 }
@@ -498,10 +497,10 @@ export async function setup2FAHandler(
     // Vérifier si 2FA déjà activée
     if (totpService.isTOTPEnabled(userId)) {
       logger.warn({ event: '2fa_setup_already_enabled', userId, username });
-      return reply.code(HTTP_STATUS.BAD_REQUEST).send({
+      return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: '2FA is already enabled. Disable it first to reconfigure.',
-          code: '2FA_ALREADY_ENABLED',
+          code: 'TOTP_ALREADY_ENABLED',
         },
       });
     }

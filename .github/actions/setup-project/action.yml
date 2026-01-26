@@ -7,7 +7,7 @@ inputs:
     default: 'dummysupersecretkey'
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Setup Node.js
       uses: actions/setup-node@v4
@@ -25,7 +25,7 @@ runs:
         INPUT_JWT: ${{ inputs.jwt_secret }}
       run: |
         mkdir -p srcs
-        
+
         # Secret handling (dummy if PR from a fork)
         if [ -z "$INPUT_JWT" ]; then
           JWT_VAL="dummysupersecretkey"

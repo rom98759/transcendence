@@ -5,16 +5,18 @@ include make/config.mk
 all : volumes colima build
 	$(D_COMPOSE) up -d
 
-dev: volumes colima-dev
-	$(D_COMPOSE_DEV) up --build -d
+dev: volumes colima-dev build-dev
+	$(D_COMPOSE_DEV) up -d
 
 volumes:
-	@mkdir -p $(VOLUMES_PATH)
-	@mkdir -p $(UPLOADS_PATH)
+	@mkdir -p $(DATABASE_PATH) $(UPLOADS_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
+# 	@docker run --rm -v $(VOLUMES_PATH):/tmp/v alpine sh -c "chown -R 1001:204 /tmp/v && chmod -R 775 /tmp/v"
 
 start :
 	$(D_COMPOSE) start
+start-dev :
+	$(D_COMPOSE_DEV) start
 stop :
 	$(D_COMPOSE) stop
 down :
@@ -82,7 +84,8 @@ build-block: install
 build-api: install
 	$(N_BUILD_WK)/gateway
 build-user: install
-	cd srcs/users && npm install && npm run build
+	$(N_BUILD_WK)/users
+# 	cd srcs/users && npm install && npm run build
 
 # --- Builds Images ---
 nginx: build-core
@@ -94,13 +97,16 @@ api: build-core build-api
 auth: build-core build-auth
 	$(D_COMPOSE) up -d --build $(AUTH_SERVICE_NAME)
 user: build-core build-user
-	$(D_COMPOSE) up -d --build $(UM_SERVICE_NAME)
+	$(D_COMPOSE) build $(UM_SERVICE_NAME)
+	$(D_COMPOSE) up -d $(UM_SERVICE_NAME)
 game: build-core build-game
 	$(D_COMPOSE) up -d --build $(GAME_SERVICE_NAME)
 block: build-core build-block
 	$(D_COMPOSE) up -d --build $(BK_SERVICE_NAME)
 build: build-core
 	$(D_COMPOSE) build
+build-dev: build-core
+	$(D_COMPOSE_DEV) build
 
 # --- Test ---
 test: install test-user
@@ -111,6 +117,25 @@ test-user: build-core
 	cd srcs/users && npm install && npx vitest run --config vite.config.mjs
 test-coverage-user: build-core
 	cd srcs/users && npx vitest run --coverage --config vite.config.mjs
+
+test-block:
+	@gnome-terminal -- bash -c "cd srcs/blockchain/src/SmartContract && npx hardhat node" &
+	sleep 2
+	@echo "Deploying contract and updating .env.test.blockchain..."
+	@cd srcs/blockchain/src/SmartContract && \
+	CONTRACT_OUTPUT=$$(npx hardhat ignition deploy ignition/modules/GameStorage.ts --network localhost 2>&1) && \
+	echo "$$CONTRACT_OUTPUT" && \
+	CONTRACT_ADDR=$$(echo "$$CONTRACT_OUTPUT" | grep -o '0x[a-fA-F0-9]\{40\}' | tail -1) && \
+	if [ -n "$$CONTRACT_ADDR" ]; then \
+		echo "Contract deployed at: $$CONTRACT_ADDR" && \
+		sed -i "s/^GAME_STORAGE_ADDRESS=.*/GAME_STORAGE_ADDRESS=$$CONTRACT_ADDR/" ../../.env.test.blockchain && \
+		echo "Updated .env.test.blockchain with address: $$CONTRACT_ADDR"; \
+	else \
+		echo "Failed to extract contract address"; \
+	fi
+	sleep 2
+	cd srcs/blockchain && \
+	npm run dev:b
 
 # --- DB ---
 redis-cli:
@@ -137,6 +162,9 @@ shell-block:
 	$(CONTAINER_CMD) exec -it $(BK_SERVICE_NAME) /bin/sh
 
 # --- Logs and status ---
+
+prisma-user:
+	$(CONTAINER_CMD) exec -it $(USER_SERVICE_NAME) npx prisma studio --browser none
 
 logs:
 	$(D_COMPOSE) logs -f
@@ -181,10 +209,10 @@ fclean: clean
 	@echo "Removing volumes and networks…"
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
-	@echo "Cleaning volume contents…"
-	@if [ -d "$(VOLUMES_PATH)" ] && [ "$(VOLUMES_PATH)" != "/" ]; then \
-		find $(VOLUMES_PATH) -mindepth 1 -delete || true; \
-	fi
+	@echo "Cleaning volume contents with Docker"
+	rm -rf ./srcs/shared/core/dist
+	rm -rf ./srcs/users/dist
+	rm -rf $(VOLUMES_PATH)
 	@echo "Volume folder cleaned (structure preserved)"
 
 re : fclean all
@@ -201,11 +229,11 @@ reset-hard: clean clean-packages
 	-$(CONTAINER_CMD) network prune -f
 	-$(CONTAINER_CMD) system prune -a --volumes --force
 ifeq ($(OS), Darwin)
+ifneq ($(CHIP), arm64)
 	@echo "Stopping Colima…"
 	-colima stop
-	rm -rf $(VOLUMES_PATH)
-else
-	rm -rf $(VOLUMES_PATH)
 endif
+endif
+	rm -rf $(VOLUMES_PATH)
 
 .PHONY : all clean fclean re check format core build volumes setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth colima colima-dev

@@ -7,7 +7,6 @@
     "noEmit": true,
     "baseUrl": "./",
     "outDir": "./dist",
-    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"],
     "strict": true, // strict type check
     "esModuleInterop": true, // allow imports from CommonJS modules
     "skipLibCheck": true,
@@ -25,8 +24,9 @@
     "sourceMap": true, // debug
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "inlineSources": true
+    "inlineSources": true,
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types"]
   },
-  "include": ["src/**/*", "test/**/*", "prisma/prisma.config.ts"],
+  "include": ["src/**/*", "test/**/*", "vite.config.mts"],
   "exclude": ["node_modules", "dist"]
 }

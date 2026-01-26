@@ -25,9 +25,9 @@
                   </div>
                   <% } %>
                 </div>
-                <button class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50" type="submit" id="regBtn">S'inscrire</button>
+                <button class="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50" type="submit" id="regBtn">Ajouter un tournoi</button>
                 <div class="text-xs" id="regMsg"></div>
-                <div class="text-xs text-gray-500">Envoi POST vers: <code class="font-mono">/register</code></div>
+                <div class="text-xs text-gray-500">Envoi POST vers: <code class="font-mono text-blue-600">:redis publisher</code></div>
             </form>
         </div>
     </div>
@@ -63,7 +63,7 @@
             const player3 = document.getElementById("regp3Id").value;
             const player4 = document.getElementById("regp4Id").value;
             try {
-                const result = await postJson("/tournaments", { tour_id, player1, player2,player3,player4  });
+                const result = await postJson("/tournamentspub", { tour_id, player1, player2,player3,player4  });
                 if (result.ok) {
                     regMsg.textContent = "Inscription réussie";
                     regMsg.classList.add("success");
@@ -81,6 +81,8 @@
         });
     </script>
 
+    <%- include('snapshots.ejs') %>
+    
     <div class="overflow-x-auto rounded-xl border bg-white shadow-sm border-gray-200">
         <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
             <h2 class="text-lg font-semibold">List of tournaments in snapshot</h2>
@@ -197,7 +199,6 @@
             }
         });
     </script>
-<%- include('snapshots.ejs') %>
 </div>
 
 <%- include('footer.ejs') %>
