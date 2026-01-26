@@ -31,6 +31,9 @@ export class AppError extends Error {
       reason: definition.reason,
       ...dynamicContext,
     } as LogContext;
-    Error.captureStackTrace(this, this.constructor);
+    if ('captureStackTrace' in Error) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+      (Error as { captureStackTrace: Function }).captureStackTrace(this, this.constructor);
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Scores, GameState, ServerMessage, ClientMessage, Vector2D } from '../core/types.js';
+import { Scores, GameState, ServerMessage, ClientMessage } from '../types/types.js';
 
 export interface GameSettings {
   ballRadius: number;
@@ -15,7 +15,7 @@ export class GameDisplay {
   resultDialog: HTMLElement;
   panel: HTMLElement;
   gameSessions: HTMLElement;
-  sessionsInterval: Node.timeout | null = null;
+  sessionsInterval: number | null = null; // browser setInterval returns a number
   settings: HTMLElement;
   gameArena: HTMLElement;
   gameLogs: HTMLElement;
@@ -257,12 +257,13 @@ export class GameDisplay {
         credentials: 'include',
       });
       const data = await response.json();
-      if (response.ok && data.sessionId) {
+      const { sessionId } = data;
+      if (response.ok && sessionId) {
         this.gameArena.classList.remove('hidden');
-        this.sessionId = data.sessionId;
+        this.sessionId = sessionId;
         console.log('Created game session:', this.sessionId);
         console.log('game session result:', data);
-        await this.openWebSocket(this.sessionId);
+        await this.openWebSocket(sessionId);
         this.showPanel('settings');
         // this.settings.classList.remove('hidden')
         // this.sessions.classList.add('hidden')
@@ -537,7 +538,7 @@ export class GameDisplay {
   private handleServerMessage(message: ServerMessage): void {
     switch (message.type) {
       case 'connected':
-        this.player = message.message;
+        this.player = message?.message || null;
         if (message.sessionId) {
           this.sessionId = message.sessionId;
         }

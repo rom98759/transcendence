@@ -9,9 +9,9 @@ dev: volumes colima-dev build-dev
 	$(D_COMPOSE_DEV) up -d
 
 volumes:
-	@mkdir -p $(VOLUMES_PATH)
-	@mkdir -p $(UPLOADS_PATH)
+	@mkdir -p $(DATABASE_PATH) $(UPLOADS_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
+# 	@docker run --rm -v $(VOLUMES_PATH):/tmp/v alpine sh -c "chown -R 1001:204 /tmp/v && chmod -R 775 /tmp/v"
 
 start :
 	$(D_COMPOSE) start
@@ -84,7 +84,8 @@ build-block: install
 build-api: install
 	$(N_BUILD_WK)/gateway
 build-user: install
-	cd srcs/users && npm install && npm run build
+	$(N_BUILD_WK)/users
+# 	cd srcs/users && npm install && npm run build
 
 # --- Builds Images ---
 nginx: build-core
@@ -96,7 +97,8 @@ api: build-core build-api
 auth: build-core build-auth
 	$(D_COMPOSE) up -d --build $(AUTH_SERVICE_NAME)
 user: build-core build-user
-	$(D_COMPOSE) up -d --build $(UM_SERVICE_NAME)
+	$(D_COMPOSE) build $(UM_SERVICE_NAME)
+	$(D_COMPOSE) up -d $(UM_SERVICE_NAME)
 game: build-core build-game
 	$(D_COMPOSE) up -d --build $(GAME_SERVICE_NAME)
 block: build-core build-block
@@ -161,6 +163,9 @@ shell-block:
 
 # --- Logs and status ---
 
+prisma-user:
+	$(CONTAINER_CMD) exec -it $(USER_SERVICE_NAME) npx prisma studio --browser none
+
 logs:
 	$(D_COMPOSE) logs -f
 # generic rule : replace % with service name
@@ -204,10 +209,10 @@ fclean: clean
 	@echo "Removing volumes and networks…"
 	-$(CONTAINER_CMD) volume prune -f
 	-$(CONTAINER_CMD) network prune -f
-	@echo "Cleaning volume contents…"
-	@if [ -d "$(VOLUMES_PATH)" ] && [ "$(VOLUMES_PATH)" != "/" ]; then \
-		find $(VOLUMES_PATH) -mindepth 1 -delete || true; \
-	fi
+	@echo "Cleaning volume contents with Docker"
+	rm -rf ./srcs/shared/core/dist
+	rm -rf ./srcs/users/dist
+	rm -rf $(VOLUMES_PATH)
 	@echo "Volume folder cleaned (structure preserved)"
 
 re : fclean all

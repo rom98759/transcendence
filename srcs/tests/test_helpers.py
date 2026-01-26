@@ -49,7 +49,7 @@ class TestSession:
             return f"{BASE_URL}{endpoint}"
         return f"{API_URL}{endpoint}"
 
-    def post(self, endpoint: str, json: Optional[Dict] = None, expected_status: int = 200) -> requests.Response:
+    def post(self, endpoint: str, json: Optional[Dict] = {}, expected_status: int = 200) -> requests.Response:
         """POST request avec validation du status"""
         url = self._build_url(endpoint)
         response = self.session.post(url, json=json)

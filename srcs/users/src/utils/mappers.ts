@@ -10,15 +10,15 @@ export function mapProfileToDTO(profile: UserProfile): ProfileDTO {
 }
 
 export function mapFriendshipToDTO(
-  friendship: FriendshipFullDTO,
+  f: FriendshipFullDTO,
   currentUserId: number,
 ): FriendshipUnifiedDTO {
-  const friendProfile =
-    friendship.receiver.authId === currentUserId ? friendship.requester : friendship.receiver;
+  const friendProfile = f.receiver.authId === currentUserId ? f.requester : f.receiver;
+  const nickname = f.receiver.authId === currentUserId ? f.nicknameRequester : f.nicknameReceiver;
   return {
-    id: friendship.id,
-    status: friendship.status,
-    nickname: friendship.nickname,
+    id: f.id,
+    status: f.status,
+    nickname: nickname,
     friend: friendProfile,
   };
 }

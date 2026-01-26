@@ -40,11 +40,22 @@ export async function errorHandler(
       error.message,
     );
 
+    if (error.statusCode == 400) {
+      return reply.status(400).send({
+        statusCode: 400,
+        error: 'Bad Request',
+        message: 'Validation failed',
+        details: {
+          fields: error.context?.field,
+        },
+      });
+    }
+
     return reply.status(error.statusCode).send({
       statusCode: error.statusCode,
       error: error.name,
       message: error.message,
-      details: error.context.details,
+      details: error.context?.details,
     });
   }
 

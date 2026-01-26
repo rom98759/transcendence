@@ -578,14 +578,14 @@
 
             let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">';
             if (data.user) {
-              const user = data.user
-              html += '<div class="space-y-2">'
-              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`
-              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`
-              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`
-              html += `<div><span class="font-medium text-gray-700">2FA Enabled:</span> <span class="text-gray-900">${user.isTwoFactorAuthEnabled ? 'Yes' : 'No'}</span></div>`
-              html += `<div><span class="font-medium text-gray-700">Role:</span> <span class="text-gray-900">${user.role || 'N/A'}</span></div>`
-              html += '</div>'
+              const user = data.user;
+              html += '<div class="space-y-2">';
+              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`;
+              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`;
+              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`;
+              html += `<div><span class="font-medium text-gray-700">2FA Enabled:</span> <span class="text-gray-900">${user.isTwoFactorAuthEnabled ? 'Yes' : 'No'}</span></div>`;
+              html += `<div><span class="font-medium text-gray-700">Role:</span> <span class="text-gray-900">${user.role || 'N/A'}</span></div>`;
+              html += '</div>';
             } else {
               html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
             }

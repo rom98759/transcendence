@@ -1,8 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import WebSocket from 'ws';
-import { logger, createLogContext } from './logger.js';
+import { logger } from './logger.js';
 import { GATEWAY_CONFIG, ERROR_CODES } from './constants.js';
 import { pipeline } from 'node:stream/promises';
+import { getInternalHeaders } from '../index.js';
 
 export async function proxyBlockRequest(
   app: FastifyInstance,
@@ -180,6 +181,18 @@ export function webSocketProxyRequest(
 
   handleErrorAndDisconnection(app, downstreamWs, upstreamWs);
   handleErrorAndDisconnection(app, upstreamWs, downstreamWs);
+}
+
+/**
+ * Fast proxy for /users using @fastify/reply-from
+ */
+export async function fastStreamProxy(req: FastifyRequest, reply: FastifyReply, targetUrl: string) {
+  return reply.from(targetUrl, {
+    rewriteRequestHeaders: (originalReq, headers) => ({
+      ...headers,
+      ...getInternalHeaders(req),
+    }),
+  });
 }
 
 export async function proxyRequest(

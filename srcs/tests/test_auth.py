@@ -974,12 +974,38 @@ def main():
         test_28_2fa_too_many_attempts,
     ]
 
+    test_dict = {}
+    for t in tests:
+        num = t.__name__.split('_')[1]
+        test_dict[num] = t
+
+    target_test = None
+    if len(sys.argv) > 1:
+        arg = sys.argv[1].zfill(2) # Ajoute un 0 devant si l'utilisateur tape "1" au lieu de "01"
+        if arg in test_dict:
+            target_test = arg
+        else:
+            print_error(f"Erreur : Le test n°{arg} n'existe pas.")
+            print(f"Tests disponibles : {', '.join(sorted(test_dict.keys()))}")
+            sys.exit(1)
+
+    print("\n" + "=" * 60)
+    if target_test:
+        print(f"Exécution du test spécifique : {target_test}")
+        tests_to_run = [(target_test, test_dict[target_test])]
+    else:
+        print("Exécution de tous les tests CI/CD")
+        tests_to_run = [(num, test_dict[num]) for num in sorted(test_dict.keys())]
+    print("=" * 60)
+
     passed = 0
     failed = 0
 
-    for test in tests:
+    for num, test_func in tests_to_run:
+        # On affiche explicitement l'ID du test avant son exécution
+        print(f"\n[TEST {num}]", end=" ") 
         try:
-            test()
+            test_func()
             passed += 1
         except AssertionError as e:
             failed += 1

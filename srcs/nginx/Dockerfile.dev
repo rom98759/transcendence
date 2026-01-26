@@ -17,6 +17,7 @@ RUN npm install -g esbuild
 # Copy nginx configs
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY conf.d/default.conf /etc/nginx/conf.d/default.conf
+COPY conf.d/proxy_headers.conf /etc/nginx/conf.d/proxy_headers.conf
 
 # Copy entrypoint script
 COPY dev-start.sh /dev-start.sh
@@ -25,5 +26,3 @@ RUN chmod +x /dev-start.sh
 EXPOSE 80 443
 
 CMD ["/dev-start.sh"]
-
-

@@ -1,4 +1,3 @@
-import type { UserPayload } from './types/types.js';
 import fastify, { FastifyError, FastifyReply, FastifyRequest } from 'fastify';
 import fastifyCors from '@fastify/cors';
 import fastifyCookie from '@fastify/cookie';
@@ -9,6 +8,7 @@ import { apiRoutes, publicRoutes } from './routes/gateway.routes.js';
 import { logger, optimizeErrorHandler } from './utils/logger.js';
 import { verifyRequestJWT } from './utils/jwt.service.js';
 import { GATEWAY_CONFIG, ERROR_CODES } from './utils/constants.js';
+import { UserPayload } from './types/types.d.js';
 
 const app = fastify({
   logger: false, // Utiliser notre logger
@@ -44,8 +44,12 @@ app.register(fastifyRateLimit, {
   }),
 });
 
-console.log('register');
+logger.info({ event: 'register' });
 app.register(websocketPlugin);
+
+app.addContentTypeParser('multipart/form-data', function (req, payload, done) {
+  done(null, payload); // Pass raw stream through
+});
 
 // Hook verify JWT routes `/api` sauf les routes publiques
 app.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) => {
@@ -85,8 +89,15 @@ app.addHook('onRequest', async (request: FastifyRequest, reply: FastifyReply) =>
   }
 
   // Attacher les données utilisateur à la requête
-  request.user = verification.user;
+  request.user = verification.user as UserPayload;
   logger.logAuth({ url: request.url, user: request.user?.username }, true);
+});
+
+export const getInternalHeaders = (req: FastifyRequest): Record<string, string> => ({
+  'x-user-name': req.user?.username || (req.headers['x-user-name'] as string) || '',
+  'x-user-id': String(req.user?.sub || req.user?.id || req.headers['x-user-id'] || ''),
+  'x-user-role': req.user?.role || 'USER',
+  cookie: req.headers?.cookie || '',
 });
 
 // Décorateur requêtes internes : ajoute automatiquement
@@ -108,7 +119,6 @@ app.decorate(
   },
 );
 
-// Log request end
 app.addHook('onResponse', async (request: FastifyRequest, reply: FastifyReply) => {
   logger.logRequest(
     {
@@ -143,6 +153,7 @@ app.register(fastifyCors, {
   origin: [
     'http://localhost:80', // Dev
     'https://localhost:443', // Dev HTTPS
+    'https://localhost:5173', // Dev Vite
   ],
   credentials: true,
 });
