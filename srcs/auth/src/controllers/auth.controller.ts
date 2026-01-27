@@ -3,7 +3,6 @@ import * as authService from '../services/auth.service.js';
 import { ValidationSchemas } from '../utils/validation.js';
 import {
   AUTH_CONFIG,
-  UserRole,
   HTTP_STATUS,
   ERROR_MESSAGES,
   ERROR_RESPONSE_CODES,

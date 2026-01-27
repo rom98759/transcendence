@@ -7,6 +7,29 @@ import { authenv, UM_SERVICE_URL } from '../config/env.js';
 
 export { UM_SERVICE_URL };
 
+/**
+ * Convertit une chaîne de temps (ex: "1 minute", "5 minutes") en secondes
+ */
+export function parseTimeWindowToSeconds(timeWindow: string): number {
+  const match = timeWindow.match(/(\d+)\s*(second|minute|hour|day)s?/i);
+  if (!match) return 60; // Fallback: 1 minute
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2].toLowerCase();
+
+  const multipliers: Record<string, number> = {
+    second: 1,
+    minute: 60,
+    hour: 3600,
+    day: 86400,
+  };
+
+  return value * (multipliers[unit] || 60);
+}
+
+// Adapter les limites selon l'environnement
+const isTestOrDev = ['test', 'development'].includes(authenv.NODE_ENV);
+
 export const AUTH_CONFIG = {
   // JWT Configuration
   JWT_EXPIRATION: '1h',
@@ -38,20 +61,38 @@ export const AUTH_CONFIG = {
 
   // Maintenance
   CLEANUP_INTERVAL_MS: 5 * 60 * 1000, // 5 minutes en millisecondes
+  ONLINE_STATUS_CLEANUP_INTERVAL_MS: 60 * 1000, // 60 secondes en millisecondes
 
   // Cookie Configuration
   COOKIE_MAX_AGE_SECONDS: 60 * 60, // 1 heure (sync avec JWT)
   COOKIE_2FA_MAX_AGE_SECONDS: 120, // 2 minutes
 
-  // Rate Limiting (utilisé par @fastify/rate-limit)
+  // Rate Limiting - Limites adaptées selon l'environnement (dev/test vs production)
   RATE_LIMIT: {
-    // Tests enchaînent de nombreuses requêtes : on relève les seuils pour éviter des 429 involontaires
-    GLOBAL: { max: 1000, timeWindow: '15 minutes' },
-    LOGIN: { max: 1000, timeWindow: '15 minutes' },
-    REGISTER: { max: 1000, timeWindow: '15 minutes' },
-    TWO_FA_VERIFY: { max: 1000, timeWindow: '15 minutes' },
-    TWO_FA_SETUP: { max: 1000, timeWindow: '15 minutes' },
-    IS_USER_ONLINE: { max: 100, timeWindow: '1 minute' },
+    GLOBAL: {
+      max: isTestOrDev ? 10000 : 1000,
+      timeWindow: '1 minute',
+    },
+    LOGIN: {
+      max: isTestOrDev ? 100 : 5,
+      timeWindow: '5 minutes',
+    },
+    REGISTER: {
+      max: isTestOrDev ? 100 : 5,
+      timeWindow: '5 minutes',
+    },
+    TWO_FA_VERIFY: {
+      max: isTestOrDev ? 100 : 5,
+      timeWindow: '5 minutes',
+    },
+    TWO_FA_SETUP: {
+      max: isTestOrDev ? 100 : 5,
+      timeWindow: '5 minutes',
+    },
+    IS_USER_ONLINE: {
+      max: isTestOrDev ? 1000 : 200,
+      timeWindow: '1 minute',
+    },
   },
 } as const;
 

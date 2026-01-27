@@ -15,23 +15,6 @@ export async function listAllUsers(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const idHeader = (req.headers as any)['x-user-id'];
-  const userId = idHeader ? Number(idHeader) : null;
-  const username = (req.headers as any)['x-user-name'] || null;
-
-  logger.info({ event: 'list_all_users_attempt', user: username, userId });
-
-  // Vérifier que l'utilisateur existe et a le rôle admin
-  if (!userId || !authService.hasRole(userId, UserRole.ADMIN)) {
-    logger.warn({ event: 'list_all_users_forbidden', user: username, userId });
-    return reply.code(HTTP_STATUS.FORBIDDEN).send({
-      error: {
-        message: ERROR_MESSAGES.FORBIDDEN,
-        code: ERROR_RESPONSE_CODES.FORBIDDEN,
-      },
-    });
-  }
-
   try {
     const users = authService.listUsers();
 
@@ -49,13 +32,10 @@ export async function listAllUsers(
       online: onlineStatusMap.get(user.id!) || false,
     }));
 
-    logger.info({ event: 'list_all_users_success', user: username, count: enrichedUsers.length });
-
-    return reply.code(HTTP_STATUS.OK).send({
-      users: enrichedUsers,
-    });
+    logger.info({ event: 'list_all_users_success', count: enrichedUsers.length });
+    return reply.code(HTTP_STATUS.OK).send({ users: enrichedUsers });
   } catch (err: any) {
-    logger.error({ event: 'list_all_users_error', user: username, err: err?.message || err });
+    logger.error({ event: 'list_all_users_error', err: err?.message || err });
     return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: {
         message: ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
@@ -73,33 +53,7 @@ export async function updateUserHandler(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const idHeader = (req.headers as any)['x-user-id'];
-  const adminUserId = idHeader ? Number(idHeader) : null;
-  const adminUsername = (req.headers as any)['x-user-name'] || null;
   const targetUserId = Number((req.params as any).id);
-
-  logger.info({
-    event: 'admin_update_user_attempt',
-    admin: adminUsername,
-    adminUserId,
-    targetUserId,
-  });
-
-  // Vérifier que l'utilisateur existe et a le rôle admin
-  if (!adminUserId || !authService.hasRole(adminUserId, UserRole.ADMIN)) {
-    logger.warn({
-      event: 'admin_update_user_forbidden',
-      admin: adminUsername,
-      adminUserId,
-      targetUserId,
-    });
-    return reply.code(HTTP_STATUS.FORBIDDEN).send({
-      error: {
-        message: ERROR_MESSAGES.FORBIDDEN,
-        code: ERROR_RESPONSE_CODES.FORBIDDEN,
-      },
-    });
-  }
 
   if (!targetUserId || isNaN(targetUserId)) {
     return reply.code(HTTP_STATUS.BAD_REQUEST).send({
@@ -155,7 +109,6 @@ export async function updateUserHandler(
 
     logger.info({
       event: 'admin_update_user_success',
-      admin: adminUsername,
       targetUserId,
       newUsername: newUsername,
     });
@@ -172,7 +125,6 @@ export async function updateUserHandler(
   } catch (err: any) {
     logger.error({
       event: 'admin_update_user_error',
-      admin: adminUsername,
       targetUserId,
       err: err?.message || err,
     });
@@ -217,9 +169,9 @@ export async function deleteUserHandler(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const idHeader = (req.headers as any)['x-user-id'];
-  const adminUserId = idHeader ? Number(idHeader) : null;
-  const adminUsername = (req.headers as any)['x-user-name'] || null;
+  // Récupérer les informations admin déjà validées par verifyAdminRole
+  const adminUserId = (req as any).adminUserId;
+  const adminUsername = (req as any).adminUsername;
   const targetUserId = Number((req.params as any).id);
 
   logger.info({
@@ -228,22 +180,6 @@ export async function deleteUserHandler(
     adminUserId,
     targetUserId,
   });
-
-  // Vérifier que l'utilisateur existe et a le rôle admin
-  if (!adminUserId || !authService.hasRole(adminUserId, UserRole.ADMIN)) {
-    logger.warn({
-      event: 'admin_delete_user_forbidden',
-      admin: adminUsername,
-      adminUserId,
-      targetUserId,
-    });
-    return reply.code(HTTP_STATUS.FORBIDDEN).send({
-      error: {
-        message: ERROR_MESSAGES.FORBIDDEN,
-        code: ERROR_RESPONSE_CODES.FORBIDDEN,
-      },
-    });
-  }
 
   if (!targetUserId || isNaN(targetUserId)) {
     return reply.code(HTTP_STATUS.BAD_REQUEST).send({
@@ -314,9 +250,9 @@ export async function adminDisable2FAHandler(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
-  const idHeader = (req.headers as any)['x-user-id'];
-  const adminUserId = idHeader ? Number(idHeader) : null;
-  const adminUsername = (req.headers as any)['x-user-name'] || null;
+  // Récupérer les informations admin déjà validées par verifyAdminRole
+  const adminUserId = (req as any).adminUserId;
+  const adminUsername = (req as any).adminUsername;
   const targetUserId = Number((req.params as any).id);
 
   logger.info({
@@ -325,22 +261,6 @@ export async function adminDisable2FAHandler(
     adminUserId,
     targetUserId,
   });
-
-  // Vérifier que l'utilisateur existe et a le rôle admin
-  if (!adminUserId || !authService.hasRole(adminUserId, UserRole.ADMIN)) {
-    logger.warn({
-      event: 'admin_disable_2fa_forbidden',
-      admin: adminUsername,
-      adminUserId,
-      targetUserId,
-    });
-    return reply.code(HTTP_STATUS.FORBIDDEN).send({
-      error: {
-        message: ERROR_MESSAGES.FORBIDDEN,
-        code: ERROR_RESPONSE_CODES.FORBIDDEN,
-      },
-    });
-  }
 
   if (!targetUserId || isNaN(targetUserId)) {
     return reply.code(HTTP_STATUS.BAD_REQUEST).send({

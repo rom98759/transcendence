@@ -7,7 +7,7 @@ import websocketPlugin from '@fastify/websocket';
 import { apiRoutes, publicRoutes } from './routes/gateway.routes.js';
 import { logger, optimizeErrorHandler } from './utils/logger.js';
 import { verifyRequestJWT } from './utils/jwt.service.js';
-import { GATEWAY_CONFIG, ERROR_CODES } from './utils/constants.js';
+import { GATEWAY_CONFIG, ERROR_CODES, parseTimeWindowToSeconds } from './utils/constants.js';
 import { gatewayenv } from './config/env.js';
 import { UserPayload } from './types/types.d.js';
 
@@ -22,51 +22,14 @@ app.register(fastifyCookie);
 // Register fastify-jwt
 app.register(fastifyJwt, { secret: gatewayenv.JWT_SECRET });
 
-// Rate limiting - désactivé en mode test/développement
-const isTestOrDev = gatewayenv.NODE_ENV === 'test' || gatewayenv.NODE_ENV === 'development';
+app.register(fastifyRateLimit, {
+  max: gatewayenv.RATE_LIMIT_MAX,
+  timeWindow: gatewayenv.RATE_LIMIT_WINDOW,
+  keyGenerator: (request: FastifyRequest) => {
+    return request.ip || 'unknown';
+  },
+});
 
-if (isTestOrDev) {
-  logger.info({
-    event: 'rate_limit_disabled',
-    environment: gatewayenv.NODE_ENV,
-    reason: 'test_environment - avoiding 500 errors',
-  });
-} else {
-  // Rate limiting uniquement en production
-  logger.info({
-    event: 'rate_limit_enabled',
-    environment: gatewayenv.NODE_ENV,
-    max: gatewayenv.RATE_LIMIT_MAX,
-    timeWindow: gatewayenv.RATE_LIMIT_WINDOW,
-  });
-
-  app.register(fastifyRateLimit, {
-    max: gatewayenv.RATE_LIMIT_MAX,
-    timeWindow: gatewayenv.RATE_LIMIT_WINDOW,
-    keyGenerator: (request: FastifyRequest) => {
-      return request.ip || 'unknown';
-    },
-    errorResponseBuilder: (req, context) => {
-      logger.warn({
-        event: 'rate_limit_429_sent',
-        ip: req.ip,
-        url: req.url,
-        method: req.method,
-        retryAfter: context.after,
-      });
-
-      return {
-        error: {
-          message: 'Too many requests, please try again later',
-          code: ERROR_CODES.RATE_LIMIT_EXCEEDED,
-          retryAfter: context.after,
-        },
-      };
-    },
-  });
-}
-console.log('register');
-logger.info({ event: 'register' });
 app.register(websocketPlugin);
 
 app.addContentTypeParser('multipart/form-data', function (req, payload, done) {
@@ -170,31 +133,37 @@ app.setErrorHandler((error: FastifyError, request: FastifyRequest, reply: Fastif
   // Gestion spéciale pour les erreurs de rate limiting
   // @fastify/rate-limit utilise le code 'FST_ERR_RATE_LIMITED'
   if (
-    error.statusCode === 429 ||
     (error as any).code === 'FST_ERR_RATE_LIMITED' ||
     (error as any).code === 'FST_ERR_RATE_LIMIT' ||
     error.message?.includes('Rate limit exceeded')
   ) {
+    // Calculer le retry-after dynamiquement
+    // header Retry-After de fastify-rate-limit en sec
+    const retryAfterHeader = reply.getHeader('Retry-After');
+    const retryAfterSeconds = retryAfterHeader
+      ? Math.ceil(Number(retryAfterHeader))
+      : Math.ceil(parseTimeWindowToSeconds(gatewayenv.RATE_LIMIT_WINDOW));
+
+    const timeUnit = retryAfterSeconds === 1 ? 'second' : 'seconds';
+
     logger.warn({
-      event: 'rate_limit_handled_in_error_handler',
+      event: 'rate_limit_429_sent',
       method: request?.method,
       url: request?.url,
       user: request?.user?.username || null,
       ip: request.ip,
       errorCode: (error as any).code,
-      errorMessage: error.message,
-      statusCode: error.statusCode,
+      retryAfter: `${retryAfterSeconds}s`,
     });
 
-    // Envoi de la réponse et stop
-    reply.code(429).send({
+    // Envoi de la réponse 429 et stop
+    return reply.code(429).send({
       error: {
-        message: 'Too many requests, please try again later',
+        message: `Too many requests, please try again in ${retryAfterSeconds} ${timeUnit}`,
         code: ERROR_CODES.RATE_LIMIT_EXCEEDED,
-        retryAfter: '60s',
+        retryAfter: `${retryAfterSeconds}s`,
       },
     });
-    return; // Important : arrêter le traitement ici
   }
 
   // Gestion spéciale pour les timeouts de proxy

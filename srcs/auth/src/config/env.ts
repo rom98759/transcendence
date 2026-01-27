@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import { bool, cleanEnv, email, port, str, url } from 'envalid';
+import { bool, cleanEnv, email, port, str } from 'envalid';
 
 config({ path: '../.env' });
 config({ path: '../.env.auth' });

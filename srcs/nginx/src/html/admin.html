@@ -518,6 +518,12 @@
 						<option value="true">En ligne</option>
 						<option value="false">Hors ligne</option>
 					</select>
+					<select id="items-per-page" class="form-input" style="max-width: 150px;">
+						<option value="10">10 par page</option>
+						<option value="20">20 par page</option>
+						<option value="50">50 par page</option>
+						<option value="100">100 par page</option>
+					</select>
 				</div>
 			</div>
 
@@ -551,6 +557,33 @@
 						</tr>
 					</tbody>
 				</table>
+			</div>
+
+			<!-- Pagination Controls -->
+			<div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+				<div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+					<!-- Info sur les éléments affichés -->
+					<div class="text-sm text-gray-600">
+						<span id="pagination-info">0 à 0 sur 0 utilisateurs</span>
+					</div>
+
+					<!-- Boutons de navigation -->
+					<div class="flex items-center gap-2">
+						<button id="prev-page-btn" onclick="previousPage()" class="btn btn-secondary btn-sm" disabled>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+							</svg>
+							Précédent
+						</button>
+						<span id="page-info" class="text-sm text-gray-700 font-medium px-4">Page 1 sur 1</span>
+						<button id="next-page-btn" onclick="nextPage()" class="btn btn-secondary btn-sm" disabled>
+							Suivant
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -664,6 +697,8 @@
 		let currentUser = null;
 		let filteredUsers = [];
 		let autoRefreshTimer = null;
+		let currentPage = 1;
+		let itemsPerPage = 10;
 
 		// === Initialization ===
 		document.addEventListener('DOMContentLoaded', async function () {
@@ -690,10 +725,27 @@
 
 		// === Event Listeners ===
 		function setupEventListeners() {
-			document.getElementById('search-input').addEventListener('input', filterUsers);
-			document.getElementById('role-filter').addEventListener('change', filterUsers);
-			document.getElementById('2fa-filter').addEventListener('change', filterUsers);
-			document.getElementById('online-filter').addEventListener('change', filterUsers);
+			document.getElementById('search-input').addEventListener('input', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('role-filter').addEventListener('change', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('2fa-filter').addEventListener('change', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('online-filter').addEventListener('change', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('items-per-page').addEventListener('change', (e) => {
+				itemsPerPage = parseInt(e.target.value);
+				currentPage = 1;
+				filterUsers();
+			});
 
 
 			document.getElementById('edit-user-modal').addEventListener('click', function (e) {
@@ -911,10 +963,16 @@
                         </td>
                     </tr>
                 `;
+				updatePaginationControls();
 				return;
 			}
 
-			tbody.innerHTML = filteredUsers.map(user => {
+			// Calculer les indices pour la pagination
+			const startIndex = (currentPage - 1) * itemsPerPage;
+			const endIndex = Math.min(startIndex + itemsPerPage, filteredUsers.length);
+			const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+			tbody.innerHTML = paginatedUsers.map(user => {
 				const isProtected = isProtectedAccount(user.username);
 				const canDelete = user.id !== currentUser.id && !isProtected;
 				const canModify = !isProtected;
@@ -979,6 +1037,8 @@
                 </tr>
             `;
 			}).join('');
+
+			updatePaginationControls();
 		}
 
 
@@ -1129,6 +1189,56 @@
 			} catch (error) {
 				console.error('Disable 2FA error:', error);
 				showAlert(error.message, 'error');
+			}
+		}
+
+		// === Pagination Functions ===
+		function updatePaginationControls() {
+			const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+			const startIndex = (currentPage - 1) * itemsPerPage + 1;
+			const endIndex = Math.min(currentPage * itemsPerPage, filteredUsers.length);
+
+			// Mise à jour de l'info de pagination
+			const paginationInfo = document.getElementById('pagination-info');
+			if (filteredUsers.length === 0) {
+				paginationInfo.textContent = 'Aucun utilisateur à afficher';
+			} else {
+				paginationInfo.textContent = `${startIndex} à ${endIndex} sur ${filteredUsers.length} utilisateur${filteredUsers.length > 1 ? 's' : ''}`;
+			}
+
+			// Mise à jour de l'info de page
+			const pageInfo = document.getElementById('page-info');
+			if (totalPages > 0) {
+				pageInfo.textContent = `Page ${currentPage} sur ${totalPages}`;
+			} else {
+				pageInfo.textContent = 'Page 0 sur 0';
+			}
+
+			// Activation/désactivation des boutons
+			const prevBtn = document.getElementById('prev-page-btn');
+			const nextBtn = document.getElementById('next-page-btn');
+
+			if (prevBtn) {
+				prevBtn.disabled = currentPage <= 1;
+			}
+
+			if (nextBtn) {
+				nextBtn.disabled = currentPage >= totalPages;
+			}
+		}
+
+		function previousPage() {
+			if (currentPage > 1) {
+				currentPage--;
+				renderUsersTable();
+			}
+		}
+
+		function nextPage() {
+			const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+			if (currentPage < totalPages) {
+				currentPage++;
+				renderUsersTable();
 			}
 		}
 

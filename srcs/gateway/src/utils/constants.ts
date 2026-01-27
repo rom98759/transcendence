@@ -10,6 +10,29 @@ import {
   BK_SERVICE_URL,
 } from '../config/env.js';
 
+/**
+ * Convertit une chaîne de temps (ex: "1 minute", "5 minutes") en secondes
+ */
+export function parseTimeWindowToSeconds(timeWindow: string): number {
+  const match = timeWindow.match(/(\d+)\s*(second|minute|hour|day)s?/i);
+  if (!match) return 60; // Fallback: 1 minute
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2].toLowerCase();
+
+  const multipliers: Record<string, number> = {
+    second: 1,
+    minute: 60,
+    hour: 3600,
+    day: 86400,
+  };
+
+  return value * (multipliers[unit] || 60);
+}
+
+// Adapter les limites selon l'environnement
+const isTestOrDev = ['test', 'development'].includes(gatewayenv.NODE_ENV);
+
 export const GATEWAY_CONFIG = {
   // Routes publiques : pas de vérification JWT requise
   PUBLIC_ROUTES: [
@@ -27,7 +50,7 @@ export const GATEWAY_CONFIG = {
   // Rate Limiting
   RATE_LIMIT: {
     GLOBAL: {
-      max: gatewayenv.RATE_LIMIT_MAX,
+      max: isTestOrDev ? 10000 : gatewayenv.RATE_LIMIT_MAX,
       timeWindow: gatewayenv.RATE_LIMIT_WINDOW,
     },
   },
