@@ -2,14 +2,14 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 import { DataError } from '../types/errors.js';
-import { DATA_ERROR } from '../utils/constants.js';
+import { DATA_ERROR, UserRole } from '../utils/constants.js';
 import { DBUser } from '../types/models.js';
 import crypto from 'crypto';
 import { AUTH_CONFIG } from '../utils/constants.js';
+import { authenv } from '../config/env.js';
 
-// DB path
-const DEFAULT_DIR = path.join(process.cwd(), 'data');
-const DB_PATH = process.env.AUTH_DB_PATH || path.join(DEFAULT_DIR, 'auth.db');
+// DB path from validated environment
+const DB_PATH = authenv.AUTH_DB_PATH;
 
 // Check dir
 try {
@@ -29,7 +29,7 @@ try {
       username TEXT UNIQUE,
       email TEXT UNIQUE,
       password TEXT,
-      role TEXT DEFAULT 'user',
+      role TEXT DEFAULT '${UserRole.USER}',
       is_2fa_enabled INTEGER DEFAULT 0,
       totp_secret TEXT
     );
@@ -98,6 +98,9 @@ const findByIdentifierStmt = db.prepare(
 );
 const findByIdStmt = db.prepare('SELECT * FROM users WHERE id = ?');
 const insertUserStmt = db.prepare('INSERT INTO users (username, email, password) VALUES (?, ?, ?)');
+const updateUserStmt = db.prepare(
+  'UPDATE users SET username = ?, email = ?, role = ? WHERE id = ?',
+);
 const deleteUserStmt = db.prepare('DELETE FROM users WHERE id = ?');
 
 // 2FA statements
@@ -233,6 +236,38 @@ export function deleteUser(userId: number): void {
   }
 }
 
+export function updateUser(
+  userId: number,
+  userData: { username: string; email: string; role: string },
+): void {
+  try {
+    const info = updateUserStmt.run(userData.username, userData.email, userData.role, userId);
+    if (info.changes === 0) {
+      throw new DataError(DATA_ERROR.NOT_FOUND, 'User not found for update');
+    }
+  } catch (err: any) {
+    if (err instanceof DataError) throw err;
+
+    // Gestion des contraintes uniques
+    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      if (err.message.includes('username')) {
+        throw new DataError(DATA_ERROR.DUPLICATE, 'Username taken', err, {
+          field: 'username',
+          value: userData.username,
+        });
+      } else if (err.message.includes('email')) {
+        throw new DataError(DATA_ERROR.DUPLICATE, 'Email taken', err, {
+          field: 'email',
+          value: userData.email,
+        });
+      } else {
+        throw new DataError(DATA_ERROR.DUPLICATE, 'Unique constraint violated', err);
+      }
+    }
+    throw new DataError(DATA_ERROR.INTERNAL_ERROR, `DB Error ${err.message}`, err);
+  }
+}
+
 export function closeDatabase() {
   try {
     db.close();
@@ -246,7 +281,7 @@ export function getDatabasePath() {
 }
 
 /**
- * @todo dev only - delete before prod
+ * Liste tous les utilisateurs dans la base de données
  */
 export function listUsers(): DBUser[] {
   try {
@@ -476,7 +511,7 @@ export function cleanExpiredTokens(): void {
 export function getUserRole(userId: number): string {
   try {
     const result = getUserRoleStmt.get(userId) as { role: string } | undefined;
-    return result?.role || 'user';
+    return result?.role || UserRole.USER;
   } catch (err) {
     const error: any = new Error(
       `Error getting user role: ${(err as any)?.message || String(err)}`,

@@ -52,6 +52,13 @@ python test.py
 
 - ✅ List users (admin)
 - ✅ List users interdit (non-admin)
+- ✅ Update user (admin)
+- ✅ Disable 2FA for user (admin)
+
+#### Système de présence
+
+- ✅ Vérifier statut online par username
+- ✅ Gestion utilisateur inexistant (404)
 
 #### Sécurité
 

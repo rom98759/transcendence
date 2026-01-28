@@ -1,657 +1,911 @@
 <!doctype html>
 <html lang="fr">
-  <head>
+
+<head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Transcendence - Auth & Game Platform</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      .striped-disabled {
-        position: relative;
-        overflow: hidden;
-      }
+        .striped-disabled {
+            position: relative;
+            overflow: hidden;
+        }
 
-      .striped-disabled::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(
-          45deg,
-          transparent,
-          transparent 10px,
-          rgba(0, 0, 0, 0.2) 10px,
-          rgba(0, 0, 0, 0.2) 20px
-        );
-        pointer-events: none;
-      }
-      .error-details {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 6px;
-        padding: 12px;
-        margin-top: 8px;
-      }
-      .error-item {
-        display: flex;
-        align-items: flex-start;
-        margin-bottom: 6px;
-        font-size: 13px;
-      }
-      .error-item:last-child {
-        margin-bottom: 0;
-      }
-      .error-icon {
-        color: #dc2626;
-        margin-right: 6px;
-        font-weight: bold;
-      }
-      .service-status {
-        display: inline-flex;
-        align-items: center;
-        padding: 4px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 500;
-      }
-      .status-healthy {
-        background-color: #dcfce7;
-        color: #166534;
-      }
-      .status-unhealthy {
-        background-color: #fee2e2;
-        color: #dc2626;
-      }
+        .striped-disabled::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(0, 0, 0, 0.2) 10px,
+                    rgba(0, 0, 0, 0.2) 20px);
+            pointer-events: none;
+        }
+
+        .error-details {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 8px;
+        }
+
+        .error-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .error-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .error-icon {
+            color: #dc2626;
+            margin-right: 6px;
+            font-weight: bold;
+        }
+
+        .service-status {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-healthy {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .status-unhealthy {
+            background-color: #fee2e2;
+            color: #dc2626;
+        }
     </style>
-  </head>
-  <body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
-    <div id="first-screen" class="container mx-auto px-4 max-w-7xl">
-      <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Transcendence super Platform</h1>
-        <p class="text-gray-600">Authentication & Services</p>
-      </div>
+</head>
 
-      <!-- Carte de connexion -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
-              ></path>
-            </svg>
-            Connexion
-          </h2>
-          <form id="loginForm" class="space-y-4">
-            <div>
-              <label for="loginUsername" class="block text-sm font-medium text-gray-700 mb-1"
-                >Nom d'utilisateur</label
-              >
-              <input
-                id="loginUsername"
-                name="username"
-                type="text"
-                required
-                autocomplete="username"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1"
-                >Mot de passe</label
-              >
-              <input
-                id="loginPassword"
-                name="password"
-                type="password"
-                required
-                autocomplete="current-password"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <button
-              type="submit"
-              id="loginBtn"
-              class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Connexion
-            </button>
-            <div class="msg" id="loginMsg"></div>
-            <div class="text-xs text-gray-500 mt-2">
-              Envoi POST vers: <code class="bg-gray-100 px-1 rounded">/api/auth/login</code>
-            </div>
-          </form>
-        </div>
-        <script>
-          // Fonction utilitaire pour formater les erreurs
-          function formatErrorMessage(result) {
-            if (!result.data || typeof result.data !== 'object') {
-              return `<div class="text-red-700">Erreur (${result.status}): ${result.data || 'Inconnue'}</div>`;
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8">
+
+    <!-- ======================================== -->
+    <!-- Heartbeat System - Doit être défini AVANT les cartes -->
+    <!-- ======================================== -->
+    <script>
+        // Configuration du heartbeat
+        const HEARTBEAT_INTERVAL = 15000; // 15 secondes
+        let heartbeatTimer = null;
+        let isTabVisible = true;
+
+        /**
+         * Vérifie si l'utilisateur est connecté
+         * Comme le cookie est httpOnly, on utilise localStorage comme indicateur
+         */
+        function isUserLoggedIn() {
+            // Vérifier le flag dans localStorage
+            return localStorage.getItem('isLoggedIn') === 'true';
+        }
+
+        /**
+         * Envoie un heartbeat au serveur pour indiquer que l'utilisateur est actif
+         */
+        async function sendHeartbeat() {
+            // Ne pas envoyer si l'utilisateur n'est pas connecté
+            if (!isUserLoggedIn()) {
+                return;
             }
 
-            const error = result.data.error;
-            if (!error) {
-              return `<div class="text-red-700">Erreur (${result.status}): ${JSON.stringify(result.data)}</div>`;
+            // Ne pas envoyer si l'onglet n'est pas visible (optimisation)
+            if (!isTabVisible) {
+                return;
             }
 
-            let html = `<div class="text-red-700 font-medium mb-2">❌ ${error.message}</div>`;
+            try {
+                const response = await fetch('/api/auth/heartbeat', {
+                    method: 'POST',
+                    credentials: 'include', // Important pour envoyer les cookies
+                });
 
-            // Afficher un hint si disponible
-            if (error.hint) {
-              html += `<div class="text-orange-600 text-sm mb-2 flex items-start gap-1">`;
-              html += `<span>💡</span><span>${error.hint}</span>`;
-              html += `</div>`;
-            }
-
-            // Afficher des informations complémentaires
-            if (error.details && typeof error.details === 'string') {
-              html += `<div class="text-gray-600 text-sm mb-2">${error.details}</div>`;
-            }
-
-            // Afficher les erreurs de validation détaillées
-            if (error.details && Array.isArray(error.details)) {
-              html += '<div class="error-details mt-3">';
-              html +=
-                '<div class="text-xs font-semibold text-gray-700 mb-2">Détails des erreurs :</div>';
-              error.details.forEach((detail) => {
-                const field =
-                  detail.path && detail.path[0] ? `<strong>${detail.path[0]}</strong>: ` : '';
-                html += `<div class="error-item">`;
-                html += `<span class="error-icon">•</span>`;
-                html += `<span>${field}${detail.message}</span>`;
-                html += `</div>`;
-              });
-              html += '</div>';
-            }
-
-            // Afficher les erreurs par champ si disponibles (format structuré)
-            if (error.fields && typeof error.fields === 'object') {
-              html += '<div class="error-details mt-3">';
-              html +=
-                '<div class="text-xs font-semibold text-gray-700 mb-2">Problèmes à corriger :</div>';
-              Object.entries(error.fields).forEach(([field, messages]) => {
-                const fieldLabel =
-                  {
-                    username: "👤 Nom d'utilisateur",
-                    email: '📧 Email',
-                    password: '🔒 Mot de passe',
-                    code: '🔢 Code',
-                    general: '⚠️ Général',
-                  }[field] || field;
-
-                if (Array.isArray(messages)) {
-                  messages.forEach((msg) => {
-                    html += `<div class="error-item">`;
-                    html += `<span class="error-icon">•</span>`;
-                    html += `<span><strong>${fieldLabel}</strong>: ${msg}</span>`;
-                    html += `</div>`;
-                  });
+                if (response.status === 401) {
+                    // Session expirée, arrêter le heartbeat
+                    stopHeartbeat();
+                    localStorage.removeItem('isLoggedIn');
                 }
-              });
-              html += '</div>';
+            } catch (error) {
+                console.error('Failed to send heartbeat:', error);
+            }
+        }
+
+        /**
+         * Démarre le système de heartbeat
+         */
+        function startHeartbeat() {
+            // Ne pas démarrer si déjà actif
+            if (heartbeatTimer) {
+                return;
             }
 
-            // Afficher le champ concerné si disponible
-            if (error.field && !error.fields) {
-              html += `<div class="text-gray-500 text-xs mt-2">Champ: ${error.field}</div>`;
+            // Envoyer immédiatement un premier heartbeat
+            sendHeartbeat();
+
+            // Puis continuer périodiquement
+            heartbeatTimer = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+        }
+
+        /**
+         * Arrête le système de heartbeat
+         */
+        function stopHeartbeat() {
+            if (heartbeatTimer) {
+                clearInterval(heartbeatTimer);
+                heartbeatTimer = null;
             }
+        }
 
-            // Afficher les tentatives restantes si disponible
-            if (typeof error.remainingAttempts === 'number') {
-              const color = error.remainingAttempts <= 1 ? 'text-red-600' : 'text-orange-600';
-              html += `<div class="${color} text-sm mt-2 font-medium">`;
-              html += `⚠️ ${error.remainingAttempts} tentative(s) restante(s)`;
-              html += `</div>`;
+        /**
+         * Gestion de la visibilité de l'onglet
+         * Utilise l'API Page Visibility pour détecter si l'onglet est actif
+         */
+        document.addEventListener('visibilitychange', function () {
+            if (document.hidden) {
+                isTabVisible = false;
+            } else {
+                isTabVisible = true;
+                // Envoyer un heartbeat immédiatement quand l'onglet redevient visible
+                if (isUserLoggedIn()) {
+                    sendHeartbeat();
+                }
             }
+        });
 
-            // Afficher l'expiration si disponible
-            if (error.expiresIn || result.data.result?.expiresIn) {
-              const expires = error.expiresIn || result.data.result?.expiresIn;
-              html += `<div class="text-gray-500 text-xs mt-2">⏱️ Expire dans ${expires} secondes</div>`;
+        /**
+         * Démarrer automatiquement le heartbeat si l'utilisateur est déjà connecté
+         * (utile après un refresh de page)
+         */
+        document.addEventListener('DOMContentLoaded', function () {
+            if (isUserLoggedIn()) {
+                startHeartbeat();
             }
+        });
 
-            return html;
-          }
+        // Nettoyer à la fermeture de la page
+        window.addEventListener('beforeunload', function () {
+            stopHeartbeat();
+        });
+    </script>
 
-          // Code de la carte de connexion
-          const loginForm = document.getElementById('loginForm');
-          const loginMsg = document.getElementById('loginMsg');
-          const loginBtn = document.getElementById('loginBtn');
+    <div id="first-screen" class="container mx-auto px-4 max-w-7xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">Transcendence super Platform</h1>
+            <p class="text-gray-600">Authentication & Services</p>
+        </div>
 
-          async function postJson(url, body) {
-            const res = await fetch(url, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify(body),
-            });
-            const text = await res.text();
-            try {
-              return { ok: res.ok, status: res.status, data: JSON.parse(text) };
-            } catch {
-              return { ok: res.ok, status: res.status, data: text };
-            }
-          }
+        <!-- Carte de connexion -->
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1">
+                        </path>
+                    </svg>
+                    Connexion
+                </h2>
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label for="loginUsername" class="block text-sm font-medium text-gray-700 mb-1">Nom
+                            d'utilisateur</label>
+                        <input id="loginUsername" name="username" type="text" required autocomplete="username"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label for="loginPassword" class="block text-sm font-medium text-gray-700 mb-1">Mot de
+                            passe</label>
+                        <input id="loginPassword" name="password" type="password" required
+                            autocomplete="current-password"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+                    </div>
+                    <button type="submit" id="loginBtn"
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Connexion
+                    </button>
+                    <div class="msg" id="loginMsg"></div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        Envoi POST vers: <code class="bg-gray-100 px-1 rounded">/api/auth/login</code>
+                    </div>
+                </form>
+            </div>
+            <script>
+                // Fonction utilitaire pour formater les erreurs
+                function formatErrorMessage(result) {
+                    if (!result.data || typeof result.data !== 'object') {
+                        return `<div class="text-red-700">Erreur (${result.status}): ${result.data || 'Inconnue'}</div>`
+                    }
 
-          loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            loginMsg.innerHTML = '';
-            loginMsg.className = 'msg mt-3';
-            loginBtn.disabled = true;
-            const username = document.getElementById('loginUsername').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            try {
-              const result = await postJson('/api/auth/login', { username, password });
-              if (result.ok) {
-                const resultData = result.data?.result || {};
+                    const error = result.data.error
+                    if (!error) {
+                        return `<div class="text-red-700">Erreur (${result.status}): ${JSON.stringify(result.data)}</div>`
+                    }
 
-                if (resultData.require2FA) {
-                  // 2FA requise
-                  loginMsg.innerHTML = `
+                    let html = `<div class="text-red-700 font-medium mb-2">❌ ${error.message}</div>`
+
+                    // Afficher un hint si disponible
+                    if (error.hint) {
+                        html += `<div class="text-orange-600 text-sm mb-2 flex items-start gap-1">`
+                        html += `<span>💡</span><span>${error.hint}</span>`
+                        html += `</div>`
+                    }
+
+                    // Afficher des informations complémentaires
+                    if (error.details && typeof error.details === 'string') {
+                        html += `<div class="text-gray-600 text-sm mb-2">${error.details}</div>`
+                    }
+
+                    // Afficher les erreurs de validation détaillées
+                    if (error.details && Array.isArray(error.details)) {
+                        html += '<div class="error-details mt-3">'
+                        html +=
+                            '<div class="text-xs font-semibold text-gray-700 mb-2">Détails des erreurs :</div>'
+                        error.details.forEach((detail) => {
+                            const field =
+                                detail.path && detail.path[0] ? `<strong>${detail.path[0]}</strong>: ` : ''
+                            html += `<div class="error-item">`
+                            html += `<span class="error-icon">•</span>`
+                            html += `<span>${field}${detail.message}</span>`
+                            html += `</div>`
+                        })
+                        html += '</div>'
+                    }
+
+                    // Afficher les erreurs par champ si disponibles (format structuré)
+                    if (error.fields && typeof error.fields === 'object') {
+                        html += '<div class="error-details mt-3">'
+                        html +=
+                            '<div class="text-xs font-semibold text-gray-700 mb-2">Problèmes à corriger :</div>'
+                        Object.entries(error.fields).forEach(([field, messages]) => {
+                            const fieldLabel =
+                                {
+                                    username: "👤 Nom d'utilisateur",
+                                    email: '📧 Email',
+                                    password: '🔒 Mot de passe',
+                                    code: '🔢 Code',
+                                    general: '⚠️ Général',
+                                }[field] || field
+
+                            if (Array.isArray(messages)) {
+                                messages.forEach((msg) => {
+                                    html += `<div class="error-item">`
+                                    html += `<span class="error-icon">•</span>`
+                                    html += `<span><strong>${fieldLabel}</strong>: ${msg}</span>`
+                                    html += `</div>`
+                                })
+                            }
+                        })
+                        html += '</div>'
+                    }
+
+                    // Afficher le champ concerné si disponible
+                    if (error.field && !error.fields) {
+                        html += `<div class="text-gray-500 text-xs mt-2">Champ: ${error.field}</div>`
+                    }
+
+                    // Afficher les tentatives restantes si disponible
+                    if (typeof error.remainingAttempts === 'number') {
+                        const color = error.remainingAttempts <= 1 ? 'text-red-600' : 'text-orange-600'
+                        html += `<div class="${color} text-sm mt-2 font-medium">`
+                        html += `⚠️ ${error.remainingAttempts} tentative(s) restante(s)`
+                        html += `</div>`
+                    }
+
+                    // Afficher l'expiration si disponible
+                    if (error.expiresIn || result.data.result?.expiresIn) {
+                        const expires = error.expiresIn || result.data.result?.expiresIn
+                        html += `<div class="text-gray-500 text-xs mt-2">⏱️ Expire dans ${expires} secondes</div>`
+                    }
+
+                    return html
+                }
+
+                // Code de la carte de connexion
+                const loginForm = document.getElementById('loginForm')
+                const loginMsg = document.getElementById('loginMsg')
+                const loginBtn = document.getElementById('loginBtn')
+
+                async function postJson(url, body) {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify(body),
+                    })
+                    const text = await res.text()
+                    try {
+                        return { ok: res.ok, status: res.status, data: JSON.parse(text) }
+                    } catch {
+                        return { ok: res.ok, status: res.status, data: text }
+                    }
+                }
+
+                loginForm.addEventListener('submit', async (e) => {
+                    e.preventDefault()
+                    loginMsg.innerHTML = ''
+                    loginMsg.className = 'msg mt-3'
+                    loginBtn.disabled = true
+                    const username = document.getElementById('loginUsername').value.trim()
+                    const password = document.getElementById('loginPassword').value
+                    try {
+                        const result = await postJson('/api/auth/login', { username, password })
+                        if (result.ok) {
+                            const resultData = result.data?.result || {}
+
+                            if (resultData.require2FA) {
+                                // 2FA requise
+                                loginMsg.innerHTML = `
                     <div class="text-blue-700 font-medium mb-2">🔐 ${resultData.message || 'Authentification 2FA requise'}</div>
                     ${resultData.details ? `<div class="text-gray-600 text-sm mb-2">${resultData.details}</div>` : ''}
                     ${resultData.expiresIn ? `<div class="text-gray-500 text-xs">⏱️ Session valide ${resultData.expiresIn} secondes</div>` : ''}
                     <div class="text-sm mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
                       📱 Utilisez la carte "Vérification 2FA" ci-dessous pour entrer votre code
                     </div>
-                  `;
-                } else {
-                  // Connexion réussie
-                  loginMsg.innerHTML = `
+                  `
+                            } else {
+                                // Connexion réussie
+                                localStorage.setItem('isLoggedIn', 'true');
+                                loginMsg.innerHTML = `
                     <div class="text-green-700 font-medium mb-2">✓ ${resultData.message || 'Connexion réussie'}</div>
                     ${resultData.username ? `<div class="text-gray-600 text-sm">Connecté en tant que: <strong>${resultData.username}</strong></div>` : ''}
-                  `;
-                  // Réinitialiser le formulaire après succès
-                  setTimeout(() => {
-                    loginForm.reset();
-                    loginMsg.innerHTML = '';
-                  }, 3000);
-                }
-              } else {
-                loginMsg.innerHTML = formatErrorMessage(result);
-              }
-            } catch (err) {
-              loginMsg.innerHTML = `<div class="text-red-700">❌ Connexion impossible: ${err.message}</div>`;
-            } finally {
-              loginBtn.disabled = false;
-            }
-          });
-        </script>
+                  `
+                                // Réinitialiser le formulaire après succès
+                                setTimeout(() => {
+                                    loginForm.reset()
+                                    loginMsg.innerHTML = ''
+                                }, 3000)
+                                // Démarrer le heartbeat
+                                startHeartbeat();
+                            }
+                        } else {
+                            loginMsg.innerHTML = formatErrorMessage(result)
+                        }
+                    } catch (err) {
+                        loginMsg.innerHTML = `<div class="text-red-700">❌ Connexion impossible: ${err.message}</div>`
+                    } finally {
+                        loginBtn.disabled = false
+                    }
+                })
+            </script>
 
-        <!-- Carte d'inscription -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-              ></path>
-            </svg>
-            Inscription
-          </h2>
-          <form id="registerForm" class="space-y-4">
-            <div>
-              <label for="regUsername" class="block text-sm font-medium text-gray-700 mb-1"
-                >Nom d'utilisateur</label
-              >
-              <input
-                id="regUsername"
-                name="username"
-                type="text"
-                required
-                autocomplete="username"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-              <div class="text-xs text-gray-500 mt-1">
-                Min. 4 caractères, lettres, chiffres et _ uniquement
-              </div>
+            <!-- Carte d'inscription -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z">
+                        </path>
+                    </svg>
+                    Inscription
+                </h2>
+                <form id="registerForm" class="space-y-4">
+                    <div>
+                        <label for="regUsername" class="block text-sm font-medium text-gray-700 mb-1">Nom
+                            d'utilisateur</label>
+                        <input id="regUsername" name="username" type="text" required autocomplete="username"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                        <div class="text-xs text-gray-500 mt-1">
+                            Min. 4 caractères, lettres, chiffres et _ uniquement
+                        </div>
+                    </div>
+                    <div>
+                        <label for="regEmail" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input id="regEmail" name="email" type="email" required autocomplete="email"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label for="regPassword" class="block text-sm font-medium text-gray-700 mb-1">Mot de
+                            passe</label>
+                        <input id="regPassword" name="password" type="password" required autocomplete="new-password"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent" />
+                        <div class="text-xs text-gray-500 mt-1">
+                            Min. 8 caractères avec majuscule, minuscule, chiffre et caractère spécial
+                        </div>
+                    </div>
+                    <button type="submit" id="regBtn"
+                        class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        S'inscrire
+                    </button>
+                    <div class="msg" id="regMsg"></div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        Envoi POST vers: <code class="bg-gray-100 px-1 rounded">/api/auth/register</code>
+                    </div>
+                </form>
             </div>
-            <div>
-              <label for="regEmail" class="block text-sm font-medium text-gray-700 mb-1"
-                >Email</label
-              >
-              <input
-                id="regEmail"
-                name="email"
-                type="email"
-                required
-                autocomplete="email"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label for="regPassword" class="block text-sm font-medium text-gray-700 mb-1"
-                >Mot de passe</label
-              >
-              <input
-                id="regPassword"
-                name="password"
-                type="password"
-                required
-                autocomplete="new-password"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
-              <div class="text-xs text-gray-500 mt-1">
-                Min. 8 caractères avec majuscule, minuscule, chiffre et caractère spécial
-              </div>
-            </div>
-            <button
-              type="submit"
-              id="regBtn"
-              class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              S'inscrire
-            </button>
-            <div class="msg" id="regMsg"></div>
-            <div class="text-xs text-gray-500 mt-2">
-              Envoi POST vers: <code class="bg-gray-100 px-1 rounded">/api/auth/register</code>
-            </div>
-          </form>
-        </div>
-        <script>
-          // Code de la carte d'inscription
-          const registerForm = document.getElementById('registerForm');
-          const regMsg = document.getElementById('regMsg');
-          const regBtn = document.getElementById('regBtn');
+            <script>
+                // Code de la carte d'inscription
+                const registerForm = document.getElementById('registerForm')
+                const regMsg = document.getElementById('regMsg')
+                const regBtn = document.getElementById('regBtn')
 
-          registerForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            regMsg.innerHTML = '';
-            regMsg.className = 'msg mt-3';
-            regBtn.disabled = true;
-            const username = document.getElementById('regUsername').value.trim();
-            const email = document.getElementById('regEmail').value.trim();
-            const password = document.getElementById('regPassword').value;
-            try {
-              const result = await postJson('/api/auth/register', { username, email, password });
-              if (result.ok) {
-                const resultData = result.data?.result || {};
-                regMsg.innerHTML = `
+                registerForm.addEventListener('submit', async (e) => {
+                    e.preventDefault()
+                    regMsg.innerHTML = ''
+                    regMsg.className = 'msg mt-3'
+                    regBtn.disabled = true
+                    const username = document.getElementById('regUsername').value.trim()
+                    const email = document.getElementById('regEmail').value.trim()
+                    const password = document.getElementById('regPassword').value
+                    try {
+                        const result = await postJson('/api/auth/register', { username, email, password })
+                        if (result.ok) {
+                            const resultData = result.data?.result || {}
+                            regMsg.innerHTML = `
                   <div class="text-green-700 font-medium mb-2">✓ ${resultData.message || 'Inscription réussie !'}</div>
                   ${resultData.username ? `<div class="text-gray-600 text-sm mb-2">Compte créé: <strong>${resultData.username}</strong></div>` : ''}
                   <div class="text-sm mt-2 p-3 bg-green-50 border border-green-200 rounded">
                     👉 Vous pouvez maintenant vous connecter avec la carte "Connexion" ci-dessus
                   </div>
-                `;
-                // Réinitialiser le formulaire après succès
-                setTimeout(() => {
-                  registerForm.reset();
-                }, 2000);
-                console.log('Données reçues:', result.data);
-              } else {
-                regMsg.innerHTML = formatErrorMessage(result);
-              }
-            } catch (err) {
-              regMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              regBtn.disabled = false;
-            }
-          });
-        </script>
+                `
+                            // Réinitialiser le formulaire après succès
+                            setTimeout(() => {
+                                registerForm.reset()
+                            }, 2000)
+                        } else {
+                            regMsg.innerHTML = formatErrorMessage(result)
+                        }
+                    } catch (err) {
+                        regMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        regBtn.disabled = false
+                    }
+                })
+            </script>
 
-        <!-- Carte de statut des services -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-purple-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
-            </svg>
-            Statut des services
-          </h2>
-          <div id="healthList" class="space-y-2">
-            <div class="text-gray-500 text-sm">Chargement...</div>
-          </div>
-        </div>
-        <script>
-          // Code de la carte de statut des services
-          async function loadHealthAll() {
-            const container = document.getElementById('healthList');
-            container.innerHTML = '<div class="text-gray-500 text-sm">Chargement...</div>';
-            try {
-              const res = await fetch('/public/healthAll', { credentials: 'include' });
-              const text = await res.text();
-              let data;
-              try {
-                data = JSON.parse(text);
-              } catch {
-                data = text;
-              }
+            <!-- Carte de statut des services -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center justify-between">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Statut des services
+                    </div>
+                    <button id="toggleHealthCheck"
+                        class="px-3 py-1 text-xs font-medium rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2">
+                        <span id="healthCheckStatus">ON</span>
+                    </button>
+                </h2>
 
-              if (!res.ok) {
-                container.innerHTML = `<div class="text-red-600 text-sm">Erreur (${res.status}): ${JSON.stringify(data)}</div>`;
-                return;
-              }
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between text-sm">
+                        <span class="text-gray-600">Auto-refresh:</span>
+                        <span id="refreshStatus" class="font-medium text-green-600">Activé (30s)</span>
+                    </div>
 
-              if (typeof data === 'object' && data !== null) {
-                container.innerHTML = '';
-                for (const [service, status] of Object.entries(data)) {
-                  const div = document.createElement('div');
-                  const s = String(status).toLowerCase();
-                  const healthy = s.includes('healthy') || s === 'ok' || s === 'healthy';
+                    <div class="border-t pt-3">
+                        <ul id="healthList" class="space-y-2">
+                            <li class="text-gray-500 text-sm">Chargement...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <script>
+                // Code de la carte de statut des services
+                let healthCheckInterval = null;
 
-                  div.className = `service-status ${healthy ? 'status-healthy' : 'status-unhealthy'}`;
-                  div.innerHTML = `
-								<svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-									${
-                    healthy
-                      ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>'
-                      : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>'
-                  }
-								</svg>
-								<span class="font-medium">${service}:</span>
-								<span class="ml-1">${status}</span>
-							`;
-                  container.appendChild(div);
+                // Initialiser l'état du health check depuis localStorage
+                function initHealthCheck() {
+                    const isEnabled = localStorage.getItem('healthCheckEnabled');
+                    const enabled = isEnabled === null ? true : isEnabled === 'true';
+                    updateHealthCheckStatus(enabled);
+                    if (enabled) {
+                        startHealthCheck();
+                    }
                 }
-              } else {
-                container.innerHTML = `<div class="text-gray-600 text-sm">${typeof data === 'string' ? data : JSON.stringify(data)}</div>`;
-              }
-            } catch (err) {
-              container.innerHTML = `<div class="text-red-600 text-sm">Inaccessible: ${err.message}</div>`;
-            }
-          }
-          loadHealthAll();
-          // Rafraîchir le statut toutes les 30 secondes
-          setInterval(loadHealthAll, 30000);
-        </script>
 
-        <!-- Carte de déconnexion -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              ></path>
-            </svg>
-            Déconnexion
-          </h2>
-          <div class="space-y-4">
-            <button
-              id="logoutBtn"
-              class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Se déconnecter
-            </button>
-            <div class="msg" id="logoutMsg"></div>
-          </div>
-        </div>
-        <script>
-          // Code de la carte de déconnexion
-          document.getElementById('logoutBtn').addEventListener('click', async () => {
-            const logoutMsg = document.getElementById('logoutMsg');
-            const logoutBtn = document.getElementById('logoutBtn');
-            logoutMsg.innerHTML = '';
-            logoutMsg.className = 'msg mt-3';
-            logoutBtn.disabled = true;
-            try {
-              const res = await fetch('/api/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
-              });
-              if (res.ok) {
-                logoutMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ Déconnexion réussie</div>';
-              } else {
-                const text = await res.text();
-                let data;
-                try {
-                  data = JSON.parse(text);
-                } catch {
-                  data = text;
+                // Mettre à jour l'affichage du bouton et le statut
+                function updateHealthCheckStatus(enabled) {
+                    const toggleBtn = document.getElementById('toggleHealthCheck');
+                    const statusText = document.getElementById('healthCheckStatus');
+                    const refreshStatus = document.getElementById('refreshStatus');
+
+                    if (enabled) {
+                        toggleBtn.className = 'px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 border border-green-300 hover:bg-green-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500';
+                        statusText.textContent = 'ON';
+                        refreshStatus.textContent = 'Activé (30s)';
+                        refreshStatus.className = 'font-medium text-green-600';
+                    } else {
+                        toggleBtn.className = 'px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 border border-red-300 hover:bg-red-200 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500';
+                        statusText.textContent = 'OFF';
+                        refreshStatus.textContent = 'Désactivé';
+                        refreshStatus.className = 'font-medium text-red-600';
+                    }
+
+                    localStorage.setItem('healthCheckEnabled', enabled.toString());
                 }
-                logoutMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
-              }
-            } catch (err) {
-              logoutMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              logoutBtn.disabled = false;
-            }
-          });
-        </script>
 
-        <!-- Carte Me -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-indigo-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              ></path>
-            </svg>
-            Profil utilisateur
-          </h2>
-          <div class="space-y-4">
-            <button
-              id="meBtn"
-              class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Obtenir mes informations
-            </button>
-            <div class="msg" id="meMsg"></div>
-          </div>
-        </div>
-        <script>
-          // Code de la carte Me
-          const meBtn = document.getElementById('meBtn');
-          const meMsg = document.getElementById('meMsg');
+                // Démarrer le health check
+                function startHealthCheck() {
+                    loadHealthAll();
+                    if (healthCheckInterval) clearInterval(healthCheckInterval);
+                    healthCheckInterval = setInterval(loadHealthAll, 30000);
+                }
 
-          function formatUserData(data) {
-            if (!data || typeof data !== 'object') return JSON.stringify(data);
+                // Arrêter le health check
+                function stopHealthCheck() {
+                    if (healthCheckInterval) {
+                        clearInterval(healthCheckInterval);
+                        healthCheckInterval = null;
+                    }
+                }
 
-            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">';
-            if (data.user) {
-              const user = data.user;
-              html += '<div class="space-y-2">';
-              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`;
-              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`;
-              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`;
-              html += `<div><span class="font-medium text-gray-700">2FA Enabled:</span> <span class="text-gray-900">${user.isTwoFactorAuthEnabled ? 'Yes' : 'No'}</span></div>`;
-              html += `<div><span class="font-medium text-gray-700">Role:</span> <span class="text-gray-900">${user.role || 'N/A'}</span></div>`;
-              html += '</div>';
-            } else {
-              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
-            }
-            html += '</div>';
-            return html;
-          }
+                // Charger les données de santé
+                async function loadHealthAll() {
+                    const container = document.getElementById('healthList');
+                    const isEnabled = localStorage.getItem('healthCheckEnabled') !== 'false';
 
-          meBtn.addEventListener('click', async () => {
-            meMsg.innerHTML = '';
-            meMsg.className = 'msg';
-            meBtn.disabled = true;
-            try {
-              const res = await fetch('/api/auth/me', {
-                method: 'GET',
-                credentials: 'include',
-              });
-              const text = await res.text();
-              let data;
-              try {
-                data = JSON.parse(text);
-              } catch {
-                data = text;
-              }
-              if (res.ok) {
-                meMsg.innerHTML =
-                  '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
-                  formatUserData(data);
-              } else {
-                meMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
-              }
-            } catch (err) {
-              meMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              meBtn.disabled = false;
-            }
-          });
-        </script>
+                    if (!isEnabled) {
+                        container.innerHTML = '<li class="text-gray-500 text-sm italic">Health check désactivé</li>';
+                        return;
+                    }
 
-        <!-- Carte Game -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-yellow-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.5a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H9m-6 0V9a6 6 0 0112 0v3.5"
-              ></path>
-            </svg>
-            Jeu
-          </h2>
-          <div class="space-y-4">
-            <button
-              id="gameBtn"
-              class="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Créer une session de jeu
-            </button>
-            <div class="msg" id="gameMsg"></div>
-          </div>
-        </div>
+                    container.innerHTML = '<li class="text-gray-500 text-sm">🔄 Chargement...</li>';
+
+                    try {
+                        const res = await fetch('/public/healthAll', { credentials: 'include' });
+                        const text = await res.text();
+                        let data;
+
+                        try {
+                            data = JSON.parse(text);
+                        } catch {
+                            data = text;
+                        }
+
+                        if (!res.ok) {
+                            container.innerHTML = `<li class="text-red-600 text-sm flex items-center">
+                                <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                                <span>Erreur (${res.status}): ${JSON.stringify(data)}</span>
+                            </li>`;
+                            return;
+                        }
+
+                        if (typeof data === 'object' && data !== null) {
+                            const services = Object.entries(data);
+
+                            if (services.length === 0) {
+                                container.innerHTML = '<li class="text-gray-500 text-sm italic">Aucun service détecté</li>';
+                                return;
+                            }
+
+                            container.innerHTML = '';
+
+                            services.forEach(([service, status]) => {
+                                const li = document.createElement('li');
+                                const s = String(status).toLowerCase();
+                                const healthy = s.includes('healthy') || s === 'ok' || s === 'healthy';
+
+                                li.className = 'flex items-center justify-between py-2 px-3 rounded-lg border transition-colors hover:bg-gray-50';
+                                li.style.borderColor = healthy ? '#d1fae5' : '#fee2e2';
+                                li.style.backgroundColor = healthy ? '#f0fdf4' : '#fef2f2';
+
+                                li.innerHTML = `
+                                    <div class="flex items-center min-w-0 flex-1">
+                                        <svg class="w-4 h-4 mr-3 flex-shrink-0 ${healthy ? 'text-green-600' : 'text-red-600'}" fill="currentColor" viewBox="0 0 20 20">
+                                            ${healthy
+                                        ? '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>'
+                                        : '<path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>'
+                                    }
+                                        </svg>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-medium text-gray-900 truncate">${service}</div>
+                                        </div>
+                                    </div>
+                                    <div class="ml-2 flex-shrink-0">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${healthy
+                                        ? 'bg-green-100 text-green-800 border border-green-200'
+                                        : 'bg-red-100 text-red-800 border border-red-200'
+                                    }">
+                                            ${status}
+                                        </span>
+                                    </div>
+                                `;
+
+                                container.appendChild(li);
+                            });
+                        } else {
+                            container.innerHTML = `<li class="text-gray-600 text-sm py-2 px-3 bg-gray-50 rounded-lg border border-gray-200">
+                                ${typeof data === 'string' ? data : JSON.stringify(data)}
+                            </li>`;
+                        }
+                    } catch (err) {
+                        container.innerHTML = `<li class="text-red-600 text-sm flex items-center py-2 px-3 bg-red-50 rounded-lg border border-red-200">
+                            <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Connexion impossible: ${err.message}</span>
+                        </li>`;
+                    }
+                }
+
+                // Gestionnaire du bouton toggle
+                document.getElementById('toggleHealthCheck').addEventListener('click', () => {
+                    const currentState = localStorage.getItem('healthCheckEnabled') !== 'false';
+                    const newState = !currentState;
+
+                    updateHealthCheckStatus(newState);
+
+                    if (newState) {
+                        startHealthCheck();
+                    } else {
+                        stopHealthCheck();
+                        loadHealthAll(); // Pour afficher le message "désactivé"
+                    }
+                });
+
+                // Initialisation au chargement de la page
+                initHealthCheck();
+            </script>
+
+            <!-- Carte de déconnexion -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+                        </path>
+                    </svg>
+                    Déconnexion
+                </h2>
+                <div class="space-y-4">
+                    <button id="logoutBtn"
+                        class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Se déconnecter
+                    </button>
+                    <div class="msg" id="logoutMsg"></div>
+                </div>
+            </div>
+            <script>
+                // Code de la carte de déconnexion
+                document.getElementById('logoutBtn').addEventListener('click', async () => {
+                    const logoutMsg = document.getElementById('logoutMsg')
+                    const logoutBtn = document.getElementById('logoutBtn')
+                    logoutMsg.innerHTML = ''
+                    logoutMsg.className = 'msg mt-3'
+                    logoutBtn.disabled = true
+                    try {
+                        const res = await fetch('/api/auth/logout', {
+                            method: 'POST',
+                            credentials: 'include',
+                        })
+                        if (res.ok) {
+                            localStorage.removeItem('isLoggedIn');
+                            stopHeartbeat();
+                            logoutMsg.innerHTML =
+                                '<div class="text-green-700 font-medium">✓ Déconnexion réussie</div>'
+                        } else {
+                            const text = await res.text()
+                            let data
+                            try {
+                                data = JSON.parse(text)
+                            } catch {
+                                data = text
+                            }
+                            logoutMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                        }
+                    } catch (err) {
+                        logoutMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        logoutBtn.disabled = false
+                    }
+                })
+            </script>
+
+            <!-- Carte Me -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Profil utilisateur
+                </h2>
+                <div class="space-y-4">
+                    <button id="meBtn"
+                        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Obtenir mes informations
+                    </button>
+                    <div class="msg" id="meMsg"></div>
+                </div>
+            </div>
+            <script>
+                // Code de la carte Me
+                const meBtn = document.getElementById('meBtn')
+                const meMsg = document.getElementById('meMsg')
+
+                function formatUserData(data) {
+                    if (!data || typeof data !== 'object') return JSON.stringify(data)
+
+                    let html = '<div class="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-xl mt-3 border border-gray-200 shadow-sm">'
+                    if (data.user) {
+                        const user = data.user
+                        const isAdmin = user.role === 'admin'
+                        const has2FA = user.isTwoFactorAuthEnabled || user.is2FAEnabled
+
+                        // En-tête avec avatar et nom
+                        html += '<div class="flex items-start space-x-4 mb-6">'
+                        html += `<div class="flex-shrink-0 w-16 h-16 ${isAdmin ? 'bg-gradient-to-br from-purple-500 to-purple-600' : 'bg-gradient-to-br from-blue-500 to-blue-600'} text-white rounded-full flex items-center justify-center text-2xl font-bold shadow-lg">`
+                        html += `${(user.username || 'U').charAt(0).toUpperCase()}`
+                        html += `</div>`
+                        html += '<div class="flex-1">'
+                        html += `<h3 class="text-xl font-bold text-gray-900">${user.username || 'N/A'}</h3>`
+                        html += `<p class="text-sm text-gray-600">${user.email || 'N/A'}</p>`
+                        html += '<div class="flex items-center space-x-2 mt-2">'
+
+                        // Badge rôle
+                        if (isAdmin) {
+                            html += `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-100 text-purple-800 border border-purple-200">`
+                            html += `👑 Administrateur`
+                        } else {
+                            html += `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 border border-gray-200">`
+                            html += `👤 Utilisateur`
+                        }
+                        html += `</span>`
+
+                        // Badge 2FA
+                        if (has2FA) {
+                            html += `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">`
+                            html += `🔐 2FA Activée`
+                        } else {
+                            html += `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-100 text-orange-800 border border-orange-200">`
+                            html += `⚠️ 2FA Désactivée`
+                        }
+                        html += `</span>`
+
+                        html += '</div>'
+                        html += '</div>'
+                        html += '</div>'
+
+                        // Informations détaillées dans une grille
+                        html += '<div class="bg-white rounded-lg p-4 space-y-3 shadow-sm border border-gray-200">'
+                        html += '<div class="grid grid-cols-2 gap-4">'
+
+                        // ID
+                        html += '<div class="col-span-1">'
+                        html += '<div class="flex items-center space-x-2">'
+                        html += `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
+                        html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>`
+                        html += `</svg>`
+                        html += '<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">ID Utilisateur</span>'
+                        html += '</div>'
+                        html += `<p class="mt-1 text-sm font-mono text-gray-900">#${user.id || 'N/A'}</p>`
+                        html += '</div>'
+
+                        // Username
+                        html += '<div class="col-span-1">'
+                        html += '<div class="flex items-center space-x-2">'
+                        html += `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
+                        html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>`
+                        html += `</svg>`
+                        html += '<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Nom d\'utilisateur</span>'
+                        html += '</div>'
+                        html += `<p class="mt-1 text-sm font-medium text-gray-900">${user.username || 'N/A'}</p>`
+                        html += '</div>'
+
+                        // Email (span complet)
+                        html += '<div class="col-span-2">'
+                        html += '<div class="flex items-center space-x-2">'
+                        html += `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
+                        html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>`
+                        html += `</svg>`
+                        html += '<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Adresse Email</span>'
+                        html += '</div>'
+                        html += `<p class="mt-1 text-sm text-gray-900">${user.email || 'N/A'}</p>`
+                        html += '</div>'
+
+                        // Rôle
+                        html += '<div class="col-span-1">'
+                        html += '<div class="flex items-center space-x-2">'
+                        html += `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
+                        html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>`
+                        html += `</svg>`
+                        html += '<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Rôle</span>'
+                        html += '</div>'
+                        html += `<p class="mt-1 text-sm font-medium ${isAdmin ? 'text-purple-700' : 'text-gray-900'}">`
+                        html += `${isAdmin ? '👑 Administrateur' : '👤 Utilisateur'}`
+                        html += `</p>`
+                        html += '</div>'
+
+                        // 2FA
+                        html += '<div class="col-span-1">'
+                        html += '<div class="flex items-center space-x-2">'
+                        html += `<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
+                        html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>`
+                        html += `</svg>`
+                        html += '<span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Authentification 2FA</span>'
+                        html += '</div>'
+                        html += `<p class="mt-1 text-sm font-medium ${has2FA ? 'text-green-700' : 'text-orange-700'}">`
+                        html += `${has2FA ? '🔐 Activée' : '⚠️ Désactivée'}`
+                        html += `</p>`
+                        html += '</div>'
+
+                        html += '</div>'
+                        html += '</div>'
+
+                        // Lien admin si applicable
+                        if (isAdmin) {
+                            html += `<div class="mt-6 pt-4 border-t border-gray-200">`
+                            html += `<a href="/admin" class="inline-flex items-center justify-center w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg">`
+                            html += `<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">`
+                            html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>`
+                            html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>`
+                            html += `</svg>`
+                            html += `👑 Accéder au Panneau d'Administration`
+                            html += `</a>`
+                            html += `</div>`
+                        }
+
+                        html += '</div>'
+                    } else {
+                        html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+                    }
+                    html += '</div>'
+                    return html
+                }
+
+                meBtn.addEventListener('click', async () => {
+                    meMsg.innerHTML = ''
+                    meMsg.className = 'msg'
+                    meBtn.disabled = true
+                    try {
+                        const res = await fetch('/api/auth/me', {
+                            method: 'GET',
+                            credentials: 'include',
+                        })
+                        const text = await res.text()
+                        let data
+                        try {
+                            data = JSON.parse(text)
+                        } catch {
+                            data = text
+                        }
+                        if (res.ok) {
+                            meMsg.innerHTML =
+                                '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
+                                formatUserData(data)
+                        } else {
+                            meMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                        }
+                    } catch (err) {
+                        meMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        meBtn.disabled = false
+                    }
+                })
+            </script>
+
+            <!-- Carte Game -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1.5a1.5 1.5 0 011.5 1.5v1a1.5 1.5 0 01-1.5 1.5H9m-6 0V9a6 6 0 0112 0v3.5">
+                        </path>
+                    </svg>
+                    Jeu
+                </h2>
+                <div class="space-y-4">
+                    <button id="gameBtn"
+                        class="w-full bg-yellow-600 text-white py-2 px-4 rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Créer une session de jeu
+                    </button>
+                    <div class="msg" id="gameMsg"></div>
+                </div>
+            </div>
 
         <!-- Carte Liste des utilisateurs -->
         <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
@@ -702,586 +956,393 @@
           </div>
         </div>
 
-        <!-- Carte Configuration 2FA -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-purple-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              ></path>
-            </svg>
-            Configurer la 2FA
-          </h2>
-          <div class="space-y-4">
-            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-              <div class="flex items-start">
-                <svg
-                  class="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
-                <span class="text-sm text-blue-800"
-                  >Activez la double authentification avec Google Authenticator</span
-                >
-              </div>
-            </div>
-            <button
-              id="setup2FABtn"
-              class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Générer le QR Code
-            </button>
-            <div id="qrCodeSection" class="hidden">
-              <div class="bg-gray-50 p-4 rounded-lg text-center">
-                <img
-                  id="qrCodeImg"
-                  class="mx-auto mb-3 border-2 border-gray-200 rounded-lg"
-                  style="max-width: 250px"
-                />
-                <div class="text-xs text-gray-600 mb-2">Secret TOTP:</div>
-                <div
-                  id="totpSecret"
-                  class="text-xs font-mono bg-white p-2 rounded border break-all mb-3"
-                ></div>
-                <div class="text-xs text-gray-500 mb-3">
-                  Scannez le QR code avec Google Authenticator
+            <!-- Carte Configuration 2FA -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                        </path>
+                    </svg>
+                    Configurer la 2FA
+                </h2>
+                <div class="space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <svg class="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-sm text-blue-800">Activez la double authentification avec Google
+                                Authenticator</span>
+                        </div>
+                    </div>
+                    <button id="setup2FABtn"
+                        class="w-full bg-purple-600 text-white py-2 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Générer le QR Code
+                    </button>
+                    <div id="qrCodeSection" class="hidden">
+                        <div class="bg-gray-50 p-4 rounded-lg text-center">
+                            <img id="qrCodeImg" class="mx-auto mb-3 border-2 border-gray-200 rounded-lg"
+                                style="max-width: 250px" />
+                            <div class="text-xs text-gray-600 mb-2">Secret TOTP:</div>
+                            <div id="totpSecret" class="text-xs font-mono bg-white p-2 rounded border break-all mb-3">
+                            </div>
+                            <div class="text-xs text-gray-500 mb-3">
+                                Scannez le QR code avec Google Authenticator
+                            </div>
+                        </div>
+                        <div>
+                            <label for="verify2FACode" class="block text-sm font-medium text-gray-700 mb-1">Code à 6
+                                chiffres</label>
+                            <input id="verify2FACode" type="text" maxlength="6" placeholder="000000"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center font-mono text-lg" />
+                        </div>
+                        <button id="verify2FABtn"
+                            class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                            Activer la 2FA
+                        </button>
+                    </div>
+                    <div class="msg" id="setup2FAMsg"></div>
                 </div>
-              </div>
-              <div>
-                <label for="verify2FACode" class="block text-sm font-medium text-gray-700 mb-1"
-                  >Code à 6 chiffres</label
-                >
-                <input
-                  id="verify2FACode"
-                  type="text"
-                  maxlength="6"
-                  placeholder="000000"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-center font-mono text-lg"
-                />
-              </div>
-              <button
-                id="verify2FABtn"
-                class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                Activer la 2FA
-              </button>
             </div>
-            <div class="msg" id="setup2FAMsg"></div>
-          </div>
-        </div>
-        <script>
-          // Code de la carte Configuration 2FA
-          const setup2FABtn = document.getElementById('setup2FABtn');
-          const verify2FABtn = document.getElementById('verify2FABtn');
-          const setup2FAMsg = document.getElementById('setup2FAMsg');
-          const qrCodeSection = document.getElementById('qrCodeSection');
-          const qrCodeImg = document.getElementById('qrCodeImg');
-          const totpSecret = document.getElementById('totpSecret');
-          const verify2FACode = document.getElementById('verify2FACode');
+            <script>
+                // Code de la carte Configuration 2FA
+                const setup2FABtn = document.getElementById('setup2FABtn')
+                const verify2FABtn = document.getElementById('verify2FABtn')
+                const setup2FAMsg = document.getElementById('setup2FAMsg')
+                const qrCodeSection = document.getElementById('qrCodeSection')
+                const qrCodeImg = document.getElementById('qrCodeImg')
+                const totpSecret = document.getElementById('totpSecret')
+                const verify2FACode = document.getElementById('verify2FACode')
 
-          setup2FABtn.addEventListener('click', async () => {
-            setup2FAMsg.innerHTML = '';
-            setup2FAMsg.className = 'msg mt-3';
-            setup2FABtn.disabled = true;
-            qrCodeSection.classList.add('hidden');
+                setup2FABtn.addEventListener('click', async () => {
+                    setup2FAMsg.innerHTML = ''
+                    setup2FAMsg.className = 'msg mt-3'
+                    setup2FABtn.disabled = true
+                    qrCodeSection.classList.add('hidden')
 
-            try {
-              const res = await fetch('/api/auth/2fa/setup', {
-                method: 'POST',
-                credentials: 'include',
-              });
-              const text = await res.text();
-              let data;
-              try {
-                data = JSON.parse(text);
-              } catch {
-                data = text;
-              }
+                    try {
+                        const res = await fetch('/api/auth/2fa/setup', {
+                            method: 'POST',
+                            credentials: 'include',
+                        })
+                        const text = await res.text()
+                        let data
+                        try {
+                            data = JSON.parse(text)
+                        } catch {
+                            data = text
+                        }
 
-              if (res.ok && data.result) {
-                const result = data.result;
+                        if (res.ok && data.result) {
+                            const result = data.result
 
-                // Afficher le QR code (le secret est stocké côté serveur)
-                qrCodeImg.src = result.qrCode;
-                totpSecret.textContent = 'Secret stocké de manière sécurisée côté serveur';
-                qrCodeSection.classList.remove('hidden');
+                            // Afficher le QR code (le secret est stocké côté serveur)
+                            qrCodeImg.src = result.qrCode
+                            totpSecret.textContent = 'Secret stocké de manière sécurisée côté serveur'
+                            qrCodeSection.classList.remove('hidden')
 
-                const expiresIn = result.expiresIn || 120;
-                setup2FAMsg.innerHTML = `<div class="text-green-700 font-medium">✓ QR Code généré avec succès<br>
-                  <span class="text-sm">Session valide ${expiresIn} secondes</span></div>`;
-              } else {
-                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
-              }
-            } catch (err) {
-              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              setup2FABtn.disabled = false;
-            }
-          });
+                            const expiresIn = result.expiresIn || 120
+                            setup2FAMsg.innerHTML = `<div class="text-green-700 font-medium">✓ QR Code généré avec succès<br>
+                  <span class="text-sm">Session valide ${expiresIn} secondes</span></div>`
+                        } else {
+                            setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                        }
+                    } catch (err) {
+                        setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        setup2FABtn.disabled = false
+                    }
+                })
 
-          verify2FABtn.addEventListener('click', async () => {
-            const code = verify2FACode.value.trim();
-            if (!code || code.length !== 6) {
-              setup2FAMsg.innerHTML =
-                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>';
-              return;
-            }
+                verify2FABtn.addEventListener('click', async () => {
+                    const code = verify2FACode.value.trim()
+                    if (!code || code.length !== 6) {
+                        setup2FAMsg.innerHTML =
+                            '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>'
+                        return
+                    }
 
-            setup2FAMsg.innerHTML = '';
-            setup2FAMsg.className = 'msg mt-3';
-            verify2FABtn.disabled = true;
+                    setup2FAMsg.innerHTML = ''
+                    setup2FAMsg.className = 'msg mt-3'
+                    verify2FABtn.disabled = true
 
-            try {
-              const res = await fetch('/api/auth/2fa/setup/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                  code: code,
-                  // Le secret n'est PAS envoyé, il est déjà stocké côté serveur
-                }),
-              });
-              const text = await res.text();
-              let data;
-              try {
-                data = JSON.parse(text);
-              } catch {
-                data = text;
-              }
+                    try {
+                        const res = await fetch('/api/auth/2fa/setup/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({
+                                code: code,
+                                // Le secret n'est PAS envoyé, il est déjà stocké côté serveur
+                            }),
+                        })
+                        const text = await res.text()
+                        let data
+                        try {
+                            data = JSON.parse(text)
+                        } catch {
+                            data = text
+                        }
 
-              if (res.ok) {
-                setup2FAMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ 2FA activée avec succès ! Vous êtes maintenant connecté.</div>';
-                qrCodeSection.classList.add('hidden');
-                verify2FACode.value = '';
-              } else {
-                setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
-              }
-            } catch (err) {
-              setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              verify2FABtn.disabled = false;
-            }
-          });
-        </script>
+                        if (res.ok) {
+                            setup2FAMsg.innerHTML =
+                                '<div class="text-green-700 font-medium">✓ 2FA activée avec succès ! Vous êtes maintenant connecté.</div>'
+                            qrCodeSection.classList.add('hidden')
+                            verify2FACode.value = ''
+                        } else {
+                            setup2FAMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                        }
+                    } catch (err) {
+                        setup2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        verify2FABtn.disabled = false
+                    }
+                })
+            </script>
 
-        <!-- Carte Vérification 2FA (Login) -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-orange-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              ></path>
-            </svg>
-            Vérification 2FA
-          </h2>
-          <div class="space-y-4">
-            <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
-              <div class="flex items-start">
-                <svg
-                  class="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
-                <span class="text-sm text-orange-800"
-                  >Utilisez cette carte après le login si la 2FA est activée</span
-                >
-              </div>
+            <!-- Carte Vérification 2FA (Login) -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                    Vérification 2FA
+                </h2>
+                <div class="space-y-4">
+                    <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <svg class="w-4 h-4 text-orange-600 mr-2 mt-0.5 flex-shrink-0" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-sm text-orange-800">Utilisez cette carte après le login si la 2FA est
+                                activée</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="login2FACode" class="block text-sm font-medium text-gray-700 mb-1">Code à 6
+                            chiffres</label>
+                        <input id="login2FACode" type="text" maxlength="6" placeholder="000000"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center font-mono text-lg" />
+                    </div>
+                    <button id="verifyLogin2FABtn"
+                        class="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Vérifier et se connecter
+                    </button>
+                    <div class="msg" id="verifyLogin2FAMsg"></div>
+                </div>
             </div>
-            <div>
-              <label for="login2FACode" class="block text-sm font-medium text-gray-700 mb-1"
-                >Code à 6 chiffres</label
-              >
-              <input
-                id="login2FACode"
-                type="text"
-                maxlength="6"
-                placeholder="000000"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center font-mono text-lg"
-              />
+            <script>
+                // Code de la carte Vérification 2FA (Login)
+                const verifyLogin2FABtn = document.getElementById('verifyLogin2FABtn')
+                const verifyLogin2FAMsg = document.getElementById('verifyLogin2FAMsg')
+                const login2FACode = document.getElementById('login2FACode')
+
+                verifyLogin2FABtn.addEventListener('click', async () => {
+                    const code = login2FACode.value.trim()
+
+                    if (!code || code.length !== 6) {
+                        verifyLogin2FAMsg.innerHTML =
+                            '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>'
+                        verifyLogin2FAMsg.className = 'msg mt-3'
+                        return
+                    }
+
+                    verifyLogin2FAMsg.innerHTML = ''
+                    verifyLogin2FAMsg.className = 'msg mt-3'
+                    verifyLogin2FABtn.disabled = true
+
+                    try {
+                        const res = await fetch('/api/auth/2fa/verify', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ code: code }),
+                        })
+                        const text = await res.text()
+                        let data
+                        try {
+                            data = JSON.parse(text)
+                        } catch {
+                            data = text
+                        }
+
+                        if (res.ok) {
+                            localStorage.setItem('isLoggedIn', 'true');
+                            startHeartbeat();
+                            verifyLogin2FAMsg.innerHTML =
+                                '<div class="text-green-700 font-medium">✓ Connexion réussie avec 2FA !</div>'
+                            login2FACode.value = ''
+                        } else {
+                            verifyLogin2FAMsg.innerHTML = formatErrorMessage({
+                                ok: false,
+                                status: res.status,
+                                data,
+                            })
+                        }
+                    } catch (err) {
+                        verifyLogin2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        verifyLogin2FABtn.disabled = false
+                    }
+                })
+            </script>
+
+            <!-- Carte Désactivation 2FA -->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                        </path>
+                    </svg>
+                    Désactiver la 2FA
+                </h2>
+                <div class="space-y-4">
+                    <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                        <div class="flex items-start">
+                            <svg class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                                </path>
+                            </svg>
+                            <span class="text-sm text-red-800">⚠️ Attention: Vous devez être connecté pour désactiver la
+                                2FA</span>
+                        </div>
+                    </div>
+                    <button id="disable2FABtn"
+                        class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Désactiver la 2FA
+                    </button>
+                    <div class="msg" id="disable2FAMsg"></div>
+                </div>
             </div>
-            <button
-              id="verifyLogin2FABtn"
-              class="w-full bg-orange-600 text-white py-2 px-4 rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Vérifier et se connecter
-            </button>
-            <div class="msg" id="verifyLogin2FAMsg"></div>
-          </div>
-        </div>
-        <script>
-          // Code de la carte Vérification 2FA (Login)
-          const verifyLogin2FABtn = document.getElementById('verifyLogin2FABtn');
-          const verifyLogin2FAMsg = document.getElementById('verifyLogin2FAMsg');
-          const login2FACode = document.getElementById('login2FACode');
+            <script>
+                // Code de la carte Désactivation 2FA
+                const disable2FABtn = document.getElementById('disable2FABtn')
+                const disable2FAMsg = document.getElementById('disable2FAMsg')
 
-          verifyLogin2FABtn.addEventListener('click', async () => {
-            const code = login2FACode.value.trim();
+                disable2FABtn.addEventListener('click', async () => {
+                    if (!confirm('Êtes-vous sûr de vouloir désactiver la double authentification ?')) {
+                        return
+                    }
 
-            if (!code || code.length !== 6) {
-              verifyLogin2FAMsg.innerHTML =
-                '<div class="text-red-700">Veuillez entrer un code à 6 chiffres</div>';
-              verifyLogin2FAMsg.className = 'msg mt-3';
-              return;
-            }
+                    disable2FAMsg.innerHTML = ''
+                    disable2FAMsg.className = 'msg mt-3'
+                    disable2FABtn.disabled = true
 
-            verifyLogin2FAMsg.innerHTML = '';
-            verifyLogin2FAMsg.className = 'msg mt-3';
-            verifyLogin2FABtn.disabled = true;
+                    try {
+                        const res = await fetch('/api/auth/2fa/disable', {
+                            method: 'POST',
+                            credentials: 'include',
+                        })
+                        const text = await res.text()
+                        let data
+                        try {
+                            data = JSON.parse(text)
+                        } catch {
+                            data = text
+                        }
 
-            try {
-              const res = await fetch('/api/auth/2fa/verify', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({ code: code }),
-              });
-              const text = await res.text();
-              let data;
-              try {
-                data = JSON.parse(text);
-              } catch {
-                data = text;
-              }
+                        if (res.ok) {
+                            disable2FAMsg.innerHTML =
+                                '<div class="text-green-700 font-medium">✓ 2FA désactivée avec succès</div>'
+                        } else {
+                            disable2FAMsg.innerHTML = formatErrorMessage({
+                                ok: false,
+                                status: res.status,
+                                data,
+                            })
+                        }
+                    } catch (err) {
+                        disable2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        disable2FABtn.disabled = false
+                    }
+                })
+            </script>
 
-              if (res.ok) {
-                verifyLogin2FAMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ Connexion réussie avec 2FA !</div>';
-                login2FACode.value = '';
-              } else {
-                verifyLogin2FAMsg.innerHTML = formatErrorMessage({
-                  ok: false,
-                  status: res.status,
-                  data,
-                });
-              }
-            } catch (err) {
-              verifyLogin2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              verifyLogin2FABtn.disabled = false;
-            }
-          });
-        </script>
-
-        <!-- Carte Désactivation 2FA -->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-red-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              ></path>
-            </svg>
-            Désactiver la 2FA
-          </h2>
-          <div class="space-y-4">
-            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
-              <div class="flex items-start">
-                <svg
-                  class="w-4 h-4 text-red-600 mr-2 mt-0.5 flex-shrink-0"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                  ></path>
-                </svg>
-                <span class="text-sm text-red-800"
-                  >⚠️ Attention: Vous devez être connecté pour désactiver la 2FA</span
-                >
-              </div>
+            <!-- Carte Blockchain-->
+            <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Liste tokens enregistrés
+                </h2>
+                <div class="space-y-4">
+                    <button id="blockBtn"
+                        class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                        Liste snapshots Blockchain enregistrés
+                    </button>
+                    <div class="msg" id="blockMsg"></div>
+                </div>
             </div>
-            <button
-              id="disable2FABtn"
-              class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Désactiver la 2FA
-            </button>
-            <div class="msg" id="disable2FAMsg"></div>
-          </div>
+            <script>
+                // Code de la carte blockchain
+                const blockBtn = document.getElementById('blockBtn')
+                const blockMsg = document.getElementById('blockMsg')
+
+                function formatBlockchainData(data) {
+                    if (!data || typeof data !== 'object') return JSON.stringify(data)
+
+                    let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">'
+                    if (data.user) {
+                        const user = data.user
+                        html += '<div class="space-y-2">'
+                        html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`
+                        html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`
+                        html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`
+                        html += '</div>'
+                    } else {
+                        html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`
+                    }
+                    html += '</div>'
+                    return html
+                }
+
+                blockBtn.addEventListener('click', async () => {
+                    blockMsg.innerHTML = ''
+                    blockMsg.className = 'msg'
+                    blockBtn.disabled = true
+                    try {
+                        const res = await fetch('/api/block/list', {
+                            method: 'GET',
+                            credentials: 'include',
+                        })
+                        const text = await res.text()
+                        let data
+                        try {
+                            data = JSON.parse(text)
+                        } catch {
+                            data = text
+                        }
+                        if (res.ok) {
+                            blockMsg.innerHTML =
+                                '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
+                                formatBlockchainData(data)
+                        } else {
+                            blockMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data })
+                        }
+                    } catch (err) {
+                        blockMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`
+                    } finally {
+                        blockBtn.disabled = false
+                    }
+                })
+            </script>
         </div>
-        <script>
-          // Code de la carte Désactivation 2FA
-          const disable2FABtn = document.getElementById('disable2FABtn');
-          const disable2FAMsg = document.getElementById('disable2FAMsg');
 
-          disable2FABtn.addEventListener('click', async () => {
-            if (!confirm('Êtes-vous sûr de vouloir désactiver la double authentification ?')) {
-              return;
-            }
-
-            disable2FAMsg.innerHTML = '';
-            disable2FAMsg.className = 'msg mt-3';
-            disable2FABtn.disabled = true;
-
-            try {
-              const res = await fetch('/api/auth/2fa/disable', {
-                method: 'POST',
-                credentials: 'include',
-              });
-              const text = await res.text();
-              let data;
-              try {
-                data = JSON.parse(text);
-              } catch {
-                data = text;
-              }
-
-              if (res.ok) {
-                disable2FAMsg.innerHTML =
-                  '<div class="text-green-700 font-medium">✓ 2FA désactivée avec succès</div>';
-              } else {
-                disable2FAMsg.innerHTML = formatErrorMessage({
-                  ok: false,
-                  status: res.status,
-                  data,
-                });
-              }
-            } catch (err) {
-              disable2FAMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              disable2FABtn.disabled = false;
-            }
-          });
-        </script>
-
-        <!-- Carte Blockchain-->
-        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-          <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            <svg
-              class="w-5 h-5 mr-2 text-indigo-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-              ></path>
-            </svg>
-            Liste tokens enregistrés
-          </h2>
-          <div class="space-y-4">
-            <button
-              id="blockBtn"
-              class="w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              Liste snapshots Blockchain enregistrés
-            </button>
-            <div class="msg" id="blockMsg"></div>
-          </div>
-        </div>
-        <script>
-          // Code de la carte blockchain
-          const blockBtn = document.getElementById('blockBtn');
-          const blockMsg = document.getElementById('blockMsg');
-
-          function formatUserData(data) {
-            if (!data || typeof data !== 'object') return JSON.stringify(data);
-
-            let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">';
-            if (data.user) {
-              const user = data.user;
-              html += '<div class="space-y-2">';
-              html += `<div><span class="font-medium text-gray-700">ID:</span> <span class="text-gray-900">${user.id || 'N/A'}</span></div>`;
-              html += `<div><span class="font-medium text-gray-700">Username:</span> <span class="text-gray-900">${user.username || 'N/A'}</span></div>`;
-              html += `<div><span class="font-medium text-gray-700">Email:</span> <span class="text-gray-900">${user.email || 'N/A'}</span></div>`;
-              html += '</div>';
-            } else {
-              html += `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
-            }
-            html += '</div>';
-            return html;
-          }
-
-          blockBtn.addEventListener('click', async () => {
-            blockMsg.innerHTML = '';
-            blockMsg.className = 'msg';
-            blockBtn.disabled = true;
-            try {
-              const res = await fetch('/api/block/tournaments', {
-                method: 'GET',
-                credentials: 'include',
-              });
-              const text = await res.text();
-              let data;
-              try {
-                data = JSON.parse(text);
-              } catch {
-                data = text;
-              }
-              if (res.ok) {
-                blockMsg.innerHTML =
-                  '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
-                  formatUserData(data);
-              } else {
-                blockMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
-              }
-            } catch (err) {
-              blockMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-            } finally {
-              blockBtn.disabled = false;
-            }
-          });
-        </script>
-      </div>
-
-      <script>
-        // Code de la carte Liste des utilisateurs
-        const listUsersBtn = document.getElementById('listUsersBtn');
-        const listUsersMsg = document.getElementById('listUsersMsg');
-
-        function formatUserList(data) {
-          if (!data || !data.result || !data.result.users || !Array.isArray(data.result.users)) {
-            return `<pre class="text-sm text-gray-700 whitespace-pre-wrap">${JSON.stringify(data, null, 2)}</pre>`;
-          }
-
-          const users = data.result.users;
-          let html = '<div class="bg-gray-50 p-4 rounded-lg mt-3">';
-          html += `<div class="flex items-center justify-between mb-4">`;
-          html += `<div class="text-sm font-medium text-gray-700">${users.length} utilisateur(s) trouvé(s):</div>`;
-          html += `<div class="text-xs text-gray-500">👑 Interface Administrateur</div>`;
-          html += `</div>`;
-          html += '<div class="space-y-4">';
-
-          users.forEach((user, index) => {
-            const userId = `user-${user.id || index}`;
-            html += `<div class="bg-white border border-gray-200 rounded-lg overflow-hidden">`;
-
-            // Header avec infos principales
-            html += `<div class="bg-gray-50 px-4 py-3 border-b">`;
-            html += `<div class="flex items-center justify-between">`;
-            html += `<div class="flex items-center space-x-3">`;
-            html += `<div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-medium">`;
-            html += `${(user.username || 'U').charAt(0).toUpperCase()}`;
-            html += `</div>`;
-            html += `<div>`;
-            html += `<div class="font-medium text-gray-900">${user.username || 'N/A'}</div>`;
-            html += `<div class="text-sm text-gray-600">${user.email || 'Email non disponible'}</div>`;
-            html += `</div>`;
-            html += `</div>`;
-            html += `<div class="flex items-center space-x-2">`;
-            html += `<span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">ID: ${user.id || 'N/A'}</span>`;
-            html += `<button onclick="togglePassword('${userId}')" class="text-xs bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded transition-colors">`;
-            html += `<span id="toggle-${userId}">Voir hash</span>`;
-            html += `</button>`;
-            html += `</div>`;
-            html += `</div>`;
-            html += `</div>`;
-
-            // Section mot de passe (initialement cachée)
-            html += `<div id="password-${userId}" class="hidden px-4 py-3 bg-red-50 border-l-4 border-red-200">`;
-            html += `<div class="flex items-start space-x-2">`;
-            html += `<svg class="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">`;
-            html += `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>`;
-            html += `</svg>`;
-            html += `<div class="flex-1 min-w-0">`;
-            html += `<div class="text-xs font-medium text-red-800 mb-1">Hash bcrypt (sensible):</div>`;
-            html += `<div class="text-xs font-mono text-red-700 bg-red-100 p-2 rounded border break-all">`;
-            html += `${user.password || 'N/A'}`;
-            html += `</div>`;
-            html += `<div class="text-xs text-red-600 mt-1">⚠️ Information confidentielle - Ne pas partager</div>`;
-            html += `</div>`;
-            html += `</div>`;
-            html += `</div>`;
-
-            html += `</div>`;
-          });
-
-          html += '</div></div>';
-          return html;
-        }
-
-        // Fonction pour toggle l'affichage des mots de passe
-        function togglePassword(userId) {
-          const passwordDiv = document.getElementById(`password-${userId}`);
-          const toggleText = document.getElementById(`toggle-${userId}`);
-
-          if (passwordDiv.classList.contains('hidden')) {
-            passwordDiv.classList.remove('hidden');
-            toggleText.textContent = 'Cacher hash';
-          } else {
-            passwordDiv.classList.add('hidden');
-            toggleText.textContent = 'Voir hash';
-          }
-        }
-
-        listUsersBtn.addEventListener('click', async () => {
-          listUsersMsg.innerHTML = '';
-          listUsersMsg.className = 'msg';
-          listUsersBtn.disabled = true;
-          try {
-            const res = await fetch('/api/auth/list', {
-              method: 'GET',
-              credentials: 'include',
-            });
-            const text = await res.text();
-            let data;
-            try {
-              data = JSON.parse(text);
-            } catch {
-              data = text;
-            }
-            if (res.ok) {
-              listUsersMsg.innerHTML =
-                '<div class="text-green-700 font-medium mb-2">✓ Données récupérées</div>' +
-                formatUserList(data);
-            } else {
-              listUsersMsg.innerHTML = formatErrorMessage({ ok: false, status: res.status, data });
-            }
-          } catch (err) {
-            listUsersMsg.innerHTML = `<div class="text-red-700">Requête impossible: ${err.message}</div>`;
-          } finally {
-            listUsersBtn.disabled = false;
-          }
-        });
-      </script>
-      <script src="app.js"></script>
+        <script src="app.js"></script>
     </div>
-  </body>
+</body>
+
 </html>

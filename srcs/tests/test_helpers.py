@@ -76,6 +76,15 @@ class TestSession:
         )
         return response
 
+    def put(self, endpoint: str, json: Optional[Dict] = None, expected_status: int = 200) -> requests.Response:
+        """PUT request avec validation du status"""
+        url = self._build_url(endpoint)
+        response = self.session.put(url, json=json)
+        assert response.status_code == expected_status, (
+            f"Expected {expected_status}, got {response.status_code}: {response.text}"
+        )
+        return response
+
     def login(self, username: str, password: str) -> Dict[str, Any]:
         """Login et stockage des infos utilisateur"""
         response = self.post("/auth/login", json={"username": username, "password": password})

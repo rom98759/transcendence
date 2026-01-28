@@ -174,3 +174,4 @@ output.css
 **/src/SmartContract/artifacts
 **/src/SmartContract/dump.rdb
 make/scripts/certs/certs
+.venv

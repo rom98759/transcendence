@@ -4,8 +4,7 @@ import { logger } from '../utils/logger.js';
 import { CatchAllParams } from '../types/params.types.js';
 import { mtlsAgent } from '../utils/mtlsAgent.js';
 import { MTLSRequestInit } from '../types/https.js';
-
-const AUTH_SERVICE_URL = 'https://auth-service:3001';
+import { GATEWAY_CONFIG } from '../utils/constants.js';
 
 export function registerAuthRoutes(app: FastifyInstance) {
   // Route health spécifique
@@ -15,7 +14,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
     const init: MTLSRequestInit = {
       dispatcher: mtlsAgent,
     };
-    const res = await proxyRequest(app, request, reply, `${AUTH_SERVICE_URL}/health`, init);
+    const res = await proxyRequest(app, request, reply, `${GATEWAY_CONFIG.SERVICES.AUTH}/health`);
     return res;
   });
 
@@ -25,7 +24,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
     async (request: FastifyRequest<{ Params: CatchAllParams }>, reply: FastifyReply) => {
       const rawPath = request.params['*'];
       const cleanPath = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
-      const url = `${AUTH_SERVICE_URL}/${cleanPath}`;
+      const url = `${GATEWAY_CONFIG.SERVICES.AUTH}/${cleanPath}`;
       const queryString = new URL(request.url, 'https://localhost').search;
       const fullUrl = `${url}${queryString}`;
 

@@ -3,9 +3,32 @@
  * Utiliser ces valeurs dans tout le code pour maintenir la cohérence
  */
 
-export const UM_SERVICE_NAME = process.env['UM_SERVICE_NAME'] || 'user-service';
-export const UM_SERVICE_PORT = process.env['UM_SERVICE_PORT'] || '3002';
-export const UM_SERVICE_URL = `https://${UM_SERVICE_NAME}:${UM_SERVICE_PORT}`;
+import { authenv, UM_SERVICE_URL } from '../config/env.js';
+
+export { UM_SERVICE_URL };
+
+/**
+ * Convertit une chaîne de temps (ex: "1 minute", "5 minutes") en secondes
+ */
+export function parseTimeWindowToSeconds(timeWindow: string): number {
+  const match = timeWindow.match(/(\d+)\s*(second|minute|hour|day)s?/i);
+  if (!match) return 60; // Fallback: 1 minute
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2].toLowerCase();
+
+  const multipliers: Record<string, number> = {
+    second: 1,
+    minute: 60,
+    hour: 3600,
+    day: 86400,
+  };
+
+  return value * (multipliers[unit] || 60);
+}
+
+// Adapter les limites selon l'environnement
+const isTestOrDev = ['test', 'development'].includes(authenv.NODE_ENV);
 
 export const AUTH_CONFIG = {
   // JWT Configuration
@@ -33,24 +56,43 @@ export const AUTH_CONFIG = {
   TOTP_WINDOW: 1, // ±30 secondes
   TOTP_STEP: 30, // Période de rotation (30 secondes standard)
   TOTP_DIGITS: 6, // Code à 6 chiffres
-  TOTP_ISSUER: process.env.APP_NAME || 'Transcendence',
+  TOTP_ISSUER: authenv.APP_NAME,
   TOTP_SETUP_EXPIRATION_SECONDS: 120, // Expiration du secret temporaire en secondes
 
   // Maintenance
   CLEANUP_INTERVAL_MS: 5 * 60 * 1000, // 5 minutes en millisecondes
+  ONLINE_STATUS_CLEANUP_INTERVAL_MS: 60 * 1000, // 60 secondes en millisecondes
 
   // Cookie Configuration
   COOKIE_MAX_AGE_SECONDS: 60 * 60, // 1 heure (sync avec JWT)
   COOKIE_2FA_MAX_AGE_SECONDS: 120, // 2 minutes
 
-  // Rate Limiting (utilisé par @fastify/rate-limit)
+  // Rate Limiting - Limites adaptées selon l'environnement (dev/test vs production)
   RATE_LIMIT: {
-    // Tests enchaînent de nombreuses requêtes : on relève les seuils pour éviter des 429 involontaires
-    GLOBAL: { max: 1000, timeWindow: '15 minutes' },
-    LOGIN: { max: 1000, timeWindow: '15 minutes' },
-    REGISTER: { max: 1000, timeWindow: '15 minutes' },
-    TWO_FA_VERIFY: { max: 1000, timeWindow: '15 minutes' },
-    TWO_FA_SETUP: { max: 1000, timeWindow: '15 minutes' },
+    GLOBAL: {
+      max: isTestOrDev ? 10000 : 1000,
+      timeWindow: '1 minute',
+    },
+    LOGIN: {
+      max: isTestOrDev ? 1000 : 5,
+      timeWindow: '5 minutes',
+    },
+    REGISTER: {
+      max: isTestOrDev ? 1000 : 5,
+      timeWindow: '5 minutes',
+    },
+    TWO_FA_VERIFY: {
+      max: isTestOrDev ? 1000 : 5,
+      timeWindow: '5 minutes',
+    },
+    TWO_FA_SETUP: {
+      max: isTestOrDev ? 1000 : 5,
+      timeWindow: '5 minutes',
+    },
+    IS_USER_ONLINE: {
+      max: isTestOrDev ? 1000 : 2000,
+      timeWindow: '1 minute',
+    },
   },
 } as const;
 
@@ -61,6 +103,81 @@ export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
 }
+
+/**
+ * Codes HTTP standardisés pour les réponses
+ */
+export const HTTP_STATUS = {
+  OK: 200,
+  CREATED: 201,
+  NO_CONTENT: 204,
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  UNPROCESSABLE_ENTITY: 422,
+  TOO_MANY_REQUESTS: 429,
+  INTERNAL_SERVER_ERROR: 500,
+} as const;
+
+/**
+ * Messages d'erreur standardisés
+ */
+export const ERROR_MESSAGES = {
+  // Auth errors
+  UNAUTHORIZED: 'Unauthorized - Authentication required',
+  FORBIDDEN: 'Forbidden - Admin role required',
+  INVALID_CREDENTIALS: 'Invalid credentials',
+
+  // User errors
+  USER_NOT_FOUND: 'User not found',
+  INVALID_USER_ID: 'Invalid user ID',
+
+  // Role errors
+  INVALID_ROLE: 'Role must be either "user" or "admin"',
+
+  // Field errors
+  MISSING_FIELDS: 'Username, email, and role are required',
+  INVALID_DATA: 'Données invalides',
+
+  // Conflict errors
+  EMAIL_EXISTS: 'Email is already taken',
+  USERNAME_EXISTS: 'Username is already taken',
+
+  // 2FA errors
+  TWO_FA_NOT_ENABLED: '2FA is not enabled for this user',
+
+  // Deletion errors
+  SELF_DELETION_FORBIDDEN: 'Cannot delete your own account',
+
+  // Generic
+  INTERNAL_SERVER_ERROR: 'Internal server error',
+  FAILED_HEARTBEAT: 'Failed to record heartbeat',
+  FAILED_FETCH_USER: 'Failed to fetch user information',
+  FAILED_CHECK_USER_ONLINE: 'Failed to check user online status',
+} as const;
+
+/**
+ * Codes d'erreur pour les réponses API
+ */
+export const ERROR_RESPONSE_CODES = {
+  UNAUTHORIZED: 'UNAUTHORIZED',
+  FORBIDDEN: 'FORBIDDEN',
+  USER_NOT_FOUND: 'USER_NOT_FOUND',
+  INVALID_USER_ID: 'INVALID_USER_ID',
+  INVALID_ROLE: 'INVALID_ROLE',
+  MISSING_FIELDS: 'MISSING_FIELDS',
+  VALIDATION_ERROR: 'VALIDATION_ERROR',
+  EMAIL_EXISTS: 'EMAIL_EXISTS',
+  USERNAME_EXISTS: 'USERNAME_EXISTS',
+  TWO_FA_NOT_ENABLED: '2FA_NOT_ENABLED',
+  SELF_DELETION_FORBIDDEN: 'SELF_DELETION_FORBIDDEN',
+  INTERNAL_SERVER_ERROR: 'INTERNAL_SERVER_ERROR',
+  HEARTBEAT_ERROR: 'HEARTBEAT_ERROR',
+  FETCH_USER_ERROR: 'FETCH_USER_ERROR',
+  CHECK_USER_ONLINE_ERROR: 'CHECK_USER_ONLINE_ERROR',
+} as const;
 
 /**
  * Noms d'utilisateur réservés qui ne peuvent pas être enregistrés

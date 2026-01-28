@@ -13,7 +13,7 @@ COPY package.json package-lock.json ./
 COPY srcs/nginx/package.json ./srcs/nginx/
 RUN npm i
 
-# Copy and build shared core first - done before in Makefile yet 
+# Copy and build shared core first - done before in Makefile yet
 COPY srcs/shared/core/package*.json ./srcs/shared/core/
 COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/
 COPY srcs/shared/core/src ./srcs/shared/core/src
@@ -21,8 +21,11 @@ RUN npm run build --workspace srcs/shared/core
 
 # Copy code and build
 COPY srcs/nginx/. ./srcs/nginx/.
-COPY srcs/nginx/src/html/dashboard.html ./srcs/nginx/html/dashboard.html 
+COPY srcs/nginx/src/html/dashboard.html ./srcs/nginx/html/dashboard.html
 RUN npm run build -w srcs/nginx
+
+# Copy admin.html to the correct directory
+COPY srcs/nginx/src/html/admin.html ./srcs/nginx/html/admin.html
 
 # ==========================
 # Stage 2 — Production
@@ -50,6 +53,9 @@ COPY --from=builder /build/srcs/nginx/dist /usr/share/nginx/src/html/
 
 # Copy dashboard
 COPY --from=builder /build/srcs/nginx/html/dashboard.html /usr/share/nginx/html/
+
+# Copy admin page
+COPY --from=builder /build/srcs/nginx/html/admin.html /usr/share/nginx/html/
 
 # Create directory for uploads
 RUN mkdir -p /usr/share/nginx/html/uploads \
