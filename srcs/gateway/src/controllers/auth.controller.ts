@@ -2,14 +2,13 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { proxyRequest } from '../utils/proxy.js';
 import { logger } from '../utils/logger.js';
 import { CatchAllParams } from '../types/params.types.js';
-
-const AUTH_SERVICE_URL = 'http://auth-service:3001';
+import { GATEWAY_CONFIG } from '../utils/constants.js';
 
 export function registerAuthRoutes(app: FastifyInstance) {
   // Route health spécifique
   app.get('/health', async (request: FastifyRequest, reply: FastifyReply) => {
     logger.logHealth({ serviceName: 'auth-service' }, 'service_check');
-    const res = await proxyRequest(app, request, reply, `${AUTH_SERVICE_URL}/health`);
+    const res = await proxyRequest(app, request, reply, `${GATEWAY_CONFIG.SERVICES.AUTH}/health`);
     return res;
   });
 
@@ -19,7 +18,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
     async (request: FastifyRequest<{ Params: CatchAllParams }>, reply: FastifyReply) => {
       const rawPath = request.params['*'];
       const cleanPath = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
-      const url = `${AUTH_SERVICE_URL}/${cleanPath}`;
+      const url = `${GATEWAY_CONFIG.SERVICES.AUTH}/${cleanPath}`;
       const queryString = new URL(request.url, 'http://localhost').search;
       const fullUrl = `${url}${queryString}`;
 

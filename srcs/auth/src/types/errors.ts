@@ -41,6 +41,7 @@ export class DataError extends Error {
 export class ServiceError extends Error {
   public context: LogContext;
   public statusCode: number;
+  public definition: ErrorDefinition;
   constructor(
     definition: ErrorDefinition,
     dynamicContext: Omit<LogContext, 'event' | 'reason'> = {},
@@ -48,6 +49,7 @@ export class ServiceError extends Error {
     super(definition.message);
     this.name = 'ServiceError';
     this.statusCode = definition.statusCode || 500;
+    this.definition = definition;
     this.context = {
       event: definition.event,
       reason: definition.reason,

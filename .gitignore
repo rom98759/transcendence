@@ -173,3 +173,5 @@ output.css
 **/srcs/blockchain/src/SmartContract/ignition/deployments/
 **/src/SmartContract/artifacts
 **/src/SmartContract/dump.rdb
+
+.venv
