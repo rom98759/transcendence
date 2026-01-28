@@ -50,7 +50,7 @@ class PongEnv(gym.Env):
         # Use a persistent HTTP session to reuse TCP connections
         self._http = requests.Session()
         self._http.verify = self.verify_ssl  # Apply SSL setting to session
-        self._http.headers.update({"Content-Type": "application/json"})  # Ensure JSON content type
+       # self._http.headers.update({"Content-Type": "application/json"})  # Ensure JSON content type
         self.session_id = self._create_session()
         print(f"[PongEnv] Session created: {self.session_id} (SSL verify={self.verify_ssl})")
         

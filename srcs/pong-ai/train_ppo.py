@@ -15,8 +15,8 @@ def make_env():
     return _init
 
 
-def train_moderate_agent(
-    total_timesteps=100_000,
+def train_strong_agent(
+    total_timesteps=1_000_000,
     save_path="models/pong_moderate",
     eval_episodes=10,
     use_gpu=True,
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.mode == "train":
-        train_moderate_agent(
+        train_strong_agent(
             total_timesteps=args.timesteps,
             save_path=args.save_path,
             use_gpu=args.use_gpu,
