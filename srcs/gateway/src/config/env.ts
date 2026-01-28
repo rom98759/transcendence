@@ -95,7 +95,7 @@ if (gatewayenv.JWT_SECRET.length < 32) {
 }
 
 // Compute service URLs
-export const AUTH_SERVICE_URL = `http://${gatewayenv.AUTH_SERVICE_NAME}:${gatewayenv.AUTH_SERVICE_PORT}`;
-export const UM_SERVICE_URL = `http://${gatewayenv.UM_SERVICE_NAME}:${gatewayenv.UM_SERVICE_PORT}`;
-export const GAME_SERVICE_URL = `http://${gatewayenv.GAME_SERVICE_NAME}:${gatewayenv.GAME_SERVICE_PORT}`;
-export const BK_SERVICE_URL = `http://${gatewayenv.BK_SERVICE_NAME}:${gatewayenv.BK_SERVICE_PORT}`;
+export const AUTH_SERVICE_URL = `https://${gatewayenv.AUTH_SERVICE_NAME}:${gatewayenv.AUTH_SERVICE_PORT}`;
+export const UM_SERVICE_URL = `https://${gatewayenv.UM_SERVICE_NAME}:${gatewayenv.UM_SERVICE_PORT}`;
+export const GAME_SERVICE_URL = `https://${gatewayenv.GAME_SERVICE_NAME}:${gatewayenv.GAME_SERVICE_PORT}`;
+export const BK_SERVICE_URL = `https://${gatewayenv.BK_SERVICE_NAME}:${gatewayenv.BK_SERVICE_PORT}`;

@@ -11,6 +11,7 @@ import { loggerConfig } from './config/logger.config.js';
 import { AUTH_CONFIG, ERROR_CODES, EVENTS, REASONS } from './utils/constants.js';
 import { AppBaseError } from './types/errors.js';
 import { authenv } from './config/env.js';
+import fs from 'fs';
 
 const app = fastify({
   https: {

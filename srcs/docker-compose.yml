@@ -199,4 +199,4 @@ volumes:
     driver_opts:
       device: ${HOST_VOLUME_PATH}/uploads
       o: bind
-      tpe: none
+      type: none

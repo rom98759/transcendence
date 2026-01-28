@@ -116,4 +116,4 @@ if (authenv.NODE_ENV === 'production') {
 }
 
 // Compute derived values
-export const UM_SERVICE_URL = `http://${authenv.UM_SERVICE_NAME}:${authenv.UM_SERVICE_PORT}`;
+export const UM_SERVICE_URL = `https://${authenv.UM_SERVICE_NAME}:${authenv.UM_SERVICE_PORT}`;
