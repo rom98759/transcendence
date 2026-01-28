@@ -74,23 +74,23 @@ export const AUTH_CONFIG = {
       timeWindow: '1 minute',
     },
     LOGIN: {
-      max: isTestOrDev ? 100 : 5,
+      max: isTestOrDev ? 1000 : 5,
       timeWindow: '5 minutes',
     },
     REGISTER: {
-      max: isTestOrDev ? 100 : 5,
+      max: isTestOrDev ? 1000 : 5,
       timeWindow: '5 minutes',
     },
     TWO_FA_VERIFY: {
-      max: isTestOrDev ? 100 : 5,
+      max: isTestOrDev ? 1000 : 5,
       timeWindow: '5 minutes',
     },
     TWO_FA_SETUP: {
-      max: isTestOrDev ? 100 : 5,
+      max: isTestOrDev ? 1000 : 5,
       timeWindow: '5 minutes',
     },
     IS_USER_ONLINE: {
-      max: isTestOrDev ? 1000 : 200,
+      max: isTestOrDev ? 1000 : 2000,
       timeWindow: '1 minute',
     },
   },
