@@ -119,9 +119,9 @@ build-dev: build-core
 	$(D_COMPOSE_DEV) build
 
 # --- Test ---
-test: install test-user
+test: certs install test-user
 
-test-coverage: install test-coverage-user
+test-coverage: certs install test-coverage-user
 
 test-user: build-core
 	cd srcs/users && npm install && npx vitest run --config vite.config.mjs
