@@ -9,11 +9,13 @@ import { logger, optimizeErrorHandler } from './utils/logger.js';
 import { verifyRequestJWT } from './utils/jwt.service.js';
 import fs from 'fs';
 import { GATEWAY_CONFIG, ERROR_CODES, parseTimeWindowToSeconds } from './utils/constants.js';
-import { gatewayenv } from './config/env.js';
+import { gatewayenv, UM_SERVICE_URL } from './config/env.js';
 import { UserPayload } from './types/types.d.js';
-import fastifyReplyFrom from '@fastify/reply-from';
+import replyFrom from '@fastify/reply-from';
 import { mtlsAgent } from './utils/mtlsAgent.js';
+import { request, setGlobalDispatcher } from 'undici';
 
+setGlobalDispatcher(mtlsAgent);
 const app = fastify({
   https: {
     key: fs.readFileSync('/etc/certs/api-gateway.key'),
@@ -27,10 +29,9 @@ const app = fastify({
   disableRequestLogging: true, // Désactiver les logs automatiques
 });
 
-app.register(fastifyReplyFrom, {
-  undici: {
-    dispatcher: mtlsAgent,
-  },
+app.register(replyFrom, {
+  base: `${UM_SERVICE_URL}`,
+  globalAgent: true,
 });
 
 // Register fastify-cookie

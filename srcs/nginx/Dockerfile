@@ -12,19 +12,19 @@ COPY package.json package-lock.json ./
 # Workspace manifests (OBLIGATOIRE avant npm ci)
 COPY srcs/shared/core/package.json ./srcs/shared/core/package.json
 COPY srcs/nginx/package.json ./srcs/nginx/package.json
+COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 
 # Install deps once (workspace-aware)
 RUN npm ci
 
 # Build shared core (types/constants)
-COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 COPY srcs/shared/core/src ./srcs/shared/core/src
-RUN npm run build --workspace srcs/shared/core
 
 # Copy only nginx frontend sources
 COPY srcs/nginx ./srcs/nginx
 
 # Build frontend (Vite)
+RUN npm run build --workspace srcs/shared/core
 RUN npm run build --workspace srcs/nginx
 
 

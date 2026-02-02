@@ -18,7 +18,7 @@ COPY srcs/blockchain/package.json ./srcs/blockchain/package.json
 RUN npm ci
 
 # Copy full monorepo
-COPY . .
+COPY srcs/blockchain ./srcs/blockchain
 
 # Build blockchain-service only
 RUN npm run build --workspace srcs/blockchain

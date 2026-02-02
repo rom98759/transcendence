@@ -15,7 +15,7 @@ COPY srcs/game/package.json ./srcs/game/package.json
 RUN npm ci
 
 # Copy full monorepo
-COPY . .
+COPY srcs/game ./srcs/game
 
 # Build game-service only
 RUN npm run build --workspace srcs/game
