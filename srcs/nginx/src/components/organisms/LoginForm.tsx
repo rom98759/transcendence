@@ -4,8 +4,9 @@ import { Input } from '../atoms/Input';
 import { Link, useNavigate } from 'react-router-dom';
 import { useActionState, useEffect } from 'react';
 import { useAuth } from '../../providers/AuthProvider';
-import { emailSchema, FrontendError, HTTP_STATUS } from '@transcendence/core';
+import { emailSchema, ERROR_CODES, FrontendError, HTTP_STATUS } from '@transcendence/core';
 import { authApi } from '../../api/auth-api';
+import i18next from 'i18next';
 
 interface LoginState {
   fields?: {
@@ -22,8 +23,23 @@ interface LoginState {
 
 async function loginAction(prevState: LoginState | null, formData: FormData) {
   const data = Object.fromEntries(formData);
-  let username = '';
   const { identifier, password } = data as Record<string, string>;
+  let username = '';
+
+  const errors: Record<string, string> = {};
+
+  if (identifier.length === 0)
+    errors.identifier = i18next.t(`errors.${ERROR_CODES.VALIDATION_MANDATORY}`);
+  if (password.length === 0)
+    errors.password = i18next.t(`errors.${ERROR_CODES.VALIDATION_MANDATORY}`);
+  if (Object.keys(errors).length > 0) {
+    return {
+      fields: { identifier, username },
+      errors,
+      success: false,
+    };
+  }
+
   const isEmail = emailSchema.safeParse(identifier).success;
   try {
     username = await authApi.login(
@@ -37,7 +53,7 @@ async function loginAction(prevState: LoginState | null, formData: FormData) {
       success: false,
     };
     if (err instanceof FrontendError) {
-      if (err.statusCode === HTTP_STATUS.BAD_REQUEST && err.details) {
+      if (err.statusCode === HTTP_STATUS.BAD_REQUEST) {
         if (err.details) {
           err.details.forEach((d) => {
             if (d.field && d.field in nextState.errors!) {
@@ -51,6 +67,10 @@ async function loginAction(prevState: LoginState | null, formData: FormData) {
       } else {
         (nextState.errors as Record<string, string>)['form'] = err.message;
       }
+    } else {
+      (nextState.errors as Record<string, string>)['form'] = i18next.t(
+        `errors.${ERROR_CODES.INTERNAL_ERROR}`,
+      );
     }
     return nextState;
   }
@@ -60,14 +80,17 @@ export const LoginForm = () => {
   const { t } = useTranslation();
   const [state, formAction, isPending] = useActionState(loginAction, null);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { user, login } = useAuth();
   useEffect(() => {
-    if (state?.success && state.fields) {
+    if (state?.success && state.fields?.username) {
       const username = state.fields.username;
       login({ username: username, avatarUrl: null });
-      navigate(`/profile/${username}`);
+      navigate(`/profile/${username}`, { replace: true });
     }
-  }, [state?.success, navigate]);
+    if (user?.username) {
+      navigate(`/profile/${user.username}`, { replace: true });
+    }
+  }, [state?.success, state?.fields?.username, user, navigate, login]);
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <Input
@@ -75,16 +98,18 @@ export const LoginForm = () => {
         customType="username"
         defaultValue={state?.fields?.identifier}
         errorMessage={state?.errors?.identifier}
+        autoComplete="username"
         placeholder={t('fieldtype.username-email')}
       ></Input>
       <Input
         name="password"
         customType="password"
         errorMessage={state?.errors?.password}
+        autoComplete="current-password"
         placeholder={t('fieldtype.password')}
       ></Input>
       <Button className="mt-4" type="submit">
-        {isPending ? t('auth.processing') : t('auth.login')}
+        {isPending ? t('form.processing') : t('auth.login')}
       </Button>
 
       {state?.errors?.form && <p className="text-red-500 text-sm mb-3">{state.errors.form}</p>}

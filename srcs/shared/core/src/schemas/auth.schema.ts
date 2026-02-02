@@ -13,15 +13,11 @@ export const UserSchema = z.object({
   username: usernameSchema,
 });
 
-export const UserLoginSchema = UserRegisterSchema.pick({ password: true })
-  .extend({
-    username: usernameSchema.optional(),
-    email: z.email().optional(),
-  })
-  .refine((data) => data.username || data.email, {
-    message: 'You must provide either a username, either an email',
-    path: ['username'],
-  });
+export const UserLoginSchema = z.object({
+  username: usernameSchema.optional(),
+  email: z.email().optional(),
+  password: z.string(),
+});
 
 // inferred DTOs
 export type UserDTO = z.output<typeof UserSchema>;

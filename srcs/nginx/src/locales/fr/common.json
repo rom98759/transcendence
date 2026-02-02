@@ -18,6 +18,7 @@
     "processing": "traitement..."
   },
   "errors": {
+    "validation_mandatory": "Ce champ est obligatoire.",
     "validation_error": "Format invalide. Veuillez vérifier les champs soumis et réessayer.",
     "unauthorized": "Authentification requise. Veuillez vous connecter pour accéder à cette ressource",
     "invalid_credentials": "Identifiants invalides. Vérifiez votre email/nom d'utilisateur et mot de passe et réessayez.",

@@ -10,6 +10,7 @@ interface LocaleProps {
 const countries: Record<string, string> = {
   fr: '🇫🇷',
   en: '🇬🇧',
+  tf: '🔫',
 };
 
 export const Locale = ({ className }: LocaleProps) => {

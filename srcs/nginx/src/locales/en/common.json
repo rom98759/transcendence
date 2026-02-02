@@ -18,6 +18,7 @@
     "processing": "processing..."
   },
   "errors": {
+    "validation_mandatory": "This field is mandatory.",
     "validation_error": "Invalid format. Please check the submitted fields and try again.",
     "unauthorized": "Authentication required. Please log in to access this resource.",
     "invalid_credentials": "Invalid credentials. Please check your email/username and password and try again.",

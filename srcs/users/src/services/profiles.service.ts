@@ -12,8 +12,9 @@ import path from 'node:path';
 import type { MultipartFile } from '@fastify/multipart';
 import { mkdir } from 'node:fs/promises';
 import { fileTypeFromBuffer } from 'file-type';
+import { mapProfileToDTO } from '../utils/mappers.js';
 
-async function getProfileOrThrow(username: string): Promise<ProfileSimpleDTO> {
+async function getProfileOrThrow(username: string): Promise<UserProfile> {
   const profile = await profileRepository.findProfileByUsername(username);
   if (!profile) {
     throw new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {
@@ -34,8 +35,8 @@ export class ProfileService {
 
   @Trace
   async getByUsername(username: string): Promise<ProfileSimpleDTO | null> {
-    const profile = await getProfileOrThrow(username);
-    return profile;
+    const profileData = await getProfileOrThrow(username);
+    return mapProfileToDTO(profileData);
   }
 
   @Trace

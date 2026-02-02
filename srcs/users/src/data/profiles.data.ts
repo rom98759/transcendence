@@ -8,6 +8,8 @@ import {
   LOG_RESOURCES,
   LOG_EVENTS,
   LOG_REASONS,
+  ProfileDTO,
+  ProfileDataDTO,
 } from '@transcendence/core';
 import { Trace } from '../utils/decorators.js';
 import { logger } from '../utils/logger.js';
@@ -42,13 +44,9 @@ export class ProfileRepository {
     }
   }
 
-  async findProfileByUsername(username: string): Promise<ProfileSimpleDTO | null> {
+  async findProfileByUsername(username: string): Promise<UserProfile | null> {
     const found = await prisma.userProfile.findUnique({
       where: { username },
-      select: {
-        username: true,
-        avatarUrl: true,
-      },
     });
     logger.info({ msg: 'found profile in data', found: found });
     return found;

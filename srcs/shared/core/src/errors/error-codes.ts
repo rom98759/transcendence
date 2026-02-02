@@ -3,6 +3,7 @@
  */
 export const ERROR_CODES = {
   // 400 Validation
+  VALIDATION_MANDATORY: 'validation_mandatory',
   VALIDATION_ERROR: 'validation_error',
 
   // 401 Authentication

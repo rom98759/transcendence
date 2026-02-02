@@ -95,7 +95,7 @@ export type {
   FriendshipUpdateNicknameDTO,
 } from './schemas/friend.schema.js';
 export type {
-  // ProfileDTO,
+  ProfileDTO,
   ProfileSimpleDTO,
   // ProfileAuthDTO,
   ProfileDataDTO,

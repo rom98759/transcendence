@@ -13,6 +13,7 @@ import {
   ERROR_CODES,
 } from '@transcendence/core';
 import { useAuth } from '../../providers/AuthProvider';
+import i18next from 'i18next';
 
 interface SignupState {
   fields?: {
@@ -40,9 +41,9 @@ async function signupAction(prevState: SignupState | null, formData: FormData) {
   const userVal = usernameSchema.safeParse(username);
   const passVal = passwordSchema.safeParse(password);
 
-  if (!emailVal.success) errors.email = 'Invalid email format';
-  if (!userVal.success) errors.username = 'Username should be at least 4 chars';
-  if (!passVal.success) errors.password = 'Password is too weak';
+  if (!emailVal.success) errors.email = i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`);
+  if (!userVal.success) errors.username = i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`);
+  if (!passVal.success) errors.password = i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`);
 
   if (Object.keys(errors).length > 0) {
     return {
@@ -88,7 +89,9 @@ async function signupAction(prevState: SignupState | null, formData: FormData) {
         (nextState.errors as Record<string, string>)['form'] = err.message;
       }
     } else {
-      (nextState.errors as Record<string, string>)['form'] = 'CONNFFF';
+      (nextState.errors as Record<string, string>)['form'] = i18next.t(
+        `errors.${ERROR_CODES.INTERNAL_ERROR}`,
+      );
     }
     return nextState;
   }
@@ -119,6 +122,7 @@ export const RegisterForm = () => {
       <Input
         name="username"
         customType="username"
+        autoComplete="username"
         defaultValue={state?.fields?.username}
         errorMessage={state?.errors?.username}
         placeholder={t('fieldtype.username-choose')}
@@ -126,6 +130,7 @@ export const RegisterForm = () => {
       <Input
         name="email"
         customType="email"
+        autoComplete="email"
         defaultValue={state?.fields?.email}
         errorMessage={state?.errors?.email}
         placeholder={t('fieldtype.email')}
@@ -133,12 +138,13 @@ export const RegisterForm = () => {
       <Input
         name="password"
         customType="password"
+        autoComplete="new-password"
         errorMessage={state?.errors?.password}
         placeholder={t('fieldtype.password-choose')}
       ></Input>
 
       <Button className="mt-4" type="submit">
-        {isPending ? t('auth.processing') : t('auth.signup')}
+        {isPending ? t('form.processing') : t('auth.signup')}
       </Button>
 
       {state?.errors?.form && <p className="text-red-500 text-sm mb-3">{state.errors.form}</p>}

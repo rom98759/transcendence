@@ -23,14 +23,14 @@ export const ProfileSimpleSchema = z.object({
   avatarUrl: z.string().nullable(),
 });
 
-// export const ProfileSchema = ProfileSimpleSchema.extend({
-//   authId: idSchema,
-// });
+export const ProfileSchema = ProfileSimpleSchema.extend({
+  authId: idSchema,
+});
 
 // inferred DTOs
 export type ProfileCreateInDTO = z.output<typeof ProfileCreateInSchema>;
 export type ProfileDataDTO = z.output<typeof ProfileDataSchema>;
 export type ProfileSimpleDTO = z.output<typeof ProfileSimpleSchema>;
-// export type ProfileDTO = z.output<typeof ProfileSchema>;
+export type ProfileDTO = z.output<typeof ProfileSchema>;
 // export type ProfileStoredDTO = UserDTO & ProfileDTO & { token: string };
 // export type ProfileAuthDTO = UserDTO & ProfileDTO;

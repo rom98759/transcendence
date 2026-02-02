@@ -4,12 +4,14 @@ import intervalPlural from 'i18next-intervalplural-postprocessor';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import commonEn from './locales/en/common.json';
 import commonFr from './locales/fr/common.json';
+import commonTf from './locales/tf/common.json';
 
 // sources
 // https://react.i18next.com/guides/multiple-translation-files
 const RESOURCES = {
   en: { common: commonEn },
   fr: { common: commonFr },
+  tf: { common: commonTf },
 };
 
 const DETECTION_OPTIONS = {
@@ -27,7 +29,7 @@ i18n
     detection: DETECTION_OPTIONS,
     resources: RESOURCES,
     defaultNS,
-    fallbackLng: 'fr',
+    fallbackLng: 'ts',
     interpolation: {
       escapeValue: false, // react already safes from xss
     },

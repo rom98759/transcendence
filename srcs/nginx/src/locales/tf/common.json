@@ -18,6 +18,7 @@
     "processing": "On gère ça, mon pote…"
   },
   "errors": {
+    "validation_mandatory": "Balance l'info",
     "validation_error": "T’as tout foiré, mon pote. Vérifie tes papiers et recommence, sinon ça va barder.",
     "unauthorized": "Faut te pointer correctement, sinon t’entres pas.",
     "invalid_credentials": "T’as dû te gourer dans ton blaze ou ton code. Revoie ta copie.",
