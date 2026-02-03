@@ -211,46 +211,6 @@ async def join_game(request: Request):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-#
-#@app.get("/invite-pong-ai")
-#async def invite(request: Request):
-#
-#    try:
-#        # Create a new session on game service
-#        import httpx
-#        async with httpx.AsyncClient() as client:
-#            response = await client.post(
-#                "http://game-service:3003/create-session",
-#                timeout=5.0
-#            )
-#            response.raise_for_status()
-#            data = response.json()
-#            session_id = data.get("sessionId")
-#        
-#        if not session_id:
-#            raise HTTPException(status_code=500, detail="Failed to create game session")
-#        
-#        # Join the game as AI
-#        model_path = "models/pong_moderate/pong_moderate_final"
-#        ai_player = AIPlayer(model_path)
-#        active_ai_players[session_id] = ai_player
-#        
-#        # Start AI player in background
-#        asyncio.create_task(ai_player.play(session_id))
-#        
-#        return {
-#            "service": "Pong AI",
-#            "version": "1.0.0",
-#            "session_id": session_id,
-#            "message": "AI player created and joined game",
-#            "ws_url": f"/game/{session_id}",
-#            "stats": ai_service.get_stats()
-#        }
-#    
-#    except Exception as e:
-#        raise HTTPException(status_code=500, detail=str(e))
-
-
 @app.head("/health")
 async def health():
     return {

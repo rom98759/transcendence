@@ -46,8 +46,8 @@ export interface GameState {
     x: number;
     y: number;
     radius: number;
-    vx: number;
-    vy: number;
+    vx?: number;
+    vy?: number;
   };
   paddles: {
     left: {

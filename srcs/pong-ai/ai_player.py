@@ -13,7 +13,7 @@ class AIPlayer:
         self.game_service_url = game_service_url
         self.websocket: Optional[websockets.WebSocketClientProtocol] = None
         self.playing = False
-        self.paddle = "right"  # AI controls right paddle
+        self.paddle = "right"
         
     async def connect(self, session_id: str):
 
@@ -144,7 +144,6 @@ class AIPlayer:
                         print(f"Received connected message", flush=True)
                     
                     elif message.get("type") == "pong":
-                        # Heartbeat response
                         print(f"Received pong", flush=True)
                     
                     elif message.get("type") == "error":

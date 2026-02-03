@@ -5,15 +5,12 @@ import urllib3
 import numpy as np
 import os
 
-# Suppress InsecureRequestWarning when verify=False (dev self-signed certs)
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class PongEnv(gym.Env):
     
     metadata = {"render_modes": [], "render_fps": 60}
-
-    #when post invite-pong-ai is triggered
 
     def __init__(self, base_url=None, render_mode=None, verify_ssl=None):
         super().__init__()
