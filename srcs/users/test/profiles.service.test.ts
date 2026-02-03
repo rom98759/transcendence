@@ -32,7 +32,6 @@ import { PassThrough } from 'stream';
 import { fileTypeFromBuffer } from 'file-type';
 
 const mockProfile: ProfileDTO = {
-  authId: 1,
   username: 'toto',
   avatarUrl: '/uploads/avatar-toto.png',
 };

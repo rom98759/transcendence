@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserProfile } from '@prisma/client';
 import { AppError, ERR_DEFS, type ProfileCreateInDTO, type ProfileDTO } from '@transcendence/core';
 
 vi.mock('../src/utils/decorators.js', () => ({
@@ -56,8 +56,16 @@ vi.mock('node:stream/promises', () => ({
 
 import { profileRepository } from '../src/data/profiles.data.js';
 
-const mockProfile: ProfileDTO = {
+const mockDataProfile: UserProfile = {
+  id: 1,
   authId: 1,
+  username: 'toto',
+  createdAt: new Date(),
+  avatarUrl: '/uploads/avatar.png',
+  email: 'toto@mail.org',
+};
+
+const mockProfile: ProfileDTO = {
   username: 'toto',
   avatarUrl: '/uploads/avatar.png',
 };
@@ -118,15 +126,14 @@ describe('ProfileRepository', () => {
 
   describe('findProfileByUsername', () => {
     it('returns profile DTO when found', async () => {
-      dbMocks.findUnique.mockResolvedValue(mockProfile);
+      dbMocks.findUnique.mockResolvedValue(mockDataProfile);
 
       const result = await profileRepository.findProfileByUsername('toto');
 
       expect(dbMocks.findUnique).toHaveBeenCalledWith({
         where: { username: 'toto' },
-        select: { authId: true, username: true, avatarUrl: true },
       });
-      expect(result).toEqual(mockProfile);
+      expect(result).toEqual(mockDataProfile);
     });
 
     it('returns null when not found', async () => {
@@ -146,7 +153,7 @@ describe('ProfileRepository', () => {
 
       expect(dbMocks.findUnique).toHaveBeenCalledWith({
         where: { authId: 1 },
-        select: { authId: true, username: true, avatarUrl: true },
+        select: { username: true, avatarUrl: true },
       });
       expect(result).toEqual(mockProfile);
     });

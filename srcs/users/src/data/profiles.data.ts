@@ -8,8 +8,6 @@ import {
   LOG_RESOURCES,
   LOG_EVENTS,
   LOG_REASONS,
-  ProfileDTO,
-  ProfileDataDTO,
 } from '@transcendence/core';
 import { Trace } from '../utils/decorators.js';
 import { logger } from '../utils/logger.js';

@@ -9,7 +9,7 @@ const SERVICES: Record<string, { host: string; port: number }> = {
   blockchain: { host: 'blockchain-service', port: 3005 },
 };
 
-export async function healthHandler(request: FastifyRequest, reply: FastifyReply) {
+export async function healthHandler(request: FastifyRequest) {
   return { status: 'healthy' };
 }
 
@@ -51,7 +51,7 @@ export async function healthByNameHandler(req: FastifyRequest, reply: FastifyRep
   }
 }
 
-export async function healthAllHandler(req: FastifyRequest, reply: FastifyReply) {
+export async function healthAllHandler(req: FastifyRequest) {
   const results: Record<string, string> = {};
 
   await Promise.all(
