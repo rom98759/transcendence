@@ -42,7 +42,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
           ...(request.headers['content-type'] && {
             'content-type': request.headers['content-type'] as string,
           }),
-          // Ajout des headers de sécurité interne [cite: 266]
+          // Ajout des headers de sécurité interne
           'x-user-name': (request.headers['x-user-name'] as string) || '',
           'x-user-id': (request.headers['x-user-id'] as string) || '',
         },
