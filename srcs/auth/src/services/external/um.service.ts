@@ -4,19 +4,25 @@ import { ServiceError } from '../../types/errors.js';
 import { EVENTS, REASONS, UM_SERVICE_URL } from '../../utils/constants.js';
 import { APP_ERRORS } from '../../utils/error-catalog.js';
 import { ERROR_CODES } from '@transcendence/core';
+import { mtlsAgent } from '../../utils/mtlsAgent.js';
+import { MTLSRequestInit } from '../../types/https.js';
 
 export async function createUserProfile(payload: CreateProfileDTO): Promise<UserProfileDTO> {
   try {
     logger.info({ msg: `calling POST ${UM_SERVICE_URL}/`, payload: payload });
-    const response = await fetch(`${UM_SERVICE_URL}/`, {
+
+    // Configuration de la requête avec l'agent mTLS
+    const init: MTLSRequestInit = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-user-id': String(payload.authId),
-        'x-user-name': payload.username,
+        'x-user-id': String(payload.authId) || '',
+        'x-user-name': (payload.username as string) || '',
       },
       body: JSON.stringify(payload),
-    });
+      dispatcher: mtlsAgent,
+    };
+    const response = await fetch(`${UM_SERVICE_URL}/`, init);
 
     if (!response.ok) {
       const errorText = await response.text();

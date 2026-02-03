@@ -25,7 +25,7 @@ export const profileApi = {
     formData.append('file', file);
 
     const { data } = await api.patch(`/users/username/${username}/avatar`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
+      // headers: { 'Content-Type': 'multipart/form-data' }, // cela empeche le navigateur de gérer le boundary car Axios le supprime
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);

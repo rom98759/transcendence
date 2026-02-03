@@ -56,7 +56,7 @@ def test_service_health_proxies():
         "block": "/block/health",
     }
     for key, path in mappings.items():
-        resp = sess.get(path, expected_status=200 if key in ("auth", "user") else 200)
+        resp = sess.get(path, expected_status=200 )
         print_success(f"{path} -> {resp.status_code}")
 
 

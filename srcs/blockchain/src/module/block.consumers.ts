@@ -33,7 +33,7 @@ export async function startTournamentConsumer(app: FastifyInstance) {
 
   consumeLoop(app, redis).catch((err) => app.log.error({ err }, 'Tournament consumer fatal error'));
 }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function consumeLoop(app: FastifyInstance, redis: any): Promise<void> {
   let loopCount = 0;
 
@@ -47,6 +47,8 @@ async function consumeLoop(app: FastifyInstance, redis: any): Promise<void> {
         await recoverPending(app, redis);
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // Redis Streams: ioredis typings do not support BLOCK + COUNT.
       const streams = await redis.xreadgroup(
         'GROUP',
         GROUP,
@@ -132,6 +134,7 @@ async function processMessage(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function recoverPending(app: FastifyInstance, redis: any): Promise<void> {
   const pending = await redis.xpending(STREAM, GROUP, '-', '+', 10);
 
@@ -150,6 +153,7 @@ async function recoverPending(app: FastifyInstance, redis: any): Promise<void> {
       'Reclaiming pending tournament message',
     );
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const claimed = await redis.xclaim(STREAM, GROUP, CONSUMER, PENDING_IDLE_MS, id);
 
     for (const [, messages] of claimed) {

@@ -1,0 +1,10 @@
+services:
+  test-runner:
+    image: node:20-alpine
+    working_dir: /repo
+    volumes:
+      - ..:/repo
+    environment:
+      NODE_ENV: test
+    command: sh -lc "npm ci && npm run test --workspace srcs/users"
+

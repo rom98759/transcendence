@@ -10,63 +10,49 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy root package files for workspace resolution
+# 1) Manifests nécessaires au calcul du graphe workspace
 COPY package.json package-lock.json ./
-
+# les manisfest du service
+COPY srcs/gateway/package.json ./srcs/gateway/package.json
 # Copy shared core package files
-COPY srcs/shared/core/package.json ./srcs/shared/core/package.json
+COPY srcs/shared/core/package*.json ./srcs/shared/core/
 COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 
-# Copy service package files
-COPY srcs/gateway/package.json ./srcs/gateway/package.json
-COPY srcs/gateway/package-lock.json ./srcs/gateway/package-lock.json
-
-# Install dependencies for workspace (this links @transcendence/core)
+# 2) Installation déterministe (workspaces)
 RUN npm ci
 
-# Copy and build shared core first
+# 3) Sources nécessaires au build
+COPY srcs/gateway ./srcs/gateway
 COPY srcs/shared/core/src ./srcs/shared/core/src
+
+# 4) Build core puis gateway
 RUN npm run build --workspace srcs/shared/core
-
-# Copy service source files
-COPY srcs/gateway/tsconfig.json ./srcs/gateway/tsconfig.json
-COPY srcs/gateway/src ./srcs/gateway/src
-
-WORKDIR /app/srcs/gateway
-
-# Build → dist/
-RUN npm run build
+RUN npm run build --workspace srcs/gateway
 
 # ==========================
-# Stage 2 — Production
+# Stage 2 — Runner
 # ==========================
 
 FROM node:20-alpine AS runner
 
-# Keep the same workspace root as builder
 WORKDIR /app
 
-# Copy root workspace files
-COPY --from=builder /app/package.json /app/package-lock.json ./
+ENV NODE_ENV=production
 
-# Copy shared core (built artifacts + package.json for workspace resolution)
-COPY --from=builder /app/srcs/shared/core/package.json ./srcs/shared/core/package.json
-COPY --from=builder /app/srcs/shared/core/dist ./srcs/shared/core/dist
+# 6) Installer UNIQUEMENT les dépendances runtime du workspace users
+COPY package-lock.json ./package-lock.json
+COPY srcs/gateway/package.json ./package.json
+# audit and fund are done in builder
+RUN npm install --omit=dev --no-audit --no-fund
 
-# Copy service package files
-COPY --from=builder /app/srcs/gateway/package.json ./srcs/gateway/package.json
-COPY --from=builder /app/srcs/gateway/package-lock.json ./srcs/gateway/package-lock.json
+# 7) Injecter le package interne @transcendence/core (compilé)
+RUN mkdir -p node_modules/@transcendence
+# Copier le package core compilé
+COPY --from=builder /app/srcs/shared/core/package.json ./node_modules/@transcendence/core/package.json
+COPY --from=builder /app/srcs/shared/core/dist ./node_modules/@transcendence/core/dist
 
-# Copy built artifacts
-COPY --from=builder /app/srcs/gateway/dist ./srcs/gateway/dist
-
-# Skip husky in production
-ENV HUSKY=0
-
-# Installer uniquement les deps nécessaires en runtime
-RUN npm ci --omit=dev
-
-WORKDIR /app/srcs/gateway
+# 8) Artifacts runtime du service
+COPY --from=builder /app/srcs/gateway/dist ./dist
 
 EXPOSE 3000
 

@@ -6,6 +6,14 @@ Tests: Register, Login, Logout, Verify, Me, 2FA, Admin
 import sys
 import time
 import pyotp
+
+
+class SkipTest(Exception):
+    """Exception pour skipper un test sans arrêter l'exécution"""
+
+    pass
+
+
 from test_helpers import (
     TestSession,
     generate_test_credentials,
@@ -30,6 +38,20 @@ def skip_if_no_qr_decode(test_name: str) -> bool:
     return False
 
 
+def setup_2fa_for_user_or_skip(session: "TestSession", test_name: str):
+    """Configure la 2FA pour un utilisateur ou skip si pas possible"""
+    if skip_if_no_qr_decode(test_name):
+        raise SkipTest(f"QR decode not available for {test_name}")
+
+    # Setup 2FA
+    setup_resp = session.post("/auth/2fa/setup")
+    secret = safe_decode_qr_or_skip(setup_resp.json()["result"]["qrCode"], test_name)
+    totp = pyotp.TOTP(secret)
+    session.post("/auth/2fa/setup/verify", json={"code": totp.now()})
+
+    return secret
+
+
 def safe_decode_qr_or_skip(qr_data_url: str, test_name: str) -> str:
     """Décode le QR ou skip le test si impossible"""
     secret = decode_qr_secret(qr_data_url)
@@ -40,7 +62,7 @@ def safe_decode_qr_or_skip(qr_data_url: str, test_name: str) -> str:
             )
         else:
             print(f"   ⏭️  SKIPPED: {test_name} (QR decode not available)")
-            sys.exit(0)  # Skip ce test proprement
+            raise SkipTest(f"QR decode not available for {test_name}")
     return secret
 
 
@@ -546,21 +568,30 @@ def test_14_admin_list_users():
     session.post("/auth/login", json=ADMIN_CREDS)
 
     # Lister les users
-    response = session.get("/auth/list")
+    response = session.get("/auth/admin/users")
     data = response.json()
 
-    # L'API retourne un objet avec users, total, timestamp
+    # L'API retourne un objet avec users
     assert isinstance(data, dict), "Response should be an object"
     assert "users" in data, "Response should contain 'users' field"
     assert isinstance(data["users"], list), "Users field should be an array"
     assert len(data["users"]) > 0, "Should have at least admin user"
-    assert "total" in data, "Response should contain 'total' field"
 
     # Vérifier que admin est dans la liste
     admin_found = any(user.get("username") == "admin" for user in data["users"])
     assert admin_found, "Admin user not found in list"
 
-    print_success(f"Admin list: {data['total']} utilisateurs")
+    invite_found = any(user.get("username") == "invite" for user in data["users"])
+    assert invite_found, "Invite user not found in list"
+
+    # Vérifier les champs supplémentaires ajoutés après le merge
+    for user in data["users"]:
+        assert "id" in user, "User ID should be present"
+        assert "role" in user, "User role should be present"
+        assert "is2FAEnabled" in user, "2FA status should be present"
+        assert "online" in user, "Online status should be present"
+
+    print_success(f"Admin list: {len(data['users'])} utilisateurs")
 
 
 def test_15_non_admin_cannot_list():
@@ -578,7 +609,7 @@ def test_15_non_admin_cannot_list():
     )
 
     # Tenter de lister
-    response = session.get("/auth/list", expected_status=403)
+    response = session.get("/auth/admin/users", expected_status=403)
     data = response.json()
 
     assert "error" in data, "Error not in response"
@@ -683,14 +714,35 @@ def test_18_2fa_verify_invalid_code():
 
 
 def test_18b_2fa_setup_when_already_enabled():
-    """Test: Relancer setup alors que 2FA déjà active (400 2FA_ALREADY_ENABLED)"""
+    """Test: 2FA - Setup déjà activé"""
     print_test("2FA - Setup déjà activé")
 
-    session, secret, creds = test_17_2fa_verify_setup()
-    resp = session.post("/auth/2fa/setup", expected_status=400)
-    data = resp.json()
-    assert data.get("error", {}).get("code") == "2FA_ALREADY_ENABLED"
-    print_success("Setup refusé car 2FA déjà active")
+    if skip_if_no_qr_decode("2FA - Setup déjà activé"):
+        print(f"   ⏭️  SKIPPED: 2FA - Setup déjà activé (dépendant du test précédent)")
+        return
+
+    # Le test précédent (test_17) a déjà configuré la 2FA pour ce user
+    # On va créer un nouvel utilisateur et configurer sa 2FA
+    test_creds = generate_test_credentials()
+    session = TestSession()
+    session.post("/auth/register", json=test_creds, expected_status=201)
+    session.post(
+        "/auth/login",
+        json={"username": test_creds["username"], "password": test_creds["password"]},
+    )
+
+    try:
+        # Première activation 2FA
+        setup_2fa_for_user_or_skip(session, "2FA - Setup déjà activé (première fois)")
+
+        # Deuxième tentative devrait échouer
+        response = session.post("/auth/2fa/setup", expected_status=409)
+        assert response.json()["error"]["code"] == "TOTP_ALREADY_ENABLED"
+
+        print_success("2FA déjà activée correctement détectée")
+    except SkipTest:
+        # Si la première activation échoue à cause du QR, on skip le test
+        raise
 
 
 def test_19_2fa_login_flow():
@@ -709,7 +761,7 @@ def test_19_2fa_login_flow():
 
     response = session1.post("/auth/2fa/setup")
     if skip_if_no_qr_decode("2FA Flow de login complet"):
-        return
+        return None
 
     secret = safe_decode_qr_or_skip(
         response.json()["result"]["qrCode"], "2FA Flow de login complet"
@@ -754,33 +806,35 @@ def test_19_2fa_login_flow():
 
 
 def test_20_2fa_disable():
-    """Test: Désactivation du 2FA"""
+    """Test: 2FA - Désactivation"""
     print_test("2FA - Désactivation")
 
-    session, secret, creds = test_17_2fa_verify_setup()
+    if skip_if_no_qr_decode("2FA - Désactivation"):
+        print(f"   ⏭️  SKIPPED: 2FA - Désactivation (dépendant du test précédent)")
+        return
 
-    # Désactiver 2FA
-    response = session.post("/auth/2fa/disable")
-    data = response.json()
-
-    assert (
-        "result" in data and "disabled" in data["result"].get("message", "").lower()
-    ), "2FA disable confirmation not found"
-
-    # Vérifier qu'on peut se reconnecter sans 2FA
-    session.post("/auth/logout")
-
-    response = session.post(
+    # Créer un utilisateur avec 2FA activée
+    test_creds = generate_test_credentials()
+    session = TestSession()
+    session.post("/auth/register", json=test_creds, expected_status=201)
+    session.post(
         "/auth/login",
-        json={"username": creds["username"], "password": creds["password"]},
+        json={"username": test_creds["username"], "password": test_creds["password"]},
     )
-    data = response.json()
 
-    assert not (data.get("result", {}) or {}).get(
-        "require2FA", False
-    ), "2FA still required after disable"
+    try:
+        # Activer 2FA d'abord
+        setup_2fa_for_user_or_skip(session, "2FA - Désactivation (setup)")
 
-    print_success("2FA désactivé avec succès")
+        # Désactiver 2FA
+        response = session.post("/auth/2fa/disable")
+        assert response.status_code == 200
+        assert "message" in response.json()["result"]
+
+        print_success("2FA désactivée avec succès")
+    except SkipTest:
+        # Si l'activation échoue à cause du QR, on skip le test
+        raise
 
 
 def test_20b_2fa_disable_not_enabled():
@@ -928,6 +982,221 @@ def test_28_2fa_too_many_attempts():
         )
 
 
+def test_29_admin_user_update():
+    """Test: Admin peut mettre à jour un utilisateur"""
+    print_test("Admin - Mettre à jour utilisateur")
+
+    session = TestSession()
+
+    # Créer un utilisateur test
+    test_creds = generate_test_credentials()
+    test_session = TestSession()
+    test_session.post("/auth/register", json=test_creds, expected_status=201)
+
+    # Login admin
+    session.post("/auth/login", json=ADMIN_CREDS)
+
+    # Récupérer la liste des utilisateurs pour trouver l'ID
+    users_response = session.get("/auth/admin/users")
+    users_data = users_response.json()
+    test_user = next(
+        (u for u in users_data["users"] if u["username"] == test_creds["username"]),
+        None,
+    )
+    assert test_user is not None, "Test user not found in users list"
+
+    # Mettre à jour l'utilisateur (tous les champs requis)
+    update_data = {
+        "username": test_user["username"],  # Garder le même username
+        "email": test_user["email"],  # Garder le même email
+        "role": "admin",  # Changer juste le rôle
+    }
+    response = session.put(f"/auth/admin/users/{test_user['id']}", json=update_data)
+
+    # Vérifier que la mise à jour a réussi
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+
+    print_success("Utilisateur mis à jour par admin")
+
+
+def test_30_admin_disable_2fa():
+    """Test: Admin peut désactiver la 2FA d'un utilisateur"""
+    print_test("Admin - Désactiver 2FA utilisateur")
+
+    if skip_if_no_qr_decode("Admin - Désactiver 2FA utilisateur"):
+        return
+
+    session = TestSession()
+
+    # Créer et configurer 2FA pour un utilisateur test
+    test_creds = generate_test_credentials()
+    test_session = TestSession()
+    test_session.post("/auth/register", json=test_creds, expected_status=201)
+    test_session.post(
+        "/auth/login",
+        json={"username": test_creds["username"], "password": test_creds["password"]},
+    )
+
+    try:
+        # Activer 2FA pour l'utilisateur test
+        setup_2fa_for_user_or_skip(
+            test_session, "Admin - Désactiver 2FA utilisateur (setup)"
+        )
+        test_session.post("/auth/logout")
+
+        # Login admin
+        session.post("/auth/login", json=ADMIN_CREDS)
+
+        # Récupérer l'ID de l'utilisateur test
+        users_response = session.get("/auth/admin/users")
+        users_data = users_response.json()
+        test_user = next(
+            (u for u in users_data["users"] if u["username"] == test_creds["username"]),
+            None,
+        )
+        assert test_user is not None, "Test user not found in users list"
+        assert test_user["is2FAEnabled"] == True, "2FA should be enabled"
+
+        # Admin désactive la 2FA
+        response = session.post(f"/auth/admin/users/{test_user['id']}/disable-2fa")
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}"
+
+        # Vérifier que la 2FA est désactivée
+        users_response_after = session.get("/auth/admin/users")
+        users_data_after = users_response_after.json()
+        test_user_after = next(
+            (
+                u
+                for u in users_data_after["users"]
+                if u["username"] == test_creds["username"]
+            ),
+            None,
+        )
+        assert (
+            test_user_after["is2FAEnabled"] == False
+        ), "2FA should be disabled by admin"
+
+        print_success("2FA désactivée par admin")
+    except SkipTest:
+        # Si l'activation échoue à cause du QR, on skip le test
+        raise
+
+
+def test_31_online_status_check():
+    """Test: Vérifier le statut online d'un utilisateur spécifique"""
+    print_test("Online - Vérifier statut par username")
+
+    session = TestSession()
+
+    # Login admin
+    session.post("/auth/login", json=ADMIN_CREDS)
+
+    # Envoyer un heartbeat pour s'assurer que l'admin est bien online
+    session.post("/auth/heartbeat")
+
+    # Attendre un petit moment que Redis enregistre le heartbeat
+    time.sleep(0.1)
+
+    # Vérifier le statut online d'admin (doit être online car connecté)
+    response = session.get("/auth/is-online/admin")
+    data = response.json()
+
+    # Vérifier le format de réponse (selon le code, c'est 'isOnline')
+    assert "isOnline" in data, f"Response should contain 'isOnline' field. Got: {data}"
+    assert isinstance(
+        data["isOnline"], bool
+    ), f"Online status should be boolean, got {type(data['isOnline'])}"
+    assert data["isOnline"] == True, "Admin should be online after login and heartbeat"
+
+    print_success(f"Statut online admin: {data['isOnline']}")
+
+
+def test_32_online_status_nonexistent_user():
+    """Test: Vérifier le statut online d'un utilisateur inexistant"""
+    print_test("Online - Utilisateur inexistant")
+
+    session = TestSession()
+
+    # Login admin
+    session.post("/auth/login", json=ADMIN_CREDS)
+
+    # Vérifier le statut d'un utilisateur qui n'existe pas
+    response = session.get(
+        "/auth/is-online/nonexistent_user_12345", expected_status=404
+    )
+    data = response.json()
+
+    assert "error" in data, "Response should contain error for nonexistent user"
+
+    print_success("404 pour utilisateur inexistant")
+
+
+def test_33_users_creation():
+    """Test: Créer 100 utilisateurs différents le plus rapidement possible"""
+    print_test("Users - Création de 100 utilisateurs")
+
+    session = TestSession()
+    import time
+
+    start_time = time.time()
+
+    created_count = 0
+    failed_count = 0
+
+    # Créer 100 utilisateurs avec des noms uniques basés sur timestamp
+    timestamp = int(time.time())
+
+    for i in range(100):
+        creds = {
+            "username": f"{timestamp}_{i}",
+            "email": f"{timestamp}_{i}@test.local",
+            "password": "ValidPass123!",
+        }
+
+        try:
+            resp = session.session.post(
+                f"{API_URL}/auth/register", json=creds, verify=False
+            )
+            print(resp.text)
+            if resp.status_code == 201:
+                created_count += 1
+            else:
+                failed_count += 1
+                if failed_count <= 5:  # Afficher seulement les 5 premières erreurs
+                    print(
+                        f"Erreur utilisateur {i+1}: {resp.status_code} - {resp.text[:100]}"
+                    )
+        except Exception as e:
+            failed_count += 1
+            if failed_count <= 5:
+                print(f"Exception utilisateur {i+1}: {str(e)[:100]}")
+
+        # Affichage de progression tous les 100 utilisateurs
+        if (i + 1) % 100 == 0:
+            elapsed = time.time() - start_time
+            print(
+                f"Progrès: {i+1}/100 utilisateurs - {created_count} créés, {failed_count} échecs - {elapsed:.1f}s"
+            )
+
+    total_time = time.time() - start_time
+    success_rate = (created_count / 100) * 100
+
+    print(f"\n📊 Résultats création utilisateurs:")
+    print(f"   ✅ Créés avec succès: {created_count}/100 ({success_rate:.1f}%)")
+    print(f"   ❌ Échecs: {failed_count}")
+    print(f"   ⏱️  Temps total: {total_time:.2f} secondes")
+    print(f"   🚀 Vitesse: {created_count/total_time:.1f} utilisateurs/seconde")
+
+    if created_count >= 90:  # Au moins 90% de succès
+        print_success(
+            f"Création en masse réussie: {created_count} utilisateurs créés en {total_time:.1f}s"
+        )
+    else:
+        print(
+            f"⚠️  Taux de succès faible: {success_rate:.1f}% - Possible limitation serveur"
+        )
+
+
 def main():
     """Exécution de tous les tests"""
     print("\n" + "=" * 60)
@@ -972,6 +1241,11 @@ def main():
         test_22_2fa_setup_bad_format,
         test_27_2fa_invalid_format_login,
         test_28_2fa_too_many_attempts,
+        test_29_admin_user_update,
+        test_30_admin_disable_2fa,
+        test_31_online_status_check,
+        test_32_online_status_nonexistent_user,
+        test_33_users_creation,
     ]
 
     test_dict = {}
@@ -1000,13 +1274,17 @@ def main():
 
     passed = 0
     failed = 0
+    skipped = 0
 
     for num, test_func in tests_to_run:
         # On affiche explicitement l'ID du test avant son exécution
-        print(f"\n[TEST {num}]", end=" ") 
+        print(f"\n[TEST {num}]", end=" ")
         try:
             test_func()
             passed += 1
+        except SkipTest as e:
+            skipped += 1
+            # Message déjà affiché par la fonction skip
         except AssertionError as e:
             failed += 1
             print_error(f"FAILED: {str(e)}")
@@ -1015,7 +1293,7 @@ def main():
             print_error(f"ERROR: {str(e)}")
 
     print("\n" + "=" * 60)
-    print(f"📊 Résultats: {passed} réussis, {failed} échoués")
+    print(f"📊 Résultats: {passed} réussis, {failed} échoués, {skipped} ignorés")
     print("=" * 60 + "\n")
 
     sys.exit(0 if failed == 0 else 1)

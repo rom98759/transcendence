@@ -1,13 +1,15 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import * as authService from '../services/auth.service.js';
 import { ValidationSchemas } from '../utils/validation.js';
-import { AUTH_CONFIG, UserRole } from '../utils/constants.js';
+import { AUTH_CONFIG, ERROR_MESSAGES, UserRole } from '../utils/constants.js';
 import * as totpService from '../services/totp.service.js';
+import * as onlineService from '../services/online.service.js';
 import { logger } from '../index.js';
 import { generateJWT } from '../services/jwt.service.js';
 import {
   AppError,
   ERROR_CODES,
+  HTTP_STATUS,
   mapToFrontendError,
   mapZodIssuesToErrorDetails,
 } from '@transcendence/core';
@@ -45,7 +47,7 @@ export async function registerHandler(
       fieldErrors[field].push(issue.message);
     });
 
-    return reply.code(400).send({
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: {
         message: "Données d'inscription invalides",
         code: 'VALIDATION_ERROR',
@@ -61,7 +63,7 @@ export async function registerHandler(
   try {
     if (authService.findByUsername(username)) {
       logger.warn({ event: 'register_failed', username, reason: 'user_exists' });
-      return reply.code(409).send({
+      return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: 'Username is already taken',
           code: ERROR_CODES.CONFLICT,
@@ -71,7 +73,7 @@ export async function registerHandler(
     }
     if (authService.findByEmail(email)) {
       logger.warn({ event: 'register_failed', email, reason: 'email_exists' });
-      return reply.code(409).send({
+      return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: 'Email is already taken',
           code: ERROR_CODES.CONFLICT,
@@ -87,7 +89,7 @@ export async function registerHandler(
       err: err?.message || err,
     });
     if (err && err.code === 'DB_FIND_USER_BY_USERNAME_ERROR') {
-      return reply.code(500).send({
+      return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
         error: {
           message: "Erreur lors de la vérification du nom d'utilisateur. Veuillez réessayer.",
           // code: 'DB_FIND_USER_BY_USERNAME_ERROR',
@@ -97,7 +99,7 @@ export async function registerHandler(
       });
     }
     if (err && err.code === 'DB_FIND_USER_BY_EMAIL_ERROR') {
-      return reply.code(500).send({
+      return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
         error: {
           message: "Erreur lors de la vérification de l'email. Veuillez réessayer.",
           // code: 'DB_FIND_USER_BY_EMAIL_ERROR',
@@ -106,8 +108,7 @@ export async function registerHandler(
         },
       });
     }
-    logger.error(err);
-    return reply.code(500).send({
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: {
         message: "Une erreur interne s'est produite. Veuillez réessayer plus tard.",
         code: 'INTERNAL_SERVER_ERROR',
@@ -119,7 +120,7 @@ export async function registerHandler(
   try {
     const id = await authService.createUser({ username, email, password });
     req.log.info({ event: 'register_success', username, email, id });
-    return reply.code(201).send({
+    return reply.code(HTTP_STATUS.CREATED).send({
       user: { id, username, email },
       message: 'Register success',
     });
@@ -132,7 +133,7 @@ export async function registerHandler(
     }
     // Add errors handling
     if (err && err.code === 'USER_EXISTS') {
-      return reply.code(409).send({
+      return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: err.message || 'Username is already taken',
           code: ERROR_CODES.CONFLICT,
@@ -141,7 +142,7 @@ export async function registerHandler(
       });
     }
     if (err && err.code === 'EMAIL_EXISTS') {
-      return reply.code(409).send({
+      return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: err.message || 'Email is already taken',
           code: ERROR_CODES.CONFLICT,
@@ -150,7 +151,7 @@ export async function registerHandler(
       });
     }
     if (err && err.code === 'DB_CREATE_USER_ERROR') {
-      return reply.code(500).send({
+      return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
         error: {
           message: 'Impossible de créer votre compte pour le moment. Veuillez réessayer.',
           code: ERROR_CODES.INTERNAL_ERROR,
@@ -158,7 +159,7 @@ export async function registerHandler(
       });
     }
     if (err && err.code === 'UNIQUE_VIOLATION') {
-      return reply.code(400).send({
+      return reply.code(HTTP_STATUS.BAD_REQUEST).send({
         error: {
           message:
             "Ces informations sont déjà utilisées. Veuillez vérifier votre nom d'utilisateur et email.",
@@ -167,7 +168,7 @@ export async function registerHandler(
       });
     }
 
-    return reply.code(500).send({
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: {
         message: "Une erreur s'est produite lors de la création du compte. Veuillez réessayer.",
         code: ERROR_CODES.INTERNAL_ERROR,
@@ -194,7 +195,7 @@ export async function loginHandler(
     //   fieldErrors[field].push(issue.message);
     // });
 
-    return reply.code(400).send({
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: {
         code: ERROR_CODES.VALIDATION_ERROR,
         details: mapZodIssuesToErrorDetails(validation.error.issues),
@@ -207,25 +208,27 @@ export async function loginHandler(
   const identifier = username || email;
 
   // TypeScript safety check
-  // if (!identifier) {
-  //   logger.warn({ event: 'login_failed', reason: 'missing_identifier' });
-  //   return reply.code(400).send({
-  //     error: {
-  //       message: "Veuillez entrer votre nom d'utilisateur ou votre adresse email.",
-  //       code: 'MISSING_IDENTIFIER',
-  //     },
-  //   });
-  // }
+  if (!identifier) {
+    logger.warn({ event: 'login_failed', reason: 'missing_identifier' });
+    return reply.code(400).send({
+      error: {
+        message: "Veuillez entrer votre nom d'utilisateur ou votre adresse email.",
+        code: ERROR_CODES.VALIDATION_MANDATORY,
+        details: [{ field: 'identifier' }],
+      },
+    });
+  }
 
-  // if (!password) {
-  //   logger.warn({ event: 'login_failed', reason: 'missing_password' });
-  //   return reply.code(400).send({
-  //     error: {
-  //       message: 'Veuillez entrer votre mot de passe.',
-  //       code: 'MISSING_PASSWORD',
-  //     },
-  //   });
-  // }
+  if (!password) {
+    logger.warn({ event: 'login_failed', reason: 'missing_password' });
+    return reply.code(400).send({
+      error: {
+        message: 'Veuillez entrer votre mot de passe.',
+        code: ERROR_CODES.VALIDATION_MANDATORY,
+        details: [{ field: 'password' }],
+      },
+    });
+  }
 
   req.log.info({ event: 'login_attempt', identifier });
 
@@ -234,7 +237,7 @@ export async function loginHandler(
 
     if (!user) {
       logger.warn({ event: 'login_failed', identifier, reason: 'user_not_found' });
-      return reply.code(401).send({
+      return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
         error: {
           code: ERROR_CODES.INVALID_CREDENTIALS,
           details: [{ field: 'identifier' }],
@@ -245,7 +248,7 @@ export async function loginHandler(
     const valid = authService.validateUser(identifier!, password);
     if (!valid) {
       logger.warn({ event: 'login_failed', identifier, reason: 'invalid_password' });
-      return reply.code(401).send({
+      return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
         error: {
           code: ERROR_CODES.INVALID_CREDENTIALS,
           details: [{ field: 'password' }],
@@ -268,7 +271,7 @@ export async function loginHandler(
         getCookieOptions(AUTH_CONFIG.COOKIE_2FA_MAX_AGE_SECONDS),
       );
 
-      return reply.code(200).send({
+      return reply.code(HTTP_STATUS.OK).send({
         result: {
           require2FA: true,
           message: 'Authentification 2FA requise',
@@ -292,7 +295,7 @@ export async function loginHandler(
 
       reply
         .setCookie('token', token, getCookieOptions(AUTH_CONFIG.COOKIE_MAX_AGE_SECONDS))
-        .code(200)
+        .code(HTTP_STATUS.OK)
         .send({
           message: 'Login success',
           user: { id: user.id, username: user.username },
@@ -301,14 +304,14 @@ export async function loginHandler(
   } catch (err: any) {
     req.log.error({ event: 'login_error', identifier, err: err?.message || err });
     if (err && err.code === 'DB_FIND_USER_BY_IDENTIFIER_ERROR') {
-      return reply.code(500).send({
+      return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
         error: {
           message: 'Error recovering account',
           code: ERROR_CODES.INTERNAL_ERROR,
         },
       });
     }
-    return reply.code(500).send({
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: {
         code: ERROR_CODES.INTERNAL_ERROR,
       },
@@ -336,7 +339,7 @@ export async function verifyHandler(
 
   if (!token) {
     logger.warn({ event: 'verify_token_missing' });
-    return reply.code(401).send({
+    return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
       error: {
         message: 'No token provided',
         code: ERROR_CODES.UNAUTHORIZED,
@@ -352,7 +355,7 @@ export async function verifyHandler(
     const user = authService.findByUsername(decoded.username);
     if (!user) {
       logger.warn({ event: 'verify_user_not_found', username: decoded.username });
-      return reply.code(401).send({
+      return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
         error: {
           message: 'User not found',
           code: ERROR_CODES.INVALID_TOKEN,
@@ -361,7 +364,7 @@ export async function verifyHandler(
     }
 
     logger.info({ event: 'verify_success', username: decoded.username, id: decoded.sub });
-    return reply.code(200).send({
+    return reply.code(HTTP_STATUS.OK).send({
       user: {
         id: decoded.sub,
         username: decoded.username,
@@ -370,7 +373,7 @@ export async function verifyHandler(
     });
   } catch (err: any) {
     logger.warn({ event: 'verify_token_invalid', err: err?.message || err });
-    return reply.code(401).send({
+    return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
       error: {
         message: 'Invalid or expired token',
         code: ERROR_CODES.INVALID_TOKEN,
@@ -389,7 +392,7 @@ export async function meHandler(this: FastifyInstance, req: FastifyRequest, repl
 
   if (!id || !username) {
     logger.warn({ event: 'me_request_unauthorized', user: username, id });
-    return reply.code(401).send({
+    return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
       error: {
         message: 'Authentication required',
         code: ERROR_CODES.UNAUTHORIZED,
@@ -403,7 +406,7 @@ export async function meHandler(this: FastifyInstance, req: FastifyRequest, repl
 
     if (!user) {
       logger.warn({ event: 'me_request_user_not_found', user: username, id });
-      return reply.code(404).send({
+      return reply.code(HTTP_STATUS.NOT_FOUND).send({
         error: {
           message: 'User not found',
           code: ERROR_CODES.UNAUTHORIZED,
@@ -417,7 +420,7 @@ export async function meHandler(this: FastifyInstance, req: FastifyRequest, repl
     logger.info({ event: 'me_request_success', user: username, id });
 
     // Format de réponse standardisé
-    return reply.code(200).send({
+    return reply.code(HTTP_STATUS.OK).send({
       user: {
         id: user.id,
         username: user.username,
@@ -508,7 +511,7 @@ export async function notFoundHandler(
     url: request.url,
     user: username,
   });
-  return reply.code(404).send({
+  return reply.code(HTTP_STATUS.NOT_FOUND).send({
     error: {
       message: `Route not found: ${request.method} ${request.url}`,
       code: ERROR_CODES.NOT_FOUND,
@@ -534,7 +537,7 @@ export async function setup2FAHandler(
 
   if (!token) {
     logger.warn({ event: '2fa_setup_token_missing' });
-    return reply.code(401).send({
+    return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
       error: { message: 'Authentication required', code: 'TOKEN_MISSING' },
     });
   }
@@ -548,10 +551,10 @@ export async function setup2FAHandler(
     // Vérifier si 2FA déjà activée
     if (totpService.isTOTPEnabled(userId)) {
       logger.warn({ event: '2fa_setup_already_enabled', userId, username });
-      return reply.code(400).send({
+      return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: '2FA is already enabled. Disable it first to reconfigure.',
-          code: '2FA_ALREADY_ENABLED',
+          code: 'TOTP_ALREADY_ENABLED',
         },
       });
     }
@@ -571,7 +574,7 @@ export async function setup2FAHandler(
       getCookieOptions(AUTH_CONFIG.COOKIE_2FA_MAX_AGE_SECONDS),
     );
 
-    return reply.code(200).send({
+    return reply.code(HTTP_STATUS.OK).send({
       result: {
         qrCode: setupData.qrCodeDataUrl,
         message: 'Scan the QR code with Google Authenticator and enter the 6-digit code',
@@ -582,12 +585,12 @@ export async function setup2FAHandler(
     logger.error({ event: '2fa_setup_error', err: err?.message || err });
 
     if (err.message && err.message.includes('jwt')) {
-      return reply.code(401).send({
+      return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
         error: { message: 'Invalid or expired token', code: 'INVALID_TOKEN' },
       });
     }
 
-    return reply.code(500).send({
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' },
     });
   }
@@ -610,7 +613,7 @@ export async function verify2FASetupHandler(
   // Validation des paramètres
   if (!setupToken || !code) {
     logger.warn({ event: '2fa_setup_verify_missing_data' });
-    return reply.code(400).send({
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: { message: 'Code is required', code: 'MISSING_PARAMETERS' },
     });
   }
@@ -618,7 +621,7 @@ export async function verify2FASetupHandler(
   // Validation du format du code
   if (!/^\d{6}$/.test(code)) {
     logger.warn({ event: '2fa_setup_verify_invalid_format' });
-    return reply.code(400).send({
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: { message: 'Code must be 6 digits', code: 'INVALID_CODE_FORMAT' },
     });
   }
@@ -629,7 +632,7 @@ export async function verify2FASetupHandler(
 
     if (!session) {
       logger.warn({ event: '2fa_setup_verify_session_invalid' });
-      return reply.code(401).send({
+      return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
         error: {
           message: 'Setup session expired or invalid. Please restart the setup process.',
           code: 'SETUP_SESSION_EXPIRED',
@@ -644,7 +647,7 @@ export async function verify2FASetupHandler(
       logger.warn({ event: '2fa_setup_verify_too_many_attempts', userId, attempts });
       totpService.deleteSetupSession(setupToken);
 
-      return reply.code(429).send({
+      return reply.code(HTTP_STATUS.TOO_MANY_REQUESTS).send({
         error: {
           message: `Too many failed attempts (${attempts}/${AUTH_CONFIG.MAX_LOGIN_TOKEN_ATTEMPTS}). Please restart the setup process.`,
           code: 'TOO_MANY_ATTEMPTS',
@@ -667,7 +670,7 @@ export async function verify2FASetupHandler(
         remainingAttempts,
       });
 
-      return reply.code(400).send({
+      return reply.code(HTTP_STATUS.BAD_REQUEST).send({
         error: {
           message: `Invalid 2FA code. ${remainingAttempts} attempt(s) remaining.`,
           code: 'INVALID_2FA_CODE',
@@ -686,7 +689,7 @@ export async function verify2FASetupHandler(
     const user = authService.findUserById(userId);
     if (!user) {
       logger.error({ event: '2fa_setup_verify_user_not_found', userId });
-      return reply.code(404).send({
+      return reply.code(HTTP_STATUS.NOT_FOUND).send({
         error: { message: 'User not found', code: 'USER_NOT_FOUND' },
       });
     }
@@ -701,7 +704,7 @@ export async function verify2FASetupHandler(
     reply
       .clearCookie('2fa_setup_token')
       .setCookie('token', token, getCookieOptions(AUTH_CONFIG.COOKIE_MAX_AGE_SECONDS))
-      .code(200)
+      .code(HTTP_STATUS.OK)
       .send({
         result: {
           message: '2FA successfully activated',
@@ -710,7 +713,7 @@ export async function verify2FASetupHandler(
       });
   } catch (err: any) {
     logger.error({ event: '2fa_setup_verify_error', err: err?.message || err });
-    return reply.code(500).send({
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' },
     });
   }
@@ -733,7 +736,7 @@ export async function verify2FAHandler(
   // Validation des paramètres
   if (!loginToken || !code) {
     logger.warn({ event: '2fa_verify_missing_data' });
-    return reply.code(400).send({
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: {
         message: 'Code is required and login session must be active',
         code: 'MISSING_PARAMETERS',
@@ -744,7 +747,7 @@ export async function verify2FAHandler(
   // Validation du format du code
   if (!/^\d{6}$/.test(code)) {
     logger.warn({ event: '2fa_verify_invalid_format' });
-    return reply.code(400).send({
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: { message: 'Code must be 6 digits', code: 'INVALID_CODE_FORMAT' },
     });
   }
@@ -755,7 +758,7 @@ export async function verify2FAHandler(
 
     if (!tokenData) {
       logger.warn({ event: '2fa_verify_invalid_token' });
-      return reply.code(401).send({
+      return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
         error: {
           message: 'Login session expired. Please login again.',
           code: 'LOGIN_SESSION_EXPIRED',
@@ -770,7 +773,7 @@ export async function verify2FAHandler(
       logger.warn({ event: '2fa_verify_too_many_attempts', userId, attempts });
       authService.deleteLoginToken(loginToken);
 
-      return reply.code(429).send({
+      return reply.code(HTTP_STATUS.TOO_MANY_REQUESTS).send({
         error: {
           message: `Too many failed attempts (${attempts}/${AUTH_CONFIG.MAX_LOGIN_TOKEN_ATTEMPTS}). Please login again.`,
           code: 'TOO_MANY_ATTEMPTS',
@@ -793,7 +796,7 @@ export async function verify2FAHandler(
         remainingAttempts,
       });
 
-      return reply.code(400).send({
+      return reply.code(HTTP_STATUS.BAD_REQUEST).send({
         error: {
           message: `Invalid 2FA code. ${remainingAttempts} attempt(s) remaining.`,
           code: 'INVALID_2FA_CODE',
@@ -807,7 +810,7 @@ export async function verify2FAHandler(
 
     if (!user) {
       logger.error({ event: '2fa_verify_user_not_found', userId });
-      return reply.code(404).send({
+      return reply.code(HTTP_STATUS.NOT_FOUND).send({
         error: { message: 'User not found', code: 'USER_NOT_FOUND' },
       });
     }
@@ -825,7 +828,7 @@ export async function verify2FAHandler(
     reply
       .clearCookie('2fa_login_token')
       .setCookie('token', token, getCookieOptions(AUTH_CONFIG.COOKIE_MAX_AGE_SECONDS))
-      .code(200)
+      .code(HTTP_STATUS.OK)
       .send({
         result: {
           message: 'Login successful',
@@ -834,7 +837,7 @@ export async function verify2FAHandler(
       });
   } catch (err: any) {
     logger.error({ event: '2fa_verify_error', err: err?.message || err });
-    return reply.code(500).send({
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' },
     });
   }
@@ -854,7 +857,7 @@ export async function disable2FAHandler(
 
   if (!token) {
     logger.warn({ event: '2fa_disable_token_missing' });
-    return reply.code(401).send({
+    return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
       error: { message: 'Authentication required', code: 'TOKEN_MISSING' },
     });
   }
@@ -868,7 +871,7 @@ export async function disable2FAHandler(
     // Vérifier si 2FA est actuellement activée
     if (!totpService.isTOTPEnabled(userId)) {
       logger.warn({ event: '2fa_disable_not_enabled', userId, username });
-      return reply.code(400).send({
+      return reply.code(HTTP_STATUS.BAD_REQUEST).send({
         error: {
           message: '2FA is not enabled for this account',
           code: '2FA_NOT_ENABLED',
@@ -881,7 +884,7 @@ export async function disable2FAHandler(
 
     logger.info({ event: '2fa_disabled', userId, username });
 
-    return reply.code(200).send({
+    return reply.code(HTTP_STATUS.OK).send({
       result: {
         message: '2FA successfully disabled',
         username,
@@ -891,13 +894,114 @@ export async function disable2FAHandler(
     logger.error({ event: '2fa_disable_error', err: err?.message || err });
 
     if (err.message && err.message.includes('jwt')) {
-      return reply.code(401).send({
+      return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
         error: { message: 'Invalid or expired token', code: 'INVALID_TOKEN' },
       });
     }
 
-    return reply.code(500).send({
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: { message: 'Internal server error', code: 'INTERNAL_SERVER_ERROR' },
+    });
+  }
+}
+
+/**
+ * Handler pour le heartbeat - met à jour le statut en ligne de l'utilisateur
+ */
+export async function heartbeatHandler(
+  this: FastifyInstance,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const idHeader = (req.headers as any)['x-user-id'];
+  const userId = idHeader ? Number(idHeader) : null;
+
+  // Vérifier que l'utilisateur est authentifié
+  if (!userId) {
+    return reply.code(HTTP_STATUS.UNAUTHORIZED).send({
+      error: {
+        message: ERROR_MESSAGES.UNAUTHORIZED,
+        code: ERROR_CODES.UNAUTHORIZED,
+      },
+    });
+  }
+
+  try {
+    // Enregistrer le heartbeat dans Redis
+    await onlineService.recordHeartbeat(userId);
+
+    return reply.code(HTTP_STATUS.OK).send({
+      success: true,
+      timestamp: Date.now(),
+    });
+  } catch (error: any) {
+    logger.error({
+      event: 'heartbeat_error',
+      userId,
+      error: error?.message || error,
+    });
+
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
+      error: {
+        message: ERROR_MESSAGES.FAILED_HEARTBEAT,
+        code: ERROR_CODES.INTERNAL_ERROR,
+      },
+    });
+  }
+}
+
+/**
+ * Handler pour vérifier si un utilisateur est en ligne
+ * GET /is-online/:name
+ */
+export async function isUserOnlineHandler(
+  this: FastifyInstance,
+  req: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const params = req.params as { name?: string };
+  const userName = params.name || null;
+
+  // Validation des paramètres
+  if (!userName) {
+    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
+      error: {
+        message: 'User name is required',
+        code: 'MISSING_USER_NAME',
+      },
+    });
+  }
+
+  try {
+    const user = authService.findByUsername(userName);
+    if (!user || !user.id) {
+      return reply.code(HTTP_STATUS.NOT_FOUND).send({
+        error: {
+          message: ERROR_MESSAGES.USER_NOT_FOUND,
+          code: ERROR_CODES.NOT_FOUND,
+          details: [{ field: 'user' }],
+        },
+      });
+    }
+    const userId = user.id;
+
+    // Vérifier le statut en ligne
+    const isOnline = await onlineService.isUserOnline(userId);
+    return reply.code(HTTP_STATUS.OK).send({
+      username: userName,
+      isOnline,
+    });
+  } catch (error: any) {
+    logger.error({
+      event: 'check_user_online_error',
+      userName,
+      error: error?.message || error,
+    });
+    return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
+      error: {
+        message: ERROR_MESSAGES.FAILED_CHECK_USER_ONLINE,
+        code: ERROR_CODES.INTERNAL_ERROR,
+      },
     });
   }
 }

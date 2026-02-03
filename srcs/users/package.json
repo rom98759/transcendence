@@ -15,7 +15,7 @@
     "pretest": "prisma generate",
     "test": "vitest run",
     "test:watch": "vitest run --watch",
-    "test:coverage": "vitest run --coverage",
+    "test:coverage": "prisma generate && vitest run --coverage",
     "test:ui": "vitest --ui"
   },
   "devDependencies": {

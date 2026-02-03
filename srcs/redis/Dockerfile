@@ -1,7 +1,7 @@
 FROM redis:7-alpine
 
 # Copy custom Redis configuration
-COPY redis.conf /usr/local/etc/redis/redis.conf
+COPY srcs/redis/redis.conf /usr/local/etc/redis/redis.conf
 
 # Create data directory
 RUN mkdir -p /data

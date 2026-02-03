@@ -1,11 +1,11 @@
 <%- include('header.ejs', {title}) %>
-<div class="text-center my-4">
-    <h3 class="fw-bold"><%= message %></h3>
+<div class="max-w-6xl mx-auto px-4 my-6 space-y-4 ">
+    <h3 class="text-center rounded-xl bg-white opacity-95 text-xl font-bold"><%= message %></h3>
 </div>
 <div class="max-w-6xl mx-auto px-4 space-y-6">
 
     <!-- Carte d'enregistrement snapshot blockchain -->
-    <div class="rounded-xl border bg-white shadow-sm border-gray-200" id="registerCard">
+    <div class="rounded-xl border bg-white opacity-95 shadow-sm border-gray-200" id="registerCard">
         <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
             <h2 class="text-lg font-semibold">Adding manually a tournament</h2>
         </div>
@@ -63,7 +63,7 @@
             const player3 = document.getElementById("regp3Id").value;
             const player4 = document.getElementById("regp4Id").value;
             try {
-                const result = await postJson("/tournamentspub", { tour_id, player1, player2,player3,player4  });
+                const result = await postJson("/blockchain/tournamentspub", { tour_id, player1, player2,player3,player4  });
                 if (result.ok) {
                     regMsg.textContent = "Inscription réussie";
                     regMsg.classList.add("success");
@@ -83,7 +83,7 @@
 
     <%- include('snapshots.ejs') %>
     
-    <div class="overflow-x-auto rounded-xl border bg-white shadow-sm border-gray-200">
+    <div class="overflow-x-auto rounded-xl border bg-white opacity-95 shadow-sm border-gray-200">
         <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
             <h2 class="text-lg font-semibold">List of tournaments in snapshot</h2>
         </div>
@@ -123,7 +123,7 @@
     </div>
 
     <!-- Carte Me -->
-    <div class="rounded-xl border bg-white shadow-sm border-gray-200" id="me">
+    <div class="rounded-xl border bg-white opacity-95 shadow-sm border-gray-200" id="me">
             <div class="border-b border-gray-200 px-6 py-4 bg-gray-50 text-gray-600 rounded-t-xl">
                 <h2 class="text-lg font-semibold">Liste des Users</h2>
             </div>
@@ -153,7 +153,7 @@
             meBtn.disabled = true;
 
             try {
-                const res = await fetch("/tournaments", {
+                const res = await fetch("/blockchain/tournaments", {
                     method: "GET",
                     credentials: "include"
                 });

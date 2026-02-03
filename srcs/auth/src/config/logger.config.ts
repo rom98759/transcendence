@@ -3,9 +3,10 @@ import { IncomingMessage } from 'node:http';
 import { LoggerOptions, stdSerializers } from 'pino';
 import { hostname } from 'os';
 import { REDACT_PATHS } from '../utils/constants.js';
+import { authenv } from './env.js';
 import { ServiceError } from '../types/errors.js';
 
-const isDev = process.env.NODE_ENV !== 'production';
+const isDev = authenv.NODE_ENV !== 'production';
 
 function isFastifyRequest(req: IncomingMessage | FastifyRequest): req is FastifyRequest {
   return 'raw' in req && 'id' in req;
@@ -20,11 +21,11 @@ function isFastifyError(err: Error | unknown): err is FastifyError {
  */
 export const loggerConfig: LoggerOptions = {
   redact: [...REDACT_PATHS],
-  level: process.env.LOG_LEVEL || 'info',
+  level: authenv.LOG_LEVEL,
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
   base: {
-    env: process.env.NODE_ENV,
-    service: process.env.AUTH_SERVICE_NAME,
+    env: authenv.NODE_ENV,
+    service: authenv.AUTH_SERVICE_NAME,
     pid: process.pid,
     hostname: hostname(),
   },

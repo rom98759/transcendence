@@ -2,7 +2,7 @@ include make/config.mk
 
 # === Global ===
 
-all : volumes colima build
+all : volumes certs colima build
 	$(D_COMPOSE) up -d
 
 dev: volumes colima-dev build-dev
@@ -44,6 +44,16 @@ envs:
 	done; \
 	echo "JWT_SECRET applied to all files"
 
+# --- Certificats mTLS---
+CERTS_DIR=./make/scripts/certs/certs
+
+certs:
+	@if [ ! -d "$(CERTS_DIR)/ca" ]; then \
+		echo "Generating TLS certificates..."; \
+		cd make/scripts/certs && ./generate_certs.sh; \
+	else \
+		echo "TLS certificates already exist"; \
+	fi
 
 include make/colima.mk
 
@@ -66,38 +76,16 @@ lint-fix:
 
 # === Services ===
 
-# --- Installs Node ---
-install:
-	npm i
-
-# --- Builds Node ---
-build-core: install
-	npm run build --workspace @transcendence/core
-
-# build-nginx: install
-# 	$(N_BUILD_WK)/nginx
-# build-auth: install
-# 	$(N_BUILD_WK)/auth
-# build-game: install
-# 	$(N_BUILD_WK)/game
-# build-block: install
-# 	$(N_BUILD_WK)/blockchain
-# build-api: install
-# 	$(N_BUILD_WK)/gateway
-# build-user: install
-# 	$(N_BUILD_WK)/users
-# 	cd srcs/users && npm install && npm run build
 
 # --- Builds Images ---
 nginx:
 	$(D_COMPOSE) up -d --build $(PROXY_SERVICE_NAME)
-redis: build-core
+redis:
 	$(D_COMPOSE) up -d --build $(REDIS_SERVICE_NAME)
 api:
 	$(D_COMPOSE) up -d --build $(API_GATEWAY_NAME)
 auth:
-	$(D_COMPOSE) build $(AUTH_SERVICE_NAME)
-	$(D_COMPOSE) up -d $(AUTH_SERVICE_NAME)
+	$(D_COMPOSE) up -d --build $(AUTH_SERVICE_NAME)
 user:
 	$(D_COMPOSE) build $(UM_SERVICE_NAME)
 	$(D_COMPOSE) up -d $(UM_SERVICE_NAME)
@@ -107,18 +95,26 @@ block:
 	$(D_COMPOSE) up -d --build $(BK_SERVICE_NAME)
 build:
 	$(D_COMPOSE) build
-build-dev: build-core
+build-dev:
 	$(D_COMPOSE_DEV) build
 
 # --- Test ---
-test: install test-user
+test: certs test-user
 
-test-coverage: install test-coverage-user
+test-coverage: certs test-coverage-user
 
-test-user: build-core
-	cd srcs/users && npm install && npx vitest run --config vite.config.mjs
-test-coverage-user: build-core
-	cd srcs/users && npx vitest run --coverage --config vite.config.mjs
+test-user:
+	$(COMPOSE_CMD) \
+		-f srcs/docker-compose.yml \
+		-f srcs/docker-compose.test.yml \
+		run --rm test-runner
+
+test-coverage-user:
+	$(COMPOSE_CMD) \
+		-f srcs/docker-compose.yml \
+		-f srcs/docker-compose.test.yml \
+		run --rm test-runner \
+		sh -lc "npm ci && npm run test:coverage --workspace srcs/users"
 
 test-block:
 	@gnome-terminal -- bash -c "cd srcs/blockchain/src/SmartContract && npx hardhat node" &
@@ -143,6 +139,10 @@ test-block:
 redis-cli:
 	$(CONTAINER_CMD) exec -it $(REDIS_SERVICE_NAME) redis-cli
 
+
+dev-nginx:
+	npm run dev --workspace proxy-service
+
 # --- Shell access ---
 
 # generic rule : replace % with service name
@@ -157,7 +157,7 @@ shell-api:
 shell-auth:
 	$(CONTAINER_CMD) exec -it $(AUTH_SERVICE_NAME) /bin/sh
 shell-user:
-	$(CONTAINER_CMD) exec -it $(USER_SERVICE_NAME) /bin/sh
+	$(CONTAINER_CMD) exec -it $(UM_SERVICE_NAME) /bin/sh
 shell-game:
 	$(CONTAINER_CMD) exec -it $(GAME_SERVICE_NAME) /bin/sh
 shell-block:
@@ -237,5 +237,7 @@ ifneq ($(CHIP), arm64)
 endif
 endif
 	rm -rf $(VOLUMES_PATH)
+	@echo "Remove certificates"
+	rm -rf make/scripts/certs/certs
 
 .PHONY : all clean fclean re check format core build volumes setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth colima colima-dev

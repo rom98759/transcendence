@@ -3,7 +3,6 @@ import { HTTP_STATUS } from '../constants/index.js';
 import { EventValue, LogContext, ReasonValue } from '../logging/logging-types.js';
 import { LOG_REASONS } from '../logging/logging.js';
 import { ERROR_CODES } from './error-codes.js';
-import { ZodError } from 'zod';
 
 export type DeepValues<T> = T extends object ? { [K in keyof T]: DeepValues<T[K]> }[keyof T] : T;
 
@@ -93,7 +92,7 @@ export class FrontendError extends Error {
   }
 }
 
-export const mapZodIssuesToErrorDetails = (issues: ZodError['issues']): ErrorDetail[] => {
+export const mapZodIssuesToErrorDetails = (issues: ZodIssue[]): ErrorDetail[] => {
   return issues.map((issue) => ({
     field: issue.path?.join('.'), // Ex: "email" ou "user.email"
     reason: issue.code as ErrorDetail['reason'], // Ex: "invalid_string"

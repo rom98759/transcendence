@@ -3,8 +3,20 @@ import fastifyWebsocket from '@fastify/websocket';
 import { gameRoutes } from './routes/game.routes.js';
 import { gameSessions } from './core/game.state.js';
 import type { PongGame } from './core/game.engine.js';
+import fs from 'fs';
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({
+  https: {
+    key: fs.readFileSync('/etc/certs/game-service.key'),
+    cert: fs.readFileSync('/etc/certs/game-service.crt'),
+    ca: fs.readFileSync('/etc/ca/ca.crt'),
+
+    requestCert: true,
+    rejectUnauthorized: false,
+  },
+
+  logger: true,
+});
 
 // Register WebSocket support
 await fastify.register(fastifyWebsocket);

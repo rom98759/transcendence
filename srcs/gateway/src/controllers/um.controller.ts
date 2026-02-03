@@ -3,18 +3,9 @@ import { CatchAllParams } from '../types/params.types.js';
 import { fastStreamProxy } from '../utils/proxy.js';
 import { fastifyReplyFrom } from '@fastify/reply-from';
 
-const UM_SERVICE_URL = 'http://user-service:3002';
+const UM_SERVICE_URL = 'https://user-service:3002';
 
 export function registerUsersRoutes(app: FastifyInstance) {
-  app.register(fastifyReplyFrom, {
-    undici: {
-      connections: 100,
-      pipelining: 1,
-      bodyTimeout: 60000,
-      headersTimeout: 15000,
-    },
-  });
-
   app.all<{ Params: CatchAllParams }>(
     '/*',
     async (request: FastifyRequest, reply: FastifyReply) => {
@@ -22,7 +13,8 @@ export function registerUsersRoutes(app: FastifyInstance) {
       const cleanPath = rawPath.startsWith('/') ? rawPath.substring(1) : rawPath;
       const url = `${UM_SERVICE_URL}/${cleanPath}`;
 
-      return fastStreamProxy(request, reply, url);
+      await fastStreamProxy(request, reply, url);
+      return;
     },
   );
 }

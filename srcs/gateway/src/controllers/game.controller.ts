@@ -1,27 +1,41 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { proxyRequest, webSocketProxyRequest } from '../utils/proxy.js';
+import { GATEWAY_CONFIG } from '../utils/constants.js';
+import { fetchOptions } from '../utils/mtlsAgent.js';
 
 export function registerGameRoutes(app: FastifyInstance) {
   // Regular HTTP routes
   app.get('/health', async (request, reply) => {
     app.log.info({ event: 'game_health', remote: 'game', url: '/health' });
-    const res = await proxyRequest(app, request, reply, 'http://game-service:3003/health');
+    const res = await proxyRequest(
+      app,
+      request,
+      reply,
+      `${GATEWAY_CONFIG.SERVICES.GAME}/health`,
+      fetchOptions,
+    );
     return res;
   });
 
   app.post('/settings', async (request, reply) => {
     app.log.info({ event: 'game_settings', remote: 'game', url: '/settings' });
-    const res = await proxyRequest(app, request, reply, 'http://game-service:3003/settings', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(request.body),
-    });
+    const res = await proxyRequest(
+      app,
+      request,
+      reply,
+      `${GATEWAY_CONFIG.SERVICES.GAME}/settings`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(request.body),
+      },
+    );
     return res;
   });
 
   app.get('/sessions', async (request, reply) => {
     app.log.info({ event: 'game_sessions', remote: 'game', url: '/sessions' });
-    const res = await proxyRequest(app, request, reply, 'http://game-service:3003/sessions');
+    const res = await proxyRequest(app, request, reply, `${GATEWAY_CONFIG.SERVICES.GAME}/sessions`);
     return res;
   });
 
@@ -39,10 +53,8 @@ export function registerGameRoutes(app: FastifyInstance) {
   app.all('/*', async (request, reply) => {
     const rawPath = (request.params as any)['*'];
     const cleanPath = rawPath.replace(/^api\/game\//, ''); // 🔥 FIX
-    const url = `http://game-service:3003/${cleanPath}`;
-    // const path = (request.params as any)['*'];
-    // const url = `http://game-service:3003/${path}`;
-    const queryString = new URL(request.url, 'http://localhost').search;
+    const url = `${GATEWAY_CONFIG.SERVICES.GAME}/${cleanPath}`;
+    const queryString = new URL(request.url, 'https://localhost').search;
     const fullUrl = `${url}${queryString}`;
 
     app.log.info({

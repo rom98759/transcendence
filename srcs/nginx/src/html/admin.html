@@ -1,0 +1,1426 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Administration - Transcendence</title>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		.modal {
+			display: none;
+			position: fixed;
+			z-index: 50;
+			inset: 0;
+			background-color: rgba(0, 0, 0, 0.5);
+			backdrop-filter: blur(4px);
+		}
+
+		.modal.show {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+
+		.modal-content {
+			background: white;
+			padding: 2rem;
+			border-radius: 1rem;
+			max-width: 600px;
+			width: 90%;
+			max-height: 90vh;
+			overflow-y: auto;
+			box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+		}
+
+		.badge {
+			display: inline-flex;
+			align-items: center;
+			padding: 0.25rem 0.75rem;
+			border-radius: 9999px;
+			font-size: 0.75rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.025em;
+		}
+
+		.badge.admin {
+			background: linear-gradient(135deg, #fef3c7, #fde68a);
+			color: #92400e;
+		}
+
+		.badge.user {
+			background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+			color: #374151;
+		}
+
+		.badge.enabled {
+			background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+			color: #065f46;
+		}
+
+		.badge.disabled {
+			background: linear-gradient(135deg, #fee2e2, #fecaca);
+			color: #991b1b;
+		}
+
+		.badge.protected {
+			background: linear-gradient(135deg, #e0e7ff, #c7d2fe);
+			color: #3730a3;
+		}
+
+		.table-actions {
+			display: flex;
+			gap: 0.5rem;
+			align-items: center;
+		}
+
+		.btn {
+			padding: 0.5rem 1rem;
+			border-radius: 0.5rem;
+			font-size: 0.875rem;
+			font-weight: 600;
+			cursor: pointer;
+			border: none;
+			transition: all 0.3s;
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+
+		.btn-primary {
+			background: linear-gradient(135deg, #3b82f6, #2563eb);
+			color: white;
+			box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+		}
+
+		.btn-primary:hover {
+			background: linear-gradient(135deg, #2563eb, #1d4ed8);
+			transform: translateY(-2px);
+			box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+		}
+
+		.btn-secondary {
+			background: linear-gradient(135deg, #6b7280, #4b5563);
+			color: white;
+		}
+
+		.btn-secondary:hover {
+			background: linear-gradient(135deg, #4b5563, #374151);
+			transform: translateY(-1px);
+		}
+
+		.btn-danger {
+			background: linear-gradient(135deg, #ef4444, #dc2626);
+			color: white;
+		}
+
+		.btn-danger:hover {
+			background: linear-gradient(135deg, #dc2626, #b91c1c);
+			transform: translateY(-1px);
+		}
+
+		.btn:disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			transform: none !important;
+		}
+
+		.btn-sm {
+			padding: 0.25rem 0.5rem;
+			font-size: 0.75rem;
+		}
+
+		.alert {
+			padding: 1rem;
+			border-radius: 0.75rem;
+			margin-bottom: 1rem;
+			border-left: 4px solid;
+		}
+
+		.alert-success {
+			background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+			color: #065f46;
+			border-color: #10b981;
+		}
+
+		.alert-error {
+			background: linear-gradient(135deg, #fef2f2, #fee2e2);
+			color: #991b1b;
+			border-color: #ef4444;
+		}
+
+		.alert-warning {
+			background: linear-gradient(135deg, #fffbeb, #fef3c7);
+			color: #92400e;
+			border-color: #f59e0b;
+		}
+
+		.search-box {
+			position: relative;
+			max-width: 400px;
+		}
+
+		.search-box input {
+			padding-left: 3rem;
+			border-radius: 0.75rem;
+			border: 2px solid #e5e7eb;
+			transition: all 0.3s;
+		}
+
+		.search-box input:focus {
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+		}
+
+		.search-icon {
+			position: absolute;
+			left: 1rem;
+			top: 50%;
+			transform: translateY(-50%);
+			color: #6b7280;
+		}
+
+		.loading {
+			display: inline-block;
+			width: 20px;
+			height: 20px;
+			border: 3px solid rgba(255, 255, 255, 0.3);
+			border-top: 3px solid #3b82f6;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
+		.stats-card {
+			background: linear-gradient(135deg, #ffffff, #f8fafc);
+			border: 1px solid #e2e8f0;
+			border-radius: 1rem;
+			padding: 1.5rem;
+			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			transition: all 0.3s;
+		}
+
+		.stats-card:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+		}
+
+		.health-status {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.5rem 1rem;
+			border-radius: 0.5rem;
+			font-weight: 600;
+			font-size: 0.875rem;
+		}
+
+		.health-healthy {
+			background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+			color: #065f46;
+		}
+
+		.health-unhealthy {
+			background: linear-gradient(135deg, #fee2e2, #fecaca);
+			color: #991b1b;
+		}
+
+		.pulse {
+			animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		}
+
+		@keyframes pulse {
+
+			0%,
+			100% {
+				opacity: 1;
+			}
+
+			50% {
+				opacity: .5;
+			}
+		}
+
+		.field-error {
+			color: #dc2626;
+			font-size: 0.875rem;
+			margin-top: 0.25rem;
+			display: flex;
+			align-items: center;
+			gap: 0.25rem;
+		}
+
+		.form-input {
+			width: 100%;
+			padding: 0.75rem 1rem;
+			border: 2px solid #e5e7eb;
+			border-radius: 0.5rem;
+			font-size: 0.875rem;
+			transition: all 0.3s;
+		}
+
+		.form-input:focus {
+			outline: none;
+			border-color: #3b82f6;
+			box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+		}
+
+		.form-input.error {
+			border-color: #ef4444;
+		}
+
+		.loading-overlay {
+			position: fixed;
+			inset: 0;
+			background: rgba(0, 0, 0, 0.8);
+			display: none;
+			align-items: center;
+			justify-content: center;
+			z-index: 9999;
+		}
+
+		.loading-overlay.show {
+			display: flex;
+		}
+
+		/* Indicateur de refresh */
+		.refresh-indicator {
+			position: fixed;
+			bottom: 20px;
+			right: 20px;
+			background: rgba(59, 130, 246, 0.95);
+			color: white;
+			padding: 0.75rem 1rem;
+			border-radius: 0.75rem;
+			font-size: 0.875rem;
+			display: none;
+			align-items: center;
+			gap: 0.5rem;
+			box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+			z-index: 1000;
+			animation: slideIn 0.3s ease-out;
+		}
+
+		.refresh-indicator.show {
+			display: flex;
+		}
+
+		@keyframes slideIn {
+			from {
+				transform: translateY(100px);
+				opacity: 0;
+			}
+
+			to {
+				transform: translateY(0);
+				opacity: 1;
+			}
+		}
+	</style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-50 to-slate-100">
+	<!-- Loading Overlay -->
+	<div id="loading-overlay" class="loading-overlay">
+		<div class="bg-white p-8 rounded-lg shadow-2xl text-center">
+			<div class="loading mx-auto mb-4"></div>
+			<p class="text-gray-600">Vérification des permissions...</p>
+		</div>
+	</div>
+
+	<!-- Navigation -->
+	<nav class="bg-white shadow-lg border-b-4 border-blue-500">
+		<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div class="flex justify-between items-center h-20">
+				<div class="flex items-center">
+					<div class="flex-shrink-0">
+						<svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+							</path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<h1 class="text-2xl font-bold text-gray-900">Administration Transcendence</h1>
+						<p class="text-sm text-gray-600">Panneau de contrôle système</p>
+					</div>
+				</div>
+				<div class="flex items-center space-x-4">
+					<div id="current-user" class="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full"></div>
+					<button onclick="logout()" class="btn btn-secondary btn-sm">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1">
+							</path>
+						</svg>
+						Déconnexion
+					</button>
+					<a href="/" class="btn btn-primary btn-sm">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
+							</path>
+						</svg>
+						Retour au site
+					</a>
+				</div>
+			</div>
+		</div>
+	</nav>
+
+	<div id="main-content" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8" style="display: none;">
+		<!-- Alerts -->
+		<div id="alerts-container"></div>
+
+		<!-- System Health Check -->
+		<div class="mb-8">
+			<h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+				<svg class="w-6 h-6 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+						d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+				</svg>
+				État du Système
+			</h2>
+			<div id="health-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+				<!-- Les cartes de santé seront générées dynamiquement ici -->
+				<div class="stats-card">
+					<div class="flex justify-center items-center h-24">
+						<div class="loading"></div>
+						<span class="ml-3 text-gray-600">Vérification des services...</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Stats Cards -->
+		<div class="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+			<div class="stats-card">
+				<div class="flex items-center">
+					<div class="p-3 bg-blue-100 rounded-full">
+						<svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+							</path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<p class="text-sm font-medium text-gray-600">Total Utilisateurs</p>
+						<p id="total-users" class="text-3xl font-bold text-gray-900">-</p>
+					</div>
+				</div>
+			</div>
+			<div class="stats-card">
+				<div class="flex items-center">
+					<div class="p-3 bg-green-100 rounded-full">
+						<svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z">
+							</path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<p class="text-sm font-medium text-gray-600">En ligne</p>
+						<p id="online-count" class="text-3xl font-bold text-green-600">-</p>
+					</div>
+				</div>
+			</div>
+			<div class="stats-card">
+				<div class="flex items-center">
+					<div class="p-3 bg-yellow-100 rounded-full">
+						<svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+							</path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<p class="text-sm font-medium text-gray-600">Administrateurs</p>
+						<p id="admin-count" class="text-3xl font-bold text-gray-900">-</p>
+					</div>
+				</div>
+			</div>
+			<div class="stats-card">
+				<div class="flex items-center">
+					<div class="p-3 bg-indigo-100 rounded-full">
+						<svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<p class="text-sm font-medium text-gray-600">2FA Activée</p>
+						<p id="2fa-count" class="text-3xl font-bold text-gray-900">-</p>
+					</div>
+				</div>
+			</div>
+			<div class="stats-card">
+				<div class="flex items-center">
+					<div class="p-3 bg-purple-100 rounded-full">
+						<svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+						</svg>
+					</div>
+					<div class="ml-4">
+						<p class="text-sm font-medium text-gray-600">Utilisateurs</p>
+						<p id="user-count" class="text-3xl font-bold text-gray-900">-</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- User Management Section -->
+		<div class="bg-white rounded-xl shadow-lg border border-gray-200">
+			<div class="px-6 py-4 border-b border-gray-200 bg-gray-50 rounded-t-xl">
+				<div class="flex justify-between items-center">
+					<h2 class="text-xl font-bold text-gray-900 flex items-center">
+						<svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+							</path>
+						</svg>
+						Gestion des Utilisateurs
+					</h2>
+				</div>
+
+				<!-- Search and Filters -->
+				<div class="mt-4 flex flex-col sm:flex-row gap-4">
+					<div class="search-box flex-1">
+						<svg class="search-icon w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+						</svg>
+						<input type="text" id="search-input" placeholder="Rechercher par nom, email..."
+							class="form-input">
+					</div>
+					<select id="role-filter" class="form-input" style="max-width: 200px;">
+						<option value="">Tous les rôles</option>
+						<option value="admin">Administrateurs</option>
+						<option value="user">Utilisateurs</option>
+					</select>
+					<select id="2fa-filter" class="form-input" style="max-width: 200px;">
+						<option value="">Tous</option>
+						<option value="true">2FA Activée</option>
+						<option value="false">2FA Désactivée</option>
+					</select>
+					<select id="online-filter" class="form-input" style="max-width: 200px;">
+						<option value="">Tous (Statut)</option>
+						<option value="true">En ligne</option>
+						<option value="false">Hors ligne</option>
+					</select>
+					<select id="items-per-page" class="form-input" style="max-width: 150px;">
+						<option value="10">10 par page</option>
+						<option value="20">20 par page</option>
+						<option value="50">50 par page</option>
+						<option value="100">100 par page</option>
+					</select>
+				</div>
+			</div>
+
+			<!-- Table -->
+			<div class="overflow-x-auto">
+				<table class="min-w-full divide-y divide-gray-200">
+					<thead class="bg-gray-50">
+						<tr>
+							<th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">ID
+							</th>
+							<th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+								Utilisateur</th>
+							<th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+								Email</th>
+							<th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+								Rôle</th>
+							<th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">2FA
+							</th>
+							<th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+								Statut</th>
+							<th class="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+								Actions</th>
+						</tr>
+					</thead>
+					<tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+						<tr>
+							<td colspan="7" class="px-6 py-8 text-center">
+								<div class="loading mx-auto mb-4"></div>
+								<span class="text-gray-500">Chargement des utilisateurs...</span>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!-- Pagination Controls -->
+			<div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+				<div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+					<!-- Info sur les éléments affichés -->
+					<div class="text-sm text-gray-600">
+						<span id="pagination-info">0 à 0 sur 0 utilisateurs</span>
+					</div>
+
+					<!-- Boutons de navigation -->
+					<div class="flex items-center gap-2">
+						<button id="prev-page-btn" onclick="previousPage()" class="btn btn-secondary btn-sm" disabled>
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+							</svg>
+							Précédent
+						</button>
+						<span id="page-info" class="text-sm text-gray-700 font-medium px-4">Page 1 sur 1</span>
+						<button id="next-page-btn" onclick="nextPage()" class="btn btn-secondary btn-sm" disabled>
+							Suivant
+							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Edit User Modal -->
+	<div id="edit-user-modal" class="modal">
+		<div class="modal-content">
+			<div class="flex justify-between items-center mb-6">
+				<h3 class="text-xl font-bold text-gray-900 flex items-center">
+					<svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+							d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+						</path>
+					</svg>
+					Modifier l'Utilisateur
+				</h3>
+				<button onclick="hideEditUserModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+					<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+						</path>
+					</svg>
+				</button>
+			</div>
+
+			<form id="edit-user-form" onsubmit="updateUser(event)">
+				<input type="hidden" id="edit-user-id">
+				<div class="space-y-6">
+					<div>
+						<label for="edit-username" class="block text-sm font-semibold text-gray-700 mb-2">
+							Nom d'utilisateur *
+						</label>
+						<input type="text" id="edit-username" required class="form-input" minlength="3" maxlength="30"
+							pattern="[a-zA-Z0-9_\-]+" title="Lettres, chiffres, tirets et underscores uniquement">
+						<div id="edit-username-error" class="field-error" style="display: none;"></div>
+					</div>
+					<div>
+						<label for="edit-email" class="block text-sm font-semibold text-gray-700 mb-2">
+							Adresse Email *
+						</label>
+						<input type="email" id="edit-email" required class="form-input">
+						<div id="edit-email-error" class="field-error" style="display: none;"></div>
+					</div>
+					<div id="edit-role-section">
+						<label for="edit-role" class="block text-sm font-semibold text-gray-700 mb-2">
+							Rôle *
+						</label>
+						<select id="edit-role" required class="form-input">
+							<option value="user">Utilisateur</option>
+							<option value="admin">Administrateur</option>
+						</select>
+						<div id="edit-role-error" class="field-error" style="display: none;"></div>
+					</div>
+					<div>
+						<label class="block text-sm font-semibold text-gray-700 mb-3">
+							Double Authentification (2FA)
+						</label>
+						<div class="bg-gray-50 p-4 rounded-lg">
+							<div class="flex items-center justify-between">
+								<div>
+									<span id="2fa-status" class="badge disabled">2FA Désactivée</span>
+									<p class="text-sm text-gray-600 mt-1">Statut de la double authentification</p>
+								</div>
+								<button type="button" id="disable-2fa-btn" onclick="disable2FA()"
+									class="btn btn-danger btn-sm" style="display: none;">
+									<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+											d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18 18M5.636 5.636L6 6">
+										</path>
+									</svg>
+									Désactiver 2FA
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+					<button type="button" onclick="hideEditUserModal()" class="btn btn-secondary">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+						Annuler
+					</button>
+					<button type="submit" id="edit-user-btn" class="btn btn-primary">
+						<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7">
+							</path>
+						</svg>
+						Sauvegarder les Modifications
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Indicateur de refresh -->
+	<div id="refresh-indicator" class="refresh-indicator">
+		<div class="loading"></div>
+		<span>Mise à jour...</span>
+	</div>
+
+	<script>
+		// === Configuration ===
+		const API_BASE = '';
+		const AUTO_REFRESH_INTERVAL = 20000;
+
+		// === State Management ===
+		let users = [];
+		let currentUser = null;
+		let filteredUsers = [];
+		let autoRefreshTimer = null;
+		let currentPage = 1;
+		let itemsPerPage = 10;
+
+		// === Initialization ===
+		document.addEventListener('DOMContentLoaded', async function () {
+			document.getElementById('loading-overlay').classList.add('show');
+
+			// Réinitialiser les filtres
+			document.getElementById('search-input').value = '';
+			document.getElementById('role-filter').value = '';
+			document.getElementById('2fa-filter').value = '';
+			if (document.getElementById('online-filter')) {
+				document.getElementById('online-filter').value = '';
+			}
+
+			await checkAuthentication();
+			await checkSystemHealth();
+			await loadUsers();
+
+			document.getElementById('loading-overlay').classList.remove('show');
+			document.getElementById('main-content').style.display = 'block';
+
+			setupEventListeners();
+			startAutoRefresh();
+		});
+
+		// === Event Listeners ===
+		function setupEventListeners() {
+			document.getElementById('search-input').addEventListener('input', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('role-filter').addEventListener('change', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('2fa-filter').addEventListener('change', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('online-filter').addEventListener('change', () => {
+				currentPage = 1;
+				filterUsers();
+			});
+			document.getElementById('items-per-page').addEventListener('change', (e) => {
+				itemsPerPage = parseInt(e.target.value);
+				currentPage = 1;
+				filterUsers();
+			});
+
+
+			document.getElementById('edit-user-modal').addEventListener('click', function (e) {
+				if (e.target === this) hideEditUserModal();
+			});
+
+
+			document.getElementById('edit-username').addEventListener('input', validateEditForm);
+			document.getElementById('edit-email').addEventListener('input', validateEditForm);
+		}
+
+		// === System Health Check ===
+		async function checkSystemHealth() {
+			const container = document.getElementById('health-cards-container');
+
+			const serviceConfig = {
+				auth: {
+					name: 'Service Auth',
+					icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z',
+					color: 'text-blue-600'
+				},
+				user: {
+					name: 'Service Users',
+					icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+					color: 'text-green-600'
+				},
+				game: {
+					name: 'Service Game',
+					icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z',
+					color: 'text-purple-600'
+				},
+				blockchain: {
+					name: 'Service Blockchain',
+					icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+					color: 'text-orange-600'
+				},
+				gateway: {
+					name: 'API Gateway',
+					icon: 'M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0',
+					color: 'text-indigo-600'
+				}
+			};
+
+			try {
+				const controller = new AbortController();
+				const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+				const response = await fetch('/public/healthAll', {
+					method: 'GET',
+					credentials: 'include',
+					signal: controller.signal
+				});
+
+				clearTimeout(timeoutId);
+
+				if (response.ok) {
+					const healthData = await response.json();
+					const cardsHTML = Object.entries(healthData).map(([serviceName, status]) => {
+						const config = serviceConfig[serviceName] || {
+							name: `Service ${serviceName.charAt(0).toUpperCase() + serviceName.slice(1)}`,
+							icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
+							color: 'text-gray-600'
+						};
+
+						const isHealthy = status === 'healthy';
+						const statusClass = isHealthy ? 'health-healthy' : 'health-unhealthy';
+						const statusText = isHealthy ? 'Opérationnel' : 'Indisponible';
+
+						return `
+							<div class="stats-card">
+								<div class="flex justify-between items-center">
+									<div>
+										<h3 class="text-lg font-semibold text-gray-900">${config.name}</h3>
+										<div class="health-status ${statusClass} mt-2">
+											<div class="w-2 h-2 bg-current rounded-full ${isHealthy ? 'pulse' : ''}"></div>
+											${statusText}
+										</div>
+									</div>
+									<svg class="w-8 h-8 ${config.color}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${config.icon}"></path>
+									</svg>
+								</div>
+							</div>
+						`;
+					}).join('');
+
+					container.innerHTML = cardsHTML;
+				}
+			} catch (error) {
+				container.innerHTML = `
+					<div class="stats-card col-span-full">
+						<div class="flex items-center justify-center h-24">
+							<svg class="w-8 h-8 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+							</svg>
+							<span class="text-red-600 font-medium">Impossible de vérifier l'état des services</span>
+						</div>
+					</div>
+				`;
+			}
+		}
+
+		// === Authentication ===
+		async function checkAuthentication() {
+			try {
+				const response = await fetch('/api/auth/me', {
+					method: 'GET',
+					credentials: 'include'
+				});
+
+				if (!response.ok) {
+					window.location.href = '/';
+					return;
+				}
+
+				const data = await response.json();
+				currentUser = data.user;
+
+				// Check admin role
+				if (currentUser.role !== 'admin') {
+					showAlert('Accès refusé. Vous devez être administrateur.', 'error');
+					setTimeout(() => window.location.href = '/', 3000);
+					return;
+				}
+
+				document.getElementById('current-user').textContent = `${currentUser.username} (${currentUser.role})`;
+			} catch (error) {
+				window.location.href = '/';
+			}
+		}
+
+		async function logout() {
+			try {
+				await fetch('/api/auth/logout', {
+					method: 'POST',
+					credentials: 'include'
+				});
+			} catch (error) { }
+			window.location.href = '/';
+		}
+
+		// === Users Management ===
+		async function loadUsers(silent = false) {
+			if (silent) {
+				document.getElementById('refresh-indicator').classList.add('show');
+			}
+
+			try {
+				const response = await fetch('/api/auth/admin/users', {
+					method: 'GET',
+					credentials: 'include'
+				});
+
+				if (!response.ok) throw new Error('Failed to load users');
+
+				const data = await response.json();
+				users = data.users || [];
+
+				filterUsers();
+				updateStats();
+			} catch (error) {
+				if (!silent) {
+					showAlert('Erreur lors du chargement des utilisateurs', 'error');
+				}
+			} finally {
+				if (silent) {
+					setTimeout(() => {
+						document.getElementById('refresh-indicator').classList.remove('show');
+					}, 1000);
+				}
+			}
+		}
+
+		function updateStats() {
+			const totalUsers = users.length;
+			const adminCount = users.filter(user => user.role === 'admin').length;
+			const userCount = users.filter(user => user.role === 'user').length;
+			const twoFaCount = users.filter(user => user.is2FAEnabled).length;
+			const onlineCount = users.filter(user => user.online).length;
+
+			document.getElementById('total-users').textContent = totalUsers;
+			document.getElementById('online-count').textContent = onlineCount;
+			document.getElementById('admin-count').textContent = adminCount;
+			document.getElementById('user-count').textContent = userCount;
+			document.getElementById('2fa-count').textContent = twoFaCount;
+		}
+
+		function filterUsers() {
+			const searchTerm = document.getElementById('search-input').value.toLowerCase();
+			const roleFilter = document.getElementById('role-filter').value;
+			const twoFaFilter = document.getElementById('2fa-filter').value;
+			const onlineFilter = document.getElementById('online-filter').value;
+
+			filteredUsers = users.filter(user => {
+				const matchesSearch = user.username.toLowerCase().includes(searchTerm) ||
+					user.email.toLowerCase().includes(searchTerm);
+				const matchesRole = !roleFilter || user.role === roleFilter;
+				const matches2FA = twoFaFilter === '' || user.is2FAEnabled.toString() === twoFaFilter;
+				const matchesOnline = onlineFilter === '' || (user.online !== undefined && user.online.toString() === onlineFilter);
+
+				return matchesSearch && matchesRole && matches2FA && matchesOnline;
+			});
+
+			renderUsersTable();
+		}
+
+		function renderUsersTable() {
+			const tbody = document.getElementById('users-table-body');
+
+			if (filteredUsers.length === 0) {
+				tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                            Aucun utilisateur trouvé
+                        </td>
+                    </tr>
+                `;
+				updatePaginationControls();
+				return;
+			}
+
+			// Calculer les indices pour la pagination
+			const startIndex = (currentPage - 1) * itemsPerPage;
+			const endIndex = Math.min(startIndex + itemsPerPage, filteredUsers.length);
+			const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+			tbody.innerHTML = paginatedUsers.map(user => {
+				const isProtected = isProtectedAccount(user.username);
+				const canDelete = user.id !== currentUser.id && !isProtected;
+				const canModify = !isProtected;
+
+				return `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="text-sm font-medium text-gray-900">${user.username}</div>
+                            ${isProtected ? `<span class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Protégé</span>` : ''}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${user.email}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="badge ${user.role}">${user.role}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="badge ${user.is2FAEnabled ? 'enabled' : 'disabled'}">
+                            ${user.is2FAEnabled ? 'Activée' : 'Désactivée'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="badge ${user.online ? 'enabled' : 'disabled'}">
+                            ${user.online ? 'En ligne' : 'Hors ligne'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div class="table-actions">
+                            ${canModify ? `
+                                <button onclick="editUser(${user.id})"
+                                        class="btn btn-primary btn-sm"
+                                        title="Modifier l'utilisateur">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </button>
+                            ` : `
+                                <button class="btn btn-secondary btn-sm" disabled title="Modification non autorisée">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                    </svg>
+                                </button>
+                            `}
+                            ${canDelete ? `
+                                <button onclick="deleteUser(${user.id}, '${user.username}')"
+                                        class="btn btn-danger btn-sm"
+                                        title="Supprimer l'utilisateur">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            ` : `
+                                <button class="btn btn-secondary btn-sm" disabled title="Suppression non autorisée">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
+                            `}
+                        </div>
+                    </td>
+                </tr>
+            `;
+			}).join('');
+
+			updatePaginationControls();
+		}
+
+
+		function showEditUserModal() {
+			stopAutoRefresh();
+			document.getElementById('edit-user-modal').classList.add('show');
+		}
+
+		function hideEditUserModal() {
+			document.getElementById('edit-user-modal').classList.remove('show');
+			startAutoRefresh();  // Redémarre le refresh
+		}
+
+
+		async function editUser(userId) {
+			const user = users.find(u => u.id === userId);
+			if (!user) return;
+
+			document.getElementById('edit-user-id').value = user.id;
+			document.getElementById('edit-username').value = user.username;
+			document.getElementById('edit-email').value = user.email;
+			document.getElementById('edit-role').value = user.role;
+
+			// Update 2FA status
+			const twoFaStatus = document.getElementById('2fa-status');
+			const disable2FABtn = document.getElementById('disable-2fa-btn');
+
+			if (user.is2FAEnabled) {
+				twoFaStatus.textContent = '2FA activée';
+				twoFaStatus.className = 'text-sm text-green-600';
+				disable2FABtn.style.display = 'inline-block';
+			} else {
+				twoFaStatus.textContent = '2FA désactivée';
+				twoFaStatus.className = 'text-sm text-gray-600';
+				disable2FABtn.style.display = 'none';
+			}
+
+			showEditUserModal();
+		}
+
+		async function updateUser(event) {
+			event.preventDefault();
+
+			const userId = parseInt(document.getElementById('edit-user-id').value);
+			const username = document.getElementById('edit-username').value.trim();
+			const email = document.getElementById('edit-email').value.trim();
+			const roleElement = document.getElementById('edit-role');
+			const role = roleElement.disabled ? null : roleElement.value;
+
+			// Find current user being edited
+			const currentEditUser = users.find(u => u.id === userId);
+			const isProtected = currentEditUser && isProtectedAccount(currentEditUser.username);
+
+			// Validate form
+			if (!validateEditForm()) {
+				return;
+			}
+
+			try {
+				const updateData = { username, email };
+
+				// Only include role if it's not a protected account
+				if (!isProtected && role) {
+					updateData.role = role;
+				}
+
+				const response = await fetch(`/api/auth/admin/users/${userId}`, {
+					method: 'PUT',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					credentials: 'include',
+					body: JSON.stringify(updateData)
+				});
+
+				const data = await response.json();
+
+				if (!response.ok) {
+					throw new Error(data.error?.message || 'Erreur lors de la mise à jour');
+				}
+
+				showAlert('Utilisateur mis à jour avec succès', 'success');
+				hideEditUserModal();
+				await loadUsers();
+			} catch (error) {
+				console.error('Update user error:', error);
+				showAlert(error.message, 'error');
+			}
+		}
+
+		async function deleteUser(userId, username) {
+			// Check if it's the current user
+			if (userId === currentUser.id) {
+				showAlert('Vous ne pouvez pas supprimer votre propre compte', 'error');
+				return;
+			}
+
+			// Check if it's a protected account
+			if (isProtectedAccount(username)) {
+				showAlert('Les comptes protégés (admin/invite) ne peuvent pas être supprimés', 'error');
+				return;
+			}
+
+			if (!confirm(`Êtes-vous sûr de vouloir supprimer l'utilisateur "${username}" ?\n\nCette action est irréversible.`)) {
+				return;
+			}
+
+			try {
+				const response = await fetch(`/api/auth/admin/users/${userId}`, {
+					method: 'DELETE',
+					credentials: 'include'
+				});
+
+				if (!response.ok) {
+					const data = await response.json();
+					throw new Error(data.error?.message || 'Erreur lors de la suppression');
+				}
+
+				showAlert(`Utilisateur "${username}" supprimé avec succès`, 'success');
+				await loadUsers();
+			} catch (error) {
+				console.error('Delete user error:', error);
+				showAlert(error.message, 'error');
+			}
+		}
+
+		async function disable2FA() {
+			const userId = document.getElementById('edit-user-id').value;
+
+			if (!confirm('Êtes-vous sûr de vouloir désactiver la 2FA pour cet utilisateur ?')) {
+				return;
+			}
+
+			try {
+				const response = await fetch(`/api/auth/admin/users/${userId}/disable-2fa`, {
+					method: 'POST',
+					credentials: 'include'
+				});
+
+				if (!response.ok) {
+					const data = await response.json();
+					throw new Error(data.error?.message || 'Erreur lors de la désactivation de la 2FA');
+				}
+
+				showAlert('2FA désactivée avec succès', 'success');
+				hideEditUserModal();
+				loadUsers();
+			} catch (error) {
+				console.error('Disable 2FA error:', error);
+				showAlert(error.message, 'error');
+			}
+		}
+
+		// === Pagination Functions ===
+		function updatePaginationControls() {
+			const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+			const startIndex = (currentPage - 1) * itemsPerPage + 1;
+			const endIndex = Math.min(currentPage * itemsPerPage, filteredUsers.length);
+
+			// Mise à jour de l'info de pagination
+			const paginationInfo = document.getElementById('pagination-info');
+			if (filteredUsers.length === 0) {
+				paginationInfo.textContent = 'Aucun utilisateur à afficher';
+			} else {
+				paginationInfo.textContent = `${startIndex} à ${endIndex} sur ${filteredUsers.length} utilisateur${filteredUsers.length > 1 ? 's' : ''}`;
+			}
+
+			// Mise à jour de l'info de page
+			const pageInfo = document.getElementById('page-info');
+			if (totalPages > 0) {
+				pageInfo.textContent = `Page ${currentPage} sur ${totalPages}`;
+			} else {
+				pageInfo.textContent = 'Page 0 sur 0';
+			}
+
+			// Activation/désactivation des boutons
+			const prevBtn = document.getElementById('prev-page-btn');
+			const nextBtn = document.getElementById('next-page-btn');
+
+			if (prevBtn) {
+				prevBtn.disabled = currentPage <= 1;
+			}
+
+			if (nextBtn) {
+				nextBtn.disabled = currentPage >= totalPages;
+			}
+		}
+
+		function previousPage() {
+			if (currentPage > 1) {
+				currentPage--;
+				renderUsersTable();
+			}
+		}
+
+		function nextPage() {
+			const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+			if (currentPage < totalPages) {
+				currentPage++;
+				renderUsersTable();
+			}
+		}
+
+		// Utility functions
+		function showAlert(message, type) {
+			const alertsContainer = document.getElementById('alerts-container');
+			const alertId = Date.now();
+
+			const alertHtml = `
+                <div id="alert-${alertId}" class="alert alert-${type}">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            ${type === 'success' ? `
+                                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                </svg>
+                            ` : `
+                                <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                </svg>
+                            `}
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium">${message}</p>
+                        </div>
+                        <div class="ml-auto pl-3">
+                            <div class="-mx-1.5 -my-1.5">
+                                <button onclick="document.getElementById('alert-${alertId}').remove()"
+                                        class="inline-flex rounded-md p-1.5 focus:outline-none focus:ring-2 focus:ring-offset-2">
+                                    <span class="sr-only">Fermer</span>
+                                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+			alertsContainer.insertAdjacentHTML('afterbegin', alertHtml);
+
+			// Auto remove after 5 seconds
+			setTimeout(() => {
+				const alert = document.getElementById(`alert-${alertId}`);
+				if (alert) alert.remove();
+			}, 5000);
+		}
+
+		// Protected accounts check
+		function isProtectedAccount(username) {
+			const protectedAccounts = ['admin', 'invite'];
+			return protectedAccounts.includes(username.toLowerCase());
+		}
+
+
+		function validateEditForm() {
+			clearValidationErrors('edit');
+
+			const userId = parseInt(document.getElementById('edit-user-id').value);
+			const username = document.getElementById('edit-username').value.trim();
+			const email = document.getElementById('edit-email').value.trim();
+
+			let isValid = true;
+
+			// Find current user being edited
+			const currentEditUser = users.find(u => u.id === userId);
+
+			// Check if it's a protected account
+			if (currentEditUser && isProtectedAccount(currentEditUser.username)) {
+				// Disable role editing for protected accounts
+				const roleSection = document.getElementById('edit-role-section');
+				if (roleSection) {
+					const roleSelect = document.getElementById('edit-role');
+					roleSelect.disabled = true;
+					roleSelect.title = 'Les comptes protégés ne peuvent pas voir leur rôle modifié';
+
+					const helpText = roleSection.querySelector('.text-xs');
+					if (!helpText) {
+						const help = document.createElement('div');
+						help.className = 'mt-1 text-xs text-yellow-600';
+						help.textContent = 'Le rôle des comptes protégés (admin/invite) ne peut pas être modifié';
+						roleSection.appendChild(help);
+					}
+				}
+			} else {
+				// Re-enable role editing for non-protected accounts
+				const roleSelect = document.getElementById('edit-role');
+				if (roleSelect) {
+					roleSelect.disabled = false;
+					roleSelect.title = '';
+				}
+			}
+
+			// Username validation
+			if (username.length < 3) {
+				showValidationError('edit-username', 'Le nom d\'utilisateur doit contenir au moins 3 caractères');
+				isValid = false;
+			} else if (!/^[a-zA-Z0-9_-]+$/.test(username)) {
+				showValidationError('edit-username', 'Le nom d\'utilisateur ne peut contenir que des lettres, chiffres, tirets et underscores');
+				isValid = false;
+			} else if (users.some(user => user.id !== userId && user.username.toLowerCase() === username.toLowerCase())) {
+				showValidationError('edit-username', 'Ce nom d\'utilisateur est déjà utilisé');
+				isValid = false;
+			}
+
+			// Email validation
+			if (!isValidEmail(email)) {
+				showValidationError('edit-email', 'Veuillez entrer une adresse email valide');
+				isValid = false;
+			} else if (users.some(user => user.id !== userId && user.email.toLowerCase() === email.toLowerCase())) {
+				showValidationError('edit-email', 'Cette adresse email est déjà utilisée');
+				isValid = false;
+			}
+
+			// Enable/disable submit button
+			const submitBtn = document.getElementById('edit-user-btn');
+			if (submitBtn) submitBtn.disabled = !isValid;
+
+			return isValid;
+		}
+
+		function showValidationError(fieldId, message) {
+			const errorElement = document.getElementById(`${fieldId}-error`);
+			if (errorElement) {
+				errorElement.textContent = message;
+				errorElement.style.display = 'block';
+			}
+
+			const fieldElement = document.getElementById(fieldId);
+			if (fieldElement) {
+				fieldElement.classList.add('error');
+			}
+		}
+
+		function clearValidationErrors(prefix) {
+			const fields = [`${prefix}-username`, `${prefix}-email`, `${prefix}-password`, `${prefix}-role`];
+
+			fields.forEach(fieldId => {
+				const errorElement = document.getElementById(`${fieldId}-error`);
+				if (errorElement) {
+					errorElement.style.display = 'none';
+				}
+
+				const fieldElement = document.getElementById(fieldId);
+				if (fieldElement) {
+					fieldElement.classList.remove('error');
+				}
+			});
+		}
+
+		function isValidEmail(email) {
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			return emailRegex.test(email);
+		}
+
+		/**
+		 * Démarre le refresh automatique des utilisateurs
+		 */
+		function startAutoRefresh() {
+			if (autoRefreshTimer) return;
+
+			autoRefreshTimer = setInterval(async () => {
+				await loadUsers(true);
+			}, AUTO_REFRESH_INTERVAL);
+		}
+
+		/**
+		 * Arrête le refresh automatique
+		 */
+		function stopAutoRefresh() {
+			if (autoRefreshTimer) {
+				clearInterval(autoRefreshTimer);
+				autoRefreshTimer = null;
+			}
+		}
+
+		// Nettoyer à la fermeture de la page
+		window.addEventListener('beforeunload', function () {
+			stopAutoRefresh();
+		});
+	</script>
+</body>
+
+</html>

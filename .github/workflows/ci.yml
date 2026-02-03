@@ -70,12 +70,6 @@ jobs:
         with:
           jwt_secret: ${{ secrets.JWT_SECRET }}
 
-      - name: Build Core
-        run: make build-core
-
-      - name: Build Users
-        run: make build-user
-
       - name: Test coverage
         run: make test-coverage
 
@@ -131,6 +125,9 @@ jobs:
         run: |
           echo "🔧 Configuring test environment..."
           # Note: Tests expect admin/invite users to be pre-seeded or auto-created
+
+      - name: Make envs
+        run: make envs
 
       - name: Set up Python
         uses: actions/setup-python@v4

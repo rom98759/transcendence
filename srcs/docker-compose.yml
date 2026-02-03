@@ -11,8 +11,8 @@ services:
 
   redis-broker:
     build:
-      context: ./redis
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: srcs/redis/Dockerfile
     container_name: ${REDIS_SERVICE_NAME}
     expose:
       - '${REDIS_SERVICE_PORT}'
@@ -38,6 +38,8 @@ services:
       - path: ./.env
       - path: ./.env.um
     volumes:
+      - ../make/scripts/certs/certs/services/${UM_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
       - data:/app/data
       - uploads:/app/uploads
     ports:
@@ -47,15 +49,7 @@ services:
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test:
-        [
-          'CMD',
-          'wget',
-          '--no-verbose',
-          '--tries=1',
-          '--spider',
-          'http://127.0.0.1:${UM_SERVICE_PORT}/health',
-        ]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--no-check-certificate', '--spider', 'https://127.0.0.1:${UM_SERVICE_PORT}/health']
 
   auth-service:
     build:
@@ -69,6 +63,8 @@ services:
       - path: ./.env.auth
     volumes:
       - data:/data
+      - ../make/scripts/certs/certs/services/${AUTH_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -77,20 +73,12 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
-      test:
-        [
-          'CMD',
-          'wget',
-          '--no-verbose',
-          '--tries=1',
-          '--spider',
-          'http://127.0.0.1:${AUTH_SERVICE_PORT}/health',
-        ]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--no-check-certificate', '--spider', 'https://127.0.0.1:${AUTH_SERVICE_PORT}/health']
 
   blockchain-service:
     build:
-      context: ./blockchain
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: srcs/blockchain/Dockerfile
     container_name: ${BK_SERVICE_NAME}
     expose:
       - '${BK_SERVICE_PORT}'
@@ -99,31 +87,28 @@ services:
       - path: ./.env.blockchain
     volumes:
       - data:/data
+      - ../make/scripts/certs/certs/services/${BK_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
     healthcheck:
       <<: *healthcheck-template
-      test:
-        [
-          'CMD',
-          'wget',
-          '--no-verbose',
-          '--tries=1',
-          '--spider',
-          'http://127.0.0.1:${BK_SERVICE_PORT}/health',
-        ]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--no-check-certificate', '--spider', 'https://127.0.0.1:${BK_SERVICE_PORT}/health']
 
   game-service:
     build:
-      context: ./game
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: srcs/game/Dockerfile
     container_name: ${GAME_SERVICE_NAME}
     expose:
       - '${GAME_SERVICE_PORT}'
     env_file:
       - path: ./.env
       - path: ./.env.game
+    volumes:
+      - ../make/scripts/certs/certs/services/${GAME_SERVICE_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -132,15 +117,7 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
-      test:
-        [
-          'CMD',
-          'wget',
-          '--no-verbose',
-          '--tries=1',
-          '--spider',
-          'http://127.0.0.1:${GAME_SERVICE_PORT}/health',
-        ]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--no-check-certificate', '--spider', 'https://127.0.0.1:${GAME_SERVICE_PORT}/health']
 
   # ============================================================================
   # API Gateway Layer
@@ -156,6 +133,9 @@ services:
     env_file:
       - path: ./.env
       - path: ./.env.gateway
+    volumes:
+      - ../make/scripts/certs/certs/services/${API_GATEWAY_NAME}:/etc/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/ca:ro
     networks:
       - app-network
     restart: unless-stopped
@@ -164,15 +144,7 @@ services:
         condition: service_healthy
     healthcheck:
       <<: *healthcheck-template
-      test:
-        [
-          'CMD',
-          'wget',
-          '--no-verbose',
-          '--tries=1',
-          '--spider',
-          'http://127.0.0.1:${API_GATEWAY_PORT}/health',
-        ]
+      test: ['CMD', 'wget', '--no-verbose', '--tries=1', '--no-check-certificate', '--spider', 'https://127.0.0.1:${API_GATEWAY_PORT}/health']
 
   # ============================================================================
   # Reverse Proxy Layer
@@ -186,10 +158,12 @@ services:
     ports:
       - '8080:80'
       - '4430:443'
+    volumes:
+      - ../make/scripts/certs/certs/nginx:/etc/nginx/certs:ro
+      - ../make/scripts/certs/certs/ca:/etc/nginx/ca:ro
+      - uploads:/usr/share/nginx/html/uploads
     networks:
       - app-network
-    volumes:
-      - uploads:/usr/share/nginx/html/uploads
     restart: unless-stopped
     depends_on:
       api-gateway:

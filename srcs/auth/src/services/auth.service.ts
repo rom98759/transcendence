@@ -4,7 +4,7 @@ import { createUserProfile } from './external/um.service.js';
 import { DataError, ServiceError } from '../types/errors.js';
 import { APP_ERRORS } from '../utils/error-catalog.js';
 import { EVENTS, REASONS, UserRole } from '../utils/constants.js';
-import { ADMIN_USERNAME, INVITE_USERNAME } from '../config/env.js';
+import { authenv } from '../config/env.js';
 import { logger } from '../index.js';
 import { AppError, ERR_DEFS } from '@transcendence/core';
 
@@ -48,7 +48,7 @@ export async function createUser(user: {
     throw err;
   }
 
-  if ([ADMIN_USERNAME, INVITE_USERNAME].includes(user.username)) return userId;
+  if ([authenv.ADMIN_USERNAME, authenv.INVITE_USERNAME].includes(user.username)) return userId;
 
   logger.info('created in auth DB');
   try {
@@ -78,9 +78,50 @@ export function validateUser(identifier: string, password: string) {
   return bcrypt.compareSync(password, user.password);
 }
 
-// DEV ONLY - À supprimer en production
+// ============================================
+// Admin User Management Functions
+// ============================================
+
 export function listUsers() {
   return db.listUsers();
+}
+
+export function updateUserAsAdmin(
+  userId: number,
+  userData: { username: string; email: string; role: string },
+) {
+  try {
+    db.updateUser(userId, userData);
+  } catch (err: unknown) {
+    if (err instanceof DataError) {
+      if (err.meta?.field === 'email') {
+        throw new ServiceError(APP_ERRORS.REG_EMAIL_EXISTS, { details: userData.email });
+      }
+      if (err.meta?.field === 'username') {
+        throw new ServiceError(APP_ERRORS.REG_USERNAME_TAKEN, { details: userData.username });
+      }
+    }
+    throw err;
+  }
+}
+
+export function deleteUserAsAdmin(userId: number) {
+  try {
+    db.deleteUser(userId);
+  } catch (err: unknown) {
+    if (err instanceof DataError) {
+      throw new ServiceError(APP_ERRORS.LOGIN_USER_NOT_FOUND);
+    }
+    throw err;
+  }
+}
+
+export function adminDisable2FA(userId: number) {
+  try {
+    db.disable2FA(userId);
+  } catch (err: unknown) {
+    throw err;
+  }
 }
 
 export type UserRow = ReturnType<typeof db.findUserByIdentifier>;
