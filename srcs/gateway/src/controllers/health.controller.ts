@@ -52,18 +52,15 @@ export async function healthByNameHandler(req: FastifyRequest, reply: FastifyRep
 }
 
 export async function healthAllHandler(req: FastifyRequest, reply: FastifyReply) {
-  const services = Object.values(SERVICES);
-
   const results: Record<string, string> = {};
 
   await Promise.all(
-    services.map(async (service) => {
-      const serviceKey = `${service.host}:${service.port}`;
+    Object.entries(SERVICES).map(async ([name, service]) => {
       try {
         const res = await fetch(`https://${service.host}:${service.port}/health`, fetchOptions);
         results[name] = res.status === 200 ? 'healthy' : 'unhealthy';
       } catch (error) {
-        results[serviceKey] = `unhealthy (error: ${(error as Error).message})`;
+        results[name] = `unhealthy (error: ${(error as Error).message})`;
       }
     }),
   );
