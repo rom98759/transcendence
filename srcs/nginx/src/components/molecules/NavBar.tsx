@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Locale } from '../atoms/Locale';
 import { useAuth } from '../../providers/AuthProvider';
 import Avatar from '../atoms/Avatar';
+import { useTranslation } from 'react-i18next';
 
 // const homeItems = [{ label: 'Home', href: '#' }];
 
@@ -14,21 +15,22 @@ import Avatar from '../atoms/Avatar';
 
 export const NavBar = () => {
   const { user, isLoggedIn, logout } = useAuth();
+  const { t } = useTranslation();
 
   const playItems = [
-    { label: 'Play with friend', to: '/friends' },
-    { label: 'Play with AI', to: '/ai' },
-    { label: 'Tournament', to: '/tournament' },
+    { label: t('navbar.play_friend'), to: '/friends' },
+    { label: t('navbar.play_ai'), to: '/ai' },
+    { label: t('navbar.play_tournament'), to: '/tournament' },
   ];
 
   const statsItems = [
-    { label: 'Statistics', to: '/stats' },
-    { label: 'History', to: '/history' },
+    { label: t('navbar.stats'), to: '/stats' },
+    { label: t('navbar.stats_history'), to: '/history' },
   ];
 
   const profileItems = [
-    { label: 'Profile', to: '/profile' },
-    { label: 'Logout', onClick: logout },
+    { label: t('navbar.profile'), to: '/profile' },
+    { label: t('navbar.profile_logout'), onClick: logout },
   ];
 
   return (

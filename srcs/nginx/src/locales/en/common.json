@@ -17,6 +17,11 @@
   "form": {
     "processing": "processing..."
   },
+  "global": {
+    "loading": "Loading...",
+    "not_found": "Not found",
+    "disabled": "disabled"
+  },
   "errors": {
     "validation_mandatory": "This field is mandatory.",
     "validation_error": "Invalid format. Please check the submitted fields and try again.",
@@ -34,8 +39,23 @@
     "home": "Home",
     "about": "About",
     "play": "Play",
+    "play_friend": "Play with a friend",
+    "play_ai": "Play with AI",
+    "play_tournament": "Tournament",
     "stats": "Stats",
-    "profile": "Profile"
+    "stats_history": "History",
+    "profile": "Profile",
+    "profile_logout": "Logout"
+  },
+  "profile": {
+    "profile": "Profile",
+    "2fa": "2FA",
+    "update_avatar": "Update avatar"
+  },
+  "file_uploader": {
+    "file_choose": "Choose a file",
+    "drop": "Drop it",
+    "drag": "Or drag and drop it here"
   },
   "footer": {
     "copyright": "© 2026 . All rights reserved.",

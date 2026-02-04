@@ -17,6 +17,11 @@
   "form": {
     "processing": "On gère ça, mon pote…"
   },
+  "global": {
+    "loading": "Laisse nous gérer ça...",
+    "not_found": "Que dalle",
+    "disabled": "pas enclenché, le machin"
+  },
   "errors": {
     "validation_mandatory": "Balance l'info",
     "validation_error": "T’as tout foiré, mon pote. Vérifie tes papiers et recommence, sinon ça va barder.",
@@ -34,8 +39,23 @@
     "home": "Le bercail",
     "about": "C’est quoi ce b%@#*l ?",
     "play": "C'est parti!",
+    "play_friend": "Affronter un pote",
+    "play_ai": "Se frotter au machin",
+    "play_tournament": "La compét",
     "stats": "Ton palmarès",
-    "profile": "Ton pedigree"
+    "stats_history": "Ton historique",
+    "profile": "Ton pedigree",
+    "profile_logout": "Allez, on se tire"
+  },
+  "profile": {
+    "profile": "Pedigree",
+    "2fa": "Double contrôle",
+    "update_avatar": "Se faire retirer le portrait"
+  },
+  "file_uploader": {
+    "file_choose": "Fais ton choix mon gars",
+    "drop": "Allez, lâche le bouton !",
+    "drag": "Ou bien ramène ton image ici"
   },
   "footer": {
     "copyright": "© 2026 – C'est à nous.",

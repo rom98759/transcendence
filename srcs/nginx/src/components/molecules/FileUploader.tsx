@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import Button from '../atoms/Button';
+import { useTranslation } from 'react-i18next';
 
 // Props
 interface FileUploaderProps {
@@ -10,7 +11,7 @@ interface FileUploaderProps {
 const FileUploader = ({ onFileSelect, className = '' }: FileUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isOver, setIsOver] = useState(false);
-
+  const { t } = useTranslation();
   const handleFile = (files: FileList | null) => {
     const file = files?.[0];
     if (!file) return;
@@ -48,10 +49,10 @@ const FileUploader = ({ onFileSelect, className = '' }: FileUploaderProps) => {
       />
 
       <Button onClick={() => fileInputRef.current?.click()} variant="secondary" className="mb-2">
-        Choose a file
+        {t('file_uploader.file_choose')}
       </Button>
       <p className="text-xs font-bold text-slate-700 mt-2">
-        {isOver ? 'drop it' : 'or drag and drop it here'}
+        {isOver ? t('file_uploader.drop') : t('file_uploader.drag')}
       </p>
       <p className="text-xs text-gray-400 mt-1">jpg, png (min 64 x 64)</p>
     </div>

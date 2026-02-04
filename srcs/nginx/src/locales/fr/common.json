@@ -17,6 +17,11 @@
   "form": {
     "processing": "traitement..."
   },
+  "global": {
+    "loading": "Chargement...",
+    "not_found": "Non trouvé",
+    "disabled": "désactivé"
+  },
   "errors": {
     "validation_mandatory": "Ce champ est obligatoire.",
     "validation_error": "Format invalide. Veuillez vérifier les champs soumis et réessayer.",
@@ -34,8 +39,23 @@
     "home": "Accueil",
     "about": "A propos",
     "play": "Jouer",
+    "play_friend": "Jouer contre un ami",
+    "play_ai": "Jouer contre l'IA",
+    "play_tournament": "Tournoi",
     "stats": "Stats",
-    "profile": "Profil"
+    "stats_history": "Historique",
+    "profile": "Profil",
+    "profile_logout": "Se déconnecter"
+  },
+  "profile": {
+    "profile": "Profil",
+    "2fa": "2FA",
+    "update_avatar": "Changer d'avatar"
+  },
+  "file_uploader": {
+    "file_choose": "Choisir un fichier",
+    "drop": "Déposer",
+    "drag": "Ou le faire glisser jusqu'ici"
   },
   "footer": {
     "copyright": "© 2026 Tous droits réservés.",
