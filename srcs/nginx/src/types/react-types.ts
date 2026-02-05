@@ -18,6 +18,8 @@ export enum Roles {
 
 export interface AuthContextType {
   user: ProfileSimpleDTO | null;
+  isLoggedIn: boolean;
+  isAuthChecked: boolean;
   login: (user: ProfileSimpleDTO) => void;
   logout: () => void;
   updateUser: (newUser: ProfileSimpleDTO) => void;

@@ -28,7 +28,7 @@ export const Page = ({ children, title, className }: PageProps) => {
           </div>
         }
         <Circle>
-          {title && <h1 className="mb-6 text-gray-600 font-quantico text-xl">{title}</h1>}
+          {title && <h1 className="mb-6 text-gray-600 font-quantico text-6xl">{title}</h1>}
           {children}
         </Circle>
       </Background>

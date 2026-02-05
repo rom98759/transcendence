@@ -1,44 +1,58 @@
 import { ProfileSimpleDTO } from '@transcendence/core';
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { AuthContextType, AuthProviderProps } from '../types/react-types';
-
-// from https://dev.to/joodi/useauth-hook-in-react-1bp3
+import { authApi } from '../api/auth-api';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<ProfileSimpleDTO | null>(() => {
-    const storedUser = localStorage.getItem('user');
-    return storedUser ? JSON.parse(storedUser) : null;
-  });
+  const [user, setUser] = useState<ProfileSimpleDTO | null>(null);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
+
+  /**
+   * Vérification réelle de session au montage
+   */
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const me = await authApi.me();
+        const profile: ProfileSimpleDTO = {
+          username: me.username,
+          avatarUrl: null, // ou me.avatarUrl si dispo plus tard
+        };
+        setUser(profile);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsAuthChecked(true);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   const login = (user: ProfileSimpleDTO) => {
     setUser(user);
-    localStorage.setItem('user', JSON.stringify(user));
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
-    localStorage.removeItem('user');
   };
 
   const updateUser = (newUser: ProfileSimpleDTO) => {
-    setUser((prevUser) => {
-      const updated = { ...prevUser, ...newUser };
-      localStorage.setItem('user', JSON.stringify(updated));
-      return updated as ProfileSimpleDTO;
-    });
+    setUser((prev) => (prev ? { ...prev, ...newUser } : prev));
   };
 
-  // memoize to avoid re-render
   const contextValue = useMemo(
     () => ({
       user,
+      isAuthChecked,
+      isLoggedIn: isAuthChecked && user !== null,
       login,
       logout,
       updateUser,
     }),
-    [user],
+    [user, isAuthChecked],
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
@@ -49,8 +63,5 @@ export const useAuth = () => {
   if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
-
-  const isLoggedIn = Boolean(context.user);
-
-  return { ...context, isLoggedIn };
+  return context;
 };

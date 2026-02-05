@@ -66,5 +66,11 @@
     "copyright": "© 2026 . All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service"
+  },
+  "game": {
+    "tournament": "Tournament",
+    "game": "Game",
+    "participate": "Participate",
+    "create": "Create"
   }
 }
