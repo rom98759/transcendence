@@ -17,7 +17,7 @@ const toggle2FA = () => {};
 export const ProfilePage = () => {
   const params = useParams();
   const queryClient = useQueryClient();
-  const username = params.username || 'Toto';
+  const username = params.username || '';
   const { user: authUser, updateUser } = useAuth();
   const {
     data: displayedUser,
@@ -45,7 +45,7 @@ export const ProfilePage = () => {
     );
   }
 
-  if (isError || !displayedUser) {
+  if (isError || !displayedUser || username == '') {
     return (
       <Page>
         <div>{t('global.not_found')}</div>

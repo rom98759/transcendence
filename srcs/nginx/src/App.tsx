@@ -21,7 +21,7 @@ const MeRedirect = () => {
 
 export const App = () => {
   return (
-    <main className="min-h-screen bd-slate-950 text-slate-100">
+    <main className="h-screen bd-slate-950 text-slate-100">
       <Routes>
         <Route path="/" element={<AnimationPage />}></Route>
         <Route

@@ -3,7 +3,6 @@
 # ==========================
 FROM node:20-alpine AS builder
 
-RUN apk add --no-cache wget python3 make g++
 WORKDIR /app
 
 # 1) Manifests nécessaires au calcul du graphe workspace
@@ -26,16 +25,12 @@ COPY srcs/shared/core/src ./srcs/shared/core/src
 RUN npm run build --workspace srcs/shared/core
 RUN npm run build --workspace srcs/auth
 
-WORKDIR /app
 RUN npm prune --omit=dev
 
 # ==========================
 # Stage 2 — Runner
 # ==========================
 FROM node:20-alpine
-
-WORKDIR /app
-ENV NODE_ENV=production
 
 # Install runtime-only system deps (wget for healthcheck)
 RUN apk add --no-cache wget

@@ -51,6 +51,4 @@ export const Locale = ({ className }: LocaleProps) => {
       </NavDropdown>
     </div>
   );
-  {
-  }
 };

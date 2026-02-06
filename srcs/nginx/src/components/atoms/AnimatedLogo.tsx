@@ -93,7 +93,7 @@ const AnimatedLogo = ({
         rotZ = -25;
       }
 
-      const transformStr = `rotateY(${rotY}deg) rotateZ(${rotZ}deg)`;
+      const transformStr = `translate(50px, 0px) rotateY(${rotY}deg) rotateZ(${rotZ}deg)`;
 
       if (morphPathRef.current) {
         morphPathRef.current.setAttribute('d', currentD);
@@ -163,11 +163,11 @@ const AnimatedLogo = ({
     return () => cancelAnimationFrame(frameId);
   }, [interpolators, duration, trajectory, onComplete]);
 
-  const finalTransform = 'rotateY(0deg) rotateZ(-25deg)';
+  // const finalTransform = 'rotateY(0deg) rotateZ(-25deg)';
 
   return (
     <div
-      className={`ping-pong-container mx-auto ${className}`}
+      className={`mx-auto ${className}`}
       style={{
         perspective: '1200px',
         width: '100%',
@@ -177,7 +177,10 @@ const AnimatedLogo = ({
         justifyContent: 'center',
       }}
     >
-      <svg viewBox="0 0 100 160" style={{ width: '100%', height: 'auto', overflow: 'visible' }}>
+      <svg
+        viewBox="0 0 200 160"
+        style={{ width: '100%', height: 'auto', maxHeight: '100vh', overflow: 'visible' }}
+      >
         <defs>
           <filter id="waveParticle" x="-50%" y="-50%" width="200%" height="200%">
             <feTurbulence
@@ -198,35 +201,37 @@ const AnimatedLogo = ({
           </filter>
         </defs>
 
-        <path
-          ref={morphPathRef}
-          fill={color}
-          d={PATH_FULL_SILHOUETTE}
-          style={{
-            transformOrigin: '50px 70px',
-            transform: isFinished ? finalTransform : undefined,
-            // opacity: isFinished ? 1 : undefined,
-          }}
-        />
-        <circle
-          ref={dotRef}
-          cx="50"
-          cy="101"
-          r="4.8"
-          fill={color}
-          style={{
-            transformOrigin: '50px 70px',
-            opacity: isFinished ? 1 : undefined,
-            transform: isFinished ? finalTransform : undefined,
-          }}
-        />
+        <g style={{ transformOrigin: '100px 70px' }}>
+          <path
+            ref={morphPathRef}
+            fill={color}
+            d={PATH_FULL_SILHOUETTE}
+            style={{
+              transformOrigin: '50px 70px',
+              // transform: isFinished ? finalTransform : undefined,
+              // opacity: isFinished ? 1 : undefined,
+            }}
+          />
+          <circle
+            ref={dotRef}
+            cx="50"
+            cy="101"
+            r="4.8"
+            fill={color}
+            style={{
+              transformOrigin: '50px 70px',
+              // opacity: isFinished ? 1 : undefined,
+              // transform: isFinished ? finalTransform : undefined,
+            }}
+          />
+        </g>
         <circle ref={ballRef} fill={color} style={{ opacity: 0 }} />
         <g
           style={{ fontFamily: "'Quantico', sans-serif", fontWeight: '700', pointerEvents: 'none' }}
         >
           <text
             ref={textSPRef}
-            x="34"
+            x="75"
             y="93"
             fill={color}
             fontSize="46"
@@ -237,7 +242,7 @@ const AnimatedLogo = ({
           </text>
           <text
             ref={textNRef}
-            x="74"
+            x="131"
             y="93"
             fill={color}
             fontSize="46"
@@ -248,7 +253,7 @@ const AnimatedLogo = ({
           </text>
           <text
             ref={textPongRef}
-            x="50"
+            x="100"
             y="120"
             fill={color}
             fontSize="14"

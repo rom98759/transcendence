@@ -14,6 +14,7 @@ import {
 } from '@transcendence/core';
 import { useAuth } from '../../providers/AuthProvider';
 import i18next from 'i18next';
+import { ZodSafeParseResult } from 'zod';
 
 interface SignupState {
   fields?: {
@@ -29,11 +30,24 @@ interface SignupState {
   success?: boolean;
 }
 
+const adjustErrorMessage = (
+  errors: Record<string, string>,
+  result: ZodSafeParseResult<string>,
+  field: string,
+): void => {
+  if (!result.success) {
+    if (result?.error?.issues) {
+      const issue = result.error.issues[0];
+      errors[field] = i18next.t(`zod_errors.${issue.code}`);
+    } else {
+      errors[field] = i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`);
+    }
+  }
+};
+
 async function signupAction(prevState: SignupState | null, formData: FormData) {
   const data = Object.fromEntries(formData);
   const { email, username, password } = data as Record<string, string>;
-
-  // const { t } = useTranslation();
 
   const errors: Record<string, string> = {};
 
@@ -41,9 +55,9 @@ async function signupAction(prevState: SignupState | null, formData: FormData) {
   const userVal = usernameSchema.safeParse(username);
   const passVal = passwordSchema.safeParse(password);
 
-  if (!emailVal.success) errors.email = i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`);
-  if (!userVal.success) errors.username = i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`);
-  if (!passVal.success) errors.password = i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`);
+  adjustErrorMessage(errors, emailVal, 'email');
+  adjustErrorMessage(errors, userVal, 'username');
+  adjustErrorMessage(errors, passVal, 'password');
 
   if (Object.keys(errors).length > 0) {
     return {
@@ -66,12 +80,14 @@ async function signupAction(prevState: SignupState | null, formData: FormData) {
     if (err instanceof FrontendError) {
       if (err.statusCode === HTTP_STATUS.BAD_REQUEST && err.details) {
         err.details.forEach((d) => {
-          if (d.field && d.field in nextState.errors!) {
+          if (d.field && d.field in nextState.errors! && d.reason) {
             const key = d.field as keyof NonNullable<SignupState['errors']>;
-            nextState.errors![key] = d.reason;
+            nextState.errors![key] =
+              i18next.t(`zod_errors.${d.reason}`) || i18next.t(`zod_errors.invalid_format`);
           } else if (d.field) {
             // If field is not part of state, error will be in form
-            nextState.errors!.form = d.reason;
+            nextState.errors!.form =
+              i18next.t(`zod_errors.${d.reason}`) || i18next.t(`zod_errors.invalid_format`);
           }
         });
       }

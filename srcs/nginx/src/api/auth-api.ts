@@ -3,12 +3,11 @@ import {
   ErrorDetail,
   FrontendError,
   HTTP_STATUS,
-  ReasonValue,
+  LOG_REASONS,
   UserDTO,
   UserLoginDTO,
   UserLoginSchema,
   usernameDTO,
-  usernameSchema,
   UserRegisterDTO,
   UserRegisterSchema,
 } from '@transcendence/core';
@@ -22,7 +21,8 @@ export const authApi = {
     if (!validation.success) {
       const details: ErrorDetail[] = validation.error.issues.map((issue) => ({
         field: issue.path[0]?.toString() || 'form',
-        reason: issue.message as FrontendReasonValue,
+        message: issue.message,
+        reason: (issue?.code as FrontendReasonValue) || LOG_REASONS.UNKNOWN,
       }));
       throw new FrontendError(
         i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`),
@@ -40,7 +40,8 @@ export const authApi = {
     if (!validation.success) {
       const details: ErrorDetail[] = validation.error.issues.map((issue) => ({
         field: issue.path[0]?.toString() || 'form',
-        reason: issue.message as FrontendReasonValue,
+        message: issue.message,
+        reason: (issue?.code as FrontendReasonValue) || LOG_REASONS.UNKNOWN,
       }));
       throw new FrontendError(
         i18next.t(`errors.${ERROR_CODES.VALIDATION_ERROR}`),
@@ -53,17 +54,8 @@ export const authApi = {
     return data?.user?.username;
   },
 
-  me: async (username: usernameDTO): Promise<UserDTO> => {
-    usernameSchema.parse(username);
-    // const response = await api.get(`/auth/me/`);
-    const response = {
-      data: {
-        authId: 1,
-        email: 'toto@mail.com',
-        username: 'Toto',
-      },
-      message: 'OK',
-    };
+  me: async (): Promise<UserDTO> => {
+    const response = await api.get(`/auth/me/`);
     return response.data;
   },
 };

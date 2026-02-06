@@ -36,11 +36,7 @@ export const AnimationPage = ({ className = '' }: AnimationPageProps) => {
         colorStart={colors.start}
         colorEnd={colors.end}
       >
-        <AnimatedLogo
-          className="max-w-100 lg::w-full"
-          duration={5000}
-          onComplete={handleComplete}
-        />
+        <AnimatedLogo className="w-[100]" duration={5000} onComplete={handleComplete} />
       </Background>
     </div>
   );

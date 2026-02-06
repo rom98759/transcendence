@@ -104,6 +104,7 @@ export class ProfileRepository {
   async deleteProfile(id: number): Promise<ProfileSimpleDTO> {
     return await prisma.userProfile.delete({
       where: { authId: id },
+      select: { username: true, avatarUrl: true },
     });
   }
 }

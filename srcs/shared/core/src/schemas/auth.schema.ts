@@ -13,11 +13,16 @@ export const UserSchema = z.object({
   username: usernameSchema,
 });
 
-export const UserLoginSchema = z.object({
-  username: usernameSchema.optional(),
-  email: z.email().optional(),
-  password: z.string(),
-});
+export const UserLoginSchema = z.union([
+  z.object({
+    username: usernameSchema,
+    password: z.string(),
+  }),
+  z.object({
+    email: z.email(),
+    password: z.string(),
+  }),
+]);
 
 // inferred DTOs
 export type UserDTO = z.output<typeof UserSchema>;

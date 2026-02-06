@@ -22,13 +22,18 @@
     "not_found": "Non trouvé",
     "disabled": "désactivé"
   },
+  "zod_errors": {
+    "invalid_format": "Vérifiez le format demandé",
+    "too_small": "La valeur doit être plus longue",
+    "too_big": "La valeur doit être plus courte"
+  },
   "errors": {
     "validation_mandatory": "Ce champ est obligatoire.",
     "validation_error": "Format invalide. Veuillez vérifier les champs soumis et réessayer.",
     "unauthorized": "Authentification requise. Veuillez vous connecter pour accéder à cette ressource",
     "invalid_credentials": "Identifiants invalides. Vérifiez votre email/nom d'utilisateur et mot de passe et réessayez.",
     "forbidden": "Accès refusé. Vous n'avez pas les permissions nécessaires pour cette action.",
-    "not-found": "Ressource introuvable. Vérifiez l'ID ou l'URL et réessayez.",
+    "not_found": "Ressource introuvable. Vérifiez l'ID ou l'URL et réessayez.",
     "conflict": "Cette ressource existe déjà. Utilisez un identifiant unique.",
     "rate_limit_exceeded": "Limite de requêtes dépassée. Réessayez dans quelques minutes.",
     "mfa_required": "Authentification à deux facteurs requise. Veuillez configurer ou saisir votre code MFA.",

@@ -187,21 +187,12 @@ export async function loginHandler(
   if (!validation.success) {
     this.log.warn({ event: 'login_validation_failed', errors: validation.error.issues });
 
-    // Formater les erreurs de validation
-    // const fieldErrors: Record<string, string[]> = {};
-    // validation.error.issues.forEach((issue: any) => {
-    //   const field = (issue.path[0] as string) || 'general';
-    //   if (!fieldErrors[field]) fieldErrors[field] = [];
-    //   fieldErrors[field].push(issue.message);
-    // });
-
     return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: {
         code: ERROR_CODES.VALIDATION_ERROR,
         details: mapZodIssuesToErrorDetails(validation.error.issues),
       },
     });
-    // fields: fieldErrors,
   }
 
   const { username, email, password } = validation.data;
@@ -431,64 +422,6 @@ export async function meHandler(this: FastifyInstance, req: FastifyRequest, repl
     });
   } catch (err: any) {
     logger.error({ event: 'me_request_error', user: username, id, err: err?.message || err });
-    return reply.code(500).send({
-      error: {
-        message: 'Internal server error',
-        code: ERROR_CODES.INTERNAL_ERROR,
-      },
-    });
-  }
-}
-
-// ADMIN ONLY - Liste tous les utilisateurs avec leurs informations complètes
-export async function listAllUsers(
-  this: FastifyInstance,
-  req: FastifyRequest,
-  reply: FastifyReply,
-) {
-  const idHeader = (req.headers as any)['x-user-id'];
-  const userId = idHeader ? Number(idHeader) : null;
-  const username = (req.headers as any)['x-user-name'] || null;
-
-  logger.info({ event: 'list_users_attempt', user: username, userId });
-
-  // Vérifier que l'utilisateur existe et a le rôle admin
-  if (!userId || !authService.hasRole(userId, UserRole.ADMIN)) {
-    logger.warn({ event: 'list_users_forbidden', user: username, userId });
-    return reply.code(403).send({
-      error: {
-        message: 'Forbidden - Admin role required',
-        code: ERROR_CODES.FORBIDDEN,
-      },
-    });
-  }
-
-  try {
-    const rawUsers = authService.listUsers();
-
-    // Transformer les données pour un format cohérent avec /me
-    const users = rawUsers.map((user) => {
-      const has2FA = totpService.isTOTPEnabled(user.id || 0);
-
-      return {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        is2FAEnabled: has2FA,
-      };
-    });
-
-    logger.info({ event: 'list_users_success', user: username, count: users.length });
-
-    // Format de réponse standardisé
-    return reply.code(200).send({
-      users,
-      total: users.length,
-      timestamp: new Date().toISOString(),
-    });
-  } catch (err: any) {
-    logger.error({ event: 'list_users_error', user: username, err: err?.message || err });
     return reply.code(500).send({
       error: {
         message: 'Internal server error',

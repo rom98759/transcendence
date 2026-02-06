@@ -31,7 +31,17 @@ export const Input = ({
   const errorId = `${inputId}-error`;
   const hasError = Boolean(errorMessage);
   const Icon = customType ? ICON_MAP[customType] : null;
-  const type = customType === 'password' ? 'password' : 'text';
+  let type = 'text';
+  switch (customType) {
+    case 'password':
+      type = 'password';
+      break;
+    case 'email':
+      type = 'email';
+      break;
+    default:
+      type = 'text';
+  }
   const borderClass = hasError
     ? 'border-red-400 focus:ring-red-400'
     : 'border-gray-300 focus:ring-blue-300';

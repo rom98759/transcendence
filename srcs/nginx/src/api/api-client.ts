@@ -21,12 +21,14 @@ api.interceptors.response.use(
     let message: string = i18next.t(`errors.${ERROR_CODES.INTERNAL_ERROR}`);
     let code: ErrorCode = ERROR_CODES.INTERNAL_ERROR;
     let details: ErrorDetail[] | null = null;
-    console.log(error);
+    // console.log(error);
     if (error.response) {
       const { data } = error.response;
       const errorPayload = data.error || data;
       statusCode =
-        error.status || (errorPayload.status as HttpStatus) || HTTP_STATUS.INTERNAL_SERVER_ERROR;
+        error.response?.status ||
+        (errorPayload.status as HttpStatus) ||
+        HTTP_STATUS.INTERNAL_SERVER_ERROR;
       code = errorPayload?.code || ERROR_CODES.INTERNAL_ERROR;
       const translationKey = `errors.${code}`;
       message = i18next.t(translationKey) || errorPayload?.message || error.message;

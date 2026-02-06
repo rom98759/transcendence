@@ -3,6 +3,7 @@ include make/config.mk
 # === Global ===
 
 all : volumes certs colima build
+	npm i
 	$(D_COMPOSE) up -d
 
 dev: volumes colima-dev build-dev
@@ -76,6 +77,10 @@ lint-fix:
 
 # === Services ===
 
+# --- Install workspaces ---
+
+install:
+	npm i
 
 # --- Builds Images ---
 nginx:
@@ -140,7 +145,7 @@ redis-cli:
 	$(CONTAINER_CMD) exec -it $(REDIS_SERVICE_NAME) redis-cli
 
 
-dev-nginx:
+dev-nginx: install
 	npm run dev --workspace proxy-service
 
 # --- Shell access ---

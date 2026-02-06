@@ -22,13 +22,18 @@
     "not_found": "Que dalle",
     "disabled": "pas enclenché, le machin"
   },
+  "zod_errors": {
+    "invalid_format": "T'as pas pigé le format ou quoi ?",
+    "too_small": "Sois pas chiche, tu peux y aller niveau longueur",
+    "too_big": "T'as dépassé les bornes, coco. Revois ça à la baisse"
+  },
   "errors": {
     "validation_mandatory": "Balance l'info",
     "validation_error": "T’as tout foiré, mon pote. Vérifie tes papiers et recommence, sinon ça va barder.",
     "unauthorized": "Faut te pointer correctement, sinon t’entres pas.",
     "invalid_credentials": "T’as dû te gourer dans ton blaze ou ton code. Revoie ta copie.",
     "forbidden": "Là, mon pote, t’as pas le niveau. Faut une autorisation et t'es pas sur la liste",
-    "not-found": "On a rien trouvé, mon vieux. T’es sûr de l’adresse ou du numéro ?",
+    "not_found": "On a rien trouvé, mon vieux. T’es sûr de l’adresse ou du numéro ?",
     "conflict": "Y’a déjà un gars avec ce blaze ou cette adresse. Trouve-toi un truc unique, sinon ça va chauffer.",
     "rate_limit_exceeded": "T’as trop tiré sur la corde, là. Reviens dans quelques minutes, on sera plus cool.",
     "mfa_required": "Faut un double contrôle, mon gars. Sors ton code MFA ou configure-le, sinon c’est mort.",

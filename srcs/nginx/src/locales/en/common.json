@@ -12,7 +12,7 @@
     "password": "password",
     "username-email": "username or email",
     "username-choose": "choose a username",
-    "password-choose": "choose a password"
+    "password-choose": "choose a secure password (min 8 chars, 1 uppercase, 1 special char)"
   },
   "form": {
     "processing": "processing..."
@@ -22,13 +22,18 @@
     "not_found": "Not found",
     "disabled": "disabled"
   },
+  "zod_errors": {
+    "invalid_format": "Check requested format",
+    "too_small": "A longer value is required",
+    "too_big": "A shorter value is required"
+  },
   "errors": {
     "validation_mandatory": "This field is mandatory.",
     "validation_error": "Invalid format. Please check the submitted fields and try again.",
     "unauthorized": "Authentication required. Please log in to access this resource.",
     "invalid_credentials": "Invalid credentials. Please check your email/username and password and try again.",
     "forbidden": "Access denied. You do not have the necessary permissions for this action.",
-    "not-found": "Resource not found. Please verify the ID or URL and try again.",
+    "not_found": "Resource not found. Please verify the ID or URL and try again.",
     "conflict": "This identifier already exists. Please use a unique identifier.",
     "rate_limit_exceeded": "Rate limit exceeded. Please try again in a few minutes",
     "mfa_required": "Multi-factor authentication required. Please set up or enter your MFA code",

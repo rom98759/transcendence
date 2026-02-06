@@ -58,14 +58,17 @@ async function loginAction(prevState: LoginState | null, formData: FormData) {
           err.details.forEach((d) => {
             if (d.field && d.field in nextState.errors!) {
               const key = d.field as keyof NonNullable<LoginState['errors']>;
-              nextState.errors![key] = d.reason;
+              nextState.errors![key] =
+                i18next.t(`zod_errors.${d.reason}`) || i18next.t(`zod_errors.invalid_format`);
             } else if (d.field) {
-              nextState.errors!.form = d.reason;
+              nextState.errors!.form =
+                i18next.t(`zod_errors.${d.reason}`) || i18next.t(`zod_errors.invalid_format`);
             }
           });
         }
-      } else {
-        (nextState.errors as Record<string, string>)['form'] = err.message;
+      } else if (err.code) {
+        nextState.errors!.form =
+          i18next.t(`errors.${err.code}`) || i18next.t(`errors.${ERROR_CODES.INTERNAL_ERROR}`);
       }
     } else {
       (nextState.errors as Record<string, string>)['form'] = i18next.t(

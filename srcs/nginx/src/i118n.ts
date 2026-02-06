@@ -29,7 +29,7 @@ i18n
     detection: DETECTION_OPTIONS,
     resources: RESOURCES,
     defaultNS,
-    fallbackLng: 'ts',
+    fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // react already safes from xss
     },

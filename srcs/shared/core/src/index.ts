@@ -24,6 +24,7 @@ export { ERROR_CODES } from './errors/error-codes.js';
 export {
   AppError,
   FrontendError,
+  type FrontendReasonValue,
   type ErrorDetail,
   type ErrorDefinition,
   type ErrorCode,

@@ -1,6 +1,6 @@
 import { ZodIssue, ZodIssueCode } from 'zod/v3';
 import { HTTP_STATUS } from '../constants/index.js';
-import { EventValue, LogContext, ReasonValue } from '../logging/logging-types.js';
+import { EventValue, LogContext, LogDetail, ReasonValue } from '../logging/logging-types.js';
 import { LOG_REASONS } from '../logging/logging.js';
 import { ERROR_CODES } from './error-codes.js';
 
@@ -17,6 +17,7 @@ export type FrontendReasonValue =
   | SecurityFrontReasons
   | ValidationReasons
   | ConflictReasons
+  | ZodIssueCode
   | typeof LOG_REASONS.UNKNOWN;
 
 const PUBLIC_REASONS: string[] = [
@@ -46,8 +47,9 @@ export interface ErrorDefinition {
 
 // attribute which will be propagated till client
 export interface ErrorDetail {
-  reason: FrontendReasonValue | ZodIssueCode;
+  reason: FrontendReasonValue;
   field?: string;
+  message?: string;
 }
 
 export class AppError extends Error {
@@ -104,20 +106,16 @@ export const mapToFrontendError = (error: AppError): FrontendError => {
   const reason = error?.context?.reason || '';
   const safeReason: FrontendReasonValue = isFrontendReason(reason) ? reason : LOG_REASONS.UNKNOWN;
 
-  if (error.context?.details && Array.isArray(error.context.details)) {
-    // Cas des erreurs Zod (multiples)
-    mappedDetails = error.context.details.map((issue: ZodIssue) => ({
+  if (error.context?.zodIssues) {
+    mappedDetails = error.context.zodIssues.map((issue: ZodIssue) => ({
       field: issue.path?.join('.') || 'unknown',
       reason: safeReason,
     }));
-  } else if (error.context?.details) {
-    const issue = error.context.details[0];
-    mappedDetails = [
-      {
-        field: issue?.path?.join('.') || 'unknown',
-        reason: issue?.code,
-      },
-    ];
+  } else if (error.context?.details && Array.isArray(error.context.details)) {
+    mappedDetails = error.context.details.map((detail: LogDetail) => ({
+      field: detail?.field || 'unknown',
+      reason: safeReason,
+    }));
   } else if (error.context?.field || isFrontendReason(reason)) {
     mappedDetails = [
       {
