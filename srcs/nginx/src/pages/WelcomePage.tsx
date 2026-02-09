@@ -34,7 +34,7 @@ export const WelcomePage = () => {
         {/* Not logged in - show login/register */}
         {!isLoggedIn && (
           <Halo
-            size={200}
+            size={50}
             isRegister={isRegister}
             onToggleForm={() => setIsRegister(!isRegister)}
             className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
