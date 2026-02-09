@@ -3,6 +3,8 @@ import { Page } from '../components/organisms/PageContainer';
 import { useTranslation } from 'react-i18next';
 import { useEffect, useState } from 'react';
 import { TournamentList, Tournament } from '../components/atoms/TournamentList';
+import { TournamentBracket } from '../components/molecules/TournamentBracket';
+import { Player } from '../types/types';
 
 const MOCK_TOURNAMENTS: Tournament[] = [
   {
@@ -26,6 +28,13 @@ interface LoginRegisterPageProps {
   isRegister: boolean;
 }
 
+const MOCK_PLAYERS: [Player, Player, Player, Player] = [
+  { id: '1', name: 'johnny', avatar: null },
+  { id: '2', name: 'eddy', avatar: null },
+  { id: '3', name: 'khaled', avatar: null },
+  { id: '4', name: 'danny', avatar: null },
+] as const;
+
 // const login = async () => {};
 
 export const TournamentPage = () => {
@@ -46,6 +55,7 @@ export const TournamentPage = () => {
         tournaments={MOCK_TOURNAMENTS}
         onJoin={(id) => console.log('Join tournament', id)}
       />
+      <TournamentBracket players={MOCK_PLAYERS} />
     </Page>
   );
 };

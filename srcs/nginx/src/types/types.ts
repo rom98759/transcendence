@@ -32,3 +32,9 @@ export interface ClientMessage {
   paddle?: 'left' | 'right';
   direction?: 'up' | 'down' | 'stop';
 }
+
+export type Player = {
+  id: string;
+  name: string;
+  avatar: string | null;
+};
