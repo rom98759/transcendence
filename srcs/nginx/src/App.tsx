@@ -8,7 +8,8 @@ import { WelcomePage } from './pages/WelcomePage';
 const GuestRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoggedIn } = useAuth();
   if (user && isLoggedIn) {
-    return <Navigate to={`/profile/${user.username}`} replace />;
+    return <Navigate to={`/welcome`} replace />;
+    // return <Navigate to={`/profile/${user.username}`} replace />;
   }
   return children;
 };
@@ -25,16 +26,8 @@ export const App = () => {
     <main className="h-screen bd-slate-950 text-slate-100">
       <Routes>
         <Route path="/" element={<AnimationPage />}></Route>
-        <Route
-          // path="/signup"
-          path="/welcome"
-          element={
-            <GuestRoute>
-              {/* <LoginPage isRegister={true} /> */}
-              <WelcomePage />
-            </GuestRoute>
-          }
-        />
+
+        <Route path="/welcome" element={<WelcomePage />} />
         {/* <Route
           path="/login"
           element={

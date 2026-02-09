@@ -66,5 +66,10 @@
     "copyright": "© 2026 Tous droits réservés.",
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation"
+  },
+  "game": {
+    "playWithAI": "Joue avec un ROBOT (no friends?)",
+    "playWithFriends": "Joue avec ton copaing",
+    "tournament": "Defi tes potes en tournois"
   }
 }

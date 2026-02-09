@@ -120,7 +120,8 @@ export const RegisterForm = ({ onToggleForm }: { onToggleForm?: () => void }) =>
 
   useEffect(() => {
     if (user && isLoggedIn) {
-      navigate(`/profile/${user.username}`);
+      // navigate(`/profile/${user.username}`);
+      navigate(`/welcome`);
     }
   }, [user, isLoggedIn]);
 
@@ -128,7 +129,8 @@ export const RegisterForm = ({ onToggleForm }: { onToggleForm?: () => void }) =>
     if (state?.success && state.fields?.username) {
       const username = state.fields?.username;
       login({ username: username, avatarUrl: null });
-      navigate(`/profile/${username}`);
+      // navigate(`/profile/${username}`);
+      navigate(`/welcome`);
     }
   }, [state?.success, state?.fields?.username, navigate]);
 

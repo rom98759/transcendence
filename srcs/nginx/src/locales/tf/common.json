@@ -66,5 +66,10 @@
     "copyright": "© 2026 – C'est à nous.",
     "privacyPolicy": "La loi du milieu (on balance rien, t'es en sécurité)",
     "termsOfService": "Les règles du jeu (lis ça, sinon t’es un rigolo)"
+  },
+  "game": {
+    "playWithAI": "No friends? Joue avec un ROBOT",
+    "playWithFriends": "Joue avec ton copaing",
+    "tournament": "Defi tes potes en tournois"
   }
 }
