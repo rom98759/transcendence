@@ -37,4 +37,7 @@ export type Player = {
   id: string;
   name: string;
   avatar: string | null;
+  online?: boolean;
 };
+
+export type MatchStatus = 'pending' | 'ready' | 'running' | 'finished';

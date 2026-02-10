@@ -68,9 +68,23 @@
     "termsOfService": "Conditions d'utilisation"
   },
   "game": {
-    "tournament": "tournoi",
-    "game": "jeu",
+    "tournament": "Tournoi",
+    "game": "Jeu",
     "participate": "Participer",
-    "create": "Créer"
+    "create": "Créer",
+    "tournament_available": "Tournois disponibles",
+    "name": "Pseudo",
+    "players": "Nb joueurs",
+    "status": "Statut",
+    "action": "Action",
+    "join": "Rejoindre",
+    "unavailable": "Indisponible",
+    "waiting": "En attente",
+    "in_progress": "En cours",
+    "finished": "Terminé",
+    "no_tournament": "Aucun tournoi disponible",
+    "final": "Finale",
+    "semi_final": "Demi-Finale",
+    "start": "Jouer"
   }
 }

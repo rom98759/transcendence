@@ -3,12 +3,14 @@ import { BracketConnection, BracketLines } from '../atoms/BracketLines';
 import { PlayerCapsule } from '../atoms/PlayerCapsule';
 import { MatchNode } from '../atoms/MatchNode';
 import { useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface TournamentBracketProps {
   players: [Player, Player, Player, Player];
 }
 
 export function TournamentBracket({ players }: TournamentBracketProps) {
+  const { t } = useTranslation();
   const [p1, p2, p3, p4] = players;
   const containerRef = useRef<HTMLDivElement>(null);
   const p1Ref = useRef<HTMLDivElement>(null);
@@ -29,7 +31,7 @@ export function TournamentBracket({ players }: TournamentBracketProps) {
     { from: semiRightRef, to: finalRef },
   ];
   return (
-    <div ref={containerRef} className="relative w-full max-w-6xl mx-auto py-12">
+    <div ref={containerRef} className="relative w-[70%] max-w-6xl mx-auto py-12">
       <BracketLines containerRef={containerRef} connections={connections} />
 
       <div className="relative flex flex-col lg:flex-row justify-between items-center gap-24">
@@ -46,15 +48,28 @@ export function TournamentBracket({ players }: TournamentBracketProps) {
         {/* CENTER */}
         <div className="flex flex-col items-center gap-14">
           <div ref={semiLeftRef}>
-            <MatchNode label="Demi-finale" />
+            <MatchNode
+              label={t('game.semi_final')}
+              status="ready"
+              onStart={() => console.log(`startSemiFinal('left')`)}
+            />
           </div>
 
           <div ref={finalRef}>
-            <MatchNode label="Finale" highlight />
+            <MatchNode
+              label={t('game.final')}
+              highlight
+              status="pending"
+              onStart={() => console.log(`startFinal()`)}
+            />
           </div>
 
           <div ref={semiRightRef}>
-            <MatchNode label="Demi-finale" />
+            <MatchNode
+              label={t('game.semi_final')}
+              status="ready"
+              onStart={() => console.log(`startSemiFinal('right')`)}
+            />
           </div>
         </div>
 

@@ -36,10 +36,10 @@ interface LoginRegisterPageProps {
 }
 
 const MOCK_PLAYERS: [Player, Player, Player, Player] = [
-  { id: '1', name: 'johnny', avatar: null },
-  { id: '2', name: 'eddy', avatar: null },
-  { id: '3', name: 'khaled', avatar: null },
-  { id: '4', name: 'danny', avatar: null },
+  { id: '1', name: 'johnny', avatar: null, online: true },
+  { id: '2', name: 'eddy', avatar: null, online: false },
+  { id: '3', name: 'khaled', avatar: null, online: true },
+  { id: '4', name: 'danny', avatar: null, online: false },
 ] as const;
 
 // const login = async () => {};
@@ -73,10 +73,6 @@ export const TournamentPage = () => {
             <CircleButton>{create}</CircleButton>
           </div>
         </div>
-        {/* <TournamentList */}
-        {/*   tournaments={MOCK_TOURNAMENTS} */}
-        {/*   onJoin={(id) => console.log('Join tournament', id)} */}
-        {/* /> */}
         <TournamentBracket players={MOCK_PLAYERS} />
         {/* Desktop */}
         <div className="hidden md:block">
