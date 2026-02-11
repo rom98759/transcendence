@@ -12,8 +12,9 @@ export const CircleButton = ({ children }: CircleButtonProps) => (
     whileTap={{ scale: 0.95, color: '#ff0088' }}
     transition={{ duration: 0.3 }}
     className={`
-      basis-50
-      h-56 m-10 p-6    
+      h-56 p-6  
+      scale-75
+      md:scale-100 md:m-10
       aspect-square
       rounded-full
       bg-slate-100/80

@@ -37,7 +37,7 @@ export const FriendsList = ({ friends }: FriendsListProps) => {
             text-gray-700 mb-4
           "
         >
-          <span>{t('game.friends')}</span>
+          <span>{t('game.friends')}&nbsp;</span>
           <span
             className={`
               transition-transform duration-300

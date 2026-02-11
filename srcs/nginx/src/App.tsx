@@ -4,6 +4,7 @@ import { LoginPage } from './pages/LoginRegisterPage';
 import { useAuth } from './providers/AuthProvider';
 import { AnimationPage } from './pages/AnimationPage';
 import { TournamentPage } from './pages/TournamentPage';
+import TournamentRoutes from './router/TournamentRoutes';
 
 const GuestRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoggedIn, isAuthChecked } = useAuth();
@@ -55,7 +56,7 @@ export const App = () => {
         />
         <Route path="/me" element={<MeRedirect />}></Route>
         <Route path="/profile/:username" element={<ProfilePage />}></Route>
-        <Route path="/tournament" element={<TournamentPage />}></Route>
+        <Route path="/tournaments/*" element={<TournamentRoutes />} />
       </Routes>
     </main>
   );

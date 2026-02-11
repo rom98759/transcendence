@@ -46,21 +46,10 @@ export function createWaitingPlayer(label: string): Player {
 }
 
 // const login = async () => {};
-const colors = {
-  start: '#00ff9f',
-  end: '#0088ff',
-};
 
 export const TournamentPage = () => {
   // const [currentUser, formAction, isPending] = useActionState(login, {});
   const { t } = useTranslation();
-  const MOCK_PLAYERS: [Player, Player, Player, Player] = [
-    { id: '1', name: 'johnny', avatar: null, online: true, status: 'connected' },
-    { id: '2', name: 'eddy', avatar: null, online: false, status: 'connected' },
-    { id: '3', name: 'khaled', avatar: null, online: true, status: 'connected' },
-    createWaitingPlayer('waiting...'),
-    // { id: '4', name: 'danny', avatar: null, online: false },
-  ] as const;
   const title = t('game.tournament').toUpperCase();
   const participate = t('game.participate');
   const create = t('game.create');
