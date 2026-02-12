@@ -1,17 +1,18 @@
 import { motion } from 'framer-motion';
+import React from 'react';
 
-interface CircleButtonProps {
+interface CircleButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode;
 }
 
 const dropdownStyle = 'shadow-[0_10px_10px_1px_rgba(205,205,205,0.4)] ';
 
-export const CircleButton = ({ children }: CircleButtonProps) => (
-  <motion.div
-    whileHover={{ scale: 1.1, color: '#029c8a' }}
-    whileTap={{ scale: 0.95, color: '#ff0088' }}
-    transition={{ duration: 0.3 }}
+export const CircleButton = ({ children, className = '', ...props }: CircleButtonProps) => (
+  <button
     className={`
+      transition-all
+      hover:scale-110 hover:text-green-900
+      active:scale-95 active:text-red-800
       h-56 p-6  
       scale-75
       md:scale-100 md:m-10
@@ -23,7 +24,8 @@ export const CircleButton = ({ children }: CircleButtonProps) => (
       text-gray-700
       ${dropdownStyle}
                   `}
+    {...props}
   >
     <p className="text-2xl text-center whitespace-nowrap">{children}</p>
-  </motion.div>
+  </button>
 );

@@ -3,7 +3,6 @@ import { ProfilePage } from './pages/ProfilePage';
 import { LoginPage } from './pages/LoginRegisterPage';
 import { useAuth } from './providers/AuthProvider';
 import { AnimationPage } from './pages/AnimationPage';
-import { TournamentPage } from './pages/TournamentPage';
 import TournamentRoutes from './router/TournamentRoutes';
 
 const GuestRoute = ({ children }: { children: React.ReactNode }) => {

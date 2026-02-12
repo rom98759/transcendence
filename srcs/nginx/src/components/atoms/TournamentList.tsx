@@ -26,6 +26,9 @@ const statusColor: Record<Tournament['status'], string> = {
   FINISHED: 'text-gray-500',
 };
 
+/* Version for computer screen
+ * with a html table
+ */
 export function TournamentTableDesktop({ tournaments, onJoin }: tournamentsProps) {
   const { t } = useTranslation();
   return (

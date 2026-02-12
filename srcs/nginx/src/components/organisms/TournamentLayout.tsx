@@ -8,6 +8,8 @@ const colors = {
   start: '#00ff9f',
   end: '#0088ff',
 };
+
+/*This component is the architecture of all tournament pages.*/
 export default function TournamentLayout() {
   const MOCK_PLAYERS: [Player, Player, Player, Player] = [
     { id: '1', name: 'johnny', avatar: null, online: true, status: 'connected' },
@@ -28,9 +30,11 @@ export default function TournamentLayout() {
             <NavBar></NavBar>
           </div>
         }
-        {MOCK_PLAYERS.length > 0 && <FriendsList friends={MOCK_PLAYERS} />}
+        <div className="flex min-h-screen justify-center">
+          {MOCK_PLAYERS.length > 0 && <FriendsList friends={MOCK_PLAYERS} />}
 
-        <Outlet />
+          <Outlet />
+        </div>
       </Background>
     </div>
   );

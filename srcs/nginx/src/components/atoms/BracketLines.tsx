@@ -16,14 +16,15 @@ interface ComputedLine {
 }
 
 interface BracketLinesProps {
-  // référentile des coordonnées
+  // coordinate reference
   containerRef: RefObject<HTMLElement | null>;
   connections: BracketConnection[];
 }
 
-// renvoi les coordonnées du centre de l'objet / div
-// car getBoundingClientRect renvoie les coordonnées viewport du rectangle
-// cette fontion utilitaire permet aux lignes de partir du centre des capsules
+/* renvoi les coordonnées du centre de l'objet / div
+ * car getBoundingClientRect renvoie les coordonnées viewport du rectangle
+ * cette fontion utilitaire permet aux lignes de partir du centre des capsules
+ */
 function centerOf(rect: DOMRect): Point {
   return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
 }

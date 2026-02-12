@@ -87,6 +87,8 @@
     "semi_final": "Demi-Finale",
     "little_final": "Petite-Finale",
     "start": "Jouer",
-    "friends": "Amis"
+    "friends": "Amis",
+    "waitiing": "Attente...",
+    "creating": "Création du tournoi..."
   }
 }

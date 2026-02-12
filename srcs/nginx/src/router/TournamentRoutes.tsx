@@ -1,10 +1,13 @@
 import { Routes, Route } from 'react-router-dom';
-import TournamentLayout from '../layouts/TournamentLayout';
+import TournamentLayout from '../components/organisms/TournamentLayout';
 import TournamentMenuPage from '../pages/TournamentMenuPage';
 import TournamentsListPage from '../pages/TournamentsListPage';
 import TournamentCreatePage from '../pages/TournamentCreatePage';
 import TournamentPage from '../pages/TournamentPage';
 
+/*
+ * simplified page management with React Routes
+ */
 export default function TournamentRoutes() {
   return (
     <Routes>

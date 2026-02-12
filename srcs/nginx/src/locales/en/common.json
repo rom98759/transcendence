@@ -87,6 +87,8 @@
     "semi_final": "Semi-Final",
     "little_final": "Little-Finale",
     "start": "Start",
-    "friends": "Friends"
+    "friends": "Friends",
+    "waitiing": "Waiting...",
+    "creating": "Creating tournament..."
   }
 }
