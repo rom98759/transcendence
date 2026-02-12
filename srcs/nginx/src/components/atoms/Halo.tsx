@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { RegisterForm } from '../organisms/RegisterForm';
 import { LoginForm } from '../organisms/LoginForm';
-import Circle from '../atoms/Circle';
+import Circle from './Circle';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../providers/AuthProvider';
 

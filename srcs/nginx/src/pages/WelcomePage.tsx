@@ -1,5 +1,5 @@
 import { NavBar } from '../components/molecules/NavBar'; // Adjust path based on your folder structure
-import Halo from '../components/molecules/Halo';
+import Halo from '../components/atoms/Halo';
 import { Link } from 'react-router-dom';
 import Background from '../components/atoms/Background';
 import { useTranslation } from 'react-i18next';
@@ -7,7 +7,7 @@ import { RegisterForm } from '../components/organisms/RegisterForm';
 import { LoginForm } from '../components/organisms/LoginForm';
 import { useState } from 'react';
 import Circle from '../components/atoms/Circle';
-import { CircleButton } from '../components/molecules/CircleButton';
+import { CircleButton } from '../components/atoms/CircleButton';
 import { useAuth } from '../providers/AuthProvider';
 import Scrollable from '../components/atoms/Scrollable';
 
@@ -49,15 +49,15 @@ export const WelcomePage = () => {
         {isLoggedIn && (
           <Scrollable>
             <Link to="/game/pong-ai">
-              <CircleButton>{ai}</CircleButton>
+              <CircleButton isMoving={true}>{ai}</CircleButton>
             </Link>
 
             <Link to="/game/simple-game">
-              <CircleButton>{friends}</CircleButton>
+              <CircleButton isMoving={true}>{friends}</CircleButton>
             </Link>
 
             <Link to="/game/tournament">
-              <CircleButton>{tournament}</CircleButton>
+              <CircleButton isMoving={true}>{tournament}</CircleButton>
             </Link>
           </Scrollable>
         )}
