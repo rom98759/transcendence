@@ -66,5 +66,29 @@
     "copyright": "© 2026 – C'est à nous.",
     "privacyPolicy": "La loi du milieu (on balance rien, t'es en sécurité)",
     "termsOfService": "Les règles du jeu (lis ça, sinon t’es un rigolo)"
+  },
+  "game": {
+    "tournament": "Vendetta",
+    "game": "La mort ou la vie",
+    "participate": "Tu cherches des embrouilles!",
+    "create": "Je vous mets au défi!",
+    "tournament_available": "Vendetta disponibles",
+    "name": "Blaz",
+    "players": "Nb truands",
+    "status": "Statut",
+    "action": "Action",
+    "join": "Rejoindre",
+    "unavailable": "Indisponible",
+    "waiting": "En attente",
+    "in_progress": "Contrat en cours",
+    "finished": "Terminé",
+    "no_tournament": "Aucune vendetta disponible",
+    "final": "Combat final",
+    "semi_final": "On prends du Galon",
+    "little_final": "Les loosers c'est ici",
+    "start": "C'est parti",
+    "friends": "Les potes",
+    "waitiing": "On t'attend...",
+    "creating": "Création de la vendetta..."
   }
 }

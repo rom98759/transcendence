@@ -54,8 +54,23 @@ export const authApi = {
     return data?.user?.username;
   },
 
+  // me: async (): Promise<UserDTO> => {
+  //   usernameSchema.parse(username);
+  //   // const response = await api.get(`/auth/me/`);
+  //   const response = {
+  //     data: {
+  //       authId: 1,
+  //       email: 'toto@mail.com',
+  //       username: 'Toto',
+  //     },
+  //     message: 'OK',
+  //   };
+  //   return response.data;
+  // },
   me: async (): Promise<UserDTO> => {
-    const response = await api.get(`/auth/me/`);
-    return response.data;
+    const { data } = await api.get('/auth/me', {
+      withCredentials: true,
+    });
+    return data;
   },
 };

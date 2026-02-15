@@ -66,5 +66,29 @@
     "copyright": "© 2026 . All rights reserved.",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service"
+  },
+  "game": {
+    "tournament": "Tournament",
+    "game": "Game",
+    "participate": "Participate",
+    "create": "Create",
+    "tournament_available": "Tournament available",
+    "name": "Pseudo",
+    "players": "Nb players",
+    "status": "Status",
+    "action": "Action",
+    "join": "Join",
+    "unavailable": "Unavailable",
+    "waiting": "Waiting",
+    "in_progress": "In progress",
+    "finished": "Finished",
+    "no_tournament": "No tournament",
+    "final": "Final",
+    "semi_final": "Semi-Final",
+    "little_final": "Little-Finale",
+    "start": "Start",
+    "friends": "Friends",
+    "waitiing": "Waiting...",
+    "creating": "Creating tournament..."
   }
 }
