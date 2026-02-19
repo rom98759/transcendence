@@ -44,10 +44,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    
-    env:
-      PONG_AI_SERVICE_NAME: pong-ai-service
-      PONG_AI_SERVICE_PORT: 3006
 
     steps:
       - uses: actions/checkout@v4
