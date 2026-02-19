@@ -222,6 +222,27 @@ services:
           'https://localhost/health',
         ]
 
+  pong-ai-service:
+    build:
+      context: ./pong-ai
+      dockerfile: Dockerfile
+    container_name: ${PONG_AI_SERVICE_NAME}
+    expose:
+      - '${PONG_AI_SERVICE_PORT}'
+    env_file:
+      - path: ./.env
+    environment:
+      - MODEL_PATH=/app/models/best_model
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+    volumes:
+      - ./pong-ai/models:/app/models
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      <<: *healthcheck-template
+      test: ['CMD', 'curl', '-f', 'http://localhost:${PONG_AI_SERVICE_PORT}/health']
+
 networks:
   app-network:
     driver: bridge

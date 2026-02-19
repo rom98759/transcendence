@@ -304,7 +304,7 @@ export class PongGame {
     this.ball.pos.y = this.height / 2;
     // this.ball.vel.x = -this.ball.vel.x;
 
-    var velX = 5 * this.serve;
+    const velX = 5 * this.serve;
     this.ball.vel.x = velX;
     this.ball.vel.y = (Math.random() - 0.5) * 10;
   }
@@ -320,6 +320,8 @@ export class PongGame {
         x: this.ball.pos.x,
         y: this.ball.pos.y,
         radius: this.ball.radius,
+        vx: this.ball.vel.x,
+        vy: this.ball.vel.y,
       },
       paddles: {
         left: {

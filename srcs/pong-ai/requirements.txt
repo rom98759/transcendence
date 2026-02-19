@@ -1,0 +1,18 @@
+# Pong AI Service dependencies
+
+# ML Framework
+gymnasium==0.29.1
+numpy<2.0.0
+torch==2.2.0
+stable-baselines3==2.2.1
+
+# Web Framework
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+websockets==12.0
+python-multipart==0.0.6
+pydantic==2.5.3
+
+# Utilities
+requests==2.31.0
+python-dotenv==1.0.0

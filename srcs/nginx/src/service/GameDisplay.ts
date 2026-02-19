@@ -123,6 +123,9 @@ export class GameDisplay {
          <button id="exit-btn" class="flex-1 bg-red-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
             Exit to main page
          </button>
+         <button id="create-ai-game-btn" class="flex-1 bg-blue-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+            Create game with AI
+         </button>
       </div>
       `;
   }
@@ -247,7 +250,6 @@ export class GameDisplay {
     this.setupEventListeners();
     // this.loadSessions()
   }
-
   async askForGameSession(): Promise<void> {
     if (this.sessionId) return;
     this.clearGameLogs();
@@ -274,6 +276,58 @@ export class GameDisplay {
       console.error('Connection error:', error);
       alert('Failed to connect to game service. Please try again.');
       throw error; // Re-throw so display() knows it failed
+    }
+  }
+
+  async askForAIGameSession(): Promise<void> {
+    if (this.sessionId) return;
+
+    console.log('AI game session requested');
+
+    try {
+      const response = await fetch('/api/game/create-session', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Game session created:', data);
+
+      if (!data.sessionId) {
+        throw new Error('No sessionId in response');
+      }
+
+      this.sessionId = data.sessionId;
+      this.gameArena.classList.remove('hidden');
+      await this.openWebSocket(data.sessionId);
+      this.showPanel('settings');
+
+      const aiResponse = await fetch(
+        `/api/pong-ai/join-game?sessionId=${encodeURIComponent(data.sessionId)}`,
+        {
+          method: 'GET',
+          credentials: 'include',
+        },
+      );
+
+      if (!aiResponse.ok) {
+        throw new Error(`Failed to invite AI: ${aiResponse.status}`);
+      }
+
+      const aiData = await aiResponse.json();
+      console.log('AI joined game:', aiData);
+
+      this.addGameLog('AI player has joined as right paddle!', 'success');
+    } catch (error) {
+      console.error('Failed to create AI game session:', error);
+      alert('Failed to connect to AI service. Please try again.');
+      if (this.sessionId) {
+        this.stopGame();
+      }
     }
   }
 
@@ -388,6 +442,7 @@ export class GameDisplay {
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       if (target.id === 'create-game-btn') this.askForGameSession();
+      if (target.id === 'create-ai-game-btn') this.askForAIGameSession();
       if (target.id === 'exit-btn') this.exitGame();
       if (target.id === 'stop-btn') {
         this.stopGame();

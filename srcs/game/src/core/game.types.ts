@@ -1,4 +1,3 @@
-import { Vector2 } from './game.vector.js';
 // Message types
 export interface GameSettings {
   ballRadius: number;
@@ -46,6 +45,8 @@ export interface GameState {
     x: number;
     y: number;
     radius: number;
+    vx?: number;
+    vy?: number;
   };
   paddles: {
     left: {
