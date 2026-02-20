@@ -77,6 +77,32 @@ export const authenv = cleanEnv(process.env, {
     default: 'Transcendence',
     desc: 'Application name for TOTP issuer',
   }),
+
+  // OAuth 2.0 Configuration - Google
+  GOOGLE_CLIENT_ID: str({
+    desc: 'Google OAuth 2.0 Client ID',
+    example: '123456789-abcdef.apps.googleusercontent.com',
+  }),
+  GOOGLE_CLIENT_SECRET: str({
+    desc: 'Google OAuth 2.0 Client Secret - KEEP SECURE',
+    example: 'GOCSPX-your_client_secret_here',
+  }),
+
+  // OAuth 2.0 Configuration - 42 School
+  SCHOOL42_CLIENT_ID: str({
+    desc: '42 School OAuth 2.0 Client ID (Application UID)',
+    example: 'u-s4t2ud-abcdef123456789...',
+  }),
+  SCHOOL42_CLIENT_SECRET: str({
+    desc: '42 School OAuth 2.0 Client Secret - KEEP SECURE',
+    example: 's-s4t2ud-your_secret_here...',
+  }),
+
+  // OAuth 2.0 General Configuration
+  OAUTH_BASE_URL: str({
+    default: 'http://localhost:4430',
+    desc: 'Base URL for OAuth callback redirects (frontend URL)',
+  }),
 });
 
 // ⚠️ CRITICAL SECURITY VALIDATION

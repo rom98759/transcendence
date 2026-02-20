@@ -4,6 +4,7 @@ import { LoginPage } from './pages/LoginRegisterPage';
 import { useAuth } from './providers/AuthProvider';
 import { AnimationPage } from './pages/AnimationPage';
 import TournamentRoutes from './router/TournamentRoutes';
+import { OAuthCallback } from './pages/OAuthCallback';
 
 const GuestRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, isLoggedIn, isAuthChecked } = useAuth();
@@ -54,6 +55,11 @@ export const App = () => {
           }
         />
         <Route path="/me" element={<MeRedirect />}></Route>
+
+        {/* Routes OAuth Callback - Publiques car appelées après authentification */}
+        <Route path="/auth/oauth/google/callback" element={<OAuthCallback />} />
+        <Route path="/auth/oauth/school42/callback" element={<OAuthCallback />} />
+
         <Route path="/profile/:username" element={<ProfilePage />}></Route>
         <Route path="/tournaments/*" element={<TournamentRoutes />} />
       </Routes>

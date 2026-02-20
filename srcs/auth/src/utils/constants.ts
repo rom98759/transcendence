@@ -98,6 +98,34 @@ export const AUTH_CONFIG = {
       timeWindow: '1 minute',
     },
   },
+
+  // OAuth 2.0 Configuration
+  OAUTH: {
+    // Timeouts et limites
+    TOKEN_EXCHANGE_TIMEOUT_MS: 10000, // 10 secondes
+    USER_PROFILE_TIMEOUT_MS: 8000, // 8 secondes
+
+    // Rate limiting OAuth
+    CALLBACK_RATE_LIMIT: {
+      max: isTestOrDev ? 1000 : 10,
+      timeWindow: '5 minutes',
+    },
+
+    // Providers configuration
+    GOOGLE: {
+      AUTHORIZATION_URL: 'https://accounts.google.com/o/oauth2/v2/auth',
+      TOKEN_URL: 'https://oauth2.googleapis.com/token',
+      USER_INFO_URL: 'https://www.googleapis.com/oauth2/v2/userinfo',
+      SCOPES: ['openid', 'profile', 'email'],
+    },
+
+    SCHOOL42: {
+      AUTHORIZATION_URL: 'https://api.intra.42.fr/oauth/authorize',
+      TOKEN_URL: 'https://api.intra.42.fr/oauth/token',
+      USER_INFO_URL: 'https://api.intra.42.fr/v2/me',
+      SCOPES: ['public'],
+    },
+  },
 } as const;
 
 /**
@@ -177,6 +205,7 @@ export const ERROR_RESPONSE_CODES = {
   INVALID_ROLE: 'INVALID_ROLE',
   MISSING_FIELDS: 'MISSING_FIELDS',
   VALIDATION_ERROR: 'VALIDATION_ERROR',
+  BAD_REQUEST: 'BAD_REQUEST',
   EMAIL_EXISTS: 'EMAIL_EXISTS',
   USERNAME_EXISTS: 'USERNAME_EXISTS',
   TWO_FA_NOT_ENABLED: '2FA_NOT_ENABLED',
@@ -186,6 +215,26 @@ export const ERROR_RESPONSE_CODES = {
   FETCH_USER_ERROR: 'FETCH_USER_ERROR',
   CHECK_USER_ONLINE_ERROR: 'CHECK_USER_ONLINE_ERROR',
 } as const;
+
+// // Constantes supplémentaires pour OAuth
+// export const DATA_ERROR = {
+//   DUPLICATE: 'duplicate_entry',
+//   NOT_FOUND: 'not_found',
+//   USER_NOT_FOUND: 'user_not_found',
+//   USER_EXISTS: 'user_exists',
+//   EMAIL_EXISTS: 'email_exists',
+//   ALREADY_EXISTS: 'already_exists',
+//   CONNECTION_FAIL: 'connection_fail',
+//   CONSTRAINT_VIOLATION: 'constraint_violation',
+//   INTERNAL_ERROR: 'internal_error',
+// } as const;
+
+// export const VALIDATION_REASONS = {
+//   MISSING_FIELD: 'missing_field',
+//   WEAK_PASSWORD: 'weak_password',
+//   INVALID_FORMAT: 'invalid_format',
+//   INVALID_INPUT: 'invalid_input',
+// } as const;
 
 /**
  * Noms d'utilisateur réservés qui ne peuvent pas être enregistrés
@@ -254,6 +303,9 @@ export const EVENTS = {
     GAME_MATCH_START: 'lc_game_match_started',
     GAME_MATCH_END: 'lc_game_match_ended',
     GAME_MATCH_ABORT: 'lc_game_match_aborted',
+    // oauth
+    OAUTH_LOGIN_SUCCESS: 'lc_oauth_logged_in',
+    OAUTH_REGISTER_SUCCESS: 'lc_oauth_registered',
   },
 
   DEPENDENCY: {
@@ -267,6 +319,12 @@ export const EVENTS = {
     // service specific errors
     AUTH_FAIL: 'app_auth_failed',
     VALIDATION_FAIL: 'app_validation_failed',
+    // oauth specific events
+    OAUTH_EXCHANGE_START: 'app_oauth_exchange_start',
+    OAUTH_EXCHANGE_SUCCESS: 'app_oauth_exchange_success',
+    OAUTH_EXCHANGE_FAILED: 'app_oauth_exchange_failed',
+    OAUTH_USER_CREATED: 'app_oauth_user_created',
+    OAUTH_USER_LINKED: 'app_oauth_user_linked',
   },
 
   CRITICAL: {
@@ -355,6 +413,7 @@ export const DATA_ERROR = {
   CONNECTION_FAIL: 'connection_fail',
   CONSTRAINT_VIOLATION: 'constraint_violation',
   INTERNAL_ERROR: 'internal_error',
+  ALREADY_EXISTS: 'already_exists',
 } as const;
 
 /**

@@ -43,6 +43,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser((prev) => (prev ? { ...prev, ...newUser } : prev));
   };
 
+  const checkAuth = async () => {
+    try {
+      const me = await authApi.me();
+      const profile: ProfileSimpleDTO = {
+        username: me.username,
+        avatarUrl: null,
+      };
+      setUser(profile);
+    } catch {
+      setUser(null);
+    } finally {
+      setIsAuthChecked(true);
+    }
+  };
+
   const contextValue = useMemo(
     () => ({
       user,
@@ -51,6 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       login,
       logout,
       updateUser,
+      checkAuth,
     }),
     [user, isAuthChecked],
   );

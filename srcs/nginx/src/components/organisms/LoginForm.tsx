@@ -7,6 +7,7 @@ import { useAuth } from '../../providers/AuthProvider';
 import { emailSchema, ERROR_CODES, FrontendError, HTTP_STATUS } from '@transcendence/core';
 import { authApi } from '../../api/auth-api';
 import i18next from 'i18next';
+import { GoogleOAuthButton, School42OAuthButton } from '../OAuthButton';
 
 interface LoginState {
   fields?: {
@@ -95,36 +96,52 @@ export const LoginForm = () => {
     }
   }, [state?.success, state?.fields?.username, user, navigate, login]);
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <Input
-        name="identifier"
-        customType="username"
-        defaultValue={state?.fields?.identifier}
-        errorMessage={state?.errors?.identifier}
-        autoComplete="username"
-        placeholder={t('fieldtype.username-email')}
-      ></Input>
-      <Input
-        name="password"
-        customType="password"
-        errorMessage={state?.errors?.password}
-        autoComplete="current-password"
-        placeholder={t('fieldtype.password')}
-      ></Input>
-      <Button className="mt-4" type="submit">
-        {isPending ? t('form.processing') : t('auth.login')}
-      </Button>
-
-      {state?.errors?.form && <p className="text-red-500 text-sm mb-3">{state.errors.form}</p>}
-
-      <div className="text-xs text-gray-500 mt-5">
-        {t('auth.noAccount')}{' '}
-        <span>
-          <Link className="hover:text-blue-400" to={`/signup`}>
-            {t('auth.signup')}
-          </Link>
-        </span>
+    <div className="flex flex-col gap-6">
+      {/* Section OAuth */}
+      <div className="flex flex-col gap-3">
+        <GoogleOAuthButton disabled={isPending} />
+        <School42OAuthButton disabled={isPending} />
       </div>
-    </form>
+
+      {/* Séparateur OU */}
+      <div className="relative flex items-center">
+        <div className="flex-grow border-t border-gray-300"></div>
+        <span className="bg-white px-3 text-gray-500 text-sm">OU</span>
+        <div className="flex-grow border-t border-gray-300"></div>
+      </div>
+
+      {/* Formulaire classique */}
+      <form action={formAction} className="flex flex-col gap-4">
+        <Input
+          name="identifier"
+          customType="username"
+          defaultValue={state?.fields?.identifier}
+          errorMessage={state?.errors?.identifier}
+          autoComplete="username"
+          placeholder={t('fieldtype.username-email')}
+        ></Input>
+        <Input
+          name="password"
+          customType="password"
+          errorMessage={state?.errors?.password}
+          autoComplete="current-password"
+          placeholder={t('fieldtype.password')}
+        ></Input>
+        <Button className="mt-4" type="submit">
+          {isPending ? t('form.processing') : t('auth.login')}
+        </Button>
+
+        {state?.errors?.form && <p className="text-red-500 text-sm mb-3">{state.errors.form}</p>}
+
+        <div className="text-xs text-gray-500 mt-5">
+          {t('auth.noAccount')}{' '}
+          <span>
+            <Link className="hover:text-blue-400" to={`/signup`}>
+              {t('auth.signup')}
+            </Link>
+          </span>
+        </div>
+      </form>
+    </div>
   );
 };

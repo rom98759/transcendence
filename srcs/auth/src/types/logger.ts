@@ -8,6 +8,8 @@ export interface LogContext {
   userId?: number | string;
   details?: unknown; // Zod details
   originalError?: unknown;
+  provider?: string; // For OAuth events
+  [key: string]: unknown; // Permet d'ajouter d'autres champs dynamiquement
 }
 
 export const logger = pino(loggerConfig) as pino.Logger<never> & {

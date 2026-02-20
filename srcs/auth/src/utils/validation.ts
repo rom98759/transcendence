@@ -54,6 +54,15 @@ export const ValidationSchemas = {
       message: 'Either username or email must be provided',
       path: ['username'],
     }),
+
+  // OAuth callback validation
+  oauthCallback: z.object({
+    code: z.string().min(1, 'Authorization code is required'),
+    state: z.string().optional(), // Pour vérification CSRF si implémenté
+    provider: z.enum(['google', 'school42'], {
+      errorMap: () => ({ message: 'Provider must be either "google" or "school42"' }),
+    }),
+  }),
 };
 
 // Helper pour validation avec log d'erreurs

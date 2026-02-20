@@ -157,16 +157,107 @@ export async function getBulkOnlineStatus(userIds: number[]): Promise<Map<number
         statusMap.set(userId, !err && exists === 1);
       });
     }
-
-    return statusMap;
   } catch (error: any) {
     logger.error({
       event: 'bulk_online_status_error',
+      userIds: userIds.slice(0, 5), // Log seulement les 5 premiers pour éviter spam
       error: error?.message,
     });
-    // En cas d'erreur, retourner tous offline
+
+    // Fallback: tous offline si erreur
     userIds.forEach((userId) => statusMap.set(userId, false));
-    return statusMap;
+  }
+
+  return statusMap;
+}
+
+/**
+ * Marque un utilisateur comme en ligne
+ */
+export async function setUserOnline(userId: number): Promise<void> {
+  const redis = getRedisClient();
+  const onlineKey = `${ONLINE_KEY_PREFIX}${userId}`;
+
+  try {
+    // Définir la clé avec TTL
+    await redis.setex(onlineKey, ONLINE_TTL, Date.now().toString());
+
+    // Ajouter au set des utilisateurs en ligne
+    await redis.sadd(ONLINE_USERS_SET, userId.toString());
+
+    logger.debug({
+      event: 'user_set_online',
+      userId,
+    });
+  } catch (error: any) {
+    logger.error({
+      event: 'set_user_online_error',
+      userId,
+      error: error?.message,
+    });
+    throw error;
+  }
+}
+
+/**
+ * Marque un utilisateur comme hors ligne
+ */
+export async function setUserOffline(userId: number, lastSeen?: Date): Promise<void> {
+  const redis = getRedisClient();
+  const onlineKey = `${ONLINE_KEY_PREFIX}${userId}`;
+
+  try {
+    // Supprimer la clé online
+    await redis.del(onlineKey);
+
+    // Retirer du set des utilisateurs en ligne
+    await redis.srem(ONLINE_USERS_SET, userId.toString());
+
+    logger.debug({
+      event: 'user_set_offline',
+      userId,
+      lastSeen: lastSeen?.toISOString(),
+    });
+  } catch (error: any) {
+    logger.error({
+      event: 'set_user_offline_error',
+      userId,
+      error: error?.message,
+    });
+    throw error;
+  }
+}
+
+/**
+ * Met à jour le statut en ligne d'un utilisateur
+ * Fonction principale utilisée par les controllers
+ */
+export async function updateOnlineStatus(
+  userId: number,
+  isOnline: boolean,
+  lastSeen?: Date,
+): Promise<void> {
+  try {
+    if (isOnline) {
+      await setUserOnline(userId);
+    } else {
+      await setUserOffline(userId, lastSeen);
+    }
+
+    logger.info({
+      event: 'online_status_updated',
+      userId,
+      isOnline,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    logger.error({
+      event: 'update_online_status_failed',
+      userId,
+      isOnline,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw error;
   }
 }
 

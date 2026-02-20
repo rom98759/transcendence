@@ -15,6 +15,7 @@ import {
 import { useAuth } from '../../providers/AuthProvider';
 import i18next from 'i18next';
 import { ZodSafeParseResult } from 'zod';
+import { GoogleOAuthButton, School42OAuthButton } from '../OAuthButton';
 
 interface SignupState {
   fields?: {
@@ -134,45 +135,61 @@ export const RegisterForm = () => {
   }, [state?.success, state?.fields?.username, navigate]);
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
-      <Input
-        name="username"
-        customType="username"
-        autoComplete="username"
-        defaultValue={state?.fields?.username}
-        errorMessage={state?.errors?.username}
-        placeholder={t('fieldtype.username-choose')}
-      ></Input>
-      <Input
-        name="email"
-        customType="email"
-        autoComplete="email"
-        defaultValue={state?.fields?.email}
-        errorMessage={state?.errors?.email}
-        placeholder={t('fieldtype.email')}
-      ></Input>
-      <Input
-        name="password"
-        customType="password"
-        autoComplete="new-password"
-        errorMessage={state?.errors?.password}
-        placeholder={t('fieldtype.password-choose')}
-      ></Input>
-
-      <Button className="mt-4" type="submit">
-        {isPending ? t('form.processing') : t('auth.signup')}
-      </Button>
-
-      {state?.errors?.form && <p className="text-red-500 text-sm mb-3">{state.errors.form}</p>}
-
-      <div className="text-xs text-gray-500 mt-5">
-        {t('auth.hasAccount')}{' '}
-        <span>
-          <Link className="hover:text-blue-400" to={`/login`}>
-            {t('auth.login')}
-          </Link>
-        </span>
+    <div className="flex flex-col gap-6">
+      {/* Section OAuth */}
+      <div className="flex flex-col gap-3">
+        <GoogleOAuthButton disabled={isPending} />
+        <School42OAuthButton disabled={isPending} />
       </div>
-    </form>
+
+      {/* Séparateur OU */}
+      <div className="relative flex items-center">
+        <div className="flex-grow border-t border-gray-300"></div>
+        <span className="bg-white px-3 text-gray-500 text-sm">OU</span>
+        <div className="flex-grow border-t border-gray-300"></div>
+      </div>
+
+      {/* Formulaire classique */}
+      <form action={formAction} className="flex flex-col gap-4">
+        <Input
+          name="username"
+          customType="username"
+          autoComplete="username"
+          defaultValue={state?.fields?.username}
+          errorMessage={state?.errors?.username}
+          placeholder={t('fieldtype.username-choose')}
+        ></Input>
+        <Input
+          name="email"
+          customType="email"
+          autoComplete="email"
+          defaultValue={state?.fields?.email}
+          errorMessage={state?.errors?.email}
+          placeholder={t('fieldtype.email')}
+        ></Input>
+        <Input
+          name="password"
+          customType="password"
+          autoComplete="new-password"
+          errorMessage={state?.errors?.password}
+          placeholder={t('fieldtype.password-choose')}
+        ></Input>
+
+        <Button className="mt-4" type="submit">
+          {isPending ? t('form.processing') : t('auth.signup')}
+        </Button>
+
+        {state?.errors?.form && <p className="text-red-500 text-sm mb-3">{state.errors.form}</p>}
+
+        <div className="text-xs text-gray-500 mt-5">
+          {t('auth.hasAccount')}{' '}
+          <span>
+            <Link className="hover:text-blue-400" to={`/login`}>
+              {t('auth.login')}
+            </Link>
+          </span>
+        </div>
+      </form>
+    </div>
   );
 };

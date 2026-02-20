@@ -23,6 +23,7 @@ export interface AuthContextType {
   login: (user: ProfileSimpleDTO) => void;
   logout: () => void;
   updateUser: (newUser: ProfileSimpleDTO) => void;
+  checkAuth: () => Promise<void>;
 }
 
 export interface AuthProviderProps {

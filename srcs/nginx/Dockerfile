@@ -3,11 +3,18 @@
 # ==========================
 FROM node:20-alpine AS builder
 
+# Arguments pour les variables d'environnement Vite à build time
+ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_SCHOOL42_CLIENT_ID
+
+# Exposer les arguments comme variables d'environnement pour Vite
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+ENV VITE_SCHOOL42_CLIENT_ID=${VITE_SCHOOL42_CLIENT_ID}
+
 WORKDIR /app
 
 # Copy ROOT workspace manifests
 COPY package.json package-lock.json ./
-
 
 # Workspace manifests (OBLIGATOIRE avant npm ci)
 COPY srcs/shared/core/package.json ./srcs/shared/core/package.json
@@ -25,7 +32,12 @@ COPY srcs/nginx ./srcs/nginx
 COPY srcs/nginx/src/html/dashboard.html ./srcs/nginx/html/dashboard.html
 COPY srcs/nginx/src/html/admin.html ./srcs/nginx/html/admin.html
 
-# Build frontend (Vite)
+# Debug: Afficher les variables d'environnement disponibles
+RUN echo "Variables d'environnement Vite:"
+RUN echo "VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID"
+RUN echo "VITE_SCHOOL42_CLIENT_ID=$VITE_SCHOOL42_CLIENT_ID"
+
+# Build frontend (Vite) avec variables d'environnement
 RUN npm run build --workspace srcs/shared/core
 RUN npm run build --workspace srcs/nginx
 

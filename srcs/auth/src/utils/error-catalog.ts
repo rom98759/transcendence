@@ -141,4 +141,48 @@ export const APP_ERRORS = {
     503,
   ),
   SERVICE_GENERIC: serviceError(ERROR_CODES.INTERNAL_ERROR, REASONS.UNKNOWN, 'Internal error'),
+
+  // === OAuth 2.0 ERRORS ===
+  OAUTH_INVALID_PROVIDER: authError(
+    ERROR_CODES.INTERNAL_ERROR,
+    REASONS.VALIDATION.INVALID_FORMAT,
+    'Invalid OAuth provider',
+    400,
+  ),
+  OAUTH_INVALID_CODE: authError(
+    ERROR_CODES.INTERNAL_ERROR,
+    REASONS.VALIDATION.INVALID_FORMAT,
+    'Invalid authorization code',
+    400,
+  ),
+  OAUTH_TOKEN_EXCHANGE_FAILED: serviceError(
+    ERROR_CODES.INTERNAL_ERROR,
+    REASONS.NETWORK.UPSTREAM_ERROR,
+    'Failed to exchange authorization code for access token',
+    502,
+  ),
+  OAUTH_PROFILE_FETCH_FAILED: serviceError(
+    ERROR_CODES.INTERNAL_ERROR,
+    REASONS.NETWORK.UPSTREAM_ERROR,
+    'Failed to retrieve user profile from OAuth provider',
+    502,
+  ),
+  OAUTH_INVALID_PROFILE: serviceError(
+    ERROR_CODES.INTERNAL_ERROR,
+    REASONS.VALIDATION.INVALID_FORMAT,
+    'Invalid user profile received from OAuth provider',
+    502,
+  ),
+  OAUTH_NETWORK_ERROR: serviceError(
+    ERROR_CODES.INTERNAL_ERROR,
+    REASONS.NETWORK.TIMEOUT,
+    'Network error during OAuth communication',
+    503,
+  ),
+  OAUTH_EXCHANGE_FAILED: serviceError(
+    ERROR_CODES.INTERNAL_ERROR,
+    REASONS.NETWORK.UPSTREAM_ERROR,
+    'OAuth authentication process failed',
+    500,
+  ),
 } as const;

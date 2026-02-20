@@ -6,6 +6,14 @@
 # ===========================
 FROM nginx:alpine
 
+# Arguments pour les variables d'environnement Vite à build time
+ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_SCHOOL42_CLIENT_ID
+
+# Exposer les arguments comme variables d'environnement pour Vite
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
+ENV VITE_SCHOOL42_CLIENT_ID=${VITE_SCHOOL42_CLIENT_ID}
+
 # Install Node.js for esbuild hot reload
 RUN apk add --no-cache nodejs npm openssl
 
@@ -13,6 +21,9 @@ WORKDIR /app
 
 # Install esbuild globally for faster execution
 RUN npm install -g esbuild
+
+# Copy environment file for development (adapted path for dev context)
+COPY ../.env.nginx.build /usr/share/nginx/src/.env
 
 # Copy nginx configs
 COPY nginx.conf /etc/nginx/nginx.conf

@@ -73,4 +73,38 @@ export const authApi = {
     });
     return data;
   },
+
+  /**
+   * Échange un code d'autorisation OAuth contre un JWT
+   * @param provider Provider OAuth ('google' | 'school42')
+   * @param request Code d'autorisation et state
+   * @returns Informations de connexion OAuth
+   */
+  oauthCallback: async (
+    provider: 'google' | 'school42',
+    request: { code: string; state?: string },
+  ): Promise<{
+    message: string;
+    username: string;
+    provider: string;
+    isNewUser: boolean;
+  }> => {
+    const { data } = await api.post(
+      `/auth/oauth/${provider}/callback`,
+      {
+        code: request.code,
+        state: request.state,
+      },
+      {
+        withCredentials: true,
+      },
+    );
+
+    return {
+      message: data.result?.message || 'OAuth login successful',
+      username: data.result?.username || '',
+      provider: data.result?.provider || provider,
+      isNewUser: data.result?.isNewUser || false,
+    };
+  },
 };
