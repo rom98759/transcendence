@@ -15,18 +15,24 @@ export const DevLoginButtons = () => {
         password: 'Password123!',
         username: username,
       };
-      const loggedUsername = await authApi.login(credentials);
-      // console.log(`dev login logged username = ${loggedUsername}`);
+      const result = await authApi.login(credentials);
+
+      // Type guard pour gérer la 2FA
+      if ('require2FA' in result && result.require2FA) {
+        console.warn('2FA required for dev login - skipping in dev mode');
+        return;
+      }
+
+      // Ici TypeScript sait que result est { username: string }
+      const loggedUsername = result.username;
 
       if (!loggedUsername) return;
       const profile = await profileApi.getMe(loggedUsername);
-      // console.log(`dev login full profile = ${profile}`);
       const fullProfile = {
         ...profile,
         email: 'test@mail.com',
       };
       login(fullProfile);
-      // console.log('Login success with real data:', fullProfile.avatarUrl);
     } catch (error) {
       console.error(`Login error:`, error);
     }

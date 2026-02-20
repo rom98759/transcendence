@@ -18,10 +18,11 @@ interface LoginState {
     password?: string;
     form?: string;
   };
-  success?: boolean;
+  success: boolean; // Obligatoire pour discriminated union
+  require2FA?: boolean; // Nouveau champ pour gérer la 2FA
 }
 
-async function loginAction(prevState: LoginState | null, formData: FormData) {
+async function loginAction(_prevState: LoginState | null, formData: FormData): Promise<LoginState> {
   const data = Object.fromEntries(formData);
   const { identifier, password } = data as Record<string, string>;
   let username = '';
@@ -42,10 +43,21 @@ async function loginAction(prevState: LoginState | null, formData: FormData) {
 
   const isEmail = emailSchema.safeParse(identifier).success;
   try {
-    username = await authApi.login(
+    const result = await authApi.login(
       isEmail ? { email: identifier, password } : { username: identifier, password },
     );
-    return { success: true, fields: { identifier, username } };
+
+    // Vérifier si 2FA est requise
+    if ('require2FA' in result && result.require2FA) {
+      return {
+        success: false,
+        require2FA: true,
+        fields: { identifier, username: result.username },
+      };
+    }
+
+    // Login direct (pas de 2FA)
+    return { success: true, fields: { identifier, username: result.username } };
   } catch (err: unknown) {
     const nextState: LoginState = {
       fields: { identifier, username },
@@ -85,6 +97,13 @@ export const LoginForm = () => {
   const navigate = useNavigate();
   const { user, login } = useAuth();
   useEffect(() => {
+    // Gérer la redirection vers 2FA verification
+    if (state?.require2FA) {
+      navigate('/2fa/verify', { replace: true });
+      return;
+    }
+
+    // Gérer le login réussi (sans 2FA)
     if (state?.success && state.fields?.username) {
       const username = state.fields.username;
       login({ username: username, avatarUrl: null });
@@ -93,7 +112,7 @@ export const LoginForm = () => {
     if (user?.username) {
       navigate(`/profile/${user.username}`, { replace: true });
     }
-  }, [state?.success, state?.fields?.username, user, navigate, login]);
+  }, [state?.success, state?.require2FA, state?.fields?.username, user, navigate, login]);
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <Input
