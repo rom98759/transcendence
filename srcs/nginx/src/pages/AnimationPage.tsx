@@ -14,7 +14,7 @@ const colors = {
 };
 
 export const AnimationPage = ({ className = '' }: AnimationPageProps) => {
-  const { user, hasSeenAnim, markAnimAsSeen } = useAuth();
+  const { hasSeenAnim, markAnimAsSeen } = useAuth();
   const [animDone, setAnimDone] = useState(false);
   const navigate = useNavigate();
 

@@ -3,10 +3,7 @@ import Halo from '../components/atoms/Halo';
 import { Link } from 'react-router-dom';
 import Background from '../components/atoms/Background';
 import { useTranslation } from 'react-i18next';
-import { RegisterForm } from '../components/organisms/RegisterForm';
-import { LoginForm } from '../components/organisms/LoginForm';
 import { useState } from 'react';
-import Circle from '../components/atoms/Circle';
 import { CircleButton } from '../components/atoms/CircleButton';
 import { useAuth } from '../providers/AuthProvider';
 import Scrollable from '../components/atoms/Scrollable';
@@ -22,7 +19,7 @@ const colors = {
 export const WelcomePage = () => {
   const { t } = useTranslation();
   const [isRegister, setIsRegister] = useState(false);
-  const { user, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   const ai = t('game.playWithAI');
   const tournament = t('game.tournament');
