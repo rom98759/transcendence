@@ -32,7 +32,7 @@ COPY srcs/nginx ./srcs/nginx
 COPY srcs/nginx/src/html/dashboard.html ./srcs/nginx/html/dashboard.html
 COPY srcs/nginx/src/html/admin.html ./srcs/nginx/html/admin.html
 
-# Build frontend (Vite) avec variables d'environnement
+# Build frontend (Vite)
 RUN npm run build --workspace srcs/shared/core
 RUN npm run build --workspace srcs/nginx
 
