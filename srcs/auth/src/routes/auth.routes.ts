@@ -151,8 +151,19 @@ export async function authRoutes(app: FastifyInstance) {
     isUserOnlineHandler,
   );
 
-  // Callback OAuth pour Google et 42 School
-  app.get('/oauth/:provider/callback', oauthCallbackHandler);
+  // Callback OAuth pour Google et 42 School (POST: le frontend envoie { code, state })
+  app.post(
+    '/oauth/:provider/callback',
+    {
+      config: {
+        rateLimit: {
+          max: AUTH_CONFIG.OAUTH.CALLBACK_RATE_LIMIT.max,
+          timeWindow: AUTH_CONFIG.OAUTH.CALLBACK_RATE_LIMIT.timeWindow,
+        },
+      },
+    },
+    oauthCallbackHandler,
+  );
 
   // Gestion des routes inconnues (doit être en dernier)
   app.all('/*', notFoundHandler);

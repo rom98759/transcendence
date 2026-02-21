@@ -111,9 +111,6 @@ const deleteUserStmt = db.prepare('DELETE FROM users WHERE id = ?');
 // OAuth statements
 const findUserByGoogleIdStmt = db.prepare('SELECT * FROM users WHERE google_id = ?');
 const findUserBySchool42IdStmt = db.prepare('SELECT * FROM users WHERE school42_id = ?');
-const updateOAuthDataStmt = db.prepare(
-  'UPDATE users SET google_id = ?, school42_id = ?, oauth_email = ?, avatar_url = ? WHERE id = ?',
-);
 const insertOAuthUserStmt = db.prepare(
   'INSERT INTO users (username, email, password, google_id, school42_id, oauth_email, avatar_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
 );
@@ -232,35 +229,6 @@ export function findUserBySchool42Id(school42Id: string): DBUser | null {
     const user = findUserBySchool42IdStmt.get(school42Id);
     return (user as DBUser) || null;
   } catch (err: any) {
-    throw new DataError(DATA_ERROR.INTERNAL_ERROR, `DB Error ${err.message}`, err);
-  }
-}
-
-/**
- * Met à jour les données OAuth d'un utilisateur existant
- */
-export function updateOAuthData(
-  userId: number,
-  oauthData: {
-    googleId?: string | null;
-    school42Id?: string | null;
-    oauthEmail?: string | null;
-    avatarUrl?: string | null;
-  },
-) {
-  try {
-    const info = updateOAuthDataStmt.run(
-      oauthData.googleId || null,
-      oauthData.school42Id || null,
-      oauthData.oauthEmail || null,
-      oauthData.avatarUrl || null,
-      userId,
-    );
-    if (info.changes === 0) {
-      throw new DataError(DATA_ERROR.NOT_FOUND, `User ${userId} not found for OAuth update`);
-    }
-  } catch (err: any) {
-    if (err instanceof DataError) throw err;
     throw new DataError(DATA_ERROR.INTERNAL_ERROR, `DB Error ${err.message}`, err);
   }
 }

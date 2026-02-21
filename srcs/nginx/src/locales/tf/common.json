@@ -67,6 +67,23 @@
     "privacyPolicy": "La loi du milieu (on balance rien, t'es en sécurité)",
     "termsOfService": "Les règles du jeu (lis ça, sinon t’es un rigolo)"
   },
+  "oauth": {
+    "continue_google": "S'embarquer avec Google",
+    "continue_42": "S'embarquer avec 42",
+    "separator": "OU ALORS",
+    "connecting": "On se connecte, mon gars...",
+    "connecting_provider": "On rentre par chez {{provider}}...",
+    "checking": "On vérifie que t'es bien qui tu prétends être...",
+    "success_title": "Bienvenue dans la place !",
+    "success_redirect": "On t'emmène vers le bercail...",
+    "error_title": "Pas de bol, ça a foiré",
+    "retry": "Retenter le coup",
+    "back_home": "Retour au bercail",
+    "error_invalid_provider": "On connaît pas ce provider-là : {{provider}}",
+    "error_missing_code": "Le code d'autorisation s'est fait la malle",
+    "error_config": "La config pour {{provider}} est aux abonnés absents. Appelle le grand chef.",
+    "error_generic": "Ça a merdé avec {{provider}}. Retente ta chance."
+  },
   "game": {
     "tournament": "Vendetta",
     "game": "La mort ou la vie",

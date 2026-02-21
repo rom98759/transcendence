@@ -45,6 +45,8 @@ export const GATEWAY_CONFIG = {
     '/api/users/health',
     '/api/game/health',
     '/api/block/health',
+    '/api/auth/oauth/google/callback',
+    '/api/auth/oauth/school42/callback',
   ],
 
   // Rate Limiting

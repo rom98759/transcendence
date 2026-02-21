@@ -56,9 +56,8 @@ export const App = () => {
         />
         <Route path="/me" element={<MeRedirect />}></Route>
 
-        {/* Routes OAuth Callback - Publiques car appelées après authentification */}
-        <Route path="/auth/oauth/google/callback" element={<OAuthCallback />} />
-        <Route path="/auth/oauth/school42/callback" element={<OAuthCallback />} />
+        {/* Route OAuth Callback - dynamique pour google et school42 */}
+        <Route path="/auth/oauth/:provider/callback" element={<OAuthCallback />} />
 
         <Route path="/profile/:username" element={<ProfilePage />}></Route>
         <Route path="/tournaments/*" element={<TournamentRoutes />} />

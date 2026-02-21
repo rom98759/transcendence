@@ -32,11 +32,6 @@ COPY srcs/nginx ./srcs/nginx
 COPY srcs/nginx/src/html/dashboard.html ./srcs/nginx/html/dashboard.html
 COPY srcs/nginx/src/html/admin.html ./srcs/nginx/html/admin.html
 
-# Debug: Afficher les variables d'environnement disponibles
-RUN echo "Variables d'environnement Vite:"
-RUN echo "VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID"
-RUN echo "VITE_SCHOOL42_CLIENT_ID=$VITE_SCHOOL42_CLIENT_ID"
-
 # Build frontend (Vite) avec variables d'environnement
 RUN npm run build --workspace srcs/shared/core
 RUN npm run build --workspace srcs/nginx

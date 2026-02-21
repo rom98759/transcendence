@@ -216,26 +216,6 @@ export const ERROR_RESPONSE_CODES = {
   CHECK_USER_ONLINE_ERROR: 'CHECK_USER_ONLINE_ERROR',
 } as const;
 
-// // Constantes supplémentaires pour OAuth
-// export const DATA_ERROR = {
-//   DUPLICATE: 'duplicate_entry',
-//   NOT_FOUND: 'not_found',
-//   USER_NOT_FOUND: 'user_not_found',
-//   USER_EXISTS: 'user_exists',
-//   EMAIL_EXISTS: 'email_exists',
-//   ALREADY_EXISTS: 'already_exists',
-//   CONNECTION_FAIL: 'connection_fail',
-//   CONSTRAINT_VIOLATION: 'constraint_violation',
-//   INTERNAL_ERROR: 'internal_error',
-// } as const;
-
-// export const VALIDATION_REASONS = {
-//   MISSING_FIELD: 'missing_field',
-//   WEAK_PASSWORD: 'weak_password',
-//   INVALID_FORMAT: 'invalid_format',
-//   INVALID_INPUT: 'invalid_input',
-// } as const;
-
 /**
  * Noms d'utilisateur réservés qui ne peuvent pas être enregistrés
  */
@@ -376,35 +356,6 @@ export const REASONS = {
 } as const;
 
 /**
- * Standardized errors, defining what will be displayed to end user
- */
-// export const ERROR_CODES = {
-//   // 400 Validation
-//   VALIDATION_ERROR: 'VALIDATION_ERROR',
-
-//   // 401 Authentication
-//   UNAUTHORIZED: 'UNAUTHORIZED',
-//   INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
-
-//   // 403 Access
-//   FORBIDDEN: 'FORBIDDEN', // if admin role is required
-
-//   // 404 - 409 Resources
-//   NOT_FOUND: 'NOT_FOUND',
-//   CONFLICT: 'CONFLICT',
-
-//   // 429 Limits
-//   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
-
-//   // specific
-//   MFA_REQUIRED: 'MFA_REQUIRED',
-//   MFA_INVALID: 'INVALID_MFA_CODE',
-
-//   // 500 for all server errors - no details needed for end user
-//   INTERNAL_ERROR: 'INTERNAL_ERROR',
-// } as const;
-
-/**
  * Error codes for data layer only
  */
 export const DATA_ERROR = {
@@ -415,21 +366,3 @@ export const DATA_ERROR = {
   INTERNAL_ERROR: 'internal_error',
   ALREADY_EXISTS: 'already_exists',
 } as const;
-
-/**
- * Standard error messages
- * NB : some default messages are not user-friendly (CONFLICT, ...)
- * -> we should check error metadata in frontend to display a more transparent message, eg 'username is taken'
- */
-// export const ERROR_MESSAGES = {
-//   [ERROR_CODES.VALIDATION_ERROR]: 'Invalid input data',
-//   [ERROR_CODES.UNAUTHORIZED]: 'Unauthorized access',
-//   [ERROR_CODES.INVALID_CREDENTIALS]: 'Invalid credentials',
-//   [ERROR_CODES.FORBIDDEN]: 'Access forbidden',
-//   [ERROR_CODES.NOT_FOUND]: 'Resource not found',
-//   [ERROR_CODES.CONFLICT]: 'Conflicting resource',
-//   [ERROR_CODES.RATE_LIMIT_EXCEEDED]: 'Too many requests. Please try again later.',
-//   [ERROR_CODES.MFA_REQUIRED]: 'Two-factors authentication is required',
-//   [ERROR_CODES.MFA_INVALID]: 'Invalid 2FA code is invalid',
-//   [ERROR_CODES.INTERNAL_ERROR]: 'Internal server error',
-// } as const

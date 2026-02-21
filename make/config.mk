@@ -6,6 +6,7 @@ CHIP := $(shell uname -m)
 
 # --- Env ---
 -include srcs/.env
+-include srcs/.env.nginx
 export
 
 # --- Paths ---
