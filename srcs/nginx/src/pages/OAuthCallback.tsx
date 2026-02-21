@@ -19,6 +19,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../providers/AuthProvider';
 import { authApi } from '../api/auth-api';
+import { FrontendError } from '@transcendence/core';
 
 type CallbackStatus = 'loading' | 'success' | 'error';
 
@@ -39,7 +40,7 @@ export const OAuthCallback = () => {
   const { provider } = useParams<{ provider: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { checkAuth } = useAuth();
+  const { login, checkAuth } = useAuth();
   const { t } = useTranslation();
   const hasRun = useRef(false);
 
@@ -79,6 +80,14 @@ export const OAuthCallback = () => {
 
       const oauthState = searchParams.get('state') ?? undefined;
 
+      // Vérification CSRF : le state doit correspondre à ce qu'on a généré
+      const storedState = sessionStorage.getItem(`oauth_state_${provider}`);
+      if (oauthState && storedState && oauthState !== storedState) {
+        setCallbackState({ status: 'error', error: t('oauth.error_state_mismatch') });
+        return;
+      }
+      sessionStorage.removeItem(`oauth_state_${provider}`);
+
       setCallbackState({
         status: 'loading',
         message: t('oauth.connecting_provider', { provider }),
@@ -87,11 +96,15 @@ export const OAuthCallback = () => {
       try {
         const result = await authApi.oauthCallback(provider, { code, state: oauthState });
 
-        setCallbackState({ status: 'success', message: result.message });
+        const successMessage = result.isNewUser
+          ? t('oauth.success_new_user', { provider })
+          : t('oauth.success_login', { provider });
 
-        // Rafraîchir le contexte — vérifier que le cookie est bien accepté
+        // 1. Mettre à jour le contexte immédiatement (même workflow que LoginForm)
+        login({ username: result.username, avatarUrl: null });
+
+        // 2. Vérification secondaire : s'assurer que le cookie JWT est bien accepté
         const isAuthenticated = await checkAuth();
-
         if (!isAuthenticated) {
           setCallbackState({
             status: 'error',
@@ -100,31 +113,21 @@ export const OAuthCallback = () => {
           return;
         }
 
+        setCallbackState({ status: 'success', message: successMessage });
+
         // Redirection identique au login classique (toujours vers le profil)
         setTimeout(() => navigate(`/profile/${result.username}`, { replace: true }), 1500);
       } catch (err: unknown) {
-        let errorMessage = t('oauth.error_generic', { provider });
-
-        if (
-          err &&
-          typeof err === 'object' &&
-          'response' in err &&
-          err.response &&
-          typeof err.response === 'object' &&
-          'data' in err.response
-        ) {
-          const data = (err.response as { data?: { error?: { message?: string } } }).data;
-          errorMessage = data?.error?.message ?? errorMessage;
-        } else if (err instanceof Error) {
-          errorMessage = err.message;
-        }
+        // L'intercepteur api-client transforme toutes les erreurs en FrontendError
+        const errorMessage =
+          err instanceof FrontendError ? err.message : t('oauth.error_generic', { provider });
 
         setCallbackState({ status: 'error', error: errorMessage });
       }
     };
 
     handleCallback();
-  }, [provider, searchParams, navigate, checkAuth, t]);
+  }, [provider, searchParams, navigate, login, checkAuth, t]);
 
   const handleRetry = () => navigate('/login', { replace: true });
 
@@ -132,14 +135,11 @@ export const OAuthCallback = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div className="text-center">
-
           {/* Chargement */}
           {callbackState.status === 'loading' && (
             <>
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                {t('oauth.connecting')}
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('oauth.connecting')}</h2>
               <p className="text-gray-600">{callbackState.message}</p>
             </>
           )}
@@ -148,8 +148,19 @@ export const OAuthCallback = () => {
           {callbackState.status === 'success' && (
             <>
               <div className="rounded-full h-12 w-12 bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="h-6 w-6 text-green-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
               <h2 className="text-xl font-semibold text-gray-900 mb-2">
@@ -164,13 +175,22 @@ export const OAuthCallback = () => {
           {callbackState.status === 'error' && (
             <>
               <div className="rounded-full h-12 w-12 bg-red-100 flex items-center justify-center mx-auto mb-4">
-                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
-                {t('oauth.error_title')}
-              </h2>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('oauth.error_title')}</h2>
               <p className="text-red-600 mb-6">{callbackState.error}</p>
               <div className="space-y-2">
                 <button
@@ -180,7 +200,7 @@ export const OAuthCallback = () => {
                   {t('oauth.retry')}
                 </button>
                 <button
-                  onClick={() => navigate('/dashboard', { replace: true })}
+                  onClick={() => navigate('/login', { replace: true })}
                   className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   {t('oauth.back_home')}
@@ -188,7 +208,6 @@ export const OAuthCallback = () => {
               </div>
             </>
           )}
-
         </div>
       </div>
     </div>
@@ -196,4 +215,3 @@ export const OAuthCallback = () => {
 };
 
 export default OAuthCallback;
-

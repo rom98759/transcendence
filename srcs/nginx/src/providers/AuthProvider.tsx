@@ -35,17 +35,17 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     checkAuth();
   }, [checkAuth]);
 
-  const login = (user: ProfileSimpleDTO) => {
+  const login = useCallback((user: ProfileSimpleDTO) => {
     setUser(user);
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     setUser(null);
-  };
+  }, []);
 
-  const updateUser = (newUser: ProfileSimpleDTO) => {
+  const updateUser = useCallback((newUser: ProfileSimpleDTO) => {
     setUser((prev) => (prev ? { ...prev, ...newUser } : prev));
-  };
+  }, []);
 
   const contextValue = useMemo(
     () => ({
@@ -57,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       updateUser,
       checkAuth,
     }),
-    [user, isAuthChecked, checkAuth],
+    [user, isAuthChecked, checkAuth, login, logout, updateUser],
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
@@ -70,4 +70,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

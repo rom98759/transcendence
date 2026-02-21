@@ -124,7 +124,7 @@ export const RegisterForm = () => {
     if (user && isLoggedIn) {
       navigate(`/profile/${user.username}`);
     }
-  }, [user, isLoggedIn]);
+  }, [user, isLoggedIn, navigate]);
 
   useEffect(() => {
     if (state?.success && state.fields?.username) {
@@ -132,7 +132,7 @@ export const RegisterForm = () => {
       login({ username: username, avatarUrl: null });
       navigate(`/profile/${username}`);
     }
-  }, [state?.success, state?.fields?.username, navigate]);
+  }, [state?.success, state?.fields?.username, navigate, login]);
 
   return (
     <div className="flex flex-col gap-6">
