@@ -1,5 +1,5 @@
 import { ProfileSimpleDTO } from '@transcendence/core';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { AuthContextType, AuthProviderProps } from '../types/react-types';
 import { authApi } from '../api/auth-api';
 
@@ -10,26 +10,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthChecked, setIsAuthChecked] = useState(false);
 
   /**
-   * Vérification réelle de session au montage
+   * Vérifie la session courante via l'API /me
+   * Retourne true si authentifié, false sinon.
+   * Exposée dans le contexte pour être rappelée après un login OAuth.
    */
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const me = await authApi.me();
-        const profile: ProfileSimpleDTO = {
-          username: me.username,
-          avatarUrl: null, // ou me.avatarUrl si dispo plus tard
-        };
-        setUser(profile);
-      } catch {
-        setUser(null);
-      } finally {
-        setIsAuthChecked(true);
-      }
-    };
-
-    checkAuth();
+  const checkAuth = useCallback(async (): Promise<boolean> => {
+    try {
+      const me = await authApi.me();
+      const profile: ProfileSimpleDTO = {
+        username: me.username,
+        avatarUrl: null,
+      };
+      setUser(profile);
+      return true;
+    } catch {
+      setUser(null);
+      return false;
+    } finally {
+      setIsAuthChecked(true);
+    }
   }, []);
+
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const login = (user: ProfileSimpleDTO) => {
     setUser(user);
@@ -43,21 +47,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser((prev) => (prev ? { ...prev, ...newUser } : prev));
   };
 
-  const checkAuth = async () => {
-    try {
-      const me = await authApi.me();
-      const profile: ProfileSimpleDTO = {
-        username: me.username,
-        avatarUrl: null,
-      };
-      setUser(profile);
-    } catch {
-      setUser(null);
-    } finally {
-      setIsAuthChecked(true);
-    }
-  };
-
   const contextValue = useMemo(
     () => ({
       user,
@@ -68,7 +57,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       updateUser,
       checkAuth,
     }),
-    [user, isAuthChecked],
+    [user, isAuthChecked, checkAuth],
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
@@ -81,3 +70,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

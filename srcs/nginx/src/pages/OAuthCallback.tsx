@@ -1,217 +1,194 @@
 /**
- * OAuthCallback - Page de traitement des callbacks OAuth
+ * OAuthCallback - Page de traitement des callbacks OAuth 2.0
  *
- * Cette page est appelée après redirection depuis Google/42
- * Elle extrait le code d'autorisation et l'échange contre un JWT
- * Puis redirige l'utilisateur vers le dashboard/profile
+ * Appelée après redirection depuis Google ou 42 School.
+ * Extrait le code d'autorisation de l'URL et l'échange contre un JWT
+ * via le service auth, puis redirige l'utilisateur.
  *
- * Flow:
- * 1. Google/42 redirige vers /auth/oauth/google/callback?code=...
- * 2. Cette page extrait le code et l'envoie au service auth
- * 3. Service auth échange le code contre un profil utilisateur
- * 4. Service auth génère un JWT et le retourne
- * 5. Frontend stocke le JWT et redirige vers le dashboard
+ * Flow :
+ * 1. Provider redirige → /auth/oauth/:provider/callback?code=...
+ * 2. Cette page extrait le code et l'envoie au service auth (POST)
+ * 3. Le service auth échange le code contre un profil utilisateur
+ * 4. Un JWT est généré et stocké dans un cookie httpOnly
+ * 5. checkAuth() rafraîchit le contexte utilisateur
+ * 6. Redirection vers dashboard (utilisateur existant) ou profil (nouveau compte)
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../providers/AuthProvider';
 import { authApi } from '../api/auth-api';
 
-interface OAuthCallbackState {
-  status: 'loading' | 'success' | 'error';
+type CallbackStatus = 'loading' | 'success' | 'error';
+
+interface CallbackState {
+  status: CallbackStatus;
   message?: string;
   error?: string;
 }
 
-/**
- * Page de callback OAuth
- */
+const VALID_PROVIDERS = ['google', 'school42'] as const;
+type ValidProvider = (typeof VALID_PROVIDERS)[number];
+
+function isValidProvider(p: string | undefined): p is ValidProvider {
+  return VALID_PROVIDERS.includes(p as ValidProvider);
+}
+
 export const OAuthCallback = () => {
   const { provider } = useParams<{ provider: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { logout, checkAuth } = useAuth();
+  const { checkAuth } = useAuth();
+  const { t } = useTranslation();
+  const hasRun = useRef(false);
 
-  const [state, setState] = useState<OAuthCallbackState>({
+  const [callbackState, setCallbackState] = useState<CallbackState>({
     status: 'loading',
-    message: 'Connexion en cours...',
+    message: t('oauth.checking'),
   });
 
   useEffect(() => {
-    const handleOAuthCallback = async () => {
-      try {
-        // Validation du provider
-        if (!provider || !['google', 'school42'].includes(provider)) {
-          setState({
-            status: 'error',
-            error: `Provider OAuth invalide: ${provider}`,
-          });
-          return;
-        }
+    // Strict Mode guard : évite le double appel en développement
+    if (hasRun.current) return;
+    hasRun.current = true;
 
-        // Récupérer le code d'autorisation
-        const code = searchParams.get('code');
-        const error = searchParams.get('error');
-        const state = searchParams.get('state');
-
-        // Vérifier les erreurs de redirection
-        if (error) {
-          const errorDescription = searchParams.get('error_description') || error;
-          setState({
-            status: 'error',
-            error: `Erreur OAuth: ${errorDescription}`,
-          });
-          return;
-        }
-
-        // Vérifier le code d'autorisation
-        if (!code) {
-          setState({
-            status: 'error',
-            error: "Code d'autorisation manquant",
-          });
-          return;
-        }
-
-        console.log(`Processing OAuth callback for ${provider}`, {
-          code: code.substring(0, 10) + '...',
-          state,
-        });
-
-        setState({
-          status: 'loading',
-          message: `Connexion avec ${provider}...`,
-        });
-
-        // Appeler l'API auth pour échanger le code
-        const result = await authApi.oauthCallback(provider as 'google' | 'school42', {
-          code,
-          state: state || undefined,
-        });
-
-        console.log('OAuth callback success:', result);
-
-        setState({
-          status: 'success',
-          message: result.message,
-        });
-
-        // Actualiser l'état d'authentification
-        await checkAuth();
-
-        // Redirection après succès
-        setTimeout(() => {
-          if (result.isNewUser) {
-            // Nouveau compte: rediriger vers profil pour configuration
-            navigate(`/profile/${result.username}`, { replace: true });
-          } else {
-            // Compte existant: rediriger vers dashboard
-            navigate('/dashboard', { replace: true });
-          }
-        }, 2000);
-      } catch (error: any) {
-        console.error('OAuth callback error:', error);
-
-        let errorMessage = 'Erreur durant la connexion OAuth';
-
-        if (error?.response?.data?.error) {
-          errorMessage = error.response.data.error.message || errorMessage;
-        } else if (error?.message) {
-          errorMessage = error.message;
-        }
-
-        setState({
+    const handleCallback = async () => {
+      // Validation du provider
+      if (!isValidProvider(provider)) {
+        setCallbackState({
           status: 'error',
-          error: errorMessage,
+          error: t('oauth.error_invalid_provider', { provider: provider ?? 'unknown' }),
         });
+        return;
+      }
 
-        // Déconnecter en cas d'erreur (nettoyage)
-        logout();
+      // Erreur retournée directement par le provider (refus utilisateur, etc.)
+      const providerError = searchParams.get('error');
+      if (providerError) {
+        const description = searchParams.get('error_description') ?? providerError;
+        setCallbackState({ status: 'error', error: description });
+        return;
+      }
+
+      const code = searchParams.get('code');
+      if (!code) {
+        setCallbackState({ status: 'error', error: t('oauth.error_missing_code') });
+        return;
+      }
+
+      const oauthState = searchParams.get('state') ?? undefined;
+
+      setCallbackState({
+        status: 'loading',
+        message: t('oauth.connecting_provider', { provider }),
+      });
+
+      try {
+        const result = await authApi.oauthCallback(provider, { code, state: oauthState });
+
+        setCallbackState({ status: 'success', message: result.message });
+
+        // Rafraîchir le contexte — vérifier que le cookie est bien accepté
+        const isAuthenticated = await checkAuth();
+
+        if (!isAuthenticated) {
+          setCallbackState({
+            status: 'error',
+            error: t('errors.unauthorized'),
+          });
+          return;
+        }
+
+        // Redirection identique au login classique (toujours vers le profil)
+        setTimeout(() => navigate(`/profile/${result.username}`, { replace: true }), 1500);
+      } catch (err: unknown) {
+        let errorMessage = t('oauth.error_generic', { provider });
+
+        if (
+          err &&
+          typeof err === 'object' &&
+          'response' in err &&
+          err.response &&
+          typeof err.response === 'object' &&
+          'data' in err.response
+        ) {
+          const data = (err.response as { data?: { error?: { message?: string } } }).data;
+          errorMessage = data?.error?.message ?? errorMessage;
+        } else if (err instanceof Error) {
+          errorMessage = err.message;
+        }
+
+        setCallbackState({ status: 'error', error: errorMessage });
       }
     };
 
-    handleOAuthCallback();
-  }, [provider, searchParams, navigate, checkAuth, logout]);
+    handleCallback();
+  }, [provider, searchParams, navigate, checkAuth, t]);
 
-  // Fonction pour réessayer
-  const handleRetry = () => {
-    navigate('/login', { replace: true });
-  };
+  const handleRetry = () => navigate('/login', { replace: true });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
         <div className="text-center">
-          {/* État de chargement */}
-          {state.status === 'loading' && (
+
+          {/* Chargement */}
+          {callbackState.status === 'loading' && (
             <>
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Connexion OAuth</h2>
-              <p className="text-gray-600">{state.message}</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {t('oauth.connecting')}
+              </h2>
+              <p className="text-gray-600">{callbackState.message}</p>
             </>
           )}
 
-          {/* État de succès */}
-          {state.status === 'success' && (
+          {/* Succès */}
+          {callbackState.status === 'success' && (
             <>
               <div className="rounded-full h-12 w-12 bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="h-6 w-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Connexion réussie !</h2>
-              <p className="text-gray-600 mb-4">{state.message}</p>
-              <p className="text-sm text-gray-500">Redirection automatique en cours...</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {t('oauth.success_title')}
+              </h2>
+              <p className="text-gray-600 mb-4">{callbackState.message}</p>
+              <p className="text-sm text-gray-500">{t('oauth.success_redirect')}</p>
             </>
           )}
 
-          {/* État d'erreur */}
-          {state.status === 'error' && (
+          {/* Erreur */}
+          {callbackState.status === 'error' && (
             <>
               <div className="rounded-full h-12 w-12 bg-red-100 flex items-center justify-center mx-auto mb-4">
-                <svg
-                  className="h-6 w-6 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
+                <svg className="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </div>
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Connexion échouée</h2>
-              <p className="text-red-600 mb-6">{state.error}</p>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                {t('oauth.error_title')}
+              </h2>
+              <p className="text-red-600 mb-6">{callbackState.error}</p>
               <div className="space-y-2">
                 <button
                   onClick={handleRetry}
                   className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
                 >
-                  Réessayer
+                  {t('oauth.retry')}
                 </button>
                 <button
                   onClick={() => navigate('/dashboard', { replace: true })}
                   className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
                 >
-                  Retour à l'accueil
+                  {t('oauth.back_home')}
                 </button>
               </div>
             </>
           )}
+
         </div>
       </div>
     </div>
@@ -219,3 +196,4 @@ export const OAuthCallback = () => {
 };
 
 export default OAuthCallback;
+

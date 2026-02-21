@@ -22,9 +22,6 @@ WORKDIR /app
 # Install esbuild globally for faster execution
 RUN npm install -g esbuild
 
-# Copy environment file for development (adapted path for dev context)
-COPY ../.env.nginx.build /usr/share/nginx/src/.env
-
 # Copy nginx configs
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY conf.d/default.conf /etc/nginx/conf.d/default.conf

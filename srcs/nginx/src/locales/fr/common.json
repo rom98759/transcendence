@@ -67,6 +67,23 @@
     "privacyPolicy": "Politique de confidentialité",
     "termsOfService": "Conditions d'utilisation"
   },
+  "oauth": {
+    "continue_google": "Continuer avec Google",
+    "continue_42": "Continuer avec 42",
+    "separator": "OU",
+    "connecting": "Connexion en cours...",
+    "connecting_provider": "Connexion avec {{provider}}...",
+    "checking": "Vérification de l'authentification...",
+    "success_title": "Connexion réussie !",
+    "success_redirect": "Redirection automatique en cours...",
+    "error_title": "Connexion échouée",
+    "retry": "Réessayer",
+    "back_home": "Retour à l'accueil",
+    "error_invalid_provider": "Provider OAuth invalide : {{provider}}",
+    "error_missing_code": "Code d'autorisation manquant",
+    "error_config": "Configuration manquante pour {{provider}}. Contactez l'administrateur.",
+    "error_generic": "Erreur lors de la connexion {{provider}}. Veuillez réessayer."
+  },
   "game": {
     "tournament": "Tournoi",
     "game": "Jeu",

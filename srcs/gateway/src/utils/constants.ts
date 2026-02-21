@@ -48,6 +48,8 @@ export const GATEWAY_CONFIG = {
     '/api/game/create-session',
     '/api/game/rl/reset',
     '/api/game/rl/step',
+    '/api/auth/oauth/google/callback',
+    '/api/auth/oauth/school42/callback',
   ],
 
   // Rate Limiting

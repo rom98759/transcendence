@@ -67,6 +67,23 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service"
   },
+  "oauth": {
+    "continue_google": "Continue with Google",
+    "continue_42": "Continue with 42",
+    "separator": "OR",
+    "connecting": "Connecting...",
+    "connecting_provider": "Connecting with {{provider}}...",
+    "checking": "Checking authentication...",
+    "success_title": "Login successful!",
+    "success_redirect": "Redirecting...",
+    "error_title": "Login failed",
+    "retry": "Try again",
+    "back_home": "Back to home",
+    "error_invalid_provider": "Invalid OAuth provider: {{provider}}",
+    "error_missing_code": "Authorization code missing",
+    "error_config": "OAuth configuration missing for {{provider}}. Contact the administrator.",
+    "error_generic": "Error during {{provider}} login. Please try again."
+  },
   "game": {
     "tournament": "Tournament",
     "game": "Game",

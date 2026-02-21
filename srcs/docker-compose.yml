@@ -200,10 +200,10 @@ services:
     build:
       context: ..
       dockerfile: srcs/nginx/Dockerfile
-      # Variables build-time (optionnel, .env.nginx.build est prioritaire)
+      # Injecte VITE_* comme ARG au moment de `docker build` (Vite build-time)
       args:
-        VITE_GOOGLE_CLIENT_ID: '${VITE_GOOGLE_CLIENT_ID:-}'
-        VITE_SCHOOL42_CLIENT_ID: '${VITE_SCHOOL42_CLIENT_ID:-}'
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
+        VITE_SCHOOL42_CLIENT_ID: ${VITE_SCHOOL42_CLIENT_ID:-}
     container_name: ${PROXY_SERVICE_NAME}
     ports:
       - '8080:80'

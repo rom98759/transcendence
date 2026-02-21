@@ -142,10 +142,10 @@ export const RegisterForm = () => {
         <School42OAuthButton disabled={isPending} />
       </div>
 
-      {/* Séparateur OU */}
+      {/* Séparateur */}
       <div className="relative flex items-center">
         <div className="flex-grow border-t border-gray-300"></div>
-        <span className="bg-white px-3 text-gray-500 text-sm">OU</span>
+        <span className="bg-white px-3 text-gray-500 text-sm">{t('oauth.separator')}</span>
         <div className="flex-grow border-t border-gray-300"></div>
       </div>
 

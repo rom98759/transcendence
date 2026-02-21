@@ -1,7 +1,9 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import * as authService from '../services/auth.service.js';
 import { ValidationSchemas } from '../utils/validation.js';
-import { AUTH_CONFIG, ERROR_MESSAGES, ERROR_RESPONSE_CODES, UserRole } from '../utils/constants.js';
+import { AUTH_CONFIG, ERROR_MESSAGES } from '../utils/constants.js';
+import { GoogleOAuthError } from '../services/providers/google.service.js';
+import { School42OAuthError } from '../services/providers/school42.service.js';
 import * as totpService from '../services/totp.service.js';
 import * as onlineService from '../services/online.service.js';
 import { logger } from '../index.js';
@@ -263,6 +265,8 @@ export async function loginHandler(
         getCookieOptions(AUTH_CONFIG.COOKIE_2FA_MAX_AGE_SECONDS),
       );
 
+       await onlineService.updateOnlineStatus(user.id || 0, true);
+
       return reply.code(HTTP_STATUS.OK).send({
         result: {
           require2FA: true,
@@ -284,6 +288,8 @@ export async function loginHandler(
         AUTH_CONFIG.JWT_EXPIRATION,
       );
       logger.info({ event: 'login_success', identifier });
+
+      await onlineService.updateOnlineStatus(user.id || 0, true);
 
       reply
         .setCookie('token', token, getCookieOptions(AUTH_CONFIG.COOKIE_MAX_AGE_SECONDS))
@@ -1014,8 +1020,7 @@ export async function deleteUserHandler(
 
 /**
  * POST /oauth/:provider/callback
- * Traite le callback OAuth et échange le code d'autorisation contre un JWT
- * Appelé par le frontend après redirection depuis Google/42 avec le code
+ * Handler OAuth callback - Frontend envoie le code reçu du provider
  */
 export async function oauthCallbackHandler(
   this: FastifyInstance,
@@ -1025,118 +1030,102 @@ export async function oauthCallbackHandler(
   }>,
   reply: FastifyReply,
 ) {
-  const { provider } = request.params;
-
-  // Validation du provider
-  if (!['google', 'school42'].includes(provider)) {
-    logger.warn({ event: 'oauth_invalid_provider', provider });
-    return reply.code(HTTP_STATUS.BAD_REQUEST).send({
-      error: {
-        message: 'Invalid OAuth provider. Supported providers: google, school42',
-        code: ERROR_CODES.VALIDATION_ERROR,
-        details: [{ field: 'provider', value: provider }],
-      },
-    });
-  }
-
-  // Validation du body
   const validation = ValidationSchemas.oauthCallback.safeParse({
-    ...request.body,
-    provider,
+    provider: request.params.provider,
+    code: request.body?.code,
+    state: request.body?.state,
   });
 
   if (!validation.success) {
     logger.warn({
       event: 'oauth_callback_validation_failed',
-      provider,
+      provider: request.params.provider,
       errors: validation.error.issues,
     });
-
-    const fieldErrors: Record<string, string[]> = {};
-    validation.error.issues.forEach((issue: any) => {
-      const field = (issue.path[0] as string) || 'general';
-      if (!fieldErrors[field]) fieldErrors[field] = [];
-      fieldErrors[field].push(issue.message);
-    });
-
     return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: {
-        message: 'Données OAuth callback invalides',
-        code: ERROR_RESPONSE_CODES.VALIDATION_ERROR,
-        details: validation.error.issues,
-        fields: fieldErrors,
+        message: 'Invalid OAuth callback parameters',
+        code: ERROR_CODES.VALIDATION_ERROR,
+        details: mapZodIssuesToErrorDetails(validation.error.issues),
       },
     });
   }
 
-  const { code } = validation.data;
+  const { provider, code } = validation.data;
 
   try {
-    logger.info({ event: 'oauth_callback_start', provider, code_length: code.length });
+    logger.info({
+      event: 'oauth_callback_start',
+      provider,
+    });
 
-    // Étape 1: Échanger le code contre un profil utilisateur
-    const profile = await oauthService.exchangeCodeForProfile(
+    // Orchestrer le processus OAuth complet
+    const result = await oauthService.handleOAuthCallback(
       provider as 'google' | 'school42',
       code,
     );
 
     logger.info({
-      event: 'oauth_profile_received',
+      event: 'oauth_callback_success',
       provider,
-      user_id: profile.id,
-      email: profile.email,
-      name: profile.name,
+      username: result.username,
+      isNewUser: result.isNewUser,
     });
-
-    // Étape 2: Trouver ou créer l'utilisateur
-    const userResult = await oauthService.findOrCreateOAuthUser(profile);
-
-    logger.info({
-      event: userResult.isNewUser ? 'oauth_user_created' : 'oauth_user_found',
-      provider,
-      userId: userResult.userId,
-      username: userResult.username,
-      isNewUser: userResult.isNewUser,
-    });
-
-    // Étape 3: Générer le JWT final
-    const token = oauthService.generateOAuthJWT(this, userResult.userId, userResult.username);
 
     // Marquer l'utilisateur comme en ligne
-    await onlineService.updateOnlineStatus(userResult.userId, true);
+    await onlineService.updateOnlineStatus(result.userId, true);
 
-    logger.info({
-      event: 'oauth_login_success',
-      provider,
-      userId: userResult.userId,
-      username: userResult.username,
-      isNewUser: userResult.isNewUser,
-    });
+    // Générer le JWT et le poser en cookie (identique au login classique)
+    const userRole = authService.getUserRole(result.userId);
+    const token = generateJWT(
+      this,
+      result.userId,
+      result.username,
+      userRole,
+      AUTH_CONFIG.JWT_EXPIRATION,
+    );
 
-    // Réponse avec cookie JWT et informations utilisateur
-    reply
+    return reply
       .setCookie('token', token, getCookieOptions(AUTH_CONFIG.COOKIE_MAX_AGE_SECONDS))
       .code(HTTP_STATUS.OK)
       .send({
         result: {
-          message: userResult.isNewUser
+          message: result.isNewUser
             ? `Welcome! Account created successfully with ${provider}`
             : `Login successful with ${provider}`,
-          username: userResult.username,
+          username: result.username,
           provider,
-          isNewUser: userResult.isNewUser,
+          isNewUser: result.isNewUser,
         },
       });
   } catch (error: unknown) {
-    logger.error({
-      event: 'oauth_callback_error',
-      provider,
-      error: error instanceof Error ? error.message : String(error),
-    });
+    // Gestion des erreurs OAuth spécifiques (provider errors)
+    if (error instanceof GoogleOAuthError || error instanceof School42OAuthError) {
+      logger.warn({
+        event: 'oauth_error_provider',
+        errorCode: error.code,
+        message: error.message,
+        statusCode: error.statusCode,
+        provider,
+      });
+      return reply.code(error.statusCode || HTTP_STATUS.BAD_REQUEST).send({
+        error: {
+          message: error.message,
+          code: error.code,
+          provider,
+        },
+      });
+    }
 
-    // Gestion des erreurs spécifiques OAuth
+    // Gestion de AppError (si applicable)
     if (error instanceof AppError) {
       const frontendError = mapToFrontendError(error);
+      logger.error({
+        event: 'oauth_error_app_error',
+        code: frontendError.code,
+        statusCode: frontendError.statusCode,
+      });
+
       return reply.code(frontendError.statusCode).send({
         error: {
           message: frontendError.message,
@@ -1146,11 +1135,17 @@ export async function oauthCallbackHandler(
       });
     }
 
-    // Erreur générique
+    // Erreur générique inattendue
+    logger.error({
+      event: 'oauth_error_unexpected',
+      provider,
+      error: error instanceof Error ? error.message : String(error),
+    });
+
     return reply.code(HTTP_STATUS.INTERNAL_SERVER_ERROR).send({
       error: {
-        message: 'OAuth authentication failed',
-        code: ERROR_RESPONSE_CODES.INTERNAL_SERVER_ERROR,
+        message: 'OAuth authentication failed. Please check the server logs for more details.',
+        code: ERROR_CODES.INTERNAL_ERROR,
         provider,
       },
     });
