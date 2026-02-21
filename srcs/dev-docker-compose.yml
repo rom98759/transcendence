@@ -193,7 +193,6 @@ services:
     build:
       context: ./nginx
       dockerfile: Dockerfile.dev
-      # Injecte VITE_* comme ARG au moment de `docker build` (Vite build-time)
       args:
         VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID:-}
         VITE_SCHOOL42_CLIENT_ID: ${VITE_SCHOOL42_CLIENT_ID:-}
