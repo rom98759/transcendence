@@ -4,7 +4,30 @@
     "hasAccount": "Déjà enregistré ?",
     "noAccount": "Pas encore enregistré ?",
     "signup": "Créer un compte",
-    "login": "S'identifier"
+    "login": "S'identifier",
+    "show_password": "Afficher le mot de passe",
+    "hide_password": "Masquer le mot de passe",
+    "i_have_read": "J'ai lu",
+    "and": "et",
+    "tos": "les conditions générales",
+    "privacy_policy": "la politique de confidentialité"
+  },
+  "oauth": {
+    "continue_google": "Continuer avec Google",
+    "continue_42": "Continuer avec 42",
+    "or_separator": "OU",
+    "connecting": "Connexion...",
+    "processing": "Authentification en cours...",
+    "success": "Authentification réussie !",
+    "redirecting": "Redirection...",
+    "error": "Erreur d'authentification",
+    "back_to_login": "Retour à la connexion",
+    "error_config": "Configuration OAuth manquante pour {{provider}}",
+    "invalid_provider": "Provider OAuth invalide",
+    "authorization_denied": "Autorisation refusée par l'utilisateur",
+    "missing_code": "Code d'autorisation manquant",
+    "invalid_state": "État CSRF invalide - problème de sécurité potentiel",
+    "callback_failed": "Échec de l'authentification OAuth"
   },
   "fieldtype": {
     "email": "courriel",
@@ -26,10 +49,179 @@
     "not_found": "Non trouvé",
     "disabled": "désactivé"
   },
+  "companyName": "Patapong SA",
+  "serviceName": "Spin Pong",
+  "address": "1, Avenue des Frères Lebrun",
+  "email": "ping@patapong.com",
+  "governingLaw": "droit français",
+  "arbitrationLocation": "Poitiers, France",
+  "privacyPolicyLink": "/privacy",
+  "tos": {
+    "title": "Conditions Générales d'Utilisation",
+    "last_updated": "Dernière mise à jour : 24 février 2026",
+    "provider": "Fournisseur : {{companyName}} ({{address}})",
+    "contact_info": "Contact : {{email}} | Téléphone : {{phone}}",
+    "agreement": "1. Acceptation des conditions",
+    "agreement-text": "En utilisant {{serviceName}} (les « Services »), vous acceptez de vous conformer à ces Conditions Générales. Si vous n'êtes pas d'accord, ne pas utiliser les Services.",
+    "ip": "2. Propriété intellectuelle",
+    "ip-text": "Tout le contenu, les marques déposées et les logiciels des Services sont la propriété de {{companyName}} ou lui sont concédés sous licence. Vous pouvez utiliser les Services à des fins personnelles et non commerciales uniquement. Toute copie, redistribution ou ingénierie inverse est interdite sans autorisation écrite.",
+    "responsibilities": "3. Responsabilités de l'utilisateur",
+    "responsibilities-text": "Vous devez fournir des informations exactes, actuelles et complètes. Vous êtes responsable de toute activité liée à votre compte. Les activités interdites incluent (sans s'y limiter) : le harcèlement, la fraude ou l'utilisation illégale ; la perturbation des Services ou le contournement des mesures de sécurité ; le téléchargement de contenu nuisible (virus, spam, etc.) ; la violation des droits de propriété intellectuelle.",
+    "user_content": "4. Contenu généré par l'utilisateur",
+    "user_content-text": "Vous conservez la propriété du contenu que vous soumettez, mais accordez à {{companyName}} une licence non exclusive et mondiale pour l'utiliser. Vous garantissez que votre contenu est légal, original et ne porte pas atteinte aux droits d'autrui.",
+    "purchases": "5. Achats et paiements",
+    "purchases-text": "Tous les achats sont définitifs et non remboursables. Vous acceptez de fournir des informations de paiement exactes. Les prix peuvent changer sans préavis.",
+    "termination": "6. Résiliation",
+    "termination-text": "Nous nous réservons le droit de suspendre ou de résilier votre accès en cas de violation de ces Conditions, sans préavis.",
+    "disclaimers": "7. Exclusions de garantie et responsabilité",
+    "disclaimers-text": "Les Services sont fournis « en l'état » sans garantie. Nous ne sommes pas responsables des dommages résultant de votre utilisation des Services. Vous acceptez d'indemniser {{companyName}} pour toute réclamation résultant de vos actions.",
+    "privacy": "8. Politique de confidentialité",
+    "privacy-text": "Vos données sont traitées conformément à notre {{privacyPolicyLink}}.",
+    "law": "9. Loi applicable et litiges",
+    "law-text": "Ces Conditions sont régies par le {{governingLaw}}. Les litiges seront résolus par arbitrage à {{arbitrationLocation}}.",
+    "contact": "10. Nous contacter",
+    "contact-text": "Pour toute question ou préoccupation, contactez-nous à : {{companyName}}, {{address}}, {{email}}, {{phone}}"
+  },
+  "privacy_policy": {
+    "title": "Politique de Confidentialité",
+    "last_updated": "Dernière mise à jour : 24 février 2026",
+
+    "intro": "{{companyName}} (« nous », « notre » ou « nos ») s'engage à protéger votre vie privée. Cette Politique de Confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez nos services.",
+
+    "summary": {
+      "title": "Résumé des points clés",
+      "description": "Ce résumé présente les points clés de notre Politique de Confidentialité. Cliquez sur les liens ci-dessous pour accéder directement à la section qui vous intéresse.",
+      "personal_info": {
+        "title": "Quelles informations personnelles traitons-nous ?",
+        "description": "Nous collectons les informations personnelles que vous nous fournissez volontairement lorsque vous vous inscrivez, manifestez un intérêt ou nous contactez."
+      },
+      "sensitive_info": {
+        "title": "Traitons-nous des informations personnelles sensibles ?",
+        "description": "Nous ne traitons pas d'informations personnelles sensibles."
+      },
+      "third_party": {
+        "title": "Collectons-nous des informations auprès de tiers ?",
+        "description": "Nous pouvons collecter des informations auprès de bases de données publiques, de partenaires marketing et d'autres sources externes."
+      },
+      "how_process": {
+        "title": "Comment traitons-nous vos informations ?",
+        "description": "Nous traitons vos informations pour fournir, améliorer et administrer nos services, ainsi que pour nous conformer à la loi."
+      },
+      "share_info": {
+        "title": "Quand et avec qui partageons-nous vos informations personnelles ?",
+        "description": "Nous pouvons partager vos informations dans des situations spécifiques, telles que des transferts d'entreprise ou avec des affiliés."
+      },
+      "your_rights": {
+        "title": "Quels sont vos droits ?",
+        "description": "Selon votre localisation géographique, la législation applicable en matière de confidentialité peut vous accorder certains droits concernant vos informations personnelles."
+      }
+    },
+
+    "table_of_contents": "Table des matières",
+
+    "toc": {
+      "info_collect": "1. Quelles informations collectons-nous ?",
+      "info_use": "2. Comment traitons-nous vos informations ?",
+      "who_share": "3. Quand et avec qui partageons-nous vos informations personnelles ?",
+      "cookies": "4. Utilisons-nous des cookies et d'autres technologies de suivi ?",
+      "social_logins": "5. Comment gérons-nous vos connexions via les réseaux sociaux ?",
+      "intl_transfers": "6. Vos informations sont-elles transférées à l'international ?",
+      "info_retain": "7. Combien de temps conservons-nous vos informations ?",
+      "info_minors": "8. Collectons-nous des informations concernant les mineurs ?",
+      "privacy_rights": "9. Quels sont vos droits en matière de confidentialité ?",
+      "dnt": "10. Contrôles pour les fonctionnalités \" Ne pas suivre \"",
+      "policy_updates": "11. Apportons-nous des mises à jour à cet avis ?",
+      "contact": "12. Comment nous contacter concernant cet avis ?"
+    },
+
+    "info_collect": {
+      "title": "1. Quelles informations collectons-nous ?",
+      "personal_info": {
+        "title": "Informations personnelles que vous nous communiquez",
+        "description": "Nous collectons les informations personnelles que vous nous fournissez volontairement lorsque vous vous inscrivez sur nos Services, manifestez un intérêt pour obtenir des informations sur nous ou nos produits et services, ou nous contactez."
+      },
+      "auto_collect": {
+        "title": "Informations collectées automatiquement",
+        "description": "Nous collectons automatiquement certaines informations lorsque vous visitez, utilisez ou naviguez sur nos Services. Ces informations ne révèlent pas votre identité spécifique, mais peuvent inclure des informations sur votre appareil et votre utilisation, telles que votre adresse IP, les caractéristiques de votre navigateur et de votre appareil, votre système d'exploitation et d'autres informations techniques."
+      }
+    },
+
+    "info_use": {
+      "title": "2. Comment traitons-nous vos informations ?",
+      "description": "Nous traitons vos informations personnelles pour diverses raisons, en fonction de la manière dont vous interagissez avec nos Services, notamment pour fournir, améliorer et administrer nos Services, communiquer avec vous, assurer la sécurité et prévenir la fraude, et nous conformer à la loi."
+    },
+
+    "who_share": {
+      "title": "3. Quand et avec qui partageons-nous vos informations personnelles ?",
+      "description": "Nous pouvons partager vos informations dans des situations spécifiques décrites dans cette section et/ou avec les tiers suivants :",
+      "business_transfers": "Transferts d'entreprise : Nous pouvons partager ou transférer vos informations dans le cadre de, ou lors de négociations de, toute fusion, vente d'actifs de l'entreprise, financement, ou acquisition de tout ou partie de notre entreprise par une autre société.",
+      "affiliates": "Affiliés : Nous pouvons partager vos informations avec nos affiliés, auquel cas nous exigeons de ces affiliés qu'ils respectent cette Politique de Confidentialité.",
+      "business_partners": "Partenaires commerciaux : Nous pouvons partager vos informations avec nos partenaires commerciaux afin de vous proposer certains produits, services ou promotions."
+    },
+
+    "cookies": {
+      "title": "4. Utilisons-nous des cookies et d'autres technologies de suivi ?",
+      "description": "Nous pouvons utiliser des cookies et des technologies de suivi similaires pour collecter et stocker vos informations. Ces technologies nous aident à maintenir la sécurité de nos Services, à prévenir les plantages et à analyser l'utilisation."
+    },
+
+    "social_logins": {
+      "title": "5. Comment gérons-nous vos connexions via les réseaux sociaux ?",
+      "description": "Si vous choisissez de vous inscrire ou de vous connecter à nos Services en utilisant un compte de réseau social, nous pouvons avoir accès à certaines informations vous concernant depuis votre fournisseur de réseau social."
+    },
+
+    "intl_transfers": {
+      "title": "6. Vos informations sont-elles transférées à l'international ?",
+      "description": "Vos informations peuvent être transférées, stockées et traitées dans des pays autres que le vôtre. Nous prendrons toutes les mesures nécessaires pour protéger vos informations personnelles conformément à cette Politique de Confidentialité et à la législation applicable."
+    },
+
+    "info_retain": {
+      "title": "7. Combien de temps conservons-nous vos informations ?",
+      "description": "Nous ne conserverons vos informations personnelles que pendant la durée nécessaire aux fins décrites dans cette Politique de Confidentialité, sauf si une période de conservation plus longue est requise ou autorisée par la loi."
+    },
+
+    "info_minors": {
+      "title": "8. Collectons-nous des informations concernant les mineurs ?",
+      "description": "Nous ne collectons pas sciemment de données ou ne ciblons pas les mineurs de moins de 18 ans. Si nous apprenons que des informations personnelles concernant des utilisateurs de moins de 18 ans ont été collectées, nous désactiverons le compte et prendrons des mesures raisonnables pour supprimer rapidement ces données."
+    },
+
+    "privacy_rights": {
+      "title": "9. Quels sont vos droits en matière de confidentialité ?",
+      "description": "Selon votre localisation géographique, la législation applicable en matière de confidentialité peut vous accorder certains droits concernant vos informations personnelles.",
+      "withdraw_consent": "Si nous nous appuyons sur votre consentement pour traiter vos informations personnelles, vous avez le droit de retirer votre consentement à tout moment. Vous pouvez retirer votre consentement en nous contactant à l'adresse {{email}}."
+    },
+
+    "dnt": {
+      "title": "10. Contrôles pour les fonctionnalités \" Ne pas suivre \"",
+      "description": "La plupart des navigateurs web et certains systèmes d'exploitation mobiles incluent une fonctionnalité ou un paramètre \" Ne pas suivre \" (\" DNT \") que vous pouvez activer pour signaler votre préférence de confidentialité. À ce stade, aucune norme technologique uniforme pour la reconnaissance et la mise en œuvre des signaux DNT n'a été finalisée."
+    },
+
+    "policy_updates": {
+      "title": "11. Apportons-nous des mises à jour à cet avis ?",
+      "description": "Nous pouvons mettre à jour cette Politique de Confidentialité de temps en temps. La version mise à jour sera indiquée par une date de \" Révision \" mise à jour en haut de cette Politique de Confidentialité."
+    },
+
+    "contact": {
+      "title": "12. Comment nous contacter concernant cet avis ?",
+      "description": "Si vous avez des questions ou des commentaires concernant cet avis, vous pouvez nous contacter par courrier à l'adresse suivante : {{address}}, ou par e-mail à l'adresse : {{email}}."
+    }
+  },
   "zod_errors": {
     "invalid_format": "Vérifiez le format demandé",
     "too_small": "La valeur doit être plus longue",
     "too_big": "La valeur doit être plus courte"
+  },
+  "validation": {
+    "password": {
+      "minLength": "Au moins 8 caractères",
+      "lowercase": "Une minuscule (a-z)",
+      "uppercase": "Une majuscule (A-Z)",
+      "number": "Un chiffre (0-9)",
+      "special": "Un caractère spécial (!@#$%^&*)"
+    },
+    "username": {
+      "minLength": "4 à 20 caractères",
+      "alphanumeric": "Lettres, chiffres et _ uniquement"
+    }
   },
   "errors": {
     "validation_mandatory": "Ce champ est obligatoire.",
@@ -42,6 +234,17 @@
     "rate_limit_exceeded": "Limite de requêtes dépassée. Réessayez dans quelques minutes.",
     "mfa_required": "Authentification à deux facteurs requise. Veuillez configurer ou saisir votre code MFA.",
     "invalid_mfa_code": "Code MFA invalide. Vérifiez le code et réessayez.",
+    "invalid_2fa_code": "Code 2FA invalide. Vérifiez votre application et réessayez.",
+    "invalid_code_format": "Le code doit contenir exactement 6 chiffres.",
+    "missing_parameters": "Paramètres manquants. Veuillez recommencer.",
+    "login_session_expired": "Session de connexion expirée. Veuillez vous reconnecter.",
+    "setup_session_expired": "Session de configuration expirée. Veuillez réinitialiser la configuration.",
+    "too_many_attempts": "Trop de tentatives échouées. Veuillez vous reconnecter.",
+    "token_missing": "Token d'authentification manquant.",
+    "totp_already_enabled": "La 2FA est déjà activée sur ce compte.",
+    "2fa_not_enabled": "La 2FA n'est pas activée sur ce compte.",
+    "user_not_found_2fa": "Utilisateur introuvable.",
+    "missing_user_name": "Nom d'utilisateur requis.",
     "internal_error": "Erreur interne du serveur. Veuillez réessayer plus tard.",
     "friend_self_add": "Choisissez un autre utilisateur que vous-même",
     "friend_already": "Vous êtes déjà amis"
@@ -63,6 +266,42 @@
     "profile": "Profil",
     "2fa": "2FA",
     "update_avatar": "Changer d'avatar"
+  },
+  "2fa": {
+    "title": "Authentification à deux facteurs",
+    "subtitle": "Entrez votre code d'authentification à 6 chiffres",
+    "code_label": "Code d'authentification",
+    "verify": "Vérifier",
+    "verifying": "Vérification...",
+    "cancel": "Annuler",
+    "invalid_code_with_attempts": "Code invalide — {{count}} tentative(s) restante(s)",
+    "help_text": "Ouvrez votre application d'authentification pour obtenir le code",
+    "apps_button": "Applications compatibles",
+    "apps_title": "Applications d'authentification TOTP",
+    "forgot_code": "Code oublié ou perdu ?",
+    "forgot_help_text": "Si vous n'avez plus accès à votre application 2FA, consultez la FAQ pour les étapes de récupération de compte.",
+    "faq_link": "Voir la FAQ → accès et récupération de compte",
+    "status_load_error": "Impossible de charger le statut 2FA",
+    "setup": {
+      "title": "Configuration de l'authentification à deux facteurs",
+      "status": "Statut",
+      "enabled": "Activé",
+      "disabled": "Désactivé",
+      "description": "Ajoutez une couche de sécurité supplémentaire à votre compte avec l'authentification à deux facteurs.",
+      "enable_button": "Activer le 2FA",
+      "disable_button": "Désactiver le 2FA",
+      "disable_description": "Désactiver l'authentification à deux facteurs sur votre compte.",
+      "disable_warning": "Attention : Désactiver le 2FA rendra votre compte moins sécurisé.",
+      "disabling": "Désactivation...",
+      "confirm_disable": "Confirmer la désactivation",
+      "scan_instructions": "Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, etc.)",
+      "manual_entry": "Ou entrez ce secret manuellement",
+      "verify_code": "Entrez le code à 6 chiffres de votre application pour activer",
+      "verify_button": "Activer le 2FA",
+      "cancel": "Annuler",
+      "setup_success": "2FA activé avec succès !",
+      "disable_success": "2FA désactivé avec succès."
+    }
   },
   "friends": {
     "friends": "Amis",

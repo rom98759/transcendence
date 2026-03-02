@@ -4,7 +4,30 @@
     "hasAccount": "Already have an account ?",
     "noAccount": "Don't have an account ?",
     "signup": "Signup",
-    "login": "Login"
+    "login": "Login",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
+    "i_have_read": "I have read",
+    "and": "and",
+    "tos": "terms of service",
+    "privacy_policy": "privacy policy"
+  },
+  "oauth": {
+    "continue_google": "Continue with Google",
+    "continue_42": "Continue with 42",
+    "or_separator": "OR",
+    "connecting": "Connecting...",
+    "processing": "Processing authentication...",
+    "success": "Authentication successful!",
+    "redirecting": "Redirecting...",
+    "error": "Authentication error",
+    "back_to_login": "Back to login",
+    "error_config": "OAuth configuration missing for {{provider}}",
+    "invalid_provider": "Invalid OAuth provider",
+    "authorization_denied": "Authorization denied by user",
+    "missing_code": "Missing authorization code",
+    "invalid_state": "Invalid CSRF state - possible security issue",
+    "callback_failed": "OAuth authentication failed"
   },
   "fieldtype": {
     "email": "email",
@@ -26,10 +49,179 @@
     "not_found": "Not found",
     "disabled": "disabled"
   },
+  "companyName": "Patapong SA",
+  "serviceName": "Spin Pong",
+  "address": "1, Avenue des Frères Lebrun",
+  "email": "ping@patapong.com",
+  "governingLaw": "French law",
+  "arbitrationLocation": "Poitiers, France",
+  "privacyPolicyLink": "/privacy",
+  "tos": {
+    "title": "Terms of Service",
+    "last_updated": "Last Updated: February 24, 2026",
+    "provider": "Provider: {{companyName}} ({{address}})",
+    "contact_info": "Contact: {{email}} | Phone: {{phone}}",
+    "agreement": "1. Agreement to Terms",
+    "agreement-text": "By using {{serviceName}} (the \"Services\"), you agree to comply with these Terms. If you disagree, do not use the Services.",
+    "ip": "2. Intellectual Property",
+    "ip-text": "All content, trademarks, and software on the Services are owned or licensed by {{companyName}}. You may use the Services for personal, non-commercial purposes only. No copying, redistributing, or reverse-engineering without written permission.",
+    "responsibilities": "3. User Responsibilities",
+    "responsibilities-text": "You must provide accurate, current, and complete information. You are responsible for all activity under your account. Prohibited activities include (but are not limited to): Harassment, fraud, or illegal use; Disrupting the Services or bypassing security measures; Uploading harmful content (viruses, spam, etc.); Violating intellectual property rights.",
+    "user_content": "4. User-Generated Content",
+    "user_content-text": "You retain ownership of content you submit, but grant {{companyName}} a non-exclusive, worldwide license to use it. You warrant that your content is legal, original, and non-infringing.",
+    "purchases": "5. Purchases & Payments",
+    "purchases-text": "All purchases are non-refundable. You agree to provide accurate payment information. Prices may change without notice.",
+    "termination": "6. Termination",
+    "termination-text": "We reserve the right to suspend or terminate your access for any violation of these Terms, without notice.",
+    "disclaimers": "7. Disclaimers & Liability",
+    "disclaimers-text": "The Services are provided \"as is\" without warranties. We are not liable for damages arising from your use of the Services. You agree to indemnify {{companyName}} for any claims resulting from your actions.",
+    "privacy": "8. Privacy Policy",
+    "privacy-text": "Your data is handled according to our {{privacyPolicyLink}}.",
+    "law": "9. Governing Law & Disputes",
+    "law-text": "These Terms are governed by {{governingLaw}}. Disputes will be resolved through arbitration in {{arbitrationLocation}}.",
+    "contact": "10. Contact Us",
+    "contact-text": "For questions or concerns, contact us at: {{companyName}}, {{address}}, {{email}}, {{phone}}"
+  },
+  "privacy_policy": {
+    "title": "Privacy Policy",
+    "last_updated": "Last Updated: February 24, 2026",
+
+    "intro": "{{companyName}} (\"we\", \"us\", or \"our\") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services.",
+
+    "summary": {
+      "title": "Summary of Key Points",
+      "description": "This summary provides key points from our Privacy Policy. Click on the links below to jump to the section you are interested in.",
+      "personal_info": {
+        "title": "What personal information do we process?",
+        "description": "We collect personal information that you voluntarily provide to us when you register, express interest, or contact us."
+      },
+      "sensitive_info": {
+        "title": "Do we process any sensitive personal information?",
+        "description": "We do not process sensitive personal information."
+      },
+      "third_party": {
+        "title": "Do we collect any information from third parties?",
+        "description": "We may collect information from public databases, marketing partners, and other outside sources."
+      },
+      "how_process": {
+        "title": "How do we process your information?",
+        "description": "We process your information to provide, improve, and administer our services, and to comply with the law."
+      },
+      "share_info": {
+        "title": "When and with whom do we share your personal information?",
+        "description": "We may share your information in specific situations, such as business transfers or with affiliates."
+      },
+      "your_rights": {
+        "title": "What are your rights?",
+        "description": "Depending on your location, you may have the right to access, update, or delete your personal information."
+      }
+    },
+
+    "table_of_contents": "Table of Contents",
+
+    "toc": {
+      "info_collect": "1. What Information Do We Collect?",
+      "info_use": "2. How Do We Process Your Information?",
+      "who_share": "3. When and With Whom Do We Share Your Personal Information?",
+      "cookies": "4. Do We Use Cookies and Other Tracking Technologies?",
+      "social_logins": "5. How Do We Handle Your Social Logins?",
+      "intl_transfers": "6. Is Your Information Transferred Internationally?",
+      "info_retain": "7. How Long Do We Keep Your Information?",
+      "info_minors": "8. Do We Collect Information From Minors?",
+      "privacy_rights": "9. What Are Your Privacy Rights?",
+      "dnt": "10. Controls for Do-Not-Track Features",
+      "policy_updates": "11. Do We Make Updates to This Notice?",
+      "contact": "12. How Can You Contact Us About This Notice?"
+    },
+
+    "info_collect": {
+      "title": "1. What Information Do We Collect?",
+      "personal_info": {
+        "title": "Personal Information You Disclose to Us",
+        "description": "We collect personal information that you voluntarily provide to us when you register on the Services, express an interest in obtaining information about us or our products and Services, or otherwise contact us."
+      },
+      "auto_collect": {
+        "title": "Information Automatically Collected",
+        "description": "We automatically collect certain information when you visit, use, or navigate the Services. This information does not reveal your specific identity but may include device and usage information, such as your IP address, browser and device characteristics, operating system, and other technical information."
+      }
+    },
+
+    "info_use": {
+      "title": "2. How Do We Process Your Information?",
+      "description": "We process your personal information for a variety of reasons, depending on how you interact with our Services, including to provide, improve, and administer our Services, communicate with you, for security and fraud prevention, and to comply with law."
+    },
+
+    "who_share": {
+      "title": "3. When and With Whom Do We Share Your Personal Information?",
+      "description": "We may share your information in specific situations described in this section and/or with the following third parties:",
+      "business_transfers": "Business Transfers: We may share or transfer your information in connection with, or during negotiations of, any merger, sale of company assets, financing, or acquisition of all or a portion of our business to another company.",
+      "affiliates": "Affiliates: We may share your information with our affiliates, in which case we will require those affiliates to honor this Privacy Policy.",
+      "business_partners": "Business Partners: We may share your information with our business partners to offer you certain products, services, or promotions."
+    },
+
+    "cookies": {
+      "title": "4. Do We Use Cookies and Other Tracking Technologies?",
+      "description": "We may use cookies and similar tracking technologies to collect and store your information. These technologies help us maintain the security of our Services, prevent crashes, and analyze usage."
+    },
+
+    "social_logins": {
+      "title": "5. How Do We Handle Your Social Logins?",
+      "description": "If you choose to register or log in to our Services using a social media account, we may have access to certain information about you from your social media provider."
+    },
+
+    "intl_transfers": {
+      "title": "6. Is Your Information Transferred Internationally?",
+      "description": "Your information may be transferred to, stored, and processed in countries other than your own. We will take all necessary measures to protect your personal information in accordance with this Privacy Policy and applicable law."
+    },
+
+    "info_retain": {
+      "title": "7. How Long Do We Keep Your Information?",
+      "description": "We will only keep your personal information for as long as it is necessary for the purposes set out in this Privacy Policy, unless a longer retention period is required or permitted by law."
+    },
+
+    "info_minors": {
+      "title": "8. Do We Collect Information From Minors?",
+      "description": "We do not knowingly collect data from or market to children under 18 years of age. If we learn that personal information from users less than 18 years of age has been collected, we will deactivate the account and take reasonable measures to promptly delete such data."
+    },
+
+    "privacy_rights": {
+      "title": "9. What Are Your Privacy Rights?",
+      "description": "Depending on where you are located geographically, the applicable privacy law may mean you have certain rights regarding your personal information.",
+      "withdraw_consent": "If we are relying on your consent to process your personal information, you have the right to withdraw your consent at any time. You can withdraw your consent by contacting us at {{email}}."
+    },
+
+    "dnt": {
+      "title": "10. Controls for Do-Not-Track Features",
+      "description": "Most web browsers and some mobile operating systems include a Do-Not-Track (\"DNT\") feature or setting you can activate to signal your privacy preference. At this stage, no uniform technology standard for recognizing and implementing DNT signals has been finalized."
+    },
+
+    "policy_updates": {
+      "title": "11. Do We Make Updates to This Notice?",
+      "description": "We may update this Privacy Policy from time to time. The updated version will be indicated by an updated 'Revised' date at the top of this Privacy Policy."
+    },
+
+    "contact": {
+      "title": "12. How Can You Contact Us About This Notice?",
+      "description": "If you have questions or comments about this notice, you may contact us by post at: {{address}}, or by email at: {{email}}."
+    }
+  },
   "zod_errors": {
     "invalid_format": "Check requested format",
     "too_small": "A longer value is required",
     "too_big": "A shorter value is required"
+  },
+  "validation": {
+    "password": {
+      "minLength": "At least 8 characters",
+      "lowercase": "One lowercase letter (a-z)",
+      "uppercase": "One uppercase letter (A-Z)",
+      "number": "One digit (0-9)",
+      "special": "One special character (!@#$%^&*)"
+    },
+    "username": {
+      "minLength": "4 to 20 characters",
+      "alphanumeric": "Letters, numbers and _ only"
+    }
   },
   "errors": {
     "validation_mandatory": "This field is mandatory.",
@@ -42,6 +234,17 @@
     "rate_limit_exceeded": "Rate limit exceeded. Please try again in a few minutes",
     "mfa_required": "Multi-factor authentication required. Please set up or enter your MFA code",
     "invalid_mfa_code": "Invalid MFA code. Please check the code and try again",
+    "invalid_2fa_code": "Invalid 2FA code. Check your authenticator app and try again.",
+    "invalid_code_format": "Code must be exactly 6 digits.",
+    "missing_parameters": "Missing parameters. Please try again.",
+    "login_session_expired": "Login session expired. Please log in again.",
+    "setup_session_expired": "Setup session expired. Please restart the 2FA setup.",
+    "too_many_attempts": "Too many failed attempts. Please log in again.",
+    "token_missing": "Authentication token missing.",
+    "totp_already_enabled": "2FA is already enabled on this account.",
+    "2fa_not_enabled": "2FA is not enabled on this account.",
+    "user_not_found_2fa": "User not found.",
+    "missing_user_name": "Username is required.",
     "internal_error": "Internal server error. Please try again later.",
     "friend_self_add": "You cannot add yourself as a friend",
     "friend_already": "You are already friends"
@@ -63,6 +266,42 @@
     "profile": "Profile",
     "2fa": "2FA",
     "update_avatar": "Update avatar"
+  },
+  "2fa": {
+    "title": "Two-Factor Authentication",
+    "subtitle": "Enter your 6-digit authentication code",
+    "code_label": "Authentication Code",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "cancel": "Cancel",
+    "invalid_code_with_attempts": "Invalid code — {{count}} attempt(s) remaining",
+    "help_text": "Open your authenticator app to get the code",
+    "apps_button": "Compatible apps",
+    "apps_title": "TOTP Authenticator Apps",
+    "forgot_code": "Lost or forgotten code?",
+    "forgot_help_text": "If you no longer have access to your 2FA app, visit the FAQ for account recovery steps.",
+    "faq_link": "View FAQ → account access & recovery",
+    "status_load_error": "Failed to load 2FA status",
+    "setup": {
+      "title": "Two-Factor Authentication Setup",
+      "status": "Status",
+      "enabled": "Enabled",
+      "disabled": "Disabled",
+      "description": "Add an extra layer of security to your account with two-factor authentication.",
+      "enable_button": "Enable 2FA",
+      "disable_button": "Disable 2FA",
+      "disable_description": "Disable two-factor authentication on your account.",
+      "disable_warning": "Warning: Disabling 2FA will make your account less secure.",
+      "disabling": "Disabling...",
+      "confirm_disable": "Confirm Disable",
+      "scan_instructions": "Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)",
+      "manual_entry": "Or enter this secret manually",
+      "verify_code": "Enter the 6-digit code from your app to activate",
+      "verify_button": "Activate 2FA",
+      "cancel": "Cancel",
+      "setup_success": "2FA enabled successfully!",
+      "disable_success": "2FA disabled successfully."
+    }
   },
   "friends": {
     "friends": "Friends",

@@ -4,7 +4,30 @@
     "hasAccount": "T’es déjà dans le coup ?",
     "noAccount": "T’es un bleu ma parole !",
     "signup": "S’inscrire (et devenir un vrai)",
-    "login": "Se pointer (avec les bons papiers)"
+    "login": "Se pointer (avec les bons papiers)",
+    "show_password": "Montre le mot de passe",
+    "hide_password": "Planque le mot de passe",
+    "i_have_read": "J'ai pigé",
+    "and": "et",
+    "tos": "la règle du jeu",
+    "privacy_policy": "la loi du secret"
+  },
+  "oauth": {
+    "continue_google": "Passe par Google",
+    "continue_42": "Passe par 42 c'est la référence",
+    "or_separator": "OU BIEN",
+    "connecting": "On s'branche...",
+    "processing": "On vérifie tes papiers...",
+    "success": "T'es dans la place, mon pote !",
+    "redirecting": "On t'embarque...",
+    "error": "Ah merde, y'a un blème",
+    "back_to_login": "Retour à l'entrée",
+    "error_config": "Y'a pas de config pour {{provider}}, on peut rien faire là",
+    "invalid_provider": "C'est quoi ce provider ? On connaît pas",
+    "authorization_denied": "T'as refusé l'autorisation, du coup on peut rien faire",
+    "missing_code": "Y'a pas de code, mon gars. C'est louche",
+    "invalid_state": "État CSRF foireux - on dirait une embrouille",
+    "callback_failed": "Raté l'authentification, mon vieux"
   },
   "fieldtype": {
     "email": "l’adresse électronique (pour les lettres, quoi)",
@@ -26,10 +49,195 @@
     "not_found": "Que dalle",
     "disabled": "pas enclenché, le machin"
   },
+  "companyName": "Patapong SA",
+  "serviceName": "Spin Pong",
+  "address": "1, Avenue des Frères Lebrun",
+  "email": "ping@patapong.com",
+  "governingLaw": "la loi française, mon vieux",
+  "arbitrationLocation": "Poitiers, France - on a choisi exprès, c'est central",
+  "privacyPolicyLink": "/privacy",
+  "tos": {
+    "title": "LES RÈGLES DU JEU",
+    "last_updated": "Dernière mise à jour : 24 février 2026 - Faut suivre, hein",
+
+    "provider": "C'est {{companyName}} ({{address}}) qui tient la barre",
+
+    "contact_info": "Pour nous joindre : {{email}} | Téléphone : {{phone}} - On répond, mais faut pas abuser",
+
+    "agreement": "1. LE CONTRAT, MON P'TIT",
+    "agreement-text": "Dès que t'utilises {{serviceName}} (nos « Services »), t'acceptes nos règles. Si ça te va pas, dégage. C'est simple.",
+
+    "ip": "2. LE MATOS, C'EST À NOUS",
+    "ip-text": "Tout ce qu'y a sur nos Services, c'est à nous : le contenu, les marques, les logiciels. T'as le droit de t'en servir pour toi, mais pas pour en faire du fric. Et surtout, pas de copie, de redistribution ou de bidouille sans notre feu vert écrit. On est pas des enfants de chœur.",
+
+    "responsibilities": "3. TES OBLIGATIONS, MON GAZIER",
+    "responsibilities-text": "Faut nous filer des infos justes et complètes. Tout ce qui se passe sur ton compte, c'est pour ta pomme. Interdit de : Emmerder les gens, tricher ou faire des coups tordus, Foutre le bordel dans nos Services ou contourner nos sécurités, Balancer des virus, du spam ou des saloperies du genre, Piquer le boulot des autres. T'as compris ?",
+
+    "user_content": "4. TES TRUCS À TOI",
+    "user_content-text": "Ce que tu balances sur nos Services, ça reste à toi. Mais on a le droit de s'en servir, partout dans le monde. T'es prévenu : ton contenu doit être légal, original et pas volé. Sinon, ça va chauffer.",
+
+    "purchases": "5. LES SOUS, C'EST LES SOUS",
+    "purchases-text": "Quand t'achètes, c'est définitif - pas de remboursement. Faut nous donner les bonnes infos de paiement. Et les prix, ça peut changer sans prévenir. C'est la vie.",
+
+    "termination": "6. SI ON TE VIRE",
+    "termination-text": "Si t'abuses, on peut te couper l'accès sans prévenir. C'est notre droit. T'es pas content ? Tant pis.",
+
+    "disclaimers": "7. ON SE DÉDOUANE (FAUT BIEN)",
+    "disclaimers-text": "Nos Services, c'est comme une bagnole d'occasion : on te les donne en l'état, sans garantie. Si t'as un problème en les utilisant, c'est pour ta gueule. Et si t'as fait une connerie, t'assumes - nous, on est couverts.",
+
+    "privacy": "8. TES DONNÉES, ON EN PREND SOIN (ENFIN, À PEU PRÈS)",
+    "privacy-text": "On gère tes données comme il faut. Tout est expliqué dans notre {{privacyPolicyLink}}. Lis-la, c'est pour ton bien.",
+
+    "law": "9. LA LOI, C'EST LA LOI",
+    "law-text": "Ici, c'est le {{governingLaw}} qui commande. Si y'a un litige, on règle ça à {{arbitrationLocation}}. Pas la peine de râler, c'est comme ça.",
+
+    "contact": "10. TU VEUX NOUS PARLER ?",
+    "contact-text": "T'as un problème ? Contacte-nous : {{companyName}}, {{address}}, {{email}}, {{phone}}. Mais dérange pas pour rien, hein."
+  },
+  "privacy_policy": {
+    "title": "POLITIQUE DE CONFIDENTIALITÉ",
+    "last_updated": "Dernière mise à jour : 24 février 2026 - C'est pas la peine de chipoter, c'est la date qu'il faut retenir",
+
+    "intro": "{{companyName}} (« nous », « notre » ou « la maison », si vous préférez), on n'est pas des enfants de chœur, mais on respecte vos petites affaires. Ce document, c'est la manière dont on gère vos données quand vous utilisez nos services. C'est clair, net et sans bavure.",
+
+    "summary": {
+      "title": "EN BREF, POUR CEUX QUI ONT LA FLEMME",
+      "description": "Voici l'essentiel, comme un bon résumé de film avant la séance. Cliquez sur les liens si vous voulez les détails. Mais attention, après, vous pourrez pas dire qu'on vous a pas prévenus.",
+      "personal_info": {
+        "title": "Qu'est-ce qu'on sait sur vous ?",
+        "description": "On ramasse ce que vous nous donnez quand vous vous inscrivez, quand vous nous écrivez ou quand vous utilisez nos services. C'est pas plus compliqué que ça."
+      },
+      "sensitive_info": {
+        "title": "On fouille dans vos affaires intimes ?",
+        "description": "Surtout pas. On a nos principes. Les données sensibles, c'est comme les secrets de famille : ça ne nous regarde pas."
+      },
+      "third_party": {
+        "title": "On glane des infos ailleurs ?",
+        "description": "Parfois, oui. Des bases de données publiques, des partenaires... On est pas des ermites. Mais toujours dans les règles."
+      },
+      "how_process": {
+        "title": "À quoi servent vos données ?",
+        "description": "À faire tourner la boutique. À améliorer le service. À vous parler quand c'est nécessaire. À éviter les embrouilles. Et à rester dans le droit chemin. C'est tout."
+      },
+      "share_info": {
+        "title": "À qui on refile vos infos ?",
+        "description": "À personne, sauf obligation. Si on vend la boîte, si on travaille avec des associés, ou si la loi l'exige. Mais on fait pas dans la dénonciation."
+      },
+      "your_rights": {
+        "title": "Quels sont vos droits ?",
+        "description": "Ça dépend où vous êtes. Mais en général, vous pouvez voir vos données, les corriger, ou nous demander de les effacer. C'est comme un bon contrat : ça se discute."
+      }
+    },
+    "table_of_contents": "SOMMAIRE - POUR S'Y RETROUVER",
+    "toc": {
+      "info_collect": "1. Qu'est-ce qu'on collecte comme infos ?",
+      "info_use": "2. À quoi ça sert, tout ça ?",
+      "who_share": "3. Avec qui on partage vos données ?",
+      "cookies": "4. Et les cookies dans l'histoire ?",
+      "social_logins": "5. Si vous vous connectez avec Facebook ou autre...",
+      "intl_transfers": "6. Vos données voyagent-elles à l'étranger ?",
+      "info_retain": "7. On les garde combien de temps, ces fichiers ?",
+      "info_minors": "8. Et pour les mineurs, on fait comment ?",
+      "privacy_rights": "9. Vos droits, c'est quoi exactement ?",
+      "dnt": "10. Le fameux « Ne pas pister »...",
+      "policy_updates": "11. On change souvent cette politique ?",
+      "contact": "12. Comment nous joindre si vous avez un problème ?"
+    },
+    "info_collect": {
+      "title": "1. QU'EST-CE QU'ON COLLECTE COMME INFOS ?",
+      "personal_info": {
+        "title": "Ce que vous nous donnez volontairement",
+        "description": "Quand vous vous inscrivez, quand vous nous contactez ou quand vous utilisez nos services, vous nous filez des infos. On les prend. C'est aussi simple que ça."
+      },
+      "auto_collect": {
+        "title": "Ce qu'on récupère tout seuls",
+        "description": "Quand vous naviguez chez nous, on note quelques trucs techniques : votre adresse IP, votre navigateur, votre appareil... Rien de bien méchant, juste de quoi faire tourner la machine sans accroc."
+      }
+    },
+    "info_use": {
+      "title": "2. À QUOI ÇA SERT, TOUT ÇA ?",
+      "description": "À vous fournir un service qui tient la route. À l'améliorer. À vous parler quand c'est nécessaire. À éviter les arnaques. Et à rester dans les clous de la loi. On fait pas dans le superflu."
+    },
+
+    "who_share": {
+      "title": "3. AVEC QUI ON PARTAGE VOS DONNÉES ?",
+      "description": "Avec personne, en principe. Sauf si :",
+      "business_transfers": "- On vend la boîte ou qu'on fusionne. Là, faut bien passer le relais.",
+      "affiliates": "- On travaille avec des associés. Mais ils doivent respecter les mêmes règles que nous.",
+      "business_partners": "- On a des partenariats qui vous concernent. Mais toujours avec votre intérêt en tête."
+    },
+
+    "cookies": {
+      "title": "4. ET LES BISCUITS ?",
+      "description": "Oui, on te refile un biscuit Pour que le site marche bien, pour analyser un peu le trafic, pour vous reconnaître quand vous revenez. Rien de bien sorcier. Et vous pouvez toujours les refuser si ça vous chante."
+    },
+
+    "social_logins": {
+      "title": "5. SI VOUS VOUS CONNECTEZ AVEC FACEBOOK OU AUTRE...",
+      "description": "Si vous utilisez un compte social pour vous connecter, on accède à quelques infos de votre profil. Juste ce qu'il faut pour que ça marche. On est pas des fouineurs."
+    },
+
+    "intl_transfers": {
+      "title": "6. VOS DONNÉES VOYAGENT-ELLES À L'ÉTRANGER ?",
+      "description": "Possible. Vos données peuvent être stockées ou traitées ailleurs que dans votre pays. Mais on veille à ce qu'elles soient toujours bien protégées, où qu'elles aillent."
+    },
+
+    "info_retain": {
+      "title": "7. ON LES GARDE COMBIEN DE TEMPS, CES FICHIERS ?",
+      "description": "Le temps nécessaire, pas une seconde de plus. Sauf si la loi nous oblige à les garder plus longtemps. Après, on efface. Proprement."
+    },
+
+    "info_minors": {
+      "title": "8. ET POUR LES MINEURS, ON FAIT COMMENT ?",
+      "description": "On ne collecte rien sur les moins de 18 ans. Si on découvre qu'on a des données de mineurs, on les supprime illico. C'est non-négociable."
+    },
+
+    "privacy_rights": {
+      "title": "9. VOS DROITS, C'EST QUOI EXACTEMENT ?",
+      "description": "Selon où vous êtes, vous pouvez :",
+      "rights_list": [
+        "- Voir quelles données on a sur vous",
+        "- Les corriger si elles sont fausses",
+        "- Nous demander de les effacer",
+        "- Retirer votre consentement si vous nous l'avez donné"
+      ],
+      "contact_for_rights": "Pour ça, contactez-nous. On réglera ça entre adultes."
+    },
+
+    "dnt": {
+      "title": "10. LE FAMEUX « NE PAS PISTER »...",
+      "description": "Votre navigateur a peut-être une option « Ne pas pister ». Pour l'instant, c'est comme un panneau 'Priére de ne pas marcher sur la pelouse' : tout le monde le voit, mais personne ne sait vraiment quoi en faire. Si ça change, on vous préviendra."
+    },
+
+    "policy_updates": {
+      "title": "11. ON CHANGE SOUVENT CETTE POLITIQUE ?",
+      "description": "On la met à jour quand c'est nécessaire. La date en haut de page sera modifiée. C'est comme un bon contrat : ça évolue, mais on vous préviendra."
+    },
+
+    "contact": {
+      "title": "12. COMMENT NOUS JOINDRE SI VOUS AVEZ UN PROBLÈME ?",
+      "description": "Pour toute question ou réclamation, deux solutions :",
+      "contact_methods": ["- Nous écrire à {{address}}", "- Nous envoyer un mail à {{email}}"],
+      "final_note": "On répondra. Promis. On est des professionnels."
+    }
+  },
   "zod_errors": {
     "invalid_format": "T'as pas pigé le format ou quoi ?",
     "too_small": "Sois pas chiche, tu peux y aller niveau longueur",
     "too_big": "T'as dépassé les bornes, coco. Revois ça à la baisse"
+  },
+  "validation": {
+    "password": {
+      "minLength": "Au moins 8 caractères (sois pas radin)",
+      "lowercase": "Une minuscule (a-z, c'est pas compliqué)",
+      "uppercase": "Une majuscule (A-Z, pour faire classe)",
+      "number": "Un chiffre (0-9, comme ton niveau au pong)",
+      "special": "Un truc chelou (!@#$%^&*, pour les pros)"
+    },
+    "username": {
+      "minLength": "4 à 20 caractères (pas moins, pas plus)",
+      "alphanumeric": "Que des lettres, chiffres et _ (pas de fantaisies)"
+    }
   },
   "errors": {
     "validation_mandatory": "Balance l'info",
@@ -42,7 +250,18 @@
     "rate_limit_exceeded": "T’as trop tiré sur la corde, là. Reviens dans quelques minutes, on sera plus cool.",
     "mfa_required": "Faut un double contrôle, mon gars. Sors ton code MFA ou configure-le, sinon c’est mort.",
     "invalid_mfa_code": "Ton code MFA, il est foireux. Vérifie et retente.",
-    "internal_error": "Putain, y’a un truc qui cloche chez nous. Reviens plus tard, on va régler ça entre nous.",
+    "invalid_2fa_code": "Faux code 2FA, vieux. Regarde mieux ton appli et retente ta chance.",
+    "invalid_code_format": "6 chiffres pile, pas moins, pas plus.",
+    "missing_parameters": "Y'a des trucs qui manquent. Recommence.",
+    "login_session_expired": "Ta session a cramé, reviens te connecter.",
+    "setup_session_expired": "T'as mis trop de temps, la session de config a claqé. Recommence depuis le début.",
+    "too_many_attempts": "T'as tout raté, vieux. Repart de zéro.",
+    "token_missing": "Ton jeton d'auth, il est où ?",
+    "totp_already_enabled": "Le double contrôle est déjà en place sur ce compte.",
+    "2fa_not_enabled": "Le double contrôle est pas activé sur ce compte.",
+    "user_not_found_2fa": "On te trouve nulle part, étrange.",
+    "missing_user_name": "Ton blaze, il est où ?",
+    "internal_error": "Putain, y'a un truc qui cloche chez nous. Reviens plus tard, on va régler ça entre nous.",
     "friend_self_add": "Tu peux pas t'ajouter toi-meme, vieux. Choisis un autre tandem.",
     "friend_already": "T'es déjà pote, mon vieux !"
   },
@@ -63,6 +282,42 @@
     "profile": "Pedigree",
     "2fa": "Double contrôle",
     "update_avatar": "Se faire retirer le portrait"
+  },
+  "2fa": {
+    "title": "Double vérification, vieux !",
+    "subtitle": "Balance ton code à 6 chiffres, on attend",
+    "code_label": "Ton code secret",
+    "verify": "Vérifier",
+    "verifying": "On vérifie ton code...",
+    "cancel": "Laisser tomber",
+    "invalid_code_with_attempts": "Code foireux — {{count}} essai(s) avant que ça bloque",
+    "help_text": "Ouvre ton appli d'authentification et chope le code",
+    "apps_button": "Les applis qui marchent",
+    "apps_title": "Applications TOTP compatibles",
+    "forgot_code": "T'as perdu ton code ?",
+    "forgot_help_text": "Si t'as plus accès à ton appli 2FA, va voir la FAQ pour récupérer ton compte.",
+    "faq_link": "Voir la FAQ → récupération de compte",
+    "status_load_error": "Impossible de charger le statut 2FA, ça craint",
+    "setup": {
+      "title": "Mise en place du double contrôle",
+      "status": "Statut",
+      "enabled": "Actif",
+      "disabled": "Inactif",
+      "description": "Ajoute une couche de sécurité à ton compte, c'est pas du luxe.",
+      "enable_button": "Activer le double contrôle",
+      "disable_button": "Désactiver le double contrôle",
+      "disable_description": "Virer le double contrôle de ton compte.",
+      "disable_warning": "Attention : sans le double contrôle, ton compte est plus facile à niquer.",
+      "disabling": "On désactive...",
+      "confirm_disable": "Confirmer la désactivation",
+      "scan_instructions": "Scanne ce QR code avec ton appli (Google Authenticator, Authy, etc.)",
+      "manual_entry": "Ou tape le secret à la main si t'es courageux",
+      "verify_code": "Entre le code à 6 chiffres de ton appli pour valider",
+      "verify_button": "Activer le double contrôle",
+      "cancel": "On laisse tomber",
+      "setup_success": "Double contrôle activé, t'es blindé !",
+      "disable_success": "Double contrôle désactivé. T'as pris un risque, toi."
+    }
   },
   "friends": {
     "friends": "Les potes",

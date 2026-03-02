@@ -4,11 +4,20 @@
   --font-quantico: 'Quantico', sans-serif;
 }
 
-/* @layer components { */
-.ts-form-title {
-  @apply text-gray-500 font-bold;
+@layer components {
+  .ts-form-title {
+    @apply text-gray-500 font-bold;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
 }
-/* } */
 
 /* @keyframes float-random {
   0%,

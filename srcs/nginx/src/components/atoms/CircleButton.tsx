@@ -6,6 +6,7 @@ interface CircleButtonProps extends HTMLMotionProps<'button'> {
   isGrowing?: boolean;
   isMoving: boolean;
   children?: React.ReactNode;
+  size?: number;
 }
 
 const dropdownStyle = 'shadow-[0_10px_10px_1px_rgba(205,205,205,0.4)] ';
@@ -15,6 +16,7 @@ export const CircleButton = ({
   className = '',
   isGrowing = true,
   isMoving = false,
+  size = 70,
   ...props
 }: CircleButtonProps) => {
   const controls = useAnimation();
@@ -41,15 +43,16 @@ export const CircleButton = ({
       whileHover={isGrowing ? { scale: 1.1, color: '#029c8a' } : {}}
       whileTap={{ scale: 0.95, color: '#11ccbb' }}
       transition={{ duration: 0.3 }}
+      style={{ width: size, height: size }}
       className={`
       basis-50
-      h-60 w-60 m-10 p-6    
+      m-10 p-6    
       aspect-square
       rounded-full
       bg-slate-100/80
       flex items-center justify-center
       font-quantico border border-cyan-300
-      text-2xl 
+      text-xl 
       text-gray-700
       cursor-pointer
       disabled:opacity-50 disabled:cursor-not-allowed
@@ -57,7 +60,7 @@ export const CircleButton = ({
       ${className}
 `}
     >
-      <span className="text-2xl text-center whitespace-nowrap">{children}</span>
+      <span className="text-xl text-center whitespace-wrap">{children}</span>
     </motion.button>
   );
 };

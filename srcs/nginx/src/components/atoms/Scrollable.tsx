@@ -2,15 +2,28 @@ import { ReactNode, Children } from 'react';
 import { motion } from 'framer-motion';
 interface ScrollableProps {
   children: ReactNode;
+  divClassName?: string;
+  className?: string;
   isAnimated?: boolean;
 }
 
-export default function Scrollable({ children, isAnimated = false }: ScrollableProps) {
+export default function Scrollable({
+  children,
+  className = '',
+  divClassName = '',
+  isAnimated = false,
+}: ScrollableProps) {
+  const layoutClass = !isAnimated ? 'max-w-4xl' : '';
   return (
-    <div className="p-1 min-h-[90vh] flex justify-center items-center">
-      <div className="h-[90vh] w-[100vw] shadow-md overflow-y-auto flex flex-col items-center gap-12 py-2 scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className={`mt-0 mb-4 h-[90vh] flex justify-center items-center ${divClassName}`}>
+      <div
+        className={`${layoutClass} h-[75vh] w-full overflow-y-auto
+          flex flex-col items-center 
+          gap-12 py-2
+          scrollbar-none [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`}
+      >
         {Children.map(children, (child, i) => {
-          if (!isAnimated) return child;
+          if (!isAnimated || i == 3) return child;
           return (
             <motion.div
               key={i}

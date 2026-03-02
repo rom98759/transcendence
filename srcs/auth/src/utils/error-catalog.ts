@@ -78,7 +78,7 @@ export const APP_ERRORS = {
     400,
   ),
   LOGIN_2FA_INVALID: authError(
-    ERROR_CODES.MFA_INVALID,
+    ERROR_CODES.INVALID_2FA_CODE,
     REASONS.SECURITY.MFA_INVALID,
     '2FA code is invalid',
     400,

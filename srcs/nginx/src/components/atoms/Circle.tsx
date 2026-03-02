@@ -22,12 +22,13 @@ const Circle = ({ children, className = '', size = 120 }: CircleProps) => {
       justify-center
       transition-all duration-900 ease-in-out
       relative
-      w-full
-      h-[75vh]
+      w-[95vw]
+      h-[80vh]
       rounded-3xl
       mx-auto
       text-gray-700
-
+      
+      sm: mt-5
       lg:absolute
       lg:top-1/2
       lg:left-1/2

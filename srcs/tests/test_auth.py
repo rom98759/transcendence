@@ -707,7 +707,7 @@ def test_18_2fa_verify_invalid_code():
     data = response.json()
 
     assert "error" in data, "Error not in response"
-    assert data["error"].get("code") == "INVALID_2FA_CODE", "Mauvais code d'erreur"
+    assert data["error"].get("code") == "invalid_2fa_code", "Mauvais code d'erreur"
 
     print_success("400 pour code 2FA invalide avec détail")
 
@@ -736,7 +736,7 @@ def test_18b_2fa_setup_when_already_enabled():
 
         # Deuxième tentative devrait échouer
         response = session.post("/auth/2fa/setup", expected_status=409)
-        assert response.json()["error"]["code"] == "TOTP_ALREADY_ENABLED"
+        assert response.json()["error"]["code"] == "totp_already_enabled"
 
         print_success("2FA déjà activée correctement détectée")
     except SkipTest:
@@ -850,7 +850,7 @@ def test_20b_2fa_disable_not_enabled():
 
     resp = session.post("/auth/2fa/disable", expected_status=400)
     data = resp.json()
-    assert data.get("error", {}).get("code") == "2FA_NOT_ENABLED"
+    assert data.get("error", {}).get("code") == "2fa_not_enabled"
     print_success("Désactivation refusée car 2FA non activée")
 
 
@@ -896,7 +896,7 @@ def test_22_2fa_setup_bad_format():
         "/auth/2fa/setup/verify", json={"code": "abc"}, expected_status=400
     )
     data = resp.json()
-    assert data.get("error", {}).get("code") == "INVALID_CODE_FORMAT"
+    assert data.get("error", {}).get("code") == "invalid_code_format"
     print_success("Format invalide correctement rejeté (setup)")
 
 
@@ -970,7 +970,7 @@ def test_28_2fa_too_many_attempts():
         print_success("429 reçu après trop de tentatives")
     elif (
         last_resp.status_code == 401
-        and last_resp.json().get("error", {}).get("code") == "LOGIN_SESSION_EXPIRED"
+        and last_resp.json().get("error", {}).get("code") == "login_session_expired"
     ):
         print_success(
             "Session de login 2FA expirée avant d'atteindre 429 (token très court)"

@@ -38,6 +38,11 @@ export interface AuthContextType {
   updateUser: (newUser: ProfileSimpleDTO) => void;
   markAnimAsSeen: () => void;
   hasSeenAnim: boolean;
+  pending2FA: import('./twoFactor.types').TwoFactorPendingContext | null;
+  /** true si pending2FA existe et n'est pas expiré */
+  hasPending2FA: boolean;
+  setPending2FA: (ctx: import('./twoFactor.types').TwoFactorPendingContext) => void;
+  clearPending2FA: () => void;
 }
 
 export interface AuthProviderProps {
