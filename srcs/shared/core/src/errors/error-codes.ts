@@ -24,7 +24,18 @@ export const ERROR_CODES = {
 
   // specific
   MFA_REQUIRED: 'mfa_required',
-  MFA_INVALID: 'invalid_mfa_code',
+  // 2FA flow
+  INVALID_2FA_CODE: 'invalid_2fa_code',
+  INVALID_CODE_FORMAT: 'invalid_code_format',
+  MISSING_PARAMETERS: 'missing_parameters',
+  LOGIN_SESSION_EXPIRED: 'login_session_expired',
+  SETUP_SESSION_EXPIRED: 'setup_session_expired',
+  TOO_MANY_ATTEMPTS: 'too_many_attempts',
+  TOKEN_MISSING: 'token_missing',
+  TOTP_ALREADY_ENABLED: 'totp_already_enabled',
+  TWO_FA_NOT_ENABLED: '2fa_not_enabled',
+  USER_NOT_FOUND_2FA: 'user_not_found_2fa',
+  MISSING_USER_NAME: 'missing_user_name',
 
   // 500 for all server errors - no details needed for end user
   INTERNAL_ERROR: 'internal_error',

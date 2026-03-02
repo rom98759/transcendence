@@ -35,9 +35,9 @@ export const OAuthCallback = () => {
   const navigate = useNavigate();
   const { provider } = useParams<{ provider: OAuthProvider }>();
   const [searchParams] = useSearchParams();
-  const { login } = useAuth();
+  const { login, setPending2FA } = useAuth();
 
-  // État local
+  // State local
   const [state, setState] = useState<OAuthCallbackState>({
     status: 'loading',
   });
@@ -67,6 +67,7 @@ export const OAuthCallback = () => {
     handleCallback();
   }, [provider, searchParams, t]);
 
+  // Effet pour login normal (sans 2FA)
   useEffect(() => {
     if (state.status === 'success' && state.data?.username) {
       login({
@@ -75,6 +76,18 @@ export const OAuthCallback = () => {
       });
     }
   }, [state.status, state.data?.username, login]);
+
+  // Effet pour déclencher le flux 2FA
+  useEffect(() => {
+    if (state.status === 'require2fa' && state.twoFactorContext) {
+      setPending2FA({
+        username: state.twoFactorContext.username,
+        provider: state.twoFactorContext.provider,
+        expiresAt: Date.now() + state.twoFactorContext.expiresIn * 1000,
+        from: null,
+      });
+    }
+  }, [state.status, state.twoFactorContext, setPending2FA]);
 
   return (
     <div className="w-full h-full relative">

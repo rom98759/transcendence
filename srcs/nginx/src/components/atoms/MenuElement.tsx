@@ -37,6 +37,7 @@ interface MenuElementProps {
   color?: Color;
   scale?: number;
   className?: string;
+  onClick?: () => void;
 }
 
 const paths: Record<MenuActions, string> = {

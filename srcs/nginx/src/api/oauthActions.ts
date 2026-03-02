@@ -5,13 +5,18 @@ import i18next from 'i18next';
  * Types pour la gestion d'état OAuth
  */
 export interface OAuthCallbackState {
-  status: 'idle' | 'loading' | 'success' | 'error';
+  status: 'idle' | 'loading' | 'success' | 'error' | 'require2fa';
   data?: {
     username: string;
     provider: string;
     isNewUser: boolean;
   };
   error?: string;
+  twoFactorContext?: {
+    username: string;
+    expiresIn: number;
+    provider: 'google' | 'school42';
+  };
 }
 
 /**
@@ -133,6 +138,19 @@ export async function oauthCallbackAction(
       state: state || undefined,
     });
 
+    // Cas 1 : 2FA requis
+    if (response.type === 'require2fa') {
+      return {
+        status: 'require2fa',
+        twoFactorContext: {
+          username: response.context.username,
+          expiresIn: response.context.expiresIn,
+          provider: provider as 'google' | 'school42',
+        },
+      };
+    }
+
+    // Cas 2 : Login OAuth normal sans 2FA
     return {
       status: 'success',
       data: {

@@ -78,7 +78,7 @@ export const WelcomeInput = ({
           aria-invalid={hasError ? 'true' : 'false'}
           aria-describedby={hasError ? errorId : undefined}
           className={cn(
-            'w-full rounded-lg border-2 py-2 text-sm transition-all focus:outline-none focus:ring-0.8',
+            'w-full rounded-lg border-2 py-2 text-sm transition-all focus:outline-none focus:ring-2',
             'bg-white text-gray-800 placeholder:text-gray-400',
             'ring-offset-2 ring-offset-transparent',
             Icon ? 'pl-10' : 'px-4',
@@ -92,7 +92,7 @@ export const WelcomeInput = ({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#344086] transition-colors focus:outline-none focus:ring-1 focus:ring-[#0088ff] rounded p-1"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#0088ff] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0088ff] rounded p-1"
             aria-label={showPassword ? t('auth.hide_password') : t('auth.show_password')}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
