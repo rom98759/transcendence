@@ -41,7 +41,7 @@ export default fp(async (app) => {
       ]);
     } catch (err) {
       app.log.error('Forcing Redis disconnect');
-      await redis.disconnect();
+      redis.disconnect();
     }
   });
 });

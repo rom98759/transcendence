@@ -2,10 +2,17 @@ import Database from 'better-sqlite3';
 import fs from 'fs';
 import path from 'path';
 import { env } from '../config/env.js';
-import { UserEvent, TournamentDTO,MatchToPlayDTO, ERR_DEFS } from '@transcendence/core';
+import {
+  UserEvent,
+  TournamentDTO,
+  MatchToPlayDTO,
+  ERR_DEFS,
+  TournamentResultDTO,
+} from '@transcendence/core';
 import { AppError, ErrorDetail } from '@transcendence/core';
 import { randomUUID } from 'crypto';
 import { LOG_REASONS } from '@transcendence/core';
+import { FastifyInstance } from 'fastify';
 
 // DB path
 const DEFAULT_DIR = path.join(process.cwd(), 'data');
@@ -240,7 +247,14 @@ export function listTournaments(): TournamentDTO[] {
     throw new AppError(ERR_DEFS.DB_SELECT_ERROR, { details: [{ field: `listTournaments` }] }, err);
   }
 }
-
+/* ===========================
+ * Tournament management
+ * joinTournament: add a player to a tournament if not full, if full return an error,
+ * if the player is already in the tournament do nothing
+ * if the tournament reach 4 players, change status to STARTED and initialize matchs
+ * create semi final match with player1 vs player2 and player3 vs player4
+ * with sessionId and round SEMI_1 and SEMI_2
+ * =========================== */
 export function joinTournament(player_id: number, tournament_id: number) {
   try {
     //db transaction to avoid race condition when multiple players try to join the same tournament
@@ -257,6 +271,7 @@ export function joinTournament(player_id: number, tournament_id: number) {
         };
         throw new AppError(ERR_DEFS.DB_UPDATE_ERROR, { details: [errorDetail] });
       }
+      // add player to tournament with the slot index +1 of the current number of players in the tournament
       addPlayerTournament(player_id, tournament_id, nbPlayers + 1);
       if (nbPlayers === 3) {
         changeStatusTournamentStmt.run('STARTED', tournament_id);
@@ -285,6 +300,10 @@ FROM tournament_player tp
 WHERE tournament_id = ?
 `);
 
+/* when 4 slots are fulled, create 2 semi final matchs with
+ * the player in slot 1 vs slot 2 and slot 3 vs slot 4
+ * and assign them a sessionId and a round SEMI_1 and SEMI_2
+ */
 function initializeTournamentMatchs(tournament_id: number) {
   const players = getPlayersIdTournamentStmt.all(tournament_id) as { player_id: number }[];
   if (players.length != 4) {
@@ -355,21 +374,21 @@ export function getPlayerStats(player_id: number) {
   }
 }
 
-const getMatchSmt = db.prepare(`
-SELECT sessionId , round, player1, player2, id
-FROM match
-WHERE tournament_id = ?
-`);
+// const getMatchSmt = db.prepare(`
+// SELECT sessionId , round, player1, player2, id
+// FROM match
+// WHERE tournament_id = ?
+// `);
 
-const createPlayer1Match = db.prepare(`
-INSERT INTO match(tournament_id, player1, round, sessionId, created_at)
-VALUES (?,?,?,?,?)
-`);
-const createPlayer2Match = db.prepare(`
-UPDATE match
-SET player2 = ?
-WHERE id = ?
-`);
+// const createPlayer1Match = db.prepare(`
+// INSERT INTO match(tournament_id, player1, round, sessionId, created_at)
+// VALUES (?,?,?,?,?)
+// `);
+// const createPlayer2Match = db.prepare(`
+// UPDATE match
+// SET player2 = ?
+// WHERE id = ?
+// `);
 
 const getMatchToPlayStmt = db.prepare(`
 SELECT sessionId , round, player1, player2
@@ -382,6 +401,10 @@ WHERE tournament_id = ?
   AND winner_id IS NULL
 `);
 
+/* ===========================
+ * Tournament page mappers
+ * =========================== */
+/* return the match to play for a player in a tournament, if no match to play return null*/
 export function getMatchToPlay(tournament_id: number, userId: number): MatchToPlayDTO | null {
   try {
     const match = getMatchToPlayStmt.get(tournament_id, userId, userId) as MatchToPlayDTO | null;
@@ -391,7 +414,7 @@ export function getMatchToPlay(tournament_id: number, userId: number): MatchToPl
         message: 'No match to play',
         reason: LOG_REASONS.TOURNAMENT.NO_MATCH_TO_PLAY,
       };
-      throw new AppError(ERR_DEFS.DB_SELECT_ERROR,{ details: [errorDetail] });
+      throw new AppError(ERR_DEFS.DB_SELECT_ERROR, { details: [errorDetail] });
     }
     return match;
   } catch (err: unknown) {
@@ -424,6 +447,25 @@ WHERE tournament_id = ?
   AND round = ?;
 `);
 
+/* when a match is finished this function  to store the score and winner */
+export function updateMatchResult(
+  matchId: number,
+  scorePlayer1: number,
+  scorePlayer2: number,
+  winnerId: number,
+) {
+  const stmt = db.prepare(`
+    UPDATE match
+    SET score_player1 = ?, score_player2 = ?, winner_id = ?
+    WHERE id = ?`);
+  stmt.run(scorePlayer1, scorePlayer2, winnerId, matchId);
+  onMatchFinished(matchId);
+}
+
+/* when a match is finished, check if it's a semi final,
+ * if yes check if both semi final are finished,
+ * if yes create the final and little final matchs
+ */
 function onMatchFinished(matchId: number) {
   db.transaction(() => {
     const match = getMatchByIdStmt.get(matchId) as {
@@ -454,6 +496,7 @@ function onMatchFinished(matchId: number) {
   })();
 }
 
+<<<<<<< HEAD
 // ---- STATS ----
 const getTournamentStatsStmt = db.prepare(`
 SELECT
@@ -511,5 +554,63 @@ export function getMatchHistory() {
     return getMatchHistoryStmt.all();
   } catch (err: unknown) {
     throw new AppError(ERR_DEFS.DB_SELECT_ERROR, { details: [{ field: 'getMatchHistory' }] }, err);
+=======
+export function recordTournamentResult(tournament_id: number): TournamentResultDTO {
+  const transaction = db.transaction(() => {
+    const finalMatch = getMatchByRound.get(tournament_id, 'FINAL');
+    if (!finalMatch || !finalMatch.winner_id) {
+      throw new Error('Final match not finished');
+    }
+    const winnerId = finalMatch.winner_id;
+    const loserId = finalMatch.player1 === winnerId ? finalMatch.player2 : finalMatch.player1;
+
+    addPlayerPositionTournament(winnerId, 1, tournament_id);
+    addPlayerPositionTournament(loserId, 2, tournament_id);
+
+    const littleFinal = getMatchByRound.get(tournament_id, 'LITTLE_FINAL');
+    if (!littleFinal || !littleFinal.winner_id) {
+      throw new Error('Little final match not finished');
+    }
+    const thirdId = littleFinal.winner_id;
+    const fourthId = littleFinal.player1 === thirdId ? littleFinal.player2 : littleFinal.player1;
+
+    addPlayerPositionTournament(thirdId, 3, tournament_id);
+    addPlayerPositionTournament(fourthId, 4, tournament_id);
+
+    changeStatusTournamentStmt.run('FINISHED', tournament_id);
+    const tournament: TournamentResultDTO = {
+      tour_id: tournament_id,
+      player1: winnerId,
+      player2: loserId,
+      player3: thirdId,
+      player4: fourthId,
+    };
+    return tournament;
+  });
+  return transaction();
+}
+
+async function sendTournamentResultToBlockchain(
+  app: FastifyInstance,
+  tournament: TournamentResultDTO,
+) {
+  try {
+    // On utilise l'instance redis partagée par Fastify
+    await app.redis.xadd(
+      'tournament.results',
+      '*',
+      'data',
+      JSON.stringify({
+        tour_id: tournament.tour_id,
+        player1: tournament.player1,
+        player2: tournament.player2,
+        player3: tournament.player3,
+        player4: tournament.player4,
+      }),
+    );
+    app.log.debug(`Event streamed to Redis for tournament ${tournament.tour_id}`);
+  } catch (err) {
+    app.log.error(err, 'Failed to stream tournament result to Redis');
+>>>>>>> f323f87 (feat(tournament): implement tournament result recording and match updates)
   }
 }
