@@ -38,17 +38,17 @@ export const App = () => {
         {/* Routes protégées — authentification requise */}
         <Route element={<PrivateRoute />}>
           <Route path="/home" element={<HomePage />} />
-          <Route path="/game/remote" element={<GamePage sessionId={null} gameMode={'remote'} />} />
-          <Route path="/game/local" element={<GamePage sessionId={null} gameMode={'local'} />} />
+          {/* <Route path="/game/remote" element={<GamePage sessionId={null} gameMode={'remote'} />} />
+          <Route path="/game/local" element={<GamePage sessionId={null} gameMode={'local'} />} /> */}
           <Route
             path="/game/tournament/:tournamentId"
-            element={<GamePage sessionId={null} gameMode={'tournament'} />}
+            // element={<GamePage sessionId={null} gameMode={'tournament'} />}
           />
           <Route path="/me" element={<MyProfilePage />} />
           <Route path="/friends" element={<FriendsPage />} />
           <Route path="/profile/:username" element={<ProfilePage />} />
           <Route path="/tournaments/*" element={<TournamentRoutes />} />
-          <Route path="/game/pong-ai" element={<PlayAiPage />} />
+          {/* <Route path="/game/pong-ai" element={<PlayAiPage />} /> */}
           <Route element={<TournamentLayout />}>
             <Route path="/stats" element={<StatsPage />} />
             <Route path="/history" element={<HistoryPage />} />
