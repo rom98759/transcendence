@@ -5,6 +5,7 @@ import { CircleButton } from '../components/atoms/CircleButton';
 import Scrollable from '../components/atoms/Scrollable';
 import { Link } from 'react-router-dom';
 import { Footer } from '../components/molecules/Footer';
+import FriendSidebar from '../components/organisms/FriendSidebar';
 
 const colors = {
   start: '#00ff9f',
@@ -28,6 +29,7 @@ export const HomePage = () => {
         colorEnd={colors.end}
       >
         <NavBar />
+        <FriendSidebar />
         <div className="flex flex-col justify-around">
           <Scrollable
             className="h-[90vh] md:grid md:grid-cols-2 md:place-items-center"

@@ -306,8 +306,11 @@
   "friends": {
     "friends": "Friends",
     "add": "add to friends",
+    "add_friend": "Add a friend",
     "remove": "remove from friends",
-    "play": "play"
+    "play": "play",
+    "my_friends": "My friends",
+    "no_friends": "No friends yet"
   },
   "file_uploader": {
     "file_choose": "Choose a file",

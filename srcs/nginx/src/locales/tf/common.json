@@ -322,8 +322,11 @@
   "friends": {
     "friends": "Les potes",
     "add": "ajoute-le",
+    "add_friend": "Ramène un pote",
     "remove": "vire-le",
-    "play": "on s'amuse"
+    "play": "on s'amuse",
+    "my_friends": "Ma bande",
+    "no_friends": "Tout seul pour l'instant, ça craint"
   },
   "file_uploader": {
     "file_choose": "Fais ton choix mon gars",
