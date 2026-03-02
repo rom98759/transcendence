@@ -346,5 +346,103 @@
     "waitiing": "Waiting...",
     "creating": "Creating tournament...",
     "tournament_full": "This tournament is full(maximum 4 players)."
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Frequently asked questions about Spin Pong",
+    "back": "Back",
+    "sections": {
+      "login": {
+        "title": "Login & Access",
+        "q1": {
+          "q": "I can't log in — I get 'Invalid credentials'. What should I do?",
+          "a": "Double-check your username/email and password. Remember passwords are case-sensitive. If you registered via OAuth (Google/42), use the same provider to log in."
+        },
+        "q2": {
+          "q": "My session expired and I was logged out unexpectedly.",
+          "a": "Sessions have a limited lifetime for security reasons. Simply log in again. If this happens frequently, make sure your browser isn't clearing cookies."
+        },
+        "q3": {
+          "q": "I get 'Too many failed attempts' and can't try again.",
+          "a": "The server temporarily blocks access after several wrong password attempts to protect your account. Wait a few minutes, then try again from the login page."
+        },
+        "q4": {
+          "q": "I registered with Google / 42 but now the button doesn't work.",
+          "a": "Make sure you allow pop-ups and third-party cookies for this site. Also check that your OAuth provider account is still active and that the app has permission to access it."
+        }
+      },
+      "twofa": {
+        "title": "Two-Factor Authentication (2FA)",
+        "q1": {
+          "q": "What is 2FA and do I need it?",
+          "a": "Two-Factor Authentication (2FA) adds a second security layer to your account. After entering your password, you are asked for a 6-digit code from an authenticator app (Google Authenticator, Authy, etc.). It is optional but strongly recommended."
+        },
+        "q2": {
+          "q": "My 2FA code is always rejected. What's wrong?",
+          "a": "The most common cause is a time drift on your phone. TOTP codes are time-sensitive (30-second window).\n• Make sure your phone's date and time are set to automatic/network.\n• Check you are reading the code for the right account in your app.\n• Try entering the code immediately after it refreshes."
+        },
+        "q3": {
+          "q": "I lost access to my authenticator app. How do I recover my account?",
+          "a": "Currently there is no self-service recovery once 2FA is locked. Contact an administrator with proof of identity. This is why keeping backup codes (if provided) is critical."
+        },
+        "q4": {
+          "q": "How do I disable 2FA on my account?",
+          "a": "Go to your profile page → 2FA section → click 'Disable 2FA'. You will be asked to confirm your password. Once confirmed, 2FA is removed and you can log in with password only."
+        },
+        "q5": {
+          "q": "Which authenticator apps are compatible?",
+          "a": "Any TOTP-compatible app works:\n• Google Authenticator (iOS & Android)\n• Authy (iOS, Android & Desktop)\n• Microsoft Authenticator (iOS & Android)\n• Bitwarden Authenticator (iOS & Android)\n• Any app that supports the TOTP standard (RFC 6238)."
+        }
+      },
+      "account": {
+        "title": "Account & Profile",
+        "q1": {
+          "q": "How do I change my avatar?",
+          "a": "Go to your profile page (/me) and click the avatar area or the 'Update avatar' button. You can upload an image file (JPEG, PNG, WebP). The file size limit applies — if your upload fails, try a smaller image."
+        },
+        "q2": {
+          "q": "What are the username rules?",
+          "a": "Usernames must be 4 to 20 characters long and can only contain letters (a-z, A-Z), digits (0-9) and underscores (_). Spaces and special characters are not allowed."
+        },
+        "q3": {
+          "q": "I get 'This identifier already exists' when registering.",
+          "a": "The username or email you chose is already taken. Pick a different username. If you already have an account, use the login page instead."
+        }
+      },
+      "game": {
+        "title": "Game & Tournament",
+        "q1": {
+          "q": "How does a tournament work?",
+          "a": "A player creates a tournament and others join. Once the maximum number of players (4) is reached, the creator can start it. The bracket is generated automatically and matches are played until a winner is determined."
+        },
+        "q2": {
+          "q": "The tournament button is greyed out / unavailable.",
+          "a": "A tournament slot may already be full (max 4 players), already started, or already finished. Check the tournament list for an available one, or create a new tournament."
+        },
+        "q3": {
+          "q": "Can I play against the AI?",
+          "a": "Yes. From the home page, choose 'Play with AI'. The AI uses a trained model and provides a real challenge. The difficulty adapts during the game."
+        }
+      },
+      "errors": {
+        "title": "Common Errors",
+        "q1": {
+          "q": "I see 'Rate limit exceeded'. Why?",
+          "a": "The server limits the number of requests per user in a short period to prevent abuse. Wait a few minutes and try again. If the issue persists, avoid refreshing the page repeatedly."
+        },
+        "q2": {
+          "q": "I get a '403 Forbidden' error.",
+          "a": "This means you are trying to access a resource you don't have permission for. Make sure you are logged in and that the action you are attempting is allowed for your account."
+        },
+        "q3": {
+          "q": "I get a '404 Not Found' error.",
+          "a": "The page or resource you requested does not exist. Check the URL, or use the navigation menu to find what you are looking for."
+        },
+        "q4": {
+          "q": "I see 'Internal server error'. Is this my fault?",
+          "a": "No — a 500 Internal Server Error means something went wrong on our side. Try again after a few moments. If the error persists, report it to the development team with the page and action that triggered it."
+        }
+      }
+    }
   }
 }

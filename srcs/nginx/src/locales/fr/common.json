@@ -346,5 +346,103 @@
     "waitiing": "Attente...",
     "creating": "Création du tournoi...",
     "tournament_full": "Ce tournoi est déjà complet (maximum 4 joueurs)."
+  },
+  "faq": {
+    "title": "FAQ",
+    "subtitle": "Questions fréquemment posées sur Spin Pong",
+    "back": "Retour",
+    "sections": {
+      "login": {
+        "title": "Connexion & Accès",
+        "q1": {
+          "q": "Je n'arrive pas à me connecter — 'Identifiants invalides'. Que faire ?",
+          "a": "Vérifiez votre nom d'utilisateur/email et votre mot de passe (attention à la casse). Si vous vous êtes inscrit via OAuth (Google/42), reconnectez-vous avec le même provider."
+        },
+        "q2": {
+          "q": "Ma session a expiré et j'ai été déconnecté sans prévenir.",
+          "a": "Les sessions ont une durée de vie limitée pour des raisons de sécurité. Reconnectez-vous simplement. Si cela se produit souvent, vérifiez que votre navigateur ne supprime pas les cookies."
+        },
+        "q3": {
+          "q": "J'obtiens 'Trop de tentatives échouées' et je ne peux plus réessayer.",
+          "a": "Le serveur bloque temporairement l'accès après plusieurs mauvaises tentatives pour protéger votre compte. Attendez quelques minutes puis revenez sur la page de connexion."
+        },
+        "q4": {
+          "q": "Je me suis inscrit via Google / 42 mais le bouton ne fonctionne plus.",
+          "a": "Assurez-vous d'autoriser les pop-ups et les cookies tiers sur ce site. Vérifiez aussi que votre compte chez le fournisseur OAuth est toujours actif et que l'application dispose des autorisations nécessaires."
+        }
+      },
+      "twofa": {
+        "title": "Authentification à deux facteurs (2FA)",
+        "q1": {
+          "q": "C'est quoi la 2FA et est-ce que je dois l'activer ?",
+          "a": "La double authentification (2FA) ajoute une couche de sécurité supplémentaire. Après avoir saisi votre mot de passe, un code à 6 chiffres est demandé via une application d'authentification (Google Authenticator, Authy…). C'est optionnel mais fortement recommandé."
+        },
+        "q2": {
+          "q": "Mon code 2FA est toujours refusé. Pourquoi ?",
+          "a": "La cause la plus fréquente est un décalage d'horloge sur votre téléphone. Les codes TOTP sont valables seulement 30 secondes.\n• Assurez-vous que la date et l'heure de votre téléphone sont en mode automatique/réseau.\n• Vérifiez que vous lisez le code du bon compte dans votre appli.\n• Saisissez le code dès qu'il vient de se renouveler."
+        },
+        "q3": {
+          "q": "J'ai perdu l'accès à mon application d'authentification. Comment récupérer mon compte ?",
+          "a": "Il n'existe pas de récupération automatique si la 2FA est verrouillée. Contactez un administrateur avec une preuve d'identité. C'est pourquoi il est essentiel de conserver vos codes de secours si fournis."
+        },
+        "q4": {
+          "q": "Comment désactiver la 2FA sur mon compte ?",
+          "a": "Rendez-vous sur votre page de profil → section 2FA → cliquez sur 'Désactiver le 2FA'. La confirmation de votre mot de passe sera demandée. Une fois confirmée, la 2FA est supprimée."
+        },
+        "q5": {
+          "q": "Quelles applications d'authentification sont compatibles ?",
+          "a": "Toute appli compatible TOTP fonctionne :\n• Google Authenticator (iOS & Android)\n• Authy (iOS, Android & Desktop)\n• Microsoft Authenticator (iOS & Android)\n• Bitwarden Authenticator (iOS & Android)\n• Toute application supportant le standard TOTP (RFC 6238)."
+        }
+      },
+      "account": {
+        "title": "Compte & Profil",
+        "q1": {
+          "q": "Comment changer mon avatar ?",
+          "a": "Rendez-vous sur votre page de profil (/me) et cliquez sur votre avatar ou sur le bouton 'Changer d'avatar'. Vous pouvez téléverser une image (JPEG, PNG, WebP). Si l'upload échoue, essayez avec un fichier plus léger."
+        },
+        "q2": {
+          "q": "Quelles sont les règles pour le nom d'utilisateur ?",
+          "a": "Le pseudo doit faire entre 4 et 20 caractères et ne peut contenir que des lettres (a-z, A-Z), des chiffres (0-9) et des underscores (_). Les espaces et caractères spéciaux ne sont pas autorisés."
+        },
+        "q3": {
+          "q": "J'obtiens 'Cette ressource existe déjà' lors de l'inscription.",
+          "a": "Le nom d'utilisateur ou l'email que vous avez choisi est déjà utilisé. Choisissez un autre pseudo. Si vous avez déjà un compte, utilisez la page de connexion."
+        }
+      },
+      "game": {
+        "title": "Jeu & Tournoi",
+        "q1": {
+          "q": "Comment fonctionne un tournoi ?",
+          "a": "Un joueur crée un tournoi et d'autres rejoignent. Quand le maximum de joueurs (4) est atteint, le créateur peut le lancer. Le tableau de match est généré automatiquement et les matchs se jouent jusqu'à désigner un vainqueur."
+        },
+        "q2": {
+          "q": "Le bouton tournoi est grisé / indisponible.",
+          "a": "Un tournoi peut être complet (max 4 joueurs), déjà démarré ou terminé. Consultez la liste des tournois pour en trouver un disponible, ou créez-en un nouveau."
+        },
+        "q3": {
+          "q": "Peut-on jouer contre l'IA ?",
+          "a": "Oui. Depuis la page d'accueil, choisissez 'Jouer contre l'IA'. L'IA utilise un modèle entraîné et représente un vrai défi. La difficulté s'adapte au cours de la partie."
+        }
+      },
+      "errors": {
+        "title": "Erreurs fréquentes",
+        "q1": {
+          "q": "Je vois 'Limite de requêtes dépassée'. Pourquoi ?",
+          "a": "Le serveur limite le nombre de requêtes par utilisateur sur une courte période pour éviter les abus. Attendez quelques minutes et réessayez. Évitez de rafraîchir la page en boucle."
+        },
+        "q2": {
+          "q": "J'obtiens une erreur '403 Forbidden'.",
+          "a": "Vous tentez d'accéder à une ressource pour laquelle vous n'avez pas les permissions. Vérifiez que vous êtes bien connecté et que l'action que vous souhaitez effectuer est autorisée pour votre compte."
+        },
+        "q3": {
+          "q": "J'obtiens une erreur '404 Not Found'.",
+          "a": "La page ou la ressource demandée n'existe pas. Vérifiez l'URL ou utilisez le menu de navigation pour trouver ce que vous cherchez."
+        },
+        "q4": {
+          "q": "Je vois 'Erreur interne du serveur'. C'est de ma faute ?",
+          "a": "Non — une erreur 500 signifie qu'un problème s'est produit de notre côté. Réessayez dans quelques instants. Si l'erreur persiste, signalez-la à l'équipe de développement en précisant la page et l'action qui l'a déclenchée."
+        }
+      }
+    }
   }
 }
