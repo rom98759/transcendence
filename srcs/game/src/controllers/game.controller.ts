@@ -6,7 +6,7 @@ import { handleClientMessage } from '../service/game.communication.js';
 import { GameSettings } from '../core/game.types.js';
 import { WebSocket } from 'ws';
 import * as db from '../core/game.database.js';
-import { AppError } from '@transcendence/core';
+import { AppError, LOG_REASONS } from '@transcendence/core';
 import { cleanupConnection } from '../service/game.connections.js';
 import { WS_CLOSE } from '../core/game.state.js';
 
