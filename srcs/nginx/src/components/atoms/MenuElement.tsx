@@ -141,6 +141,7 @@ const MenuElement = ({ action, items, scale = 1, className = '', ...props }: Men
               ) : (
                 <Link
                   to={item.to || '#'}
+                  onClick={(e) => e.stopPropagation()}
                   className="block py-1 px-2 text-slate-900 hover:text-slate-600 hover:scale-110 transition-all text-sm font-medium tracking-wide"
                 >
                   {item.label}
