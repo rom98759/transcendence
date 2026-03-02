@@ -35,76 +35,89 @@ const AccordionItem = ({
   isOpen,
   onToggle,
   index,
+  id,
 }: {
   entry: FAQEntry;
   isOpen: boolean;
   onToggle: () => void;
   index: number;
-}) => (
-  <div
-    className={`rounded-xl overflow-hidden transition-shadow duration-300 ${
-      isOpen
-        ? 'shadow-[0_4px_20px_rgba(0,255,159,0.08)] ring-1 ring-cyan-500/30'
-        : 'shadow-sm ring-1 ring-gray-200/60 hover:ring-cyan-300/40 hover:shadow-md'
-    }`}
-  >
-    <button
-      onClick={onToggle}
-      className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors duration-200
+  id: string;
+}) => {
+  const btnId = `btn-${id}`;
+  const panelId = `panel-${id}`;
+
+  return (
+    <div
+      className={`rounded-xl overflow-hidden transition-shadow duration-300 ${
+        isOpen
+          ? 'shadow-[0_4px_20px_rgba(0,255,159,0.08)] ring-1 ring-cyan-500/30'
+          : 'shadow-sm ring-1 ring-gray-200/60 hover:ring-cyan-300/40 hover:shadow-md'
+      }`}
+    >
+      <button
+        type="button"
+        id={btnId}
+        onClick={onToggle}
+        className={`w-full flex items-center gap-4 px-5 py-4 text-left transition-colors duration-200
                   focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-500 ${
                     isOpen
                       ? 'bg-gradient-to-r from-cyan-50 to-blue-50'
                       : 'bg-white hover:bg-gray-50/80'
                   }`}
-      aria-expanded={isOpen}
-    >
-      {/* Numéro de question */}
-      <span
-        className={`flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center transition-colors duration-200 ${
-          isOpen
-            ? 'bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-sm shadow-cyan-500/40'
-            : 'bg-gray-100 text-gray-400'
-        }`}
-        aria-hidden="true"
+        aria-expanded={isOpen}
+        aria-controls={panelId}
       >
-        {index + 1}
-      </span>
+        {/* Numéro de question */}
+        <span
+          className={`flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center transition-colors duration-200 ${
+            isOpen
+              ? 'bg-gradient-to-br from-cyan-500 to-blue-500 text-white shadow-sm shadow-cyan-500/40'
+              : 'bg-gray-100 text-gray-400'
+          }`}
+          aria-hidden="true"
+        >
+          {index + 1}
+        </span>
 
-      <span
-        className={`flex-1 font-medium text-sm sm:text-base leading-snug transition-colors duration-200 ${
-          isOpen ? 'text-cyan-800' : 'text-gray-800'
+        <span
+          className={`flex-1 font-medium text-sm sm:text-base leading-snug transition-colors duration-200 ${
+            isOpen ? 'text-cyan-800' : 'text-gray-800'
+          }`}
+        >
+          {entry.q}
+        </span>
+
+        {/* Chevron animé */}
+        <svg
+          className={`flex-shrink-0 w-5 h-5 transition-all duration-300 ${
+            isOpen ? 'rotate-180 text-cyan-500' : 'rotate-0 text-gray-400'
+          }`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <div
+        id={panelId}
+        role="region"
+        aria-labelledby={btnId}
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        {entry.q}
-      </span>
-
-      {/* Chevron animé */}
-      <svg
-        className={`flex-shrink-0 w-5 h-5 transition-all duration-300 ${
-          isOpen ? 'rotate-180 text-cyan-500' : 'rotate-0 text-gray-400'
-        }`}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    </button>
-
-    <div
-      className={`overflow-hidden transition-all duration-300 ease-in-out ${
-        isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
-      }`}
-    >
-      <div className="px-5 py-4 bg-white border-t border-cyan-100">
-        <div className="pl-10">
-          <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{entry.a}</p>
+        <div className="px-5 py-4 bg-white border-t border-cyan-100">
+          <div className="pl-10">
+            <p className="text-gray-600 text-sm leading-relaxed whitespace-pre-line">{entry.a}</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 // ─────────────────────────────────────────────
 // Section bloc
@@ -138,6 +151,7 @@ const FAQSectionBlock = ({ section }: { section: FAQSection }) => {
           <AccordionItem
             key={idx}
             index={idx}
+            id={`${section.id}-${idx}`}
             entry={entry}
             isOpen={openIndex === idx}
             onToggle={() => toggle(idx)}
