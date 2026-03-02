@@ -24,6 +24,7 @@ export const NavBar = () => {
 
   const profileItems = [
     { label: t('navbar.profile'), to: '/me' },
+    { label: t('faq.title'), to: '/faq' },
     { label: t('navbar.profile_logout'), onClick: () => logout() },
   ];
 

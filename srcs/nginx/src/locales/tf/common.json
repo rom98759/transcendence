@@ -362,5 +362,103 @@
     "waitiing": "On t'attend...",
     "creating": "Création de la vendetta...",
     "tournament_full": "Cette vendetta est complete(maximum 4 truands)."
+  },
+  "faq": {
+    "title": "FAQ du Turfu",
+    "subtitle": "Les questions que t'osais même pas poser, on y répond quand même",
+    "back": "On se taille",
+    "sections": {
+      "login": {
+        "title": "Connexion & Accès au Repaire",
+        "q1": {
+          "q": "Je peux pas me connecter, ça dit 'Identifiants invalides'. C'est quoi le problème ?",
+          "a": "Revois ton blaze/email et ton code secret, mon gars — attention aux majuscules. Si t'es passé par OAuth (Google/42), reconnecte-toi par le même chemin."
+        },
+        "q2": {
+          "q": "Ma session a cramé et j'ai été éjecté sans crier gare.",
+          "a": "Les sessions ont une durée de vie, c'est pour la sécurité. Reconnecte-toi, c'est simple. Si ça arrive tout le temps, regarde si ton browser ne flingue pas les cookies."
+        },
+        "q3": {
+          "q": "On me dit 'Trop de tentatives' et je peux plus rentrer.",
+          "a": "Le serveur te bloque temporairement après plusieurs ratées, c'est pas pour t'embêter — c'est pour protéger le compte. Attends quelques minutes et reviens à la charge depuis la page de connexion."
+        },
+        "q4": {
+          "q": "Je m'étais inscrit via Google / 42 mais le bouton marche plus.",
+          "a": "Assure-toi d'autoriser les pop-ups et les cookies tiers sur ce site. Vérifie aussi que ton compte chez Google ou 42 est toujours en vie et que l'appli a les droits nécessaires."
+        }
+      },
+      "twofa": {
+        "title": "Double Sécurité (2FA) — Le Verrou de Pro",
+        "q1": {
+          "q": "C'est quoi la 2FA et j'suis obligé d'l'activer ?",
+          "a": "La double authentification, c'est comme une deuxième porte blindée pour ton compte. Après le mot de passe, on te demande un code à 6 chiffres via une appli (Google Authenticator, Authy…). C'est pas obligatoire mais franchement, fais-le, coco."
+        },
+        "q2": {
+          "q": "Mon code 2FA, il passe jamais. C'est nul.",
+          "a": "C'est souvent une histoire de décalage d'horloge sur ton téléphone. Les codes TOTP vivent 30 secondes.\n• Active la date/heure automatique sur ton tel.\n• Vérifie que c'est le bon compte dans l'appli.\n• Saisis le code juste après qu'il vient de changer."
+        },
+        "q3": {
+          "q": "J'ai perdu accès à mon appli d'auth. Je suis coincé ?",
+          "a": "Ouais c'est chaud. Y'a pas de récupération automatique si la 2FA est verrouillée. Faut contacter un admin avec une preuve d'identité. Retiens ça : garde tes codes de secours quelque part."
+        },
+        "q4": {
+          "q": "Comment je vire la 2FA de mon compte ?",
+          "a": "Va sur la page profil → section 2FA → clique 'Désactiver le 2FA'. Ton mot de passe sera demandé pour confirmer. Après ça, tu repasses en mode accès simple."
+        },
+        "q5": {
+          "q": "Quelles applis d'auth marchent avec le truc ?",
+          "a": "Toute appli TOTP fait l'affaire :\n• Google Authenticator (iOS & Android)\n• Authy (iOS, Android & Desktop)\n• Microsoft Authenticator (iOS & Android)\n• Bitwarden Authenticator (iOS & Android)\n• N'importe quelle appli compatible TOTP (RFC 6238), va voir par toi-même."
+        }
+      },
+      "account": {
+        "title": "Compte & Profil du Bonhomme",
+        "q1": {
+          "q": "Comment je change ma tête de profil ?",
+          "a": "Va sur ta page profil (/me) et clique sur ton avatar ou le bouton 'Changer d'avatar'. Tu peux mettre une image (JPEG, PNG, WebP). Si ça plante, essaie avec un fichier plus léger."
+        },
+        "q2": {
+          "q": "C'est quoi les règles pour le blaze ?",
+          "a": "Le blaze doit faire entre 4 et 20 caractères, avec que des lettres (a-z, A-Z), des chiffres (0-9) et des underscores (_). Pas d'espace, pas de fantaisies."
+        },
+        "q3": {
+          "q": "On me dit 'Identifiant déjà pris' pour l'inscription.",
+          "a": "Ton blaze ou email est déjà dans la place. Trouve-toi un truc unique. Si t'as déjà un compte, passe par la page de connexion, minus."
+        }
+      },
+      "game": {
+        "title": "Jeu & Vendetta (Tournoi)",
+        "q1": {
+          "q": "Comment ça marche une vendetta ?",
+          "a": "Un gars crée la vendetta et les autres la rejoignent. Quand les 4 truands sont là, le créateur la lance. Le tableau des matchs se génère tout seul et on joue jusqu'au boss final."
+        },
+        "q2": {
+          "q": "Le bouton tournoi est grisé, je peux pas rejoindre.",
+          "a": "La vendetta est peut-être complète (max 4 gars), déjà lancée ou terminée. Regarde la liste pour en trouver une dispo, ou crée-en une toi-même."
+        },
+        "q3": {
+          "q": "On peut jouer contre le robot ?",
+          "a": "Ouais. Depuis l'accueil, clique 'Joue avec un ROBOT'. L'IA est entraînée et c'est pas de la rigolade. La difficulté s'adapte en cours de partie."
+        }
+      },
+      "errors": {
+        "title": "Erreurs que t'as pas demandées",
+        "q1": {
+          "q": "'Limite de requêtes dépassée', kesako ?",
+          "a": "T'as trop tiré sur la corde en peu de temps. Le serveur fait une pause pour protéger la boutique. Attends quelques minutes et reviens. Arrête de spam le bouton aussi."
+        },
+        "q2": {
+          "q": "J'ai une erreur 403. T'as le droit de m'éjecter comme ça ?",
+          "a": "403 c'est 'T'as pas les droits, mon gars'. Vérifie que t'es bien connecté et que ce que tu tentes de faire est autorisé pour ton compte."
+        },
+        "q3": {
+          "q": "J'ai une erreur 404. C'est où ce truc ?",
+          "a": "La page ou la ressource demandée, elle existe pas. Vérifie l'URL ou utilise le menu pour trouver ce que tu cherches."
+        },
+        "q4": {
+          "q": "'Erreur interne du serveur'. C'est moi ou c'est vous ?",
+          "a": "C'est nous, pas toi. Une 500, ça veut dire qu'on a un blème chez nous. Réessaie dans quelques instants. Si ça persiste, signale-le à l'équipe avec la page et ce que t'as fait pour déclencher le truc."
+        }
+      }
+    }
   }
 }
