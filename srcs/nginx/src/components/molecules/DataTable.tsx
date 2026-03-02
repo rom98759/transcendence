@@ -39,7 +39,7 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div className="w-[70%] max-w-5xl mx-auto my-12">
-      <div className="bg-white rounded-3xl shadow-2xl p-8 border border-cyan-300">
+      <div className="bg-white/70 rounded-3xl shadow-2xl p-8 border border-cyan-300">
         <h2 className="text-2xl font-semibold text-center mb-6 text-gray-700 font-quantico">
           {title}
         </h2>
