@@ -97,6 +97,14 @@ export const authApi = {
   },
 
   /**
+   * Indique au serveur que la session est toujours active.
+   * Appelé périodiquement tant que l'utilisateur est connecté.
+   */
+  heartbeat: async (): Promise<void> => {
+    await api.post('/auth/heartbeat');
+  },
+
+  /**
    * Échange un code d'autorisation OAuth contre un JWT
    * @param provider Provider OAuth ('google' | 'school42')
    * @param request Code d'autorisation et state

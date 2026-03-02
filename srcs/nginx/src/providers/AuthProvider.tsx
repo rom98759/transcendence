@@ -14,6 +14,7 @@ import { TwoFactorPendingContext } from '../types/twoFactor.types';
 import { authApi } from '../api/auth-api';
 import { profileApi } from '../api/profile-api';
 import api from '../api/api-client';
+import { useHeartbeat } from '../hooks/useHeartbeat';
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -141,11 +142,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // dès le prochain re-render, sans attendre un changement de pending2FA.
   const hasPending2FA = !!pending2FA && Date.now() <= pending2FA.expiresAt;
 
+  const isLoggedIn = isAuthChecked && user !== null;
+
+  // Ping périodique → démarre au login, s'arrête au logout ou sur 401.
+  useHeartbeat(isLoggedIn);
+
   const contextValue = useMemo(
     () => ({
       user,
       isAuthChecked,
-      isLoggedIn: isAuthChecked && user !== null,
+      isLoggedIn,
       login,
       logout,
       updateUser,
