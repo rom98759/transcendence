@@ -1,4 +1,4 @@
-import { LOG_EVENTS, AppError } from '@transcendence/core';
+import { LOG_EVENTS, AppError, ERROR_CODES, LOG_REASONS } from '@transcendence/core';
 import { FastifyReply, FastifyRequest } from 'fastify';
 import type { FastifyError } from 'fastify';
 
@@ -12,6 +12,7 @@ export async function errorHandler(
   if (error.code === 'FST_ERR_VALIDATION') {
     req.log.error({
       event: LOG_EVENTS.APPLICATION.VALIDATION_FAIL,
+      reason: LOG_REASONS.VALIDATION.INVALID_FORMAT,
       userId: req.user?.id,
       message: error.message,
       stack: error.stack,
@@ -20,11 +21,13 @@ export async function errorHandler(
 
     return reply.status(400).send({
       statusCode: 400,
-      error: 'Bad Request',
+      errorCode: ERROR_CODES.VALIDATION_ERROR,
       message: 'Validation failed',
-      details: {
-        fields: error.validation,
-      },
+      details: error.validation?.map((v) => ({
+        reason: v.keyword ?? LOG_REASONS.VALIDATION.INVALID_FORMAT,
+        field: v.instancePath || 'unknown',
+        message: v.message,
+      })),
     });
   }
 
@@ -33,7 +36,7 @@ export async function errorHandler(
       {
         event: error.context.event,
         reason: error.context.reason,
-        code: error.code,
+        errorCode: error.code,
         userId: req.user?.id,
         cause: error.cause,
       },
@@ -43,32 +46,31 @@ export async function errorHandler(
     if (error.statusCode == 400) {
       return reply.status(400).send({
         statusCode: 400,
-        error: 'Bad Request',
+        errorCode: ERROR_CODES.VALIDATION_ERROR,
         message: 'Validation failed',
-        details: {
-          fields: error.context?.field,
-        },
+        details: error.context?.details,
+      });
+    } else {
+      return reply.status(error.statusCode).send({
+        statusCode: error.statusCode,
+        errorCode: error.code,
+        message: error.message,
+        details: error.context?.details,
       });
     }
-
-    return reply.status(error.statusCode).send({
-      statusCode: error.statusCode,
-      error: error.name,
-      message: error.message,
-      details: error.context?.details,
-    });
   }
 
-  // console.log(error, '🔥 Unexpected error');
   req.log.error(
     {
       event: LOG_EVENTS.CRITICAL.PANIC,
       originalError: error,
     },
-    error.message || '🔥 Unexpected error',
+    error.message || 'Unexpected error',
   );
 
   return reply.status(500).send({
+    statusCode: 500,
+    errorCode: ERROR_CODES.INTERNAL_ERROR,
     message: 'Unexpected error',
   });
 }

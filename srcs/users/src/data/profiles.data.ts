@@ -33,7 +33,7 @@ export class ProfileRepository {
         if (error.code == 'P2002') {
           throw new AppError(
             ERR_DEFS.RESOURCE_ALREADY_EXIST,
-            { details: { resource: LOG_RESOURCES.PROFILE, authId: payload.authId } },
+            { details: [{ resource: LOG_RESOURCES.PROFILE, value: String(payload.authId) }] },
             error,
           );
         }
@@ -64,6 +64,17 @@ export class ProfileRepository {
   async findProfileById(id: number): Promise<ProfileSimpleDTO | null> {
     return await prisma.userProfile.findUnique({
       where: { authId: id },
+      select: {
+        username: true,
+        avatarUrl: true,
+      },
+    });
+  }
+
+  async updateProfileUsername(id: number, newUsername: string): Promise<ProfileSimpleDTO> {
+    return await prisma.userProfile.update({
+      where: { authId: id },
+      data: { username: newUsername },
       select: {
         username: true,
         avatarUrl: true,
@@ -108,7 +119,11 @@ export class ProfileRepository {
     try {
       await writeFile(uploadPath, buffer);
     } catch (err: unknown) {
-      throw new AppError(ERR_DEFS.SERVICE_GENERIC, { details: 'Disk storage error' }, err);
+      throw new AppError(
+        ERR_DEFS.SERVICE_GENERIC,
+        { details: [{ extraInfo: 'disk storage error' }] },
+        err,
+      );
     }
   }
 

@@ -4,8 +4,15 @@ set -e
 
 # chown -R appuser:appgroup /app/uploads
 
-echo "Running prisma db push..."
-npx prisma migrate deploy
+DB_FILE="/app/data/um.db"
+
+if [ ! -f "$DB_FILE" ]; then
+  echo "Fresh DB — running migrate deploy..."
+  npx prisma migrate deploy
+else
+  echo "Existing DB — using db push..."
+  npx prisma db push
+fi
 
 echo "Starting app..."
 exec "$@"

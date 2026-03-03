@@ -57,7 +57,7 @@ export async function buildApp() {
   app.addHook('preHandler', async (req, reply) => {
     const userIdHeader = req.headers['x-user-id'];
     const usernameHeader = req.headers['x-user-name'];
-
+    req.log.info({ userIdHeader, usernameHeader }, 'prehandler Header');
     if (req.routeOptions.config.skipAuth) {
       return;
     }

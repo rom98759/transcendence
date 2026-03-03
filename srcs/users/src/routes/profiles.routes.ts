@@ -7,6 +7,7 @@ import {
   DetailedErrorSchema,
   ValidationErrorSchema,
   ProfileSimpleSchema,
+  usernameSchema,
 } from '@transcendence/core';
 import { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 
@@ -62,6 +63,20 @@ const getProfilesbyUsernameQuerySchema = {
   response: {
     200: z.array(ProfileSimpleSchema),
     400: ValidationErrorSchema,
+  },
+} as const;
+
+const updateProfileUsernameSchema = {
+  tags: ['users'],
+  summary: 'Update profile username',
+  description: 'Update profile username',
+  params: UserNameSchema,
+  body: z.object({ newUsername: usernameSchema }),
+  response: {
+    200: ProfileSimpleSchema,
+    400: ValidationErrorSchema,
+    404: DetailedErrorSchema,
+    409: DetailedErrorSchema,
   },
 } as const;
 
@@ -131,7 +146,13 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
   );
 
   app.patch(
-    '/username/:username/avatar',
+    '/:username/username',
+    { schema: updateProfileUsernameSchema },
+    profileController.updateProfileUsername,
+  );
+
+  app.patch(
+    '/:username/avatar',
     { schema: updateProfileAvatarSchema },
     profileController.updateProfileAvatar,
   );
