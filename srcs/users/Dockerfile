@@ -14,7 +14,7 @@ COPY srcs/shared/core/package*.json ./srcs/shared/core/
 COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 
 # 2) Installation déterministe (workspaces)
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # 3) Sources minimales nécessaires au build
 COPY srcs/users ./srcs/users
@@ -24,12 +24,10 @@ COPY srcs/shared/core/src ./srcs/shared/core/src
 WORKDIR /app/srcs/users
 RUN npx prisma generate
 
-
 # 5) Build (core puis users)
 WORKDIR /app
 RUN npm run build --workspace srcs/shared/core
 RUN npm run build --workspace srcs/users
-
 
 # ==========================
 # Stage 2 — Runner
@@ -44,7 +42,8 @@ ENV NODE_ENV=production
 COPY package-lock.json ./package-lock.json
 COPY srcs/users/package.json ./package.json
 # audit and fund are done in builder
-RUN npm install --omit=dev --no-audit --no-fund
+COPY --from=builder /app/node_modules ./node_modules
+RUN npm prune --omit=dev
 
 # 7) Injecter le package interne @transcendence/core (compilé)
 RUN mkdir -p node_modules/@transcendence
