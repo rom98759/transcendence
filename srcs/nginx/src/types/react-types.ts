@@ -1,7 +1,7 @@
 import { ProfileSimpleDTO } from '@transcendence/core';
 import { ReactNode } from 'react';
 
-export type AvatarSize = 'sm' | 'md' | 'lg';
+export type AvatarSize = 'xs' | 'sm' | 'md' | 'lg';
 
 export interface UserAction {
   label: string;

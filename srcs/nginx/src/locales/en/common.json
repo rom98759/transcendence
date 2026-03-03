@@ -310,7 +310,9 @@
     "remove": "remove from friends",
     "play": "play",
     "my_friends": "My friends",
-    "no_friends": "No friends yet"
+    "no_friends": "No friends yet",
+    "online": "Online",
+    "offline": "Offline"
   },
   "file_uploader": {
     "file_choose": "Choose a file",

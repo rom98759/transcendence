@@ -1,7 +1,4 @@
-import Background from '../atoms/Background';
 import Circle from '../atoms/Circle';
-import { Footer } from '../molecules/Footer';
-import { NavBar } from '../molecules/NavBar';
 
 interface PageProps {
   children: React.ReactNode;
@@ -9,33 +6,26 @@ interface PageProps {
   className?: string;
 }
 
-const colors = {
-  start: '#00ff9f',
-  end: '#0088ff',
-};
-
-export const Page = ({ children, title, className }: PageProps) => {
+/**
+ * Page — Wrapper qui affiche le contenu dans un Circle (rond sur desktop).
+ *
+ * Ne gère PAS le layout global (Background, NavBar, Footer).
+ * Ceux-ci sont fournis par AppLayout via le routeur.
+ *
+ * Usage : pages avec contenu compact (profils, amis, etc.)
+ * Pour du contenu long/scrollable (TOS, Privacy), NE PAS utiliser Page.
+ */
+export const Page = ({ children, title, className = '' }: PageProps) => {
   return (
-    <div className={`w-full h-full relative ${className}`}>
-      <Background
-        grainIntensity={4}
-        baseFrequency={0.28}
-        colorStart={colors.start}
-        colorEnd={colors.end}
-      >
-        <div className="flex flex-col min-h-screen">
-          <div className="z-15 lg:absolute top-0 left-0 w-full lg-h-full">
-            <NavBar></NavBar>
-          </div>
-          <div className="grow">
-            <Circle>
-              {title && <h1 className="mb-6 text-gray-600 text-3xl font-quantico">{title}</h1>}
-              {children}
-            </Circle>
-          </div>
-          <Footer className=""></Footer>
-        </div>
-      </Background>
+    <div className={`flex-1 flex items-center justify-center p-2 sm:p-4 ${className}`}>
+      <Circle>
+        {title && (
+          <h1 className="mb-4 sm:mb-6 text-gray-600 text-xl sm:text-2xl md:text-3xl font-quantico">
+            {title}
+          </h1>
+        )}
+        {children}
+      </Circle>
     </div>
   );
 };

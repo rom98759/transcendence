@@ -18,6 +18,7 @@ import { loggerConfig } from './config/logger.config.js';
 import redisPlugin from './plugins/ioredis.plugins.js';
 import { initRedisSubscriber } from './events/redis.subscriber.js';
 import { logger } from './utils/logger.js';
+import { onlineService } from './services/online.service.js';
 
 export async function buildApp() {
   const isTest = appenv.NODE_ENV === 'test';
@@ -39,6 +40,11 @@ export async function buildApp() {
   };
   const app = fastify(options).withTypeProvider<ZodTypeProvider>();
   await app.register(redisPlugin);
+
+  // Inject Redis into the online service for checking user online status
+  if (app.redis) {
+    onlineService.setRedis(app.redis);
+  }
 
   app.addHook('onRequest', (request, reply, done) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -9,6 +9,7 @@ import {
 } from '@transcendence/core';
 import { friendshipRepository } from '../data/friends.data.js';
 import { profileService } from './profiles.service.js';
+import { onlineService } from './online.service.js';
 import { Friendship } from '@prisma/client';
 import { mapFriendshipToDTO } from '../utils/mappers.js';
 import { logger } from '../utils/logger.js';
@@ -85,9 +86,28 @@ export class FriendshipService {
 
   async getFriendsByUserId(userId: number): Promise<FriendshipUnifiedDTO[]> {
     const friendships = await friendshipRepository.findFriendshipsByUser(userId);
-    return friendships.map((f: FriendshipFullDTO) => {
+    const unifiedList = friendships.map((f: FriendshipFullDTO) => {
       return mapFriendshipToDTO(f, userId);
     });
+
+    // Enrich with online status from Redis
+    // Extract authIds from the raw Prisma data (requester/receiver have authId)
+    const friendAuthIds = friendships.map((f) => {
+      const raw = f as unknown as { requester: { authId: number }; receiver: { authId: number } };
+      return raw.receiver.authId === userId ? raw.requester.authId : raw.receiver.authId;
+    });
+
+    try {
+      const onlineStatuses = await onlineService.getBulkOnlineStatus(friendAuthIds);
+      for (let i = 0; i < unifiedList.length; i++) {
+        unifiedList[i].isOnline = onlineStatuses.get(friendAuthIds[i]) ?? false;
+      }
+    } catch (err) {
+      logger.warn({ event: 'online_status_enrichment_failed', error: err });
+      // Graceful degradation: leave isOnline undefined
+    }
+
+    return unifiedList;
   }
 
   async updateFriendshipNickname(

@@ -16,6 +16,7 @@ export const FriendshipUnifiedSchema = z.object({
   status: z.string(),
   nickname: nicknameSchema.nullable(),
   friend: ProfileSimpleSchema,
+  isOnline: z.boolean().optional(),
 });
 
 export const FriendshipReceiverSchema = FriendshipFullSchema.omit({

@@ -1,45 +1,53 @@
 interface CircleProps {
   children: React.ReactNode;
   className?: string;
-  size?: number;
 }
 
-const Circle = ({ children, className = '', size = 120 }: CircleProps) => {
+/**
+ * Circle — Conteneur visuel : rectangle arrondi sur mobile, cercle sur desktop.
+ *
+ * Dimensionnement :
+ * - Mobile : pleine largeur, hauteur flexible limitée à 80vh
+ * - Desktop (md+) : cercle parfait, taille basée sur min(hauteur, largeur) dispo
+ *
+ * Le contenu interne scrolle si nécessaire (overflow-y-auto).
+ */
+const Circle = ({ children, className = '' }: CircleProps) => {
   return (
     <div
-      style={
-        {
-          '--circle-size': `${size}vh`,
-        } as React.CSSProperties
-      }
       className={`
       bg-white/80
-      lg-bg-teal-100/10
       shadow-2xl
       z-0
       flex
       items-center
       justify-center
-      transition-all duration-900 ease-in-out
+      transition-all duration-500 ease-in-out
       relative
-      w-[95vw]
-      h-[80vh]
-      rounded-3xl
       mx-auto
+      my-auto
       text-gray-700
-      
-      sm: mt-5
-      lg:absolute
-      lg:top-1/2
-      lg:left-1/2
-      lg:-translate-x-1/2
-      lg:-translate-y-1/2
-      lg:h-(--circle-size) 
-      lg:w-(--circle-size) 
-      lg:rounded-full
+
+      w-[95vw]
+      max-w-[95vw]
+      max-h-[80vh]
+      rounded-2xl
+
+      sm:w-[90vw]
+      sm:max-w-[90vw]
+      sm:rounded-3xl
+
+      md:w-[min(75vh,80vw)]
+      md:h-[min(75vh,80vw)]
+      md:max-w-[min(75vh,80vw)]
+      md:max-h-[min(75vh,80vw)]
+      md:aspect-square
+      md:rounded-full
       ${className}`}
     >
-      <div className="relative z-10 text-center w-full max-w-4xl px-2 md:px-6 ">{children}</div>
+      <div className="relative z-10 text-center w-full max-w-4xl px-3 sm:px-4 md:px-6 py-4 overflow-y-auto max-h-full">
+        {children}
+      </div>
     </div>
   );
 };

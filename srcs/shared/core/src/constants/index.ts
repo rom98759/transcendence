@@ -5,7 +5,7 @@ export enum RequestStatus {
 }
 
 export const CONFIG = {
-  MAX_FRIENDS: 10,
+  MAX_FRIENDS: 100,
 } as const;
 
 export * from './services.const.js';

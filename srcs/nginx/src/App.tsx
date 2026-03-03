@@ -15,6 +15,8 @@ import { PublicRoute } from './router/PublicRoute';
 import { TwoFactorRoute } from './router/TwoFactorRoute';
 import TosPage from './pages/TosPage';
 import PrivacyPage from './pages/PrivacyPage';
+import AppLayout from './components/layouts/AppLayout';
+import AuthLayout from './components/layouts/AuthLayout';
 
 export const App = () => {
   return (
@@ -22,36 +24,39 @@ export const App = () => {
       <Routes>
         {/* Route publique sans guard — animation d'intro */}
         <Route path="/" element={<AnimationPage />} />
-        <Route path="/privacy" element={<PrivacyPage />} />
-        <Route path="/tos" element={<TosPage />} />
 
-        {/* Routes réservées aux non-authentifiés */}
-        <Route element={<PublicRoute />}>
-          <Route path="/welcome" element={<WelcomePage />} />
-          <Route path="/login" element={<WelcomePage />} />
-          <Route path="/register" element={<WelcomePage defaultMode="register" />} />
-          <Route path="/auth/oauth/:provider/callback" element={<OAuthCallback />} />
+        {/* AuthLayout — NavBar + contenu centré, sans footer */}
+        <Route element={<AuthLayout />}>
+          <Route element={<PublicRoute />}>
+            <Route path="/welcome" element={<WelcomePage />} />
+            <Route path="/login" element={<WelcomePage />} />
+            <Route path="/register" element={<WelcomePage defaultMode="register" />} />
+            <Route path="/auth/oauth/:provider/callback" element={<OAuthCallback />} />
+          </Route>
+          <Route element={<TwoFactorRoute />}>
+            <Route path="/2fa" element={<TwoFactorPage />} />
+          </Route>
         </Route>
 
-        {/* Route 2FA — accès contrôlé par TwoFactorRoute (pending2FA requis) */}
-        <Route element={<TwoFactorRoute />}>
-          <Route path="/2fa" element={<TwoFactorPage />} />
+        {/* AppLayout — NavBar + main scrollable + Footer */}
+        <Route element={<AppLayout />}>
+          {/* Pages accessibles à tous */}
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/tos" element={<TosPage />} />
+          <Route path="/faq" element={<FAQPage />} />
+
+          {/* Routes protégées — authentification requise */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/me" element={<MyProfilePage />} />
+            <Route path="/friends" element={<FriendsPage />} />
+            <Route path="/profile/:username" element={<ProfilePage />} />
+            <Route path="/tournaments/*" element={<TournamentRoutes />} />
+          </Route>
+
+          {/* Catch-all — toute URL non reconnue */}
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
-
-        {/* Routes protégées — authentification requise */}
-        <Route element={<PrivateRoute />}>
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/me" element={<MyProfilePage />} />
-          <Route path="/friends" element={<FriendsPage />} />
-          <Route path="/profile/:username" element={<ProfilePage />} />
-          <Route path="/tournaments/*" element={<TournamentRoutes />} />
-        </Route>
-
-        {/* FAQ — accessible à tous, connecté ou non */}
-        <Route path="/faq" element={<FAQPage />} />
-
-        {/* Catch-all — toute URL non reconnue */}
-        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </main>
   );

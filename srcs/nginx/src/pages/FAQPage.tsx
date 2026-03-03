@@ -1,14 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import Background from '../components/atoms/Background';
-import { NavBar } from '../components/molecules/NavBar';
 import { useAuth } from '../providers/AuthProvider';
-
-const colors = {
-  start: '#00ff9f',
-  end: '#0088ff',
-};
 
 // ─────────────────────────────────────────────
 // Types
@@ -234,74 +227,56 @@ export const FAQPage = () => {
   ];
 
   return (
-    <div className="w-full h-full">
-      <Background
-        grainIntensity={4}
-        baseFrequency={0.28}
-        colorStart={colors.start}
-        colorEnd={colors.end}
-      >
-        <div className="w-full h-full flex flex-col">
-          <NavBar />
+    <div className="flex flex-col items-center px-4 py-10">
+      {/* Carte principale — même style que TwoFactorPage */}
+      <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,255,159,0.15),0_0_100px_rgba(0,136,255,0.1)] border border-white/40 overflow-hidden">
+        {/* En-tête de la carte */}
+        <div className="px-8 pt-8 pb-6 border-b border-gray-100 text-center">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/40 mb-4">
+            <svg
+              className="w-7 h-7 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent mb-1 font-quantico tracking-wide">
+            {t('faq.title')}
+          </h1>
+          <p className="text-sm text-gray-500">{t('faq.subtitle')}</p>
+        </div>
 
-          {/* Conteneur scrollable — prend l'espace restant sous la navbar */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="flex flex-col items-center px-4 py-10">
-              {/* Carte principale — même style que TwoFactorPage */}
-              <div className="w-full max-w-2xl bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_8px_32px_rgba(0,255,159,0.15),0_0_100px_rgba(0,136,255,0.1)] border border-white/40 overflow-hidden">
-                {/* En-tête de la carte */}
-                <div className="px-8 pt-8 pb-6 border-b border-gray-100 text-center">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 shadow-lg shadow-cyan-500/40 mb-4">
-                    <svg
-                      className="w-7 h-7 text-white"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent mb-1 font-quantico tracking-wide">
-                    {t('faq.title')}
-                  </h1>
-                  <p className="text-sm text-gray-500">{t('faq.subtitle')}</p>
-                </div>
+        {/* Contenu — sections */}
+        <div className="px-6 sm:px-8 py-6 space-y-8">
+          {sections.map((section, sIdx) => (
+            <div key={section.id}>
+              <FAQSectionBlock section={section} />
+              {/* Séparateur entre sections (sauf le dernier) */}
+              {sIdx < sections.length - 1 && <div className="mt-6 border-t border-gray-100" />}
+            </div>
+          ))}
+        </div>
 
-                {/* Contenu — sections */}
-                <div className="px-6 sm:px-8 py-6 space-y-8">
-                  {sections.map((section, sIdx) => (
-                    <div key={section.id}>
-                      <FAQSectionBlock section={section} />
-                      {/* Séparateur entre sections (sauf le dernier) */}
-                      {sIdx < sections.length - 1 && (
-                        <div className="mt-6 border-t border-gray-100" />
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Pied de carte */}
-                <div className="px-8 py-6 bg-gray-50/70 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <Link
-                    to={backPath}
-                    className="flex-shrink-0 px-5 py-2.5 bg-gradient-to-r from-[#00ff9f] to-[#0088ff]
+        {/* Pied de carte */}
+        <div className="px-8 py-6 bg-gray-50/70 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <Link
+            to={backPath}
+            className="flex-shrink-0 px-5 py-2.5 bg-gradient-to-r from-[#00ff9f] to-[#0088ff]
                              text-white text-sm font-semibold rounded-xl shadow-md
                              hover:shadow-[0_4px_20px_rgba(0,255,159,0.3)]
                              transition-all duration-200 hover:scale-105 active:scale-95"
-                  >
-                    ← {t('faq.back')}
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
+          >
+            ← {t('faq.back')}
+          </Link>
         </div>
-      </Background>
+      </div>
     </div>
   );
 };

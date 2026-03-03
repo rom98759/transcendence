@@ -1,5 +1,6 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { profileService } from '../services/profiles.service.js';
+import { onlineService } from '../services/online.service.js';
 import * as mappers from '../utils/mappers.js';
 import {
   AppError,
@@ -31,12 +32,25 @@ export class ProfileController {
 
     const profileSimpleDTO = await profileService.getByUsername(username);
 
-    if (xUserName != username) {
-      return reply
-        .status(200)
-        .send({ username: profileSimpleDTO?.username, avatarUrl: profileSimpleDTO?.avatarUrl });
+    // Enrich with online status
+    const profileWithAuthId = await profileService.getProfileByUsername(username);
+    let isOnline = false;
+    if (profileWithAuthId?.authId) {
+      try {
+        isOnline = await onlineService.isUserOnline(profileWithAuthId.authId);
+      } catch {
+        // Graceful degradation: default to offline
+      }
     }
-    return reply.status(200).send(profileSimpleDTO);
+
+    if (xUserName != username) {
+      return reply.status(200).send({
+        username: profileSimpleDTO?.username,
+        avatarUrl: profileSimpleDTO?.avatarUrl,
+        isOnline,
+      });
+    }
+    return reply.status(200).send({ ...profileSimpleDTO, isOnline });
   }
 
   async getProfilesbyUsernameQuery(req: FastifyRequest, reply: FastifyReply) {

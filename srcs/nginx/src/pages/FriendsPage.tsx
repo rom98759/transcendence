@@ -8,8 +8,8 @@ export const FriendsPage = () => {
   const { friends, isLoading, error, addFriend, removeFriend, clearError } = useFriends();
 
   return (
-    <Page className="flex flex-col" title={t('friends.friends')}>
-      <div className="w-full max-w-lg mx-auto">
+    <Page title={t('friends.friends')}>
+      <div className="w-full max-w-xs sm:max-w-sm md:max-w-md mx-auto text-left flex flex-col h-[50vh] md:h-[45vh]">
         <FriendListPanel
           friends={friends}
           isLoading={isLoading}

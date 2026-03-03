@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { Page } from '../components/organisms/PageContainer';
-import Scrollable from '../components/atoms/Scrollable';
 import type { HTMLAttributes, ReactNode, FC } from 'react';
 
 const PrivacyPage = () => {
@@ -27,7 +26,7 @@ const PrivacyPage = () => {
 
   return (
     <Page>
-      <Scrollable className="md:mt-15">
+      <div className="w-full space-y-2 text-left">
         <h1 className="text-3xl mb-4 font-bold text-center">{t('privacy_policy.title')}</h1>
         <p className="text-center text-gray-500 mb-6">
           <i>{t('privacy_policy.last_updated')}</i>
@@ -190,7 +189,7 @@ const PrivacyPage = () => {
             })}
           </P>
         </LegalSection>
-      </Scrollable>
+      </div>
     </Page>
   );
 };

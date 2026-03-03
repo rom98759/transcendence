@@ -18,12 +18,9 @@ const FriendSidebar = () => {
 
   return (
     <>
-      {/* ── Backdrop (mobile only) ── */}
+      {/* ── Backdrop (all screen sizes when sidebar is open) ── */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40 md:hidden"
-          onClick={() => setIsOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setIsOpen(false)} />
       )}
 
       {/* ── Sidebar Panel ── */}
@@ -34,7 +31,7 @@ const FriendSidebar = () => {
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
       >
-        <div className="h-full w-72 bg-slate-900/95 backdrop-blur-xl border-r border-white/10 shadow-2xl flex flex-col">
+        <div className="h-full w-[85vw] max-w-72 bg-slate-900/95 backdrop-blur-xl border-r border-white/10 shadow-2xl flex flex-col">
           {/* ── Header ── */}
           <div className="flex items-center justify-between px-4 py-4 border-b border-white/10">
             <div className="flex items-center gap-2">
@@ -55,7 +52,7 @@ const FriendSidebar = () => {
           </div>
 
           {/* ── Content ── */}
-          <div className="flex-1 overflow-hidden px-3 py-3">
+          <div className="flex-1 min-h-0 overflow-hidden px-3 py-3">
             <FriendListPanel
               friends={friends}
               isLoading={isLoading}

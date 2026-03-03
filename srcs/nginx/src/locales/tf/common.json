@@ -326,7 +326,9 @@
     "remove": "vire-le",
     "play": "on s'amuse",
     "my_friends": "Ma bande",
-    "no_friends": "Tout seul pour l'instant, ça craint"
+    "no_friends": "Tout seul pour l'instant, ça craint",
+    "online": "Dans la place",
+    "offline": "Aux abonnés absents"
   },
   "file_uploader": {
     "file_choose": "Fais ton choix mon gars",

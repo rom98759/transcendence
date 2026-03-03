@@ -1,9 +1,8 @@
 import { FriendshipUnifiedDTO, ProfileSimpleDTO } from '@transcendence/core';
 import { useTranslation } from 'react-i18next';
-import { Loader, UserMinus, X } from 'lucide-react';
-import Avatar from '../atoms/Avatar';
-import defaultAvatar from '../../assets/avatars/default.png';
-import { Link } from 'react-router-dom';
+import { Loader, X } from 'lucide-react';
+import UserIdentity from '../atoms/UserIdentity';
+import ActionButton from '../atoms/ActionButton';
 import UserSearchContainer from './UserSearchContainer';
 import { UserActions } from '../../types/react-types';
 
@@ -13,37 +12,35 @@ interface FriendItemProps {
 }
 
 /**
- * Single friend row — compact, with avatar, username and remove action.
+ * Single friend row — compact, with avatar, username, online status and remove action.
+ * Composed from UserIdentity + ActionButton atoms.
  */
 const FriendItem = ({ friendship, onRemove }: FriendItemProps) => {
   const friend = friendship.friend;
+  const isOnline = friendship.isOnline ?? friend.isOnline ?? false;
 
   return (
-    <div className="group flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-white/10 transition-colors duration-200">
-      {/* Avatar + online indicator */}
-      <Link to={`/profile/${friend.username}`} className="relative shrink-0">
-        <Avatar src={friend.avatarUrl || defaultAvatar} size="sm" />
-      </Link>
-
-      {/* Username */}
-      <Link
-        to={`/profile/${friend.username}`}
-        className="flex-1 min-w-0 text-white text-sm font-quantico font-semibold tracking-wide truncate hover:text-cyan-300 transition-colors"
-      >
-        {friendship.nickname || friend.username}
-      </Link>
-
-      {/* Remove button — visible on hover */}
-      <button
+    <div className="group flex items-center gap-1.5 px-1.5 sm:px-3 py-1.5 sm:py-2 rounded-xl hover:bg-white/10 transition-colors duration-200">
+      <UserIdentity
+        username={friend.username}
+        displayName={friendship.nickname || friend.username}
+        avatarUrl={friend.avatarUrl}
+        isOnline={isOnline}
+        size="xs"
+        linkToProfile
+        className="flex-1"
+        nameClassName="text-white text-xs"
+      />
+      <ActionButton
+        action={UserActions.REMOVE}
         onClick={(e) => {
           e.stopPropagation();
           onRemove(friend);
         }}
-        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-full hover:bg-red-500/20 transition-all duration-200"
-        title="Remove friend"
-      >
-        <UserMinus size={16} className="text-red-400" />
-      </button>
+        size="sm"
+        variant="ghost"
+        className="opacity-100 sm:opacity-0 group-hover:opacity-100"
+      />
     </div>
   );
 };
@@ -96,9 +93,9 @@ const FriendListPanel = ({
   };
 
   return (
-    <div className={`flex flex-col ${isCompact ? 'gap-2' : 'gap-4'} ${className}`}>
+    <div className={`flex flex-col h-full ${isCompact ? 'gap-2' : 'gap-4'} ${className}`}>
       {/* ── Add Friend Section ── */}
-      <div>
+      <div className="shrink-0">
         <h2
           className={`font-quantico text-gray-400 mb-2 ${isCompact ? 'text-xs uppercase tracking-wider' : 'text-sm'}`}
         >
@@ -108,12 +105,13 @@ const FriendListPanel = ({
           isSearch={true}
           actions={[UserActions.ADD]}
           onAction={handleSearchAction}
+          compact={isCompact}
         />
       </div>
 
       {/* ── Error ── */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2 text-red-400 text-sm">
+        <div className="shrink-0 flex items-center gap-2 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2 text-red-400 text-sm">
           <span className="flex-1">{error}</span>
           {onClearError && (
             <button
@@ -126,9 +124,9 @@ const FriendListPanel = ({
         </div>
       )}
 
-      {/* ── Friend List Header ── */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
+      {/* ── Friend List ── */}
+      <div className="flex flex-col flex-1 min-h-0">
+        <div className="flex items-center justify-between mb-2 shrink-0">
           <h2
             className={`font-quantico text-gray-400 ${isCompact ? 'text-xs uppercase tracking-wider' : 'text-sm'}`}
           >
@@ -137,10 +135,8 @@ const FriendListPanel = ({
           <span className="text-xs text-gray-500 font-quantico">{friends.length}</span>
         </div>
 
-        {/* ── Scrollable List ── */}
-        <div
-          className={`overflow-y-auto no-scrollbar ${isCompact ? 'max-h-[50vh]' : 'max-h-[60vh]'}`}
-        >
+        {/* ── Scrollable List — fills all remaining space ── */}
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
           {isLoading && (
             <div className="flex items-center justify-center py-8">
               <Loader size={20} className="text-cyan-400 animate-spin" />

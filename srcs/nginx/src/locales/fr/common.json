@@ -310,7 +310,9 @@
     "remove": "supprimer des amis",
     "play": "jouer",
     "my_friends": "Mes amis",
-    "no_friends": "Aucun ami pour le moment"
+    "no_friends": "Aucun ami pour le moment",
+    "online": "En ligne",
+    "offline": "Hors ligne"
   },
   "file_uploader": {
     "file_choose": "Choisir un fichier",

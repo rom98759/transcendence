@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { Page } from '../components/organisms/PageContainer';
-import Avatar from '../components/atoms/Avatar';
+import UserIdentity from '../components/atoms/UserIdentity';
 import { useQuery } from '@tanstack/react-query';
 import { profileApi } from '../api/profile-api';
 import { useTranslation } from 'react-i18next';
@@ -52,8 +52,20 @@ export const ProfilePage = () => {
             {t('profile.profile')}
           </h1>
           <div className="flex flex-col items-center">
-            <Avatar src={profile.avatarUrl} size="lg"></Avatar>
-            <h2 className="mt-2 ts-form-title">{profile.username}</h2>
+            <UserIdentity
+              username={profile.username}
+              avatarUrl={profile.avatarUrl}
+              isOnline={profile.isOnline}
+              size="lg"
+              direction="col"
+              dotBorderClass="border-white"
+              nameClassName="mt-1 ts-form-title"
+            />
+            <span
+              className={`text-xs font-quantico mt-1 ${profile.isOnline ? 'text-emerald-400' : 'text-gray-500'}`}
+            >
+              {profile.isOnline ? t('friends.online') : t('friends.offline')}
+            </span>
           </div>
         </div>
       </div>

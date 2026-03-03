@@ -30,10 +30,10 @@ export const NavBar = () => {
 
   return (
     <nav
-      className={`mb-2 bg-teal-800/30 p-5 w-full flex flex-row sm:gap-4 ${!isLoggedIn ? 'justify-center' : 'justify-between'}`}
+      className={`bg-teal-800/30 px-2 py-2 sm:px-4 sm:py-3 w-full flex flex-row gap-2 sm:gap-4 ${!isLoggedIn ? 'justify-center' : 'justify-between'}`}
     >
-      <div className="lg:text-3xl hidden sm:block group font-quantico[900] font-stretch-extra-expanded font-bold tracking-wider self-center uppercase">
-        <Link to="/home">
+      <div className="text-lg sm:text-xl lg:text-2xl hidden sm:block group font-quantico[900] font-stretch-extra-expanded font-bold tracking-wide self-center uppercase">
+        <Link to="/home" className="hover:opacity-80 transition-opacity">
           <span>Sp</span>
           <span className="lowercase inline-block duration-500 group-hover:rotate-180">i</span>
           <span>n Pong</span>
@@ -60,7 +60,10 @@ export const NavBar = () => {
         </>
       )}
 
-      <div className="flex flex-col items-center justify-around">
+      <div className="flex flex-row gap-2 items-center">
+        <div className="flex items-center">
+          <Locale className="flex justify-center items-center" />
+        </div>
         {user && isLoggedIn && (
           <Link
             to="/me"
@@ -70,10 +73,6 @@ export const NavBar = () => {
             <Avatar key={user.avatarUrl} src={user.avatarUrl} size="sm"></Avatar>
           </Link>
         )}
-
-        <div className="flex flex-row items-center justify-center">
-          <Locale className="mt-1 flex justify-center items-center" />
-        </div>
       </div>
     </nav>
   );

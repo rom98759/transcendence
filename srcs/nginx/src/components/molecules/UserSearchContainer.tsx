@@ -6,6 +6,7 @@ import { profileApi } from '../../api/profile-api';
 import { useTranslation } from 'react-i18next';
 import { UserActions } from '../../types/react-types';
 import { useOutsideClick } from '../../hooks/useOutsideClick';
+import { X } from 'lucide-react';
 
 const useUserSearch = (query: string) => {
   const [results, setResults] = useState<ProfileSimpleDTO[]>([]);
@@ -53,9 +54,16 @@ interface UserSearchContainerProps {
   isSearch: boolean;
   actions: UserActions[];
   onAction?: (action: UserActions, user: ProfileSimpleDTO) => void;
+  /** Smaller avatar and tighter layout for narrow containers (sidebar) */
+  compact?: boolean;
 }
 
-const UserSearchContainer = ({ isSearch, actions, onAction }: UserSearchContainerProps) => {
+const UserSearchContainer = ({
+  isSearch,
+  actions,
+  onAction,
+  compact = false,
+}: UserSearchContainerProps) => {
   const [query, setQuery] = useState('');
   const [selectedUser, setSelectedUser] = useState<ProfileSimpleDTO | null>(null);
   const { results, error, isLoading } = useUserSearch(query); // Hook défini précédemment
@@ -74,17 +82,29 @@ const UserSearchContainer = ({ isSearch, actions, onAction }: UserSearchContaine
   });
   if (selectedUser || !isSearch) {
     return (
-      <div ref={containerRef}>
-        <UserRow
-          actions={actions}
-          user={selectedUser}
-          avatarSize="md"
-          onAction={(action, user) => {
-            onAction?.(action, user);
-            setSelectedUser(null);
-            setQuery('');
-          }}
-        />
+      <div ref={containerRef} className="relative">
+        <div className="flex items-center gap-1">
+          <div className="flex-1 min-w-0">
+            <UserRow
+              actions={actions}
+              user={selectedUser}
+              avatarSize={compact ? 'sm' : 'md'}
+              onAction={(action, user) => {
+                onAction?.(action, user);
+                setSelectedUser(null);
+                setQuery('');
+              }}
+            />
+          </div>
+          {/* Clear selection — lets user pick someone else */}
+          <button
+            onClick={resetSearch}
+            className="shrink-0 p-1.5 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors"
+            title="Cancel"
+          >
+            <X size={16} className="text-gray-400" />
+          </button>
+        </div>
       </div>
     );
   }

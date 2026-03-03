@@ -1,6 +1,5 @@
 import { useTranslation } from 'react-i18next';
 import { Page } from '../components/organisms/PageContainer';
-import Scrollable from '../components/atoms/Scrollable';
 import type { ReactNode } from 'react';
 
 const TosPage = () => {
@@ -18,7 +17,7 @@ const TosPage = () => {
 
   return (
     <Page>
-      <Scrollable className="md:mt-15 w-[90%]">
+      <div className="w-full space-y-2 text-left">
         <h1 className="text-3xl mb-2 font-bold">{t('tos.title')}</h1>
         <p>
           <i>{t('tos.last_updated')}</i>
@@ -79,7 +78,7 @@ const TosPage = () => {
             })}
           </P>
         </LegalSection>
-      </Scrollable>
+      </div>
     </Page>
   );
 };

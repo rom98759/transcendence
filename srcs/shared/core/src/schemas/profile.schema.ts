@@ -21,6 +21,7 @@ export const ProfileDataSchema = z.object({
 export const ProfileSimpleSchema = z.object({
   username: usernameSchema,
   avatarUrl: z.string().nullable(),
+  isOnline: z.boolean().optional(),
 });
 
 export const ProfileSchema = ProfileSimpleSchema.extend({
