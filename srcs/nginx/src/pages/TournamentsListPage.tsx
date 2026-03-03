@@ -44,7 +44,7 @@ export default function TournamentsListPage() {
   const navigate = useNavigate();
   const onJoin = async (id: string) => {
     try {
-      await api.post(`/game/tournaments/${id}`, {});
+      await api.post(`/game/tournaments/${id}`);
       navigate(`/tournaments/${id}`);
     } catch (err: any) {
       const errorCode = err.response?.data?.code;
