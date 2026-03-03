@@ -42,6 +42,7 @@ export class PongGame {
     ballMass: 1,
     paddleSpeed: 8,
     microWaveSize: 10,
+    maxScore: 5,
   };
   sessionId: string;
   width: number;
@@ -129,6 +130,12 @@ export class PongGame {
       const size = parseInt(String(newSettings.microWaveSize));
       this.settings.microWaveSize = size;
       this.cosmicBackground = new CosmicMicroWaveNoise(this.width, this.height, size);
+    }
+    if (newSettings.maxScore !== undefined) {
+      const maxScore = parseInt(String(newSettings.maxScore));
+      if (maxScore >= 1 && maxScore <= 50) {
+        this.settings.maxScore = maxScore;
+      }
     }
     // Log settings change
     console.log(`[${this.sessionId}] Settings updated:`, this.settings);
@@ -289,13 +296,12 @@ export class PongGame {
   }
 
   winConditions() {
-    // Check win condition
-    if (this.scores.left >= 5 || this.scores.right >= 5) {
+    // Check win condition using configurable maxScore
+    if (this.scores.left >= this.settings.maxScore || this.scores.right >= this.settings.maxScore) {
       this.stop();
       console.log(
         `[${this.sessionId}] Game finished! Final score: ${this.scores.left} - ${this.scores.right}`,
       );
-      // send to blockchain
     }
   }
 

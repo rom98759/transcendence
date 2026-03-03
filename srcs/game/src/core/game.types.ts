@@ -5,6 +5,7 @@ export interface GameSettings {
   ballMass: number;
   paddleSpeed: number;
   microWaveSize: number;
+  maxScore: number;
 }
 
 export interface ClientMessage {

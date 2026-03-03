@@ -104,11 +104,12 @@ export async function newGameSession(req: FastifyRequest, reply: FastifyReply) {
   const userId = req.user.id;
   req.server.log.info(`Creating new session with user id: ${userId}`);
   let sessionId = null;
+  const tournamentId = body.tournamentId ?? null;
   if (body.gameMode === 'tournament')
     sessionId = db.getMatchToPlay(body.tournamentId!, userId!)?.sessionId;
   else sessionId = randomUUID();
   req.server.log.info(`Creating new session with mode: ${body.gameMode}`);
-  const sessionData = getSessionData.call(req.server, null, sessionId, body.gameMode);
+  const sessionData = getSessionData.call(req.server, null, sessionId, body.gameMode, tournamentId);
   if (!sessionData) {
     return {
       status: 'failure',
@@ -158,11 +159,15 @@ export async function webSocketConnect(
   socket: WebSocket,
   req: FastifyRequest,
 ) {
-  console.log('get to the sessions id by WS');
   const params = req.params as { sessionId: string };
   const sessionId = params.sessionId;
 
-  handleClientMessage.call(this, socket, sessionId);
+  // Extract userId from headers forwarded by the gateway
+  const idHeader = (req.headers as any)['x-user-id'];
+  const userId = idHeader ? Number(idHeader) : null;
+
+  this.log.info({ event: 'ws_connect', sessionId, userId });
+  handleClientMessage.call(this, socket, sessionId, userId);
 }
 
 export async function newTournament(req: FastifyRequest, reply: FastifyReply) {

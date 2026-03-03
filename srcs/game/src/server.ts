@@ -1,13 +1,14 @@
 import Fastify, { FastifyRequest, FastifyReply } from 'fastify';
 import fastifyWebsocket from '@fastify/websocket';
 import { gameRoutes } from './routes/game.routes.js';
-import { gameSessions } from './core/game.state.js';
+import { gameSessions, SESSION_TTL_MS } from './core/game.state.js';
 import type { PongGame } from './core/game.engine.js';
 import fs from 'fs';
 import { env } from './config/env.js';
 import redisPlugin from './plugins/ioredis.plugin.js';
 import { startGameConsumer } from './core/game.consumer.js';
 import recoveryHeaders from './plugins/headers.plugins.js';
+import { cleanupConnection } from './service/game.connections.js';
 
 const fastify = Fastify({
   https: {
@@ -47,6 +48,27 @@ fastify.setNotFoundHandler((request: FastifyRequest, reply: FastifyReply) => {
   });
 });
 
+// ============================================================================
+// SESSION TTL CLEANUP — garbage-collect orphan sessions stuck in 'waiting'
+// ============================================================================
+const SESSION_CLEANUP_INTERVAL_MS = 60_000; // check every 60s
+
+const sessionCleanupTimer = setInterval(() => {
+  const now = Date.now();
+  for (const [sessionId, session] of gameSessions.entries()) {
+    if (session.game.status === 'waiting' && now - session.createdAt > SESSION_TTL_MS) {
+      fastify.log.warn({ event: 'session_ttl_expired', sessionId, age: now - session.createdAt });
+      session.game.stop();
+      cleanupConnection(null, sessionId, 4002, 'Session expired');
+      if (session.interval) {
+        clearInterval(session.interval);
+        session.interval = null;
+      }
+      gameSessions.delete(sessionId);
+    }
+  }
+}, SESSION_CLEANUP_INTERVAL_MS);
+
 // Start server
 const start = async () => {
   try {
@@ -64,8 +86,16 @@ start();
 // Cleanup on shutdown
 process.on('SIGTERM', () => {
   console.log('Shutting down game service...');
-  gameSessions.forEach((session: any) => session.game.stop());
-  gameSessions.forEach((session: any) => session.players.clear());
+  clearInterval(sessionCleanupTimer);
+  gameSessions.forEach((session) => {
+    session.game.stop();
+    if (session.interval) {
+      clearInterval(session.interval);
+      session.interval = null;
+    }
+    session.players.forEach((role, ws) => ws.close(1001, 'Server shutting down'));
+    session.players.clear();
+  });
   gameSessions.clear();
   process.exit(0);
 });

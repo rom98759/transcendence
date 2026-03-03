@@ -26,7 +26,16 @@ export function cleanupConnection(
   }
 }
 
-export function addPlayerConnection(this: FastifyInstance, socket: WebSocket, sessionId: string) {
+/**
+ * Add a player to a game session.
+ * @param userId - The DB user ID (from x-user-id header), used to map left/right paddle to real players.
+ */
+export function addPlayerConnection(
+  this: FastifyInstance,
+  socket: WebSocket,
+  sessionId: string,
+  userId: number | null = null,
+) {
   const currentSession = gameSessions.get(sessionId);
   if (!currentSession || !currentSession.players || !socket) return false;
 
@@ -38,11 +47,13 @@ export function addPlayerConnection(this: FastifyInstance, socket: WebSocket, se
     return false;
   } else if (players.size === 1 && Array.from(players.values())[0] === 'A') {
     players.set(socket, 'B');
-    this.log.info('Player connected as Player B');
+    currentSession.playerUserIds.B = userId;
+    this.log.info(`Player connected as Player B (userId=${userId})`);
     socket.send(JSON.stringify({ type: 'connected', message: 'Player B' }));
   } else {
     players.set(socket, 'A');
-    this.log.info('Player connected as Player A');
+    currentSession.playerUserIds.A = userId;
+    this.log.info(`Player connected as Player A (userId=${userId})`);
     socket.send(JSON.stringify({ type: 'connected', message: 'Player A' }));
   }
 
@@ -63,7 +74,14 @@ export function addPlayerConnection(this: FastifyInstance, socket: WebSocket, se
     players.delete(socket);
     if (players.size === 0 && currentSession.game.status === 'waiting') {
       currentSession.game.stop();
-      this.log.info(`[${sessionId}] Game stopped`);
+      this.log.info(`[${sessionId}] Game stopped — no players left`);
+      // Clean up orphan waiting session immediately
+      if (currentSession.interval) {
+        clearInterval(currentSession.interval);
+        currentSession.interval = null;
+      }
+      gameSessions.delete(sessionId);
+      this.log.info(`[${sessionId}] Orphan waiting session deleted`);
     }
   });
 

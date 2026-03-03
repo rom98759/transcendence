@@ -5,13 +5,21 @@ import { PongGame } from '../core/game.engine.js';
 import { defineCommunicationInterval } from './game.communication.js';
 import { WebSocket } from 'ws';
 
-// return the sessionData (incuding the game var) for a sessionId. If no Data at this sessionId, create new sessionData.
-// If a socket is given, add it to the players list of the sessionData, if not, just return the sessionData at sessionId.
+/**
+ * Get or create a game session.
+ * @param socket - Player WebSocket (null to just get/create without connecting)
+ * @param sessionId - The game session identifier
+ * @param sessionMode - 'remote' | 'local' | 'tournament' | null (null = get only, don't create)
+ * @param tournamentId - DB tournament ID if mode is 'tournament'
+ * @param userId - DB user ID of the connecting player
+ */
 export function getGame(
   this: FastifyInstance,
   socket: WebSocket | null,
   sessionId: any,
   sessionMode: string | null,
+  tournamentId: number | null = null,
+  userId: number | null = null,
 ): any {
   let sessionData = gameSessions.get(sessionId);
 
@@ -25,16 +33,22 @@ export function getGame(
       game: game,
       interval: null,
       players: new Map(),
+      playerUserIds: { A: null, B: null },
       gameMode: sessionMode,
+      tournamentId: tournamentId,
+      createdAt: Date.now(),
+      persisted: false,
     };
     gameSessions.set(sessionId, sessionData);
-    this.log.info(`[${sessionId}] Game session created via WebSocket`);
-    sessionData.interval = defineCommunicationInterval(sessionId);
+    this.log.info(
+      `[${sessionId}] Game session created (mode=${sessionMode}, tournament=${tournamentId})`,
+    );
+    sessionData.interval = defineCommunicationInterval(sessionId, this);
     this.log.info(`[${sessionId}] Game created, interval started`);
   }
 
   if (socket) {
-    addPlayerConnection.call(this, socket, sessionId);
+    addPlayerConnection.call(this, socket, sessionId, userId);
   }
 
   return sessionData;
