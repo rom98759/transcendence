@@ -16,15 +16,19 @@ import { FastifyInstance } from 'fastify';
 
 // DB path
 const DEFAULT_DIR = path.join(process.cwd(), 'data');
-const DB_PATH = env.GAME_DB_PATH || path.join(DEFAULT_DIR, 'game.db');
+const DB_PATH = env.GAME_DB_PATH
+  ? path.resolve(process.cwd(), env.GAME_DB_PATH)
+  : path.join(DEFAULT_DIR, 'game.db');
 
 // Check dir
+const dbDir = path.dirname(DB_PATH);
 try {
-  fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+  fs.mkdirSync(dbDir, { recursive: true });
+  console.log('Ensured database directory exists:', dbDir);
 } catch (err: unknown) {
   throw new AppError(
     ERR_DEFS.SERVICE_GENERIC,
-    { details: [{ field: `Failed to ensure DB directory` }] },
+    { details: [{ field: `Failed to ensure DB directory: ${dbDir}` }] },
     err,
   );
 }
@@ -32,6 +36,7 @@ try {
 export const db = new Database(DB_PATH);
 db.pragma('foreign_keys = ON');
 console.log('Using SQLite file:', DB_PATH);
+console.log('Database file exists:', fs.existsSync(DB_PATH));
 
 // Create table
 try {
@@ -557,6 +562,74 @@ export function getMatchHistory() {
 }
 
 // ============================================================================
+// GUEST USER (for local games — userId = 2)
+// ============================================================================
+
+export const GUEST_USER_ID = 2;
+
+const ensureGuestPlayerStmt = db.prepare(`
+INSERT OR IGNORE INTO player (id, username, avatar, updated_at)
+VALUES (?, 'Guest', NULL, ?)
+`);
+
+/**
+ * Ensure the guest player (id=2) exists in the player table.
+ * Called before persisting local matches.
+ */
+export function ensureGuestPlayer(): void {
+  try {
+    ensureGuestPlayerStmt.run(GUEST_USER_ID, Date.now());
+  } catch (err: unknown) {
+    throw new AppError(
+      ERR_DEFS.DB_INSERT_ERROR,
+      { details: [{ field: 'ensureGuestPlayer' }] },
+      err,
+    );
+  }
+}
+
+// ============================================================================
+// FREE / LOCAL MATCH PERSISTENCE
+// ============================================================================
+
+const createFreeMatchStmt = db.prepare(`
+INSERT INTO match (tournament_id, player1, player2, sessionId, score_player1, score_player2, winner_id, round, created_at)
+VALUES (NULL, ?, ?, ?, ?, ?, ?, NULL, ?)
+`);
+
+/**
+ * Persist a free (non-tournament) or local match into the DB.
+ * @returns The inserted match ID.
+ */
+export function createFreeMatch(
+  player1: number,
+  player2: number,
+  sessionId: string,
+  scorePlayer1: number,
+  scorePlayer2: number,
+  winnerId: number,
+): number {
+  try {
+    const result = createFreeMatchStmt.run(
+      player1,
+      player2,
+      sessionId,
+      scorePlayer1,
+      scorePlayer2,
+      winnerId,
+      Date.now(),
+    );
+    return Number(result.lastInsertRowid);
+  } catch (err: unknown) {
+    throw new AppError(
+      ERR_DEFS.DB_INSERT_ERROR,
+      { details: [{ field: `createFreeMatch session=${sessionId}` }] },
+      err,
+    );
+  }
+}
+
+// ============================================================================
 // SESSION → MATCH LOOKUP (used at game finish to persist results)
 // ============================================================================
 
@@ -570,9 +643,7 @@ WHERE sessionId = ?
  * Get match row from DB given the in-memory sessionId.
  * Returns null if this sessionId doesn't correspond to a DB match (free game).
  */
-export function getMatchBySessionId(
-  sessionId: string,
-): {
+export function getMatchBySessionId(sessionId: string): {
   id: number;
   tournament_id: number | null;
   player1: number;

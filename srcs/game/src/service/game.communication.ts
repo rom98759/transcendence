@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { gameSessions, SessionData } from '../core/game.state.js';
-import { ServerMessage, ClientMessage } from '../core/game.types.js';
+import { ServerMessage, ClientMessage, GameOverData } from '../core/game.types.js';
 import { addPlayerConnection, cleanupConnection } from './game.connections.js';
 import { WS_CLOSE } from '../core/game.state.js';
 import { WebSocket } from 'ws';
@@ -104,14 +104,18 @@ export function handleClientMessage(
  * Persist game result to DB and trigger tournament progression.
  * Called once when game status transitions to 'finished'.
  * Guards against double execution via session.persisted flag.
+ *
+ * Returns GameOverData for the gameOver WS message.
  */
 async function persistGameResult(
   app: FastifyInstance,
   sessionId: string,
   sessionData: SessionData,
-): Promise<void> {
+): Promise<GameOverData> {
   // Guard: only persist once
-  if (sessionData.persisted) return;
+  if (sessionData.persisted) {
+    return buildGameOverData(sessionData);
+  }
   sessionData.persisted = true;
 
   const { game, playerUserIds, tournamentId, gameMode } = sessionData;
@@ -133,25 +137,19 @@ async function persistGameResult(
       const match = db.getMatchBySessionId(sessionId);
       if (!match) {
         app.log.error({ event: 'game_persist_no_match', sessionId }, 'No DB match for sessionId');
-        return;
+        return buildGameOverData(sessionData);
       }
 
       // Player A = left paddle, Player B = right paddle
       // match.player1 and match.player2 are DB user IDs
       // We need to determine which paddle corresponds to which DB player.
-      //
-      // The first player to connect gets role A (left). We stored userId in playerUserIds.
-      // We map: if playerUserIds.A === match.player1 → left = player1, right = player2
-      //         otherwise → left = player2, right = player1
       let scorePlayer1: number;
       let scorePlayer2: number;
 
       if (playerUserIds.A === match.player1) {
-        // A (left) = player1, B (right) = player2
         scorePlayer1 = scores.left;
         scorePlayer2 = scores.right;
       } else {
-        // A (left) = player2, B (right) = player1
         scorePlayer1 = scores.right;
         scorePlayer2 = scores.left;
       }
@@ -170,7 +168,6 @@ async function persistGameResult(
       db.updateMatchResult(match.id, scorePlayer1, scorePlayer2, winnerId);
 
       // Check if the entire tournament is now complete
-      // (FINAL and LITTLE_FINAL both have winners)
       const tournamentComplete = db.isTournamentComplete(tournamentId);
       if (tournamentComplete) {
         db.setTournamentFinished(tournamentId);
@@ -184,16 +181,86 @@ async function persistGameResult(
       app.log.error({ event: 'game_persist_error', sessionId, err: errorMessage });
       // Don't rethrow — game cleanup must continue even if persist fails
     }
+  } else if (gameMode === 'local') {
+    // Local match: player1 = authenticated user, player2 = GUEST (id=2)
+    try {
+      db.ensureGuestPlayer();
+
+      const player1Id = playerUserIds.A ?? db.GUEST_USER_ID;
+      const player2Id = db.GUEST_USER_ID;
+
+      const winnerId = scores.left > scores.right ? player1Id : player2Id;
+
+      db.createFreeMatch(player1Id, player2Id, sessionId, scores.left, scores.right, winnerId);
+
+      app.log.info({
+        event: 'local_match_persisted',
+        sessionId,
+        player1Id,
+        player2Id,
+        scores,
+        winnerId,
+      });
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      app.log.error({ event: 'local_match_persist_error', sessionId, err: errorMessage });
+    }
   } else {
-    // Free match (non-tournament): log result but no DB persistence for now
-    // Future: create a free match record if needed
-    app.log.info({
-      event: 'free_match_finished',
-      sessionId,
-      scores,
-      playerUserIds,
-    });
+    // Free remote match: both players are real users
+    try {
+      const player1Id = playerUserIds.A;
+      const player2Id = playerUserIds.B;
+
+      if (player1Id != null && player2Id != null) {
+        const winnerId = scores.left > scores.right ? player1Id : player2Id;
+
+        db.createFreeMatch(player1Id, player2Id, sessionId, scores.left, scores.right, winnerId);
+
+        app.log.info({
+          event: 'free_match_persisted',
+          sessionId,
+          player1Id,
+          player2Id,
+          scores,
+          winnerId,
+        });
+      } else {
+        app.log.warn({
+          event: 'free_match_missing_players',
+          sessionId,
+          playerUserIds,
+        });
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      app.log.error({ event: 'free_match_persist_error', sessionId, err: errorMessage });
+    }
   }
+
+  return buildGameOverData(sessionData);
+}
+
+/**
+ * Build the GameOverData payload from session data.
+ */
+function buildGameOverData(sessionData: SessionData): GameOverData {
+  const scores = sessionData.game.scores;
+  const winnerSide: 'left' | 'right' = scores.left > scores.right ? 'left' : 'right';
+
+  // Determine the winner's userId based on which side won
+  let winnerUserId: number | null = null;
+  if (winnerSide === 'left') {
+    winnerUserId = sessionData.playerUserIds.A; // A = left paddle
+  } else {
+    winnerUserId = sessionData.playerUserIds.B; // B = right paddle
+  }
+
+  return {
+    scores,
+    winner: winnerSide,
+    winnerUserId,
+    status: 'finished',
+  };
 }
 
 /**
@@ -259,23 +326,37 @@ export function defineCommunicationInterval(
         data: currentSessionData.game.getState(),
       });
     } else if (status === 'finished') {
-      // 1. Persist result to DB + trigger tournament progression (async, non-blocking)
-      persistGameResult(app, sessionId, currentSessionData).catch((err) => {
-        app.log.error({ event: 'persist_unhandled_error', sessionId, err });
-      });
-
-      // 2. Broadcast game over to all connected clients
-      broadcastToSession(sessionId, {
-        type: 'gameOver',
-        data: currentSessionData.game.getState(),
-      });
-
-      // 3. Cleanup all WS connections + delete the gameSession
-      cleanupConnection(null, sessionId, WS_CLOSE.GAME_OVER, 'Game Over');
-      gameSessions.delete(sessionId);
+      // Clear interval immediately to prevent re-entry
       clearInterval(interval);
 
-      app.log.info({ event: 'session_destroyed', sessionId });
+      // Async finish lifecycle — persist THEN cleanup
+      (async () => {
+        try {
+          // 1. Persist result to DB + trigger tournament progression
+          const gameOverData = await persistGameResult(app, sessionId, currentSessionData);
+
+          // 2. Broadcast game over to all connected clients with enriched data
+          broadcastToSession(sessionId, {
+            type: 'gameOver',
+            data: currentSessionData.game.getState(),
+            gameOverData,
+          });
+        } catch (err) {
+          app.log.error({ event: 'persist_unhandled_error', sessionId, err });
+
+          // Still broadcast gameOver even if persist failed
+          broadcastToSession(sessionId, {
+            type: 'gameOver',
+            data: currentSessionData.game.getState(),
+          });
+        } finally {
+          // 3. Cleanup all WS connections + delete the gameSession
+          cleanupConnection(null, sessionId, WS_CLOSE.GAME_OVER, 'Game Over');
+          gameSessions.delete(sessionId);
+
+          app.log.info({ event: 'session_destroyed', sessionId });
+        }
+      })();
     } else if (status === 'waiting') {
       broadcastToSession(sessionId, {
         type: 'state',

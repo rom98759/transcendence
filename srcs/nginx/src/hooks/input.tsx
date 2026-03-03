@@ -41,6 +41,39 @@ export const useKeyboardControls = ({
             );
             break;
         }
+      } else if (gameMode === 'remote' || gameMode === 'tournament') {
+        // remote/tournament: W/S and ArrowUp/Down control the player's assigned paddle
+        // The server assigns left/right based on connection order (Player A = left, Player B = right)
+        // We send the paddle direction and let the server decide based on PlayerRole
+        // For simplicity, W/S and ArrowUp/Down all go to 'left' — the server maps role.
+        // Actually, since the WS assigns role A or B, the player should control their own paddle.
+        // Player A = left paddle, Player B = right paddle.
+        // We use both key sets to control the paddle that gets assigned.
+        switch (event.key) {
+          case 'w':
+          case 'W':
+          case 'ArrowUp':
+            event.preventDefault();
+            if (event.repeat) break;
+            // Send both paddles — server ignores the wrong one based on role
+            wsRef.current.send(JSON.stringify({ type: 'paddle', paddle: 'left', direction: 'up' }));
+            wsRef.current.send(
+              JSON.stringify({ type: 'paddle', paddle: 'right', direction: 'up' }),
+            );
+            break;
+          case 's':
+          case 'S':
+          case 'ArrowDown':
+            event.preventDefault();
+            if (event.repeat) break;
+            wsRef.current.send(
+              JSON.stringify({ type: 'paddle', paddle: 'left', direction: 'down' }),
+            );
+            wsRef.current.send(
+              JSON.stringify({ type: 'paddle', paddle: 'right', direction: 'down' }),
+            );
+            break;
+        }
       } else if (gameMode === 'ai') {
         // ai: W/S and ArrowUp/Down all control left paddle (right belongs to AI)
         switch (event.key) {
@@ -76,6 +109,14 @@ export const useKeyboardControls = ({
               paddle: event.key === 'ArrowUp' || event.key === 'ArrowDown' ? 'right' : 'left',
               direction: 'stop',
             }),
+          );
+        }
+      } else if (gameMode === 'remote' || gameMode === 'tournament') {
+        const keys = ['w', 'W', 's', 'S', 'ArrowUp', 'ArrowDown'];
+        if (keys.includes(event.key)) {
+          wsRef.current.send(JSON.stringify({ type: 'paddle', paddle: 'left', direction: 'stop' }));
+          wsRef.current.send(
+            JSON.stringify({ type: 'paddle', paddle: 'right', direction: 'stop' }),
           );
         }
       } else if (gameMode === 'ai') {

@@ -26,6 +26,10 @@ export const useLocalSession = () => {
       const response = await fetch('/api/game/create-session', {
         method: 'POST',
         credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ gameMode: 'local' }),
       });
 
       const data: GameSessionData = await response.json();
