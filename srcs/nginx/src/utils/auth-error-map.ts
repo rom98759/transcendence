@@ -33,6 +33,10 @@ export const AUTH_ERROR_I18N: Readonly<Record<string, string>> = {
   [ERROR_CODES.TOTP_ALREADY_ENABLED]: `errors.${ERROR_CODES.TOTP_ALREADY_ENABLED}`,
   [ERROR_CODES.TWO_FA_NOT_ENABLED]: `errors.${ERROR_CODES.TWO_FA_NOT_ENABLED}`,
   [ERROR_CODES.USER_NOT_FOUND_2FA]: `errors.${ERROR_CODES.USER_NOT_FOUND_2FA}`,
+  ['duplicate_entry']: `zod_errors.duplicate_entry`,
+  ['invalid_format']: `zod_errors.invalid_format`,
+  ['too_small']: `zod_errors.too_small`,
+  ['too_big']: `zod_errors.too_big`,
 } as const;
 
 /**

@@ -68,7 +68,7 @@ export const profileApi = {
 
   deleteProfile: async (username: usernameDTO): Promise<ProfileSimpleDTO> => {
     usernameSchema.parse(username);
-    const { data } = await api.delete(`/users/username/${username}`);
+    const { data } = await api.delete(`/users/${username}`);
     return { ...data };
   },
 };

@@ -226,6 +226,7 @@
   },
   "zod_errors": {
     "invalid_format": "T'as pas pigé le format ou quoi ?",
+    "duplicate_entry": "Déjà pris",
     "too_small": "Sois pas chiche, tu peux y aller niveau longueur",
     "too_big": "T'as dépassé les bornes, coco. Revois ça à la baisse",
     "invalid_string": {

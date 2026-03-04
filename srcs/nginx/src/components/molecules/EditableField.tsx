@@ -7,6 +7,7 @@ interface EditableFieldProps {
   label: string;
   value: string;
   onSave: (newValue: string) => void;
+  onCancel?: () => void;
   error?: string | null;
   isPending?: boolean;
 }
@@ -15,6 +16,7 @@ export const EditableField = ({
   label,
   value,
   onSave,
+  onCancel,
   error,
   isPending = false,
 }: EditableFieldProps) => {
@@ -22,8 +24,15 @@ export const EditableField = ({
   const [localValue, setLocalValue] = useState(value);
   useEffect(() => {
     setIsEditing(false);
+    setLocalValue(value);
   }, [value]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleCancel = () => {
+    setIsEditing(false);
+    setLocalValue(value);
+    if (onCancel) onCancel();
+  };
 
   const handleSave = () => {
     const trimmedValue = localValue.trim();
@@ -50,14 +59,7 @@ export const EditableField = ({
           Save
         </Button>
 
-        <Button
-          onClick={() => {
-            setIsEditing(false);
-            setLocalValue(value);
-          }}
-          variant="secondary"
-          className="px-2 py-2"
-        >
+        <Button onClick={handleCancel} variant="secondary" className="px-2 py-2">
           Cancel
         </Button>
       </div>

@@ -43,10 +43,6 @@ export const MyProfilePage = () => {
     queryFn: () => profileApi.getMe(),
   });
 
-  console.log('profile data:', profile);
-  console.log('isLoading:', isLoading);
-  console.log('isError:', isError);
-
   const handleUsernameSave = (newUsername: string) => {
     if (!newUsername.trim()) {
       setUsernameError(t('errors.required_field'));
@@ -80,9 +76,11 @@ export const MyProfilePage = () => {
         avatarUrl: authUser?.avatarUrl ?? null,
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       if (error instanceof FrontendError) {
-        const msg = error.details?.find((d) => d.field === 'username')?.message || error.message;
+        console.log('Erreur capturée :', error);
+        const fieldError = error.details?.find((d: any) => d.field === 'username');
+        const msg = fieldError?.message || error.message;
         setUsernameError(msg);
       } else {
         setError(t(ERROR_CODES.INTERNAL_ERROR));
@@ -101,7 +99,9 @@ export const MyProfilePage = () => {
     },
     onError: (error) => {
       if (error instanceof FrontendError) {
-        const msg = error.details?.find((d) => d.field === 'email')?.message || error.message;
+        console.log('Erreur capturée :', error);
+        const fieldError = error.details?.find((d: any) => d.field === 'email');
+        const msg = fieldError?.message || error.message;
         setEmailError(msg);
       } else {
         setEmailError(t(ERROR_CODES.INTERNAL_ERROR));
@@ -182,6 +182,7 @@ export const MyProfilePage = () => {
               error={usernameError}
               isPending={isPendingUsername}
               onSave={handleUsernameSave}
+              onCancel={() => setUsernameError(null)}
             />
 
             <EditableField
@@ -190,6 +191,7 @@ export const MyProfilePage = () => {
               error={emailError}
               isPending={isPendingEmail}
               onSave={handleEmailSave}
+              onCancel={() => setEmailError(null)}
             />
           </div>
         </div>

@@ -157,11 +157,7 @@ export const umRoutes: FastifyPluginAsyncZod = async (app) => {
     profileController.updateProfileAvatar,
   );
 
-  app.delete(
-    '/username/:username',
-    { schema: deleteProfileSchema },
-    profileController.deleteProfile,
-  );
+  app.delete('/:username', { schema: deleteProfileSchema }, profileController.deleteProfile);
 
   app.delete(
     '/users/:userId',

@@ -210,6 +210,7 @@
   },
   "zod_errors": {
     "invalid_format": "Check requested format",
+    "duplicate_entry": "Already taken. Choose another",
     "too_small": "A longer value is required",
     "too_big": "A shorter value is required",
     "invalid_string": {

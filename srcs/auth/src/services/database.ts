@@ -7,6 +7,7 @@ import { DBUser } from '../types/models.js';
 import crypto from 'crypto';
 import { AUTH_CONFIG } from '../utils/constants.js';
 import { authenv } from '../config/env.js';
+import { logger } from '../index.js';
 const { SqliteError } = Database;
 
 // DB path from validated environment
@@ -383,6 +384,7 @@ export async function updateUserUsername(userId: number, newUsername: string): P
       }
     }
   } catch (err: unknown) {
+    logger.error(err);
     if (err instanceof DataError) {
       throw err;
     } else if (err instanceof SqliteError) {

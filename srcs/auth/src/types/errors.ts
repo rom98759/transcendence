@@ -29,8 +29,8 @@ export interface AppBaseError extends Error {
 
 export class DataError extends Error {
   constructor(
-    code: DataErrorCode,
-    message: string,
+    public code: DataErrorCode,
+    public message: string,
     public originalError?: unknown,
     public meta?: Record<string, any>,
   ) {

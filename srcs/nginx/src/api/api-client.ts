@@ -31,6 +31,7 @@ api.interceptors.response.use(
     if (error.response) {
       const { data } = error.response;
       const errorPayload = data.error || data;
+      console.error(errorPayload);
       statusCode =
         error.response?.status ||
         (errorPayload.status as HttpStatus) ||
@@ -38,15 +39,20 @@ api.interceptors.response.use(
       code = errorPayload?.code || ERROR_CODES.INTERNAL_ERROR;
       message = i18next.t(mapErrorToI18nKey(code)) || errorPayload?.message || error.message;
 
-      // Transformer les erreurs Zod brutes en ErrorDetail
-      if (errorPayload.details.length > 0 && Array.isArray(errorPayload.details)) {
-        details = errorPayload.details.map((detail: ErrorDetail) => ({
-          field: detail.field || undefined,
-          message: detail.message,
-          reason: detail.reason || 'invalid_format',
+      if (Array.isArray(errorPayload?.details)) {
+        details = errorPayload.details.map((d: any) => ({
+          field: d.field || undefined,
+          message: message || '',
+          reason: d.reason || errorPayload.code || 'validation_error',
         }));
-      } else {
-        details = [];
+      } else if (errorPayload?.details && typeof errorPayload.details === 'object') {
+        details = [
+          {
+            field: errorPayload.details.field || undefined,
+            message: message || '',
+            reason: errorPayload.code || 'validation_error',
+          },
+        ];
       }
     }
 
@@ -58,7 +64,7 @@ api.interceptors.response.use(
         meta.remainingAttempts = errorPayload.remainingAttempts;
       }
     }
-
+    console.error(message);
     const frontendError = new FrontendError(
       message,
       statusCode,
