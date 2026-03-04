@@ -256,6 +256,7 @@ users (id) ──────────────────→   UserProfi
 
 ### Key fields and data types.
 
+```mermaid
 erDiagram
 
     %% ── USERS SERVICE (Prisma / SQLite) ──────────────────────────
@@ -323,6 +324,7 @@ erDiagram
     player ||--o{ match             : "plays as player1"
     player ||--o{ match             : "plays as player2"
     player ||--o{ match             : "wins"
+```
 
 Auth Service — users table
 
