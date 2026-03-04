@@ -109,17 +109,24 @@ export function webSocketProxyRequest(
   request: FastifyRequest,
   path: string,
 ) {
-  const userName = request.headers['x-user-name'] || 'anonymous';
-  const userId = request.headers['x-user-id'] || 'unknown';
+  // Use authenticated identity from request.user (set by onRequest auth hook)
+  // instead of raw headers (which the client never sends)
+  const internalHeaders = getInternalHeaders(request);
+  const userName = internalHeaders['x-user-name'] || 'anonymous';
+  const userId = internalHeaders['x-user-id'] || '';
 
   app.log.info({ event: 'game_ws_connect_attempt', path, user: userName, userId });
+
+  if (!userId) {
+    app.log.warn({ event: 'game_ws_missing_user_id', path, user: userName });
+  }
 
   // Create WebSocket to game-service, reusing mTLS options (includes rejectUnauthorized: false)
   const upstreamUrl = `wss://game-service:3003${path}`;
   const upstreamWs = new WebSocket(upstreamUrl, {
     headers: {
-      'x-user-name': userName as string,
-      'x-user-id': userId as string,
+      'x-user-name': userName,
+      'x-user-id': userId,
       cookie: request.headers.cookie || '',
     },
     ...WS_TLS_OPTIONS,

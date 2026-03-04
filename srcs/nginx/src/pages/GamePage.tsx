@@ -11,6 +11,7 @@ import { useGameSessions, UseGameSessionsReturn } from '../hooks/GameSessions';
 import { useNavigate } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import api from '../api/api-client';
+import { fa } from 'zod/v4/locales';
 export interface Paddle {
   y: number;
   height: number;
@@ -171,6 +172,20 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
     }
   }, [gameMode, currentSessionId]); // Only run when gameMode changes (on mount)
 
+  // Auto-redirect after game over (5 second delay to show the score)
+  useEffect(() => {
+    if (!gameOver) return;
+    const timer = setTimeout(() => {
+      if (gameMode === 'tournament' && tournamentId) {
+        // Return to tournament bracket view
+        navigate(`/tournaments/${tournamentId}`);
+      } else {
+        navigate('/home');
+      }
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [gameOver, gameMode, tournamentId, navigate]);
+
   useEffect(() => {
     if (!currentSessionId) return;
     const connectWebSocket = async () => {
@@ -231,6 +246,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
         baseFrequency={0.28}
         colorStart={colors.start}
         colorEnd={colors.end}
+        animated={false}
       >
         <NavBar />
         <div className="flex flex-row flex-1 overflow-hidden">
@@ -252,10 +268,42 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
               <GameStatusBar sessionsData={null} />
             )}
           </div>
-          <div className="flex-[3] flex justify-center p-4">
+          <div className="flex-[3] flex justify-center p-4 relative">
             {' '}
             {/* Added flex centering */}
             <Arena gameStateRef={gameStateRef} />
+            {/* Game Over Overlay */}
+            {gameOver && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-10 rounded-lg">
+                <h2 className="text-4xl font-bold text-white mb-4">Game Over</h2>
+                <div className="text-2xl text-white mb-2">
+                  <span
+                    className={
+                      gameOver.winner === 'left' ? 'text-green-400 font-bold' : 'text-slate-400'
+                    }
+                  >
+                    {gameOver.scores.left}
+                  </span>
+                  <span className="mx-4">-</span>
+                  <span
+                    className={
+                      gameOver.winner === 'right' ? 'text-green-400 font-bold' : 'text-slate-400'
+                    }
+                  >
+                    {gameOver.scores.right}
+                  </span>
+                </div>
+                <p className="text-lg text-green-400 mb-6">
+                  {gameOver.winner === 'left' ? 'Player 1' : 'Player 2'} wins!
+                </p>
+                <button
+                  onClick={onExitGame}
+                  className="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition"
+                >
+                  Back to Home
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </Background>

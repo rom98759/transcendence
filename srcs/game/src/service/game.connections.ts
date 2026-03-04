@@ -73,19 +73,32 @@ export function addPlayerConnection(
     }
   }
 
+  // Sanitize userId: treat NaN as null
+  const safeUserId = userId != null && !Number.isNaN(userId) ? userId : null;
+
   if (players.size >= 2) {
     this.log.info('Too much players in session, refused connection.');
     socket.close(WS_CLOSE.SESSION_FULL, 'Session full');
     return false;
   } else if (players.size === 1 && Array.from(players.values())[0] === 'A') {
     players.set(socket, 'B');
-    currentSession.playerUserIds.B = userId;
-    this.log.info(`Player connected as Player B (userId=${userId})`);
+    currentSession.playerUserIds.B = safeUserId;
+    this.log.info(`Player connected as Player B (userId=${safeUserId})`);
     socket.send(JSON.stringify({ type: 'connected', message: 'Player B' }));
   } else {
     players.set(socket, 'A');
-    currentSession.playerUserIds.A = userId;
-    this.log.info(`Player connected as Player A (userId=${userId})`);
+    // Only overwrite playerUserIds.A if the WS provides a valid userId,
+    // or if no userId was stored at session creation time.
+    if (safeUserId != null) {
+      currentSession.playerUserIds.A = safeUserId;
+    } else if (currentSession.playerUserIds.A == null) {
+      // WS has no userId and session creation didn't provide one either
+      this.log.warn(
+        { sessionId },
+        'Player A connected without userId — playerUserIds.A will be null',
+      );
+    }
+    this.log.info(`Player connected as Player A (userId=${currentSession.playerUserIds.A})`);
     socket.send(JSON.stringify({ type: 'connected', message: 'Player A' }));
   }
 
@@ -102,6 +115,10 @@ export function addPlayerConnection(
 
   // For local mode, auto-start with a single player (both paddles controlled locally)
   if (currentSession.gameMode === 'local' && players.size === 1) {
+    // Set Player B as GUEST since no real second player will connect
+    currentSession.playerUserIds.B = db.GUEST_USER_ID;
+    this.log.info(`[${sessionId}] Local mode — Player B set to GUEST (id=${db.GUEST_USER_ID})`);
+
     const game = currentSession.game;
     if (game && game.status === 'waiting') {
       game.start();

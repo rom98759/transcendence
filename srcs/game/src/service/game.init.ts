@@ -33,7 +33,9 @@ export function getGame(
       game: game,
       interval: null,
       players: new Map(),
-      playerUserIds: { A: null, B: null },
+      // Store the creating user's ID immediately as Player A (left paddle).
+      // This ensures playerUserIds.A is set even if the WS header is missing.
+      playerUserIds: { A: userId, B: null },
       gameMode: sessionMode,
       tournamentId: tournamentId,
       createdAt: Date.now(),

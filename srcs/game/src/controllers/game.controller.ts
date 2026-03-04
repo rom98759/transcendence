@@ -171,7 +171,10 @@ export async function webSocketConnect(
 
   // Extract userId from headers forwarded by the gateway
   const idHeader = (req.headers as any)['x-user-id'];
-  const userId = idHeader ? Number(idHeader) : null;
+  const parsed = idHeader ? Number(idHeader) : NaN;
+  const userId = Number.isFinite(parsed) ? parsed : null;
+
+  this.log.info({ event: 'ws_user_resolution', rawHeader: idHeader, resolvedUserId: userId });
 
   this.log.info({ event: 'ws_connect', sessionId, userId });
   handleClientMessage.call(this, socket, sessionId, userId);

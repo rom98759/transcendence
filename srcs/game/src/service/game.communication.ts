@@ -186,10 +186,46 @@ async function persistGameResult(
     try {
       db.ensureGuestPlayer();
 
-      const player1Id = playerUserIds.A ?? db.GUEST_USER_ID;
-      const player2Id = db.GUEST_USER_ID;
+      const player1Id = playerUserIds.A;
+      const player2Id = playerUserIds.B ?? db.GUEST_USER_ID;
+
+      // Validate: player IDs must be non-null integers before DB insert
+      if (player1Id == null || !Number.isFinite(player1Id)) {
+        app.log.error(
+          {
+            event: 'local_match_invalid_player1',
+            sessionId,
+            playerUserIds,
+          },
+          'Player A userId is null/invalid — cannot persist local match',
+        );
+        return buildGameOverData(sessionData);
+      }
+      if (player2Id == null || !Number.isFinite(player2Id)) {
+        app.log.error(
+          {
+            event: 'local_match_invalid_player2',
+            sessionId,
+            playerUserIds,
+          },
+          'Player B userId is null/invalid — cannot persist local match',
+        );
+        return buildGameOverData(sessionData);
+      }
 
       const winnerId = scores.left > scores.right ? player1Id : player2Id;
+
+      app.log.info({
+        event: 'match_insert_payload',
+        sessionId,
+        payload: {
+          player1Id,
+          player2Id,
+          scoreLeft: scores.left,
+          scoreRight: scores.right,
+          winnerId,
+        },
+      });
 
       db.createFreeMatch(player1Id, player2Id, sessionId, scores.left, scores.right, winnerId);
 
@@ -203,7 +239,13 @@ async function persistGameResult(
       });
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      app.log.error({ event: 'local_match_persist_error', sessionId, err: errorMessage });
+      app.log.error({
+        event: 'local_match_persist_error',
+        sessionId,
+        err: errorMessage,
+        playerUserIds,
+        scores,
+      });
     }
   } else {
     // Free remote match: both players are real users
@@ -211,8 +253,35 @@ async function persistGameResult(
       const player1Id = playerUserIds.A;
       const player2Id = playerUserIds.B;
 
-      if (player1Id != null && player2Id != null) {
+      // Validate: both player IDs must be valid integers
+      if (
+        player1Id == null ||
+        !Number.isFinite(player1Id) ||
+        player2Id == null ||
+        !Number.isFinite(player2Id)
+      ) {
+        app.log.warn(
+          {
+            event: 'free_match_missing_players',
+            sessionId,
+            playerUserIds,
+          },
+          'Cannot persist free match — one or both player IDs invalid',
+        );
+      } else {
         const winnerId = scores.left > scores.right ? player1Id : player2Id;
+
+        app.log.info({
+          event: 'match_insert_payload',
+          sessionId,
+          payload: {
+            player1Id,
+            player2Id,
+            scoreLeft: scores.left,
+            scoreRight: scores.right,
+            winnerId,
+          },
+        });
 
         db.createFreeMatch(player1Id, player2Id, sessionId, scores.left, scores.right, winnerId);
 
@@ -224,16 +293,16 @@ async function persistGameResult(
           scores,
           winnerId,
         });
-      } else {
-        app.log.warn({
-          event: 'free_match_missing_players',
-          sessionId,
-          playerUserIds,
-        });
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      app.log.error({ event: 'free_match_persist_error', sessionId, err: errorMessage });
+      app.log.error({
+        event: 'free_match_persist_error',
+        sessionId,
+        err: errorMessage,
+        playerUserIds,
+        scores,
+      });
     }
   }
 
