@@ -234,7 +234,7 @@ describe('Profile Controller unit tests', () => {
       vi.spyOn(profileService, 'deleteByUsername').mockResolvedValue(mockProfileDTO as ProfileDTO);
       const response = await app.inject({
         method: 'DELETE',
-        url: '/username/toto',
+        url: '/toto',
         headers: authHeaders,
       });
 
@@ -247,7 +247,7 @@ describe('Profile Controller unit tests', () => {
       );
       const response = await app.inject({
         method: 'DELETE',
-        url: '/username/Toto',
+        url: '/Toto',
         headers: authHeaders,
       });
 
