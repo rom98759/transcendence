@@ -24,13 +24,7 @@ export class Session {
   /** Guards against double-persist on game finish */
   persisted: boolean = false;
 
-  constructor(
-    id: string,
-    gameMode: GameMode,
-    tournamentId: number | null,
-    mode: IGameMode,
-    creatorUserId: number | null = null,
-  ) {
+  constructor(id: string, gameMode: GameMode, tournamentId: number | null, mode: IGameMode) {
     this.id = id;
     this.gameMode = gameMode;
     this.tournamentId = tournamentId;

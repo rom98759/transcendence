@@ -75,20 +75,20 @@ export class TournamentMode implements IGameMode {
     return true;
   }
 
-  async onPlayerDisconnect(
-    session: Session,
-    ws: WebSocket,
-    app: FastifyInstance,
-  ): Promise<void> {
+  async onPlayerDisconnect(session: Session, ws: WebSocket, app: FastifyInstance): Promise<void> {
     const player = session.removePlayerByWs(ws);
     app.log.info(`[${session.id}] Tournament: Player ${player?.role ?? '?'} disconnected`);
+
+    // A disconnection mid-game must stop the engine so GameLoop can persist the
+    // partial result and advance the bracket. Without this, the match is never
+    // recorded and the tournament stalls.
+    if (session.game.status === 'playing') {
+      app.log.info(`[${session.id}] Tournament: player left mid-game — game stopped (forfeit)`);
+      session.game.stop();
+    }
   }
 
-  async onGameOver(
-    session: Session,
-    result: GameOverData,
-    app: FastifyInstance,
-  ): Promise<void> {
+  async onGameOver(session: Session, result: GameOverData, app: FastifyInstance): Promise<void> {
     const tournamentId = session.tournamentId;
     if (tournamentId == null) {
       app.log.error({ event: 'tournament_persist_no_id', sessionId: session.id });
@@ -144,10 +144,7 @@ export class TournamentMode implements IGameMode {
     }
   }
 
-  private async publishToBlockchain(
-    app: FastifyInstance,
-    tournamentId: number,
-  ): Promise<void> {
+  private async publishToBlockchain(app: FastifyInstance, tournamentId: number): Promise<void> {
     try {
       const payload = this.tournamentRepo.getTournamentResultForBlockchain(tournamentId);
       if (!payload) {

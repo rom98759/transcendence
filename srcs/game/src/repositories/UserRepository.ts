@@ -6,6 +6,14 @@ import Database from 'better-sqlite3';
 import { UserEvent, AppError, ERR_DEFS } from '@transcendence/core';
 import { GUEST_USER_ID } from '../types/game.types.js';
 
+/** Shape of a player row as stored in the local SQLite replica. */
+export interface PlayerRecord {
+  id: number;
+  username: string;
+  avatar: string | null;
+  updated_at: number;
+}
+
 export class UserRepository {
   private upsertUserStmt;
   private deleteUserStmt;
@@ -48,13 +56,17 @@ export class UserRepository {
     try {
       this.deleteUserStmt.run(id);
     } catch (err: unknown) {
-      throw new AppError(ERR_DEFS.DB_DELETE_ERROR, { details: [{ field: `deleteUser ${id}` }] }, err);
+      throw new AppError(
+        ERR_DEFS.DB_DELETE_ERROR,
+        { details: [{ field: `deleteUser ${id}` }] },
+        err,
+      );
     }
   }
 
-  getUser(id: number): any {
+  getUser(id: number): PlayerRecord {
     try {
-      const result = this.getUserStmt.get(id);
+      const result = this.getUserStmt.get(id) as PlayerRecord | undefined;
       if (!result) {
         throw new AppError(ERR_DEFS.USER_NOTFOUND_ERRORS, { userId: id });
       }

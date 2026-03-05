@@ -39,6 +39,9 @@ export class LocalMode implements IGameMode {
     const guestB = createGuestPlayer('B');
     session.setPlayer('B', guestB);
 
+    // Ensure the guest player row exists in the DB once at join time, not on every
+    this.matchRepo.ensureGuestPlayer();
+
     app.log.info(`[${session.id}] Local mode — Player A (userId=${user?.id}), Player B = GUEST`);
 
     // Auto-start with single player
@@ -50,26 +53,19 @@ export class LocalMode implements IGameMode {
     return true;
   }
 
-  async onPlayerDisconnect(
-    session: Session,
-    ws: WebSocket,
-    app: FastifyInstance,
-  ): Promise<void> {
+  async onPlayerDisconnect(session: Session, ws: WebSocket, app: FastifyInstance): Promise<void> {
     session.removePlayerByWs(ws);
     app.log.info(`[${session.id}] Local mode — player disconnected`);
 
-    // If no WS players left and game was still waiting, stop and cleanup
-    if (session.connectedPlayerCount === 0 && session.game.status === 'waiting') {
+    // Stop the game regardless of status: no human player remains to control paddles.
+    // Stopping during 'playing' triggers the GameLoop's game-over + persist path.
+    if (session.connectedPlayerCount === 0 && session.game.status !== 'finished') {
       session.game.stop();
       app.log.info(`[${session.id}] Local mode — no players left, session stopped`);
     }
   }
 
-  async onGameOver(
-    session: Session,
-    result: GameOverData,
-    app: FastifyInstance,
-  ): Promise<void> {
+  async onGameOver(session: Session, result: GameOverData, app: FastifyInstance): Promise<void> {
     const player1Id = session.getUserId('A');
     const player2Id = session.getUserId('B') ?? GUEST_USER_ID;
 
@@ -79,8 +75,6 @@ export class LocalMode implements IGameMode {
     }
 
     try {
-      this.matchRepo.ensureGuestPlayer();
-
       const winnerId = result.winner === 'left' ? player1Id : player2Id;
       this.matchRepo.createFreeMatch(
         player1Id,

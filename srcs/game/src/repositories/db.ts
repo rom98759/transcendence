@@ -26,10 +26,10 @@ export function initDb(dbPath: string): Database.Database {
   const db = new Database(dbPath);
   db.pragma('foreign_keys = ON');
 
-// ---- Schema ----
+  // ---- Schema ----
 
-try {
-  db.exec(`
+  try {
+    db.exec(`
 CREATE TABLE IF NOT EXISTS player (
     id INTEGER PRIMARY KEY,
     username TEXT NOT NULL,

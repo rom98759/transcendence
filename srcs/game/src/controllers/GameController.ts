@@ -5,12 +5,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { WebSocket } from 'ws';
 import { AppError, LOG_REASONS } from '@transcendence/core';
-import {
-  GameMode,
-  GameSettings,
-  WS_CLOSE,
-  TournamentParams,
-} from '../types/game.types.js';
+import { GameMode, GameSettings, WS_CLOSE, TournamentParams } from '../types/game.types.js';
 import { SessionStore } from '../core/session/SessionStore.js';
 import { MatchRepository } from '../repositories/MatchRepository.js';
 import { TournamentRepository } from '../repositories/TournamentRepository.js';
@@ -37,9 +32,20 @@ export function createGameController(
       const body = req.body as { gameMode: string; tournamentId?: number | string };
       const userId = req.user?.id ?? null;
       const gameMode = body.gameMode as GameMode;
-      const tournamentId = body.tournamentId != null ? Number(body.tournamentId) : null;
+      const rawTournamentId = body.tournamentId != null ? Number(body.tournamentId) : null;
+      if (
+        rawTournamentId !== null &&
+        (!Number.isInteger(rawTournamentId) || rawTournamentId <= 0)
+      ) {
+        return reply
+          .code(400)
+          .send({ status: 'failure', message: 'tournamentId must be a positive integer' });
+      }
+      const tournamentId = rawTournamentId;
 
-      app.log.info(`[${gameMode}] New session request (userId=${userId}, tournamentId=${tournamentId})`);
+      app.log.info(
+        `[${gameMode}] New session request (userId=${userId}, tournamentId=${tournamentId})`,
+      );
 
       try {
         const result = createSession(
@@ -50,9 +56,11 @@ export function createGameController(
           app,
         );
 
-        // Start preview + communication loop
-        result.session.game.preview();
-        startGameLoop(result.session, sessionStore, app);
+        // Only start the loop for new sessions — re-joined tournament sessions
+        if (!result.session.interval) {
+          result.session.game.preview();
+          startGameLoop(result.session, sessionStore, app);
+        }
 
         return reply.code(200).send({
           status: 'success',
@@ -92,11 +100,16 @@ export function createGameController(
       const body = req.body as { sessionId?: string; settings?: GameSettings };
       const { sessionId, settings } = body;
 
-      if (!sessionId) return reply.code(400).send({ status: 'failure', message: 'sessionId is required' });
-      if (!settings) return reply.code(400).send({ status: 'failure', message: 'settings are required' });
+      if (!sessionId)
+        return reply.code(400).send({ status: 'failure', message: 'sessionId is required' });
+      if (!settings)
+        return reply.code(400).send({ status: 'failure', message: 'settings are required' });
 
       const session = sessionStore.get(sessionId);
-      if (!session) return reply.code(404).send({ status: 'failure', message: `Session ${sessionId} not found` });
+      if (!session)
+        return reply
+          .code(404)
+          .send({ status: 'failure', message: `Session ${sessionId} not found` });
       if (session.game.status !== 'waiting') {
         return reply.code(409).send({ status: 'failure', message: 'Game is running or finished' });
       }
@@ -145,7 +158,8 @@ export function createGameController(
       const userId = Number.isFinite(parsed) ? parsed : null;
 
       const userName = (req.headers as Record<string, string | undefined>)['x-user-name'];
-      const user = userId != null ? { id: userId, username: String(userName ?? 'anonymous') } : null;
+      const user =
+        userId != null ? { id: userId, username: String(userName ?? 'anonymous') } : null;
 
       app.log.info({ event: 'ws_connect', sessionId, userId });
 
@@ -155,7 +169,9 @@ export function createGameController(
     // ---- Tournaments ----
 
     async newTournament(req: FastifyRequest, reply: FastifyReply) {
-      const userId = req.user.id;
+      const userId = req.user?.id;
+      if (!userId)
+        return reply.code(401).send({ status: 'failure', message: 'Authentication required' });
       const tournamentId = tournamentRepo.createTournament(userId);
       return reply.code(200).send(tournamentId);
     },
@@ -222,15 +238,17 @@ export function createGameController(
     async resetGame(req: FastifyRequest, reply: FastifyReply) {
       const body = req.body as { sessionId?: string };
       const sessionId = body.sessionId;
-      if (!sessionId) return reply.code(400).send({ status: 'failure', message: 'sessionId is required' });
+      if (!sessionId)
+        return reply.code(400).send({ status: 'failure', message: 'sessionId is required' });
 
       const session = sessionStore.get(sessionId);
-      if (!session) return reply.code(404).send({ status: 'failure', message: `Session ${sessionId} not found` });
+      if (!session)
+        return reply
+          .code(404)
+          .send({ status: 'failure', message: `Session ${sessionId} not found` });
 
-      session.game.scores.left = 0;
-      session.game.scores.right = 0;
-      session.game.status = 'waiting';
-      session.game.resetBall();
+      // Delegate reset to the domain object — avoids mutating internal state from the HTTP layer
+      session.game.reset();
       return { status: 'success', state: session.game.getState() };
     },
 
@@ -242,11 +260,16 @@ export function createGameController(
       };
       const { sessionId, action, paddle = 'right' } = body;
       if (!sessionId || !action) {
-        return reply.code(400).send({ status: 'failure', message: 'sessionId and action are required' });
+        return reply
+          .code(400)
+          .send({ status: 'failure', message: 'sessionId and action are required' });
       }
 
       const session = sessionStore.get(sessionId);
-      if (!session) return reply.code(404).send({ status: 'failure', message: `Session ${sessionId} not found` });
+      if (!session)
+        return reply
+          .code(404)
+          .send({ status: 'failure', message: `Session ${sessionId} not found` });
 
       session.game.setPaddleDirection(paddle, action);
       session.game.update();
@@ -264,10 +287,14 @@ export function createGameController(
       const sessionId =
         (req.query as { sessionId?: string }).sessionId ||
         (req.body as { sessionId?: string })?.sessionId;
-      if (!sessionId) return reply.code(400).send({ status: 'failure', message: 'sessionId is required' });
+      if (!sessionId)
+        return reply.code(400).send({ status: 'failure', message: 'sessionId is required' });
 
       const session = sessionStore.get(sessionId);
-      if (!session) return reply.code(404).send({ status: 'failure', message: `Session ${sessionId} not found` });
+      if (!session)
+        return reply
+          .code(404)
+          .send({ status: 'failure', message: `Session ${sessionId} not found` });
 
       return { status: 'success', state: session.game.getState() };
     },

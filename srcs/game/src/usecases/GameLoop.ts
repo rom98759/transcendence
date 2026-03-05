@@ -17,9 +17,7 @@ function buildGameOverData(session: Session): GameOverData {
   const winnerSide: 'left' | 'right' = scores.left > scores.right ? 'left' : 'right';
 
   // A = left paddle, B = right paddle
-  const winnerUserId = winnerSide === 'left'
-    ? session.getUserId('A')
-    : session.getUserId('B');
+  const winnerUserId = winnerSide === 'left' ? session.getUserId('A') : session.getUserId('B');
 
   return {
     scores,
@@ -53,11 +51,14 @@ export function startGameLoop(
 
       // Async finish lifecycle
       (async () => {
+        // Build the game-over payload before entering the persist try-block so it
+        // is available in the catch branch even if onGameOver throws.
+        const gameOverData = buildGameOverData(session);
+
         try {
           // 1. Persist result (delegates to mode strategy)
           if (!session.persisted) {
             session.persisted = true;
-            const gameOverData = buildGameOverData(session);
             await session.mode.onGameOver(session, gameOverData, app);
 
             // 2. Broadcast game over
@@ -70,10 +71,11 @@ export function startGameLoop(
         } catch (err) {
           app.log.error({ event: 'persist_unhandled_error', sessionId: session.id, err });
 
-          // Still broadcast gameOver even if persist failed
+          // Still broadcast gameOver with scores even if persist failed
           broadcastToSession(session, {
             type: 'gameOver',
             data: session.game.getState(),
+            gameOverData,
           });
         } finally {
           // 3. Cleanup

@@ -24,7 +24,8 @@ export function attachWsMessageHandler(
 
       switch (message.type) {
         case 'start':
-          if (session.game.status === 'waiting') {
+          // Only allow registered players to start the game (not unauthorized connections)
+          if (session.getPlayerByWs(ws) && session.game.status === 'waiting') {
             session.game.start();
             broadcastToSession(session, {
               type: 'state',
@@ -42,6 +43,16 @@ export function attachWsMessageHandler(
 
         case 'paddle':
           if (message.paddle && message.direction) {
+            // In non-local modes, each player may only control their own paddle.
+            // Player A controls 'left', Player B controls 'right'.
+            if (session.gameMode !== 'local') {
+              const player = session.getPlayerByWs(ws);
+              const expectedSide = player?.role === 'A' ? 'left' : 'right';
+              if (!player || message.paddle !== expectedSide) {
+                sendToWs(ws, { type: 'error', message: 'Unauthorized paddle control' });
+                break;
+              }
+            }
             session.game.setPaddleDirection(message.paddle, message.direction);
           }
           break;

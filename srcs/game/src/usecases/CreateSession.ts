@@ -32,7 +32,11 @@ export function createSession(
   let sessionId: string;
 
   // For tournament mode, the sessionId comes from the DB match
-  if (input.gameMode === 'tournament' && input.tournamentId != null && input.creatorUserId != null) {
+  if (
+    input.gameMode === 'tournament' &&
+    input.tournamentId != null &&
+    input.creatorUserId != null
+  ) {
     const matchToPlay = tournamentRepo.getMatchToPlay(input.tournamentId, input.creatorUserId);
     if (!matchToPlay?.sessionId) {
       throw new Error('No match to play or missing sessionId for tournament');
@@ -50,13 +54,7 @@ export function createSession(
 
   // Create new session with the appropriate mode strategy
   const mode = createGameMode(input.gameMode, matchRepo, tournamentRepo);
-  const session = new Session(
-    sessionId,
-    input.gameMode,
-    input.tournamentId ?? null,
-    mode,
-    input.creatorUserId,
-  );
+  const session = new Session(sessionId, input.gameMode, input.tournamentId ?? null, mode);
 
   sessionStore.set(sessionId, session);
 

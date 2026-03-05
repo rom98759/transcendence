@@ -153,7 +153,8 @@ export const WS_CLOSE = {
 
 // ---- Session TTL ----
 
-export const SESSION_TTL_MS = 5 * 60 * 1000; // 5 minutes
+export const SESSION_TTL_MS = 5 * 60 * 1000; // 5 minutes (waiting sessions)
+export const PLAYING_TTL_MS = 30 * 60 * 1000; // 30 minutes (stuck playing sessions)
 
 // ---- Guest User ----
 

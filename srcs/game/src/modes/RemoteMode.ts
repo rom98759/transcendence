@@ -47,13 +47,17 @@ export class RemoteMode implements IGameMode {
     return true;
   }
 
-  async onPlayerDisconnect(
-    session: Session,
-    ws: WebSocket,
-    app: FastifyInstance,
-  ): Promise<void> {
+  async onPlayerDisconnect(session: Session, ws: WebSocket, app: FastifyInstance): Promise<void> {
     const player = session.removePlayerByWs(ws);
     app.log.info(`[${session.id}] Remote: Player ${player?.role ?? '?'} disconnected`);
+
+    // A disconnection during 'playing' ends the game immediately.
+    // Stopping triggers GameLoop's finished branch → onGameOver → persist path.
+    if (session.game.status === 'playing') {
+      app.log.info(`[${session.id}] Remote: player left mid-game — game stopped (forfeit)`);
+      session.game.stop();
+      return;
+    }
 
     if (session.connectedPlayerCount === 0 && session.game.status === 'waiting') {
       session.game.stop();
@@ -61,17 +65,15 @@ export class RemoteMode implements IGameMode {
     }
   }
 
-  async onGameOver(
-    session: Session,
-    result: GameOverData,
-    app: FastifyInstance,
-  ): Promise<void> {
+  async onGameOver(session: Session, result: GameOverData, app: FastifyInstance): Promise<void> {
     const player1Id = session.getUserId('A');
     const player2Id = session.getUserId('B');
 
     if (
-      player1Id == null || !Number.isFinite(player1Id) ||
-      player2Id == null || !Number.isFinite(player2Id)
+      player1Id == null ||
+      !Number.isFinite(player1Id) ||
+      player2Id == null ||
+      !Number.isFinite(player2Id)
     ) {
       app.log.warn({
         event: 'free_match_missing_players',

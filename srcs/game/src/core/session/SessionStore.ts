@@ -4,7 +4,7 @@
 // ============================================================================
 
 import { Session } from './Session.js';
-import { SESSION_TTL_MS } from '../../types/game.types.js';
+import { SESSION_TTL_MS, PLAYING_TTL_MS } from '../../types/game.types.js';
 
 export class SessionStore {
   private sessions = new Map<string, Session>();
@@ -45,13 +45,24 @@ export class SessionStore {
     this.sessions.clear();
   }
 
-  /** Garbage-collect orphan sessions stuck in 'waiting' past TTL */
-  cleanupExpired(logger?: { warn: (...args: any[]) => void; info: (...args: any[]) => void }): number {
+  /** Garbage-collect orphan sessions: 'waiting' past 5 min TTL or 'playing' past 30 min TTL */
+  cleanupExpired(logger?: {
+    warn: (...args: any[]) => void;
+    info: (...args: any[]) => void;
+  }): number {
     const now = Date.now();
     let cleaned = 0;
     for (const [id, session] of this.sessions.entries()) {
-      if (session.game.status === 'waiting' && now - session.createdAt > SESSION_TTL_MS) {
-        logger?.warn({ event: 'session_ttl_expired', sessionId: id, age: now - session.createdAt });
+      const age = now - session.createdAt;
+      const isExpiredWaiting = session.game.status === 'waiting' && age > SESSION_TTL_MS;
+      const isExpiredPlaying = session.game.status === 'playing' && age > PLAYING_TTL_MS;
+      if (isExpiredWaiting || isExpiredPlaying) {
+        logger?.warn({
+          event: 'session_ttl_expired',
+          sessionId: id,
+          status: session.game.status,
+          age,
+        });
         session.destroy();
         this.sessions.delete(id);
         cleaned++;

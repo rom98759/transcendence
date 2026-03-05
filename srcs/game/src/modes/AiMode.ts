@@ -66,8 +66,10 @@ export class AiMode implements IGameMode {
     session.removePlayerByWs(ws);
     app.log.info(`[${session.id}] AI mode — human player disconnected`);
 
-    if (session.connectedPlayerCount === 0 && session.game.status === 'waiting') {
+    // Stop whether 'waiting' or 'playing': without a human the session is meaningless.
+    if (session.connectedPlayerCount === 0 && session.game.status !== 'finished') {
       session.game.stop();
+      app.log.info(`[${session.id}] AI mode — session stopped (no human player)`);
     }
   }
 

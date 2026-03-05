@@ -39,11 +39,7 @@ export class PongGame {
     this.serve = 1;
     this.settings = { ...DEFAULT_GAME_SETTINGS };
 
-    this.cosmicBackground = new CosmicNoise(
-      this.width,
-      this.height,
-      this.settings.microWaveSize,
-    );
+    this.cosmicBackground = new CosmicNoise(this.width, this.height, this.settings.microWaveSize);
 
     this.ball = new Ball(
       new Vector2(this.width / 2, this.height / 2),
@@ -241,6 +237,18 @@ export class PongGame {
     const velX = this.settings.ballSpeed * this.serve;
     this.ball.vel = new Vector2(velX, (Math.random() - 0.5) * 10);
     this.ball.acc = Vector2.zero();
+  }
+
+  /**
+   * Reset game state for RL/AI use: scores zeroed, status back to 'waiting', ball centered.
+   * Encapsulates domain mutations so the controller layer cannot directly
+   * write to internal properties.
+   */
+  reset(): void {
+    this.scores.left = 0;
+    this.scores.right = 0;
+    this.status = 'waiting';
+    this.resetBall();
   }
 
   // ---- Serialization ----
