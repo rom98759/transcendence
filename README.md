@@ -35,7 +35,7 @@ cd transcendence
 
 make envs
 
-# → Fill in your 42 OAuth2 credentials in srcs/.env.auth
+# → Fill in your 42 OAuth2 credentials in srcs/.env.auth and srcs/.env.nginx
 
 # 3. Build and launch all services
 
@@ -162,10 +162,10 @@ How AI was used: we asked for explanation on how different libraries and tools w
 | Login                                   | Role(s)         | Responsibilities                                |
 | --------------------------------------- | --------------- | ----------------------------------------------- |
 | [lisambet](https://github.com/lisambet) | _Product Owner_ | _AI Opponent_                                   |
-| [fpetit](https://github.com/fpetit)     | _Tech Lead_     | _User Service_                                  |
-| [rcaillie](https://github.com/rcaillie) | _Developer_     | _Auth Service_                                  |
-| [jhervoch](https://github.com/jhervoch) | _Tech Lead_     | _Blockchain integration, Tournament management_ |
-| [npolack](https://github.com/npolack)   | _Scrum Master_  | _Game Engine_                                   |
+| [fpetit](https://github.com/codastream) | _Tech Lead_     | _User Service_                                  |
+| [rcaillie](https://github.com/rom98759) | _Developer_     | _Auth Service_                                  |
+| [jhervoch](https://github.com/jmtth)    | _Tech Lead_     | _Blockchain integration, Tournament management_ |
+| [npolack](https://github.com/Ilia1177)  | _Scrum Master_  | _Game Engine_                                   |
 
 > **\*Roles reference:**
 >
@@ -430,7 +430,7 @@ erDiagram
 | Current match      | Get next match to play        |
 | Tournament stats   | Competition statistics        |
 
-### Admin Panel — `@fpetit`
+### Admin Panel — `@rcaillie`
 
 | Role          | Permissions                                  |
 | ------------- | -------------------------------------------- |
@@ -459,31 +459,34 @@ erDiagram
 
 > **Total: 32 pts** (minimum required: 14 pts)
 
-| #   | Category        | Module                                                       | Type  | Points |
-| --- | --------------- | ------------------------------------------------------------ | ----- | ------ |
-| 1   | Web             | Real-time features (WebSockets)                              | Major | 2      |
-| 2   | Web             | Use a framework for both frontend and backend                | Major | 2      |
-| 3   | User Management | Standard user management & authentication                    | Major | 2      |
-| 4   | User Management | Game statistics & match history (TBD)                        | Minor | 1      |
-| 5   | User Management | Remote authentication (OAuth 2.0 — Google & 42)              | Minor | 1      |
-| 6   | User Management | Advanced permissions system (admin / moderator)              | Major | 2      |
-| 7   | User Management | Two-Factor Authentication (TOTP / 2FA)                       | Minor | 1      |
-| 8   | AI              | AI Opponent (PPO reinforcement learning)                     | Major | 2      |
-| 9   | Gaming & UX     | Complete web-based game (Pong)                               | Major | 2      |
-| 10  | Gaming & UX     | Remote players (real-time multiplayer)                       | Major | 2      |
-| 11  | Gaming & UX     | Tournament system                                            | Minor | 1      |
-| 12  | DevOps          | Backend as microservices                                     | Major | 2      |
-| 13  | Blockchain      | Store tournament scores on Blockchain (Solidity)             | Major | 2      |
-| 14  | Database        | ORM (Prisma)                                                 | Minor | 1      |
-| 15  | Accessibility   | Internationalization (i18n) — support for multiple languages | Minor | 1      |
-| 16  | Database        | A public API to interact with the database                   | Major | 2      |
-| 17  | Web             | Custom-made design system with reusable components           | Minor | 1      |
-| 18  | Web             | Advanced search with filters, sorting, and pagination        | Minor | 1      |
-| 19  | Accessibility   | Support for additional browsers (TBD)                        | Minor | 1      |
-| 20  | Security        | GDPR compliance features (TBD)                               | Minor | 1      |
-|     |                 | **Major modules × 10**                                       |       | **20** |
-|     |                 | **Minor modules × 12**                                       |       | **12** |
-|     |                 | **TOTAL**                                                    |       | **32** |
+| #   | Category         | Module                                                       | Type  | Points |
+| --- | ---------------- | ------------------------------------------------------------ | ----- | ------ |
+| 1   | Web              | Real-time features (WebSockets)                              | Major | 2      |
+| 2   | Web              | Use a framework for both frontend and backend                | Major | 2      |
+| 3   | Web              | Custom-made design system with reusable components           | Minor | 1      |
+| 4   | Web              | Advanced search with filters, sorting, and pagination        | Minor | 1      |
+| 5   | User Management  | Standard user management & authentication                    | Major | 2      |
+| 6   | User Management  | Advanced permissions system (admin / moderator)              | Major | 2      |
+| 7   | User Management  | Remote authentication (OAuth 2.0 — Google & 42)              | Minor | 1      |
+| 8   | User Management  | Two-Factor Authentication (TOTP / 2FA)                       | Minor | 1      |
+| 9   | User Management  | Game statistics & match history (TBD)                        | Minor | 1      |
+| 10  | Gaming & UX      | Complete web-based game (Pong)                               | Major | 2      |
+| 11  | Gaming & UX      | Remote players (real-time multiplayer)                       | Major | 2      |
+| 12  | Gaming & UX      | Tournament system                                            | Minor | 1      |
+| 13  | AI               | AI Opponent (PPO reinforcement learning)                     | Major | 2      |
+| 14  | DevOps           | Backend as microservices                                     | Major | 2      |
+| 15  | Blockchain       | Store tournament scores on Blockchain (Solidity)             | Major | 2      |
+| 16  | Database         | A public API to interact with the database                   | Major | 2      |
+| 17  | Database         | ORM (Prisma)                                                 | Minor | 1      |
+| 18  | Security         | GDPR compliance features (TBD)                               | Minor | 1      |
+| 19  | Accessibility    | Internationalization (i18n) — support for multiple languages | Minor | 1      |
+| 20  | Accessibility    | Support for additional browsers (TBD)                        | Minor | 1      |
+| 21  | Module of choice | LED panel                                                    | Minor | 1      |
+|     |                  | **Major modules × 10**                                       |       | **20** |
+|     |                  | **Minor modules × 12**                                       |       | **13** |
+|     |                  | **TOTAL**                                                    |       | **33** |
+
+Module of choice justification: We chose to implement a LED panel that displays the current online users and recent tournament winners. This adds a fun visual element to the app and allows us to experiment with real-time updates and external hardware integration.
 
 ## Individual Contributions:
 
