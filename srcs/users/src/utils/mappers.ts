@@ -1,10 +1,6 @@
 import { UserProfile } from '@prisma/client';
-import {
-  FriendshipFullDTO,
-  FriendshipUnifiedDTO,
-  ProfileSimpleDTO,
-  ProfileDTO,
-} from '@transcendence/core';
+import { FriendshipUnifiedDTO, ProfileSimpleDTO, ProfileDTO } from '@transcendence/core';
+import { FriendshipWithProfiles } from 'src/types/friend.js';
 
 export function mapProfileToDTO(profile: UserProfile): ProfileSimpleDTO {
   return {
@@ -22,7 +18,7 @@ export function mapProfileToIdDTO(profile: UserProfile): ProfileDTO {
 }
 
 export function mapFriendshipToDTO(
-  f: FriendshipFullDTO,
+  f: FriendshipWithProfiles,
   currentUserId: number,
 ): FriendshipUnifiedDTO {
   const friendProfile = f.receiver.authId === currentUserId ? f.requester : f.receiver;
