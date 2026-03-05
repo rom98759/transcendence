@@ -266,6 +266,8 @@
     "play": "Play",
     "play_friend": "Play with a friend",
     "play_ai": "Play with AI",
+    "play_remote": "Remote Game",
+    "play_local": "Local Game",
     "play_tournament": "Tournament",
     "stats": "Stats",
     "stats_history": "History",
@@ -336,7 +338,8 @@
     "termsOfService": "Terms of Service"
   },
   "game": {
-    "playWithAi": "Play with AI",
+    "playWithAI": "Play with AI",
+    "playWithFriends": "Play with Friends",
     "playRemote": "Remote Game",
     "playLocal": "Local Game",
     "tournament": "Tournament",

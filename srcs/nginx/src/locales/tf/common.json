@@ -281,6 +281,8 @@
     "play": "C'est parti!",
     "play_friend": "Affronter un pote",
     "play_ai": "Se frotter au machin",
+    "play_remote": "Se battre en ligne",
+    "play_local": "Se taper la cloche en local",
     "play_tournament": "La compét",
     "stats": "Ton palmarès",
     "stats_history": "Ton historique",
@@ -352,6 +354,7 @@
   },
   "game": {
     "playWithAI": "Défie le machin",
+    "playWithFriends": "Affronte tes potes",
     "playRemote": "Joue a 2 sur cette becane",
     "playLocal": "Joue avec tes potes en remote",
     "tournament": "Vendetta",

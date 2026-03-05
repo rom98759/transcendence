@@ -15,6 +15,8 @@ export const NavBar = () => {
     { label: t('navbar.play_friend'), to: '/friends' },
     { label: t('navbar.play_ai'), to: '/game/pong-ai' },
     { label: t('navbar.play_tournament'), to: '/tournaments' },
+    { label: t('navbar.play_remote'), to: '/game/remote' },
+    { label: t('navbar.play_local'), to: '/game/local' },
   ];
 
   const statsItems = [

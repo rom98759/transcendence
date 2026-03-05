@@ -265,6 +265,8 @@
     "play": "Jouer",
     "play_friend": "Jouer contre un ami",
     "play_ai": "Jouer contre l'IA",
+    "play_remote": "Partie en ligne",
+    "play_local": "Partie locale",
     "play_tournament": "Tournoi",
     "stats": "Stats",
     "stats_history": "Historique",
