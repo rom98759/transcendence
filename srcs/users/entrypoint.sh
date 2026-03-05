@@ -8,10 +8,10 @@ DB_FILE="/app/data/um.db"
 
 if [ ! -f "$DB_FILE" ]; then
   echo "Fresh DB — running migrate deploy..."
-  npx prisma migrate deploy
+  ./node_modules/.bin/prisma migrate deploy
 else
   echo "Existing DB — using db push..."
-  npx prisma db push
+  ./node_modules/.bin/prisma db push
 fi
 
 echo "Starting app..."

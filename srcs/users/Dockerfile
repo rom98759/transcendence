@@ -38,19 +38,20 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Copy deps and prune dev deps
-COPY package-lock.json ./package-lock.json ./
-COPY srcs/users/package.json ./srcs/users/package.json
 COPY --from=builder /app/node_modules ./node_modules
-RUN npm prune --omit=dev --no-audit --no-fund
+
+# Remove symlink @transcendence/core to later get real artifact
+RUN rm -rf ./node_modules/@transcendence/core
 
 # COPY artifacts
-COPY --from=builder /app/srcs/shared/core/dist ./node_modules/@transcendence/core/dist
-COPY --from=builder /app/srcs/users/dist ./dist
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/srcs/shared/core/package.json ./node_modules/@transcendence/core/package.json
+COPY --from=builder /app/srcs/shared/core/dist ./node_modules/@transcendence/core/dist
+
+COPY --from=builder /app/srcs/users/dist ./dist
 COPY --from=builder /app/srcs/users/prisma ./prisma
-COPY --from=builder /app/srcs/users/prisma.config.ts ./prisma.config.ts
-COPY --from=builder /app/srcs/users/src/config ./src/config
+COPY --from=builder /app/srcs/users/prisma.config.js ./prisma.config.js
 
 # Entrypoint
 COPY srcs/users/entrypoint.sh ./entrypoint.sh
