@@ -426,6 +426,13 @@
         "finished": "Partie terminée",
         "disconnected": "Adversaire déconnecté"
       }
+    },
+    "error": {
+      "session_not_found": "Session non trouvée ou expirée. Créez une nouvelle partie ou rafraîchissez la liste.",
+      "connection_failed": "Impossible de se connecter à la session. La session peut avoir expiré ou le serveur est indisponible. Veuillez réessayer.",
+      "websocket_error": "Erreur de connexion. Vérifie ta connexion Internet et réessaye.",
+      "invalid_session": "Session invalide. Créez une nouvelle partie.",
+      "server_error": "Erreur serveur. Veuillez réessayer dans quelques instants."
     }
   },
   "faq": {

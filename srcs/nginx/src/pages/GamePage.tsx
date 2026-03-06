@@ -61,7 +61,12 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
   const location = useLocation();
 
   // ── Hooks ──────────────────────────────────────────────────────────────────
-  const { openWebSocket, closeWebSocket, connected: wsConnected } = useGameWebSocket();
+  const {
+    openWebSocket,
+    openWebSocketWithRetry,
+    closeWebSocket,
+    connected: wsConnected,
+  } = useGameWebSocket();
   const { gameStateRef, updateGameState } = useGameState();
   const {
     lobby,
@@ -83,6 +88,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
   const [forfeit, setForfeit] = useState(false);
   const [readyCheckReceived, setReadyCheckReceived] = useState(false);
   const [readySent, setReadySent] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   // ── Machine à états : écran courant ───────────────────────────────
   const [screen, setScreen] = useState<GameScreen>(
@@ -106,6 +112,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
     setScores({ left: 0, right: 0 });
     scoresRef.current = { left: 0, right: 0 };
     phaseRef.current = 'idle';
+    setConnectionError(null);
   }, [closeWebSocket, resetLobby]);
 
   const {
@@ -239,14 +246,38 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
   /** Rejoindre une session existante depuis la liste → écran de jeu */
   const handleJoinSession = useCallback(
     (id: string) => {
+      setConnectionError(null);
+
+      // Vérifier que la session est encore valide
+      const sessionExists = sessions.sessionsList?.some((s) => s.sessionId === id);
+      if (!sessionExists) {
+        setConnectionError(t('game.error.session_not_found', 'Session not found or expired'));
+        setScreen('start');
+        return;
+      }
+
       onBeforeCreate();
       phaseRef.current = 'idle';
-      openWebSocket(id, handleWsMessage).then((ws) => {
-        wsRef.current = ws;
-      });
+
+      // Utiliser la version avec retry automatique
+      openWebSocketWithRetry(id, handleWsMessage)
+        .then((ws) => {
+          wsRef.current = ws;
+          setConnectionError(null);
+        })
+        .catch((err) => {
+          const message =
+            err instanceof Error
+              ? err.message
+              : t('game.error.connection_failed', 'Failed to connect to session');
+          setConnectionError(message);
+          setScreen('start');
+          console.error('[JoinSession] Connection failed:', err);
+        });
+
       setScreen('playing');
     },
-    [onBeforeCreate, openWebSocket, handleWsMessage],
+    [onBeforeCreate, openWebSocketWithRetry, handleWsMessage, sessions.sessionsList, t],
   );
 
   /** Bouton "Je suis prêt" dans l'overlay pré-jeu */
@@ -326,6 +357,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
             onCreateLocal={handleCreateLocal}
             onCreateRemote={handleCreateRemote}
             onJoinSession={handleJoinSession}
+            connectionError={connectionError}
           />
         )}
 

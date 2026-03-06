@@ -441,6 +441,13 @@
         "finished": "La partie, c'est fini",
         "disconnected": "L'autre s'est barré"
       }
+    },
+    "error": {
+      "session_not_found": "La partie t'a fermé les portes. C'est vieux ou chelou. Crée-toi une nouvelle ou rafraîchis la liste.",
+      "connection_failed": "T'arrives pas à te brancher sur la session. Elle s'est peut-être barrée ou le serveur fait la gueule. Réessaye.",
+      "websocket_error": "Ouille! Y'a comme un petit truc qui déraille. Vérifies ta connexion avant de relancer.",
+      "invalid_session": "C'te session, c'est des conneries. Crée une nouvelle partie.",
+      "server_error": "Ça pète sur le serveur. Attends un petit peu que ça se tasse."
     }
   },
   "faq": {

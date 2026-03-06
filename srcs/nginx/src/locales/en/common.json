@@ -426,6 +426,13 @@
         "finished": "Game finished",
         "disconnected": "Opponent disconnected"
       }
+    },
+    "error": {
+      "session_not_found": "Session not found or expired. Please create a new game or refresh the list.",
+      "connection_failed": "Failed to connect to the game session. The session may have expired or the server is unavailable. Please try again.",
+      "websocket_error": "Connection error. Please check your internet connection and try again.",
+      "invalid_session": "Invalid game session. Please create a new game.",
+      "server_error": "Server error. Please try again in a few moments."
     }
   },
   "faq": {

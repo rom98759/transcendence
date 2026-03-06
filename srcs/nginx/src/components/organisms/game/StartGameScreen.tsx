@@ -7,6 +7,7 @@
 //   Right → bouton "Rejoindre" + liste des sessions disponibles
 // ============================================================================
 
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { CircleButton } from '../../atoms/CircleButtonSimple';
 import type { UseGameSessionsReturn, GameSession } from '../../../hooks/GameSessions';
@@ -19,6 +20,7 @@ interface StartGameScreenProps {
   onCreateLocal: () => void;
   onCreateRemote: () => void;
   onJoinSession: (sessionId: string) => void;
+  connectionError?: string | null;
 }
 
 // ── Sous-composant : un item de liste de matchs ──────────────────────────────
@@ -29,8 +31,6 @@ const SessionItem = ({
   session: GameSession;
   onJoin: (id: string) => void;
 }) => {
-  const { t } = useTranslation('common');
-
   return (
     <button
       className="w-full flex items-center justify-between px-4 py-3 rounded-lg
@@ -57,6 +57,7 @@ const StartGameScreen = ({
   onCreateLocal,
   onCreateRemote,
   onJoinSession,
+  connectionError,
 }: StartGameScreenProps) => {
   const { t } = useTranslation('common');
 
@@ -67,11 +68,26 @@ const StartGameScreen = ({
     refetch,
   } = sessionsData ?? {};
 
+  // ── Rafraîchir les sessions au montage pour éviter le cache ──
+  useEffect(() => {
+    if (refetch) {
+      refetch();
+    }
+  }, [refetch]);
+
   return (
     <div className="w-full flex-1 flex flex-col">
       <div className="sticky top-0 z-50 w-full">
         <NavBar />
       </div>
+
+      {/* ── Erreur de connexion ── */}
+      {connectionError && (
+        <div className="bg-red-950/90 border border-red-700 text-red-200 px-4 py-3 text-center font-mono text-sm">
+          {connectionError}
+        </div>
+      )}
+
       <div className="flex-1 flex items-center justify-center px-12 py-8">
         <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-24">
           {/* ── Colonne gauche : créer une partie ── */}

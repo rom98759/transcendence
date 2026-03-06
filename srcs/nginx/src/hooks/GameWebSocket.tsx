@@ -2,9 +2,13 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 export const useGameWebSocket = () => {
   const websocketRef = useRef<WebSocket | null>(null);
   const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
+  const baseRetryDelay = 1000; // 1 second
 
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isRetrying, setIsRetrying] = useState(false);
 
   const stopPingInterval = useCallback(() => {
     if (pingIntervalRef.current) {
@@ -115,10 +119,48 @@ export const useGameWebSocket = () => {
     };
   }, [closeWebSocket]);
 
+  // ── Retry logic with exponential backoff ──
+  const openWebSocketWithRetry = useCallback(
+    (sessionId: string, onMessage: (msg: any) => void): Promise<WebSocket> => {
+      retryCountRef.current = 0;
+
+      const tryConnect = async (attemptNumber: number): Promise<WebSocket> => {
+        try {
+          const ws = await openWebSocket(sessionId, onMessage);
+          retryCountRef.current = 0;
+          setIsRetrying(false);
+          return ws;
+        } catch (err) {
+          retryCountRef.current = attemptNumber;
+
+          if (attemptNumber >= maxRetries) {
+            setIsRetrying(false);
+            throw new Error(
+              `Failed to connect after ${maxRetries} attempts: ${err instanceof Error ? err.message : 'Unknown error'}`,
+            );
+          }
+
+          setIsRetrying(true);
+          const delay = baseRetryDelay * Math.pow(2, attemptNumber - 1); // exponential backoff
+          console.warn(`[WS Retry] Attempt ${attemptNumber} failed, retrying in ${delay}ms...`);
+
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return tryConnect(attemptNumber + 1);
+        }
+      };
+
+      return tryConnect(1);
+    },
+    [openWebSocket],
+  );
+
   return {
     connected,
     error,
+    isRetrying,
+    retryCount: retryCountRef.current,
     openWebSocket,
+    openWebSocketWithRetry,
     closeWebSocket,
   };
 };
