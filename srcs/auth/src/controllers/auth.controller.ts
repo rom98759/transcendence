@@ -17,6 +17,7 @@ import {
 } from '@transcendence/core';
 import * as oauthService from '../services/oauth.service.js';
 import z from 'zod';
+import { toUserDTO } from '../utils/mapper.js';
 
 /**
  * Configuration des cookies avec security enforcée en production
@@ -367,6 +368,37 @@ export async function logoutHandler(
   return reply.clearCookie('token').send({ result: { message: 'Logged out successfully' } });
 }
 
+function updateToken(
+  updatedUser: {
+    id: number;
+    username: string;
+    role: string;
+  },
+  fast: FastifyInstance,
+  oldToken: string,
+): { newToken: string; finalExpiry: number } {
+  const payload = fast.jwt.verify<{
+    sub: number;
+    username: string;
+    role: string;
+    iat?: number;
+    exp?: number;
+  }>(oldToken);
+  const currentTime = Math.floor(Date.now() / 1000);
+  const remainingTime = payload.exp
+    ? payload.exp - currentTime
+    : AUTH_CONFIG.COOKIE_MAX_AGE_SECONDS;
+  const finalExpiry = remainingTime > 0 ? remainingTime : 0;
+  const newToken = generateJWT(
+    fast,
+    updatedUser.id,
+    updatedUser.username,
+    updatedUser.role,
+    finalExpiry,
+  );
+  return { newToken, finalExpiry };
+}
+
 export async function patchUsernameHandler(
   this: FastifyInstance,
   request: FastifyRequest<{ Body: z.infer<typeof patchUsernameSchema.body> }>,
@@ -378,9 +410,18 @@ export async function patchUsernameHandler(
   request.log.info({ event: 'patch_username', id, username, newUsername });
   const updatedUser = await authService.updateUserUsernameAndFetch(id, username, newUsername);
   request.log.info({ event: 'patch_username_success', id, username, newUsername });
-  return reply.send({
+
+  const oldToken = request.cookies?.token;
+  if (!oldToken) return reply.code(401).send({ code: ERROR_CODES.UNAUTHORIZED });
+  const { newToken, finalExpiry } = updateToken(
+    { id, username: updatedUser.username, role: updatedUser.role },
+    this,
+    oldToken,
+  );
+  const exposedUser = toUserDTO(updatedUser);
+  reply.setCookie('token', newToken, getCookieOptions(finalExpiry)).send({
     message: 'Update success',
-    user: updatedUser,
+    user: exposedUser,
   });
 }
 

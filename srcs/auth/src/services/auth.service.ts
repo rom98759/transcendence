@@ -19,6 +19,7 @@ import {
 } from '@transcendence/core';
 import * as onlineService from './online.service.js';
 import { toFullUserDTO, toUserDTO } from '../utils/mapper.js';
+import { DBUser } from 'src/types/models.js';
 
 const SALT_ROUNDS = 10;
 
@@ -217,15 +218,13 @@ export async function updateUserUsernameAndFetch(
   userId: number,
   username: string,
   newUsername: string,
-): Promise<UserDTO> {
+): Promise<DBUser> {
   logger.info({ username, newUsername }, 'update username');
-  const user = await db.findUserByIdOrThrow(userId);
-  const currentUsername = user.username;
   await db.updateUserUsername(userId, newUsername);
   try {
-    await updateProfileUsername(userId, currentUsername, newUsername);
+    await updateProfileUsername(userId, username, newUsername);
   } catch (error: any) {
-    await db.updateUserUsername(userId, currentUsername);
+    await db.updateUserUsername(userId, username);
     throw new ServiceError(
       {
         code: ERROR_CODES.INTERNAL_ERROR,
@@ -241,7 +240,7 @@ export async function updateUserUsernameAndFetch(
     );
   }
   const updatedUser = await db.findUserByIdOrThrow(userId);
-  return toUserDTO(updatedUser);
+  return updatedUser;
 }
 
 /**
