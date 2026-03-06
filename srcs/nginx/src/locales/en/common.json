@@ -50,7 +50,8 @@
     "disabled": "disabled",
     "confirm": "confirm",
     "save": "save",
-    "cancel": "cancel"
+    "cancel": "cancel",
+    "refresh": "Refresh"
   },
   "companyName": "Patapong SA",
   "serviceName": "Spin Pong",
@@ -375,7 +376,21 @@
     "final": "Final",
     "semi_final": "Semi-Final",
     "little_final": "Little-Finale",
-    "start": "Start Game",
+    "start_button": "Start Game",
+    "start": {
+      "create_title": "Create a game",
+      "vs_ai": "Play against AI",
+      "local": "Local game",
+      "remote": "Online game",
+      "match_list": "Match list",
+      "available_sessions": "Available sessions",
+      "no_sessions": "No sessions available"
+    },
+    "gameover": {
+      "title": "Game Over",
+      "next_match": "Next match",
+      "view_results": "View results"
+    },
     "exit": "Exit",
     "play_again": "Play Again",
     "run": "Launch Tournament",

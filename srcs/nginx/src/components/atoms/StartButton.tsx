@@ -35,7 +35,7 @@ export function StartButton({ label, isready = false, onStart }: StartButtonProp
         `}
         aria-disabled={!canStart}
       >
-        {t('game.start')}
+        {t('game.start_button')}
       </button>
     </div>
   );

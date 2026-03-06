@@ -1,6 +1,12 @@
 // ============================================================================
-// GamePage — Orchestrateur léger
-// Instancie les hooks, câble le handler WS, délègue le rendu à GameBoard.
+// GamePage — Orchestrateur : machine à états 3 écrans
+//
+//   'start'    → StartGameScreen   (créer local / remote / rejoindre)
+//   'playing'  → GamePlayScreen    (arena + pré-jeu overlay)
+//   'gameover' → GameOverScreen    (winner / score / action)
+//
+// Toute la logique WS, sessions et lobby reste ici.
+// Les 3 écrans reçoivent uniquement des props : aucun appel réseau en dehors.
 // ============================================================================
 
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -12,7 +18,9 @@ import { useGameSession } from '../hooks/useGameSession';
 import { useGameSessions } from '../hooks/GameSessions';
 import { useKeyboardControls } from '../hooks/input.tsx';
 import Background from '../components/atoms/Background';
-import GameBoard from '../components/organisms/GameBoard';
+import StartGameScreen from '../components/organisms/game/StartGameScreen';
+import GamePlayScreen from '../components/organisms/game/GamePlayScreen';
+import GameOverScreen from '../components/organisms/game/GameOverScreen';
 import type {
   ServerMessage,
   Scores,
@@ -24,10 +32,19 @@ import type {
 // Re-export : certains composants importent BackgroundMode depuis GamePage
 export type { BackgroundMode } from '../types/game.types';
 
-// ── Props ────────────────────────────────────────────────────────────────────
+// ── Types ────────────────────────────────────────────
+
+/** Les 3 écrans du flux de jeu */
+type GameScreen = 'start' | 'playing' | 'gameover';
 
 interface GamePageProps {
+  /** Session pré-sélectionnée (mode tournament : fournie par TournamentPage) */
   sessionId: string | null;
+  /**
+   * Mode initial. En mode tournament, sessionId est fourni et on démarre
+   * directement sur l'écran de jeu. Pour tous les autres modes, on démarre
+   * sur l'écran de démarrage.
+   */
   gameMode: GameMode;
 }
 
@@ -58,17 +75,18 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
 
   // ── État local ─────────────────────────────────────────────────────────────
   const [scores, setScores] = useState<Scores>({ left: 0, right: 0 });
-  const [isGameOver, setIsGameOver] = useState(false);
   const [winner, setWinner] = useState<'left' | 'right' | null>(null);
   const [bgMode, setBgMode] = useState<BackgroundMode>('psychedelic');
   const [forfeit, setForfeit] = useState(false);
-  // readyCheckReceived : le backend a envoyé ready_check
-  // readySent          : le joueur a cliqué "Je suis prêt"
-  // L’overlay est visible tant que readyCheckReceived && !readySent
   const [readyCheckReceived, setReadyCheckReceived] = useState(false);
   const [readySent, setReadySent] = useState(false);
 
-  // ── Refs (stables hors rendu) ──────────────────────────────────────────────
+  // ── Machine à états : écran courant ───────────────────────────────
+  const [screen, setScreen] = useState<GameScreen>(
+    gameMode === 'tournament' && sessionId ? 'playing' : 'start',
+  );
+
+  // ── Refs (stables, accessibles dans les closures WS) ──────────────────
   const wsRef = useRef<WebSocket | null>(null);
   const phaseRef = useRef<'idle' | 'playing' | 'gameOver'>('idle');
   const scoresRef = useRef<Scores>({ left: 0, right: 0 });
@@ -78,7 +96,6 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
     closeWebSocket();
     wsRef.current = null;
     resetLobby();
-    setIsGameOver(false);
     setWinner(null);
     setForfeit(false);
     setReadyCheckReceived(false);
@@ -91,20 +108,22 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
   const {
     sessionId: currentSessionId,
     isLoading,
+    activeMode,
     createSession,
     exitSession,
   } = useGameSession({
     gameMode,
     initialSessionId: sessionId,
     onBeforeCreate,
+    autoCreate: false,
   });
 
   // ── Clavier ────────────────────────────────────────────────────────────────
   useKeyboardControls({
     wsRef,
-    gameMode,
+    gameMode: activeMode,
     playerRole: lobby.localPlayer?.role ?? null,
-    enabled: wsConnected && !isGameOver,
+    enabled: wsConnected && screen === 'playing',
   });
 
   // ── Handler WS (réutilisé dans deux endroits) ──────────────────────────────
@@ -147,7 +166,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
           scoresRef.current = s;
           setScores(s);
           setWinner(w);
-          setIsGameOver(true);
+          setScreen('gameover');
           break;
         }
         case 'error':
@@ -166,8 +185,6 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
       onGameStart,
       updateGameState,
       onLobbyGameOver,
-      setReadyCheckReceived,
-      setForfeit,
     ],
   );
 
@@ -186,15 +203,9 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
       }
       wsRef.current = ws;
       ws.addEventListener('close', () => {
-        if (phaseRef.current !== 'gameOver') {
-          // WS fermé sans gameOver (réseau coupé, serveur redémarré, etc.)
-          // Guard : wsRef.current === ws vérifie que ce n'est pas le cleanup
-          // qui a fermé la WS (dans ce cas wsRef.current aurait déjà été mis à null)
-          if (wsRef.current === ws) {
-            setIsGameOver(false);
-            resetLobby();
-            phaseRef.current = 'idle';
-          }
+        if (phaseRef.current !== 'gameOver' && wsRef.current === ws) {
+          resetLobby();
+          phaseRef.current = 'idle';
         }
       });
     };
@@ -206,52 +217,78 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
       wsRef.current = null;
       resetLobby();
     };
-  }, [currentSessionId]); // deps: closeWebSocket/resetLobby sont stables (useCallback/useGameLobby)
+  }, [currentSessionId]);
 
-  // ── Remote : rejoindre une session existante ──────────────────────────────
-  const handleSelectSession = useCallback(
+  // ── Callbacks exposés aux écrans ───────────────────────────────────────────
+
+  /** Créer une partie locale → écran de jeu */
+  const handleCreateLocal = useCallback(async () => {
+    await createSession('local');
+    setScreen('playing');
+  }, [createSession]);
+
+  /** Créer une partie remote → écran de jeu */
+  const handleCreateRemote = useCallback(async () => {
+    await createSession('remote');
+    setScreen('playing');
+  }, [createSession]);
+
+  /** Rejoindre une session existante depuis la liste → écran de jeu */
+  const handleJoinSession = useCallback(
     (id: string) => {
-      closeWebSocket();
-      wsRef.current = null;
-      resetLobby();
-      setIsGameOver(false);
-      setWinner(null);
-      setForfeit(false);
-      setReadyCheckReceived(false);
-      setReadySent(false);
-      setScores({ left: 0, right: 0 });
-      scoresRef.current = { left: 0, right: 0 };
+      onBeforeCreate();
       phaseRef.current = 'idle';
       openWebSocket(id, handleWsMessage).then((ws) => {
         wsRef.current = ws;
       });
+      setScreen('playing');
     },
-    [closeWebSocket, openWebSocket, resetLobby, handleWsMessage],
+    [onBeforeCreate, openWebSocket, handleWsMessage],
   );
 
-  // ── Dérivés ────────────────────────────────────────────────────────────────
+  /** Bouton "Je suis prêt" dans l'overlay pré-jeu */
+  const handleSendReady = useCallback(() => {
+    wsRef.current?.send(JSON.stringify({ type: 'ready' }));
+    setReadySent(true);
+  }, []);
+
+  /** Rejouer : recrée une session du même mode actif */
+  const handlePlayAgain = useCallback(async () => {
+    if (activeMode === 'remote') {
+      onBeforeCreate();
+      setScreen('start');
+    } else {
+      await createSession(activeMode);
+      setScreen('playing');
+    }
+  }, [activeMode, createSession, onBeforeCreate]);
+
+  /** Quitter → supprime la session et navigue vers /home */
+  const handleExit = useCallback(async () => {
+    await exitSession();
+  }, [exitSession]);
+
+  // ── Dérivés pour les composants ────────────────────────────────────────────
   const isPlaying = lobby.phase === 'playing';
-  const gameStatus: GameStatus = isGameOver ? 'finished' : isPlaying ? 'playing' : 'waiting';
+  const gameStatus: GameStatus =
+    screen === 'gameover' ? 'finished' : isPlaying ? 'playing' : 'waiting';
 
   const labelLeft =
     lobby.players.find((p) => p.role === 'A')?.username ??
-    (gameMode === 'ai'
+    (activeMode === 'ai'
       ? lobby.localPlayer?.role === 'A'
         ? t('game.winner.you_label')
         : t('game.winner.ai_label')
       : t('game.winner.player1_label'));
   const labelRight =
     lobby.players.find((p) => p.role === 'B')?.username ??
-    (gameMode === 'ai'
+    (activeMode === 'ai'
       ? lobby.localPlayer?.role === 'B'
         ? t('game.winner.you_label')
         : t('game.winner.ai_label')
       : t('game.winner.player2_label'));
 
-  const onSendReady = useCallback(() => {
-    wsRef.current?.send(JSON.stringify({ type: 'ready' }));
-    setReadySent(true);
-  }, []);
+  const awaitingReady = readyCheckReceived && !readySent;
 
   // ── Rendu ──────────────────────────────────────────────────────────────────
   return (
@@ -263,30 +300,48 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
         colorEnd={BG_COLORS.end}
         animated={false}
       >
-        <GameBoard
-          gameMode={gameMode}
-          isPlaying={isPlaying}
-          isGameOver={isGameOver}
-          isForfeit={forfeit}
-          isLoading={isLoading}
-          gameStatus={gameStatus}
-          scores={scores}
-          labelLeft={labelLeft}
-          labelRight={labelRight}
-          lobbyPhase={lobby.phase}
-          awaitingReady={readyCheckReceived && !readySent}
-          localRole={lobby.localPlayer?.role ?? null}
-          winner={winner}
-          gameStateRef={gameStateRef}
-          bgMode={bgMode}
-          onChangeBgMode={setBgMode}
-          sessionsData={sessions}
-          onSelectSession={handleSelectSession}
-          onReady={onSendReady}
-          onCreateSession={createSession}
-          onExit={exitSession}
-          onPlayAgain={createSession}
-        />
+        {/* ── Écran 1 : Démarrage ── */}
+        {screen === 'start' && (
+          <StartGameScreen
+            isLoading={isLoading}
+            sessionsData={activeMode === 'remote' ? sessions : null}
+            onCreateLocal={handleCreateLocal}
+            onCreateRemote={handleCreateRemote}
+            onJoinSession={handleJoinSession}
+          />
+        )}
+
+        {/* ── Écran 2 : Jeu en cours ── */}
+        {screen === 'playing' && (
+          <GamePlayScreen
+            gameStatus={gameStatus}
+            scores={scores}
+            labelLeft={labelLeft}
+            labelRight={labelRight}
+            lobbyPhase={lobby.phase}
+            awaitingReady={awaitingReady}
+            gameStateRef={gameStateRef}
+            bgMode={bgMode}
+            onChangeBgMode={setBgMode}
+            onReady={handleSendReady}
+            onExit={handleExit}
+          />
+        )}
+
+        {/* ── Écran 3 : Game Over ── */}
+        {screen === 'gameover' && winner && (
+          <GameOverScreen
+            winner={winner}
+            scores={scores}
+            gameMode={activeMode}
+            labelLeft={labelLeft}
+            labelRight={labelRight}
+            localRole={lobby.localPlayer?.role ?? null}
+            isForfeit={forfeit}
+            onPlayAgain={handlePlayAgain}
+            onExit={handleExit}
+          />
+        )}
       </Background>
     </div>
   );

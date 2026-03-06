@@ -50,7 +50,8 @@
     "disabled": "pas enclenché, le machin",
     "confirm": "je suis sûr",
     "save": "enregistre ça",
-    "cancel": "se dégonfler"
+    "cancel": "se dégonfler",
+    "refresh": "On rafraîchit"
   },
   "companyName": "Patapong SA",
   "serviceName": "Spin Pong",
@@ -389,7 +390,21 @@
     "final": "Combat final",
     "semi_final": "On prends du Galon",
     "little_final": "Les loosers c'est ici",
-    "start": "C'est parti",
+    "start_button": "C'est parti",
+    "start": {
+      "create_title": "On organise une partie",
+      "vs_ai": "Défie le machin",
+      "local": "Partie sur cette bécane",
+      "remote": "Partie en ligne avec les potes",
+      "match_list": "Liste des baston",
+      "available_sessions": "Les parties dispo",
+      "no_sessions": "Y'a rien pour l'instant"
+    },
+    "gameover": {
+      "title": "C'est plié",
+      "next_match": "Le prochain round",
+      "view_results": "Voir les résultats"
+    },
     "exit": "On se casse",
     "play_again": "Encore une, on est pas des mauviettes !",
     "new_game": "On remet ça !",

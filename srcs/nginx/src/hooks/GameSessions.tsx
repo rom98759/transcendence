@@ -4,6 +4,7 @@ export interface GameSession {
   sessionId: string;
   createdAt?: string;
   playerCount?: number;
+  sessionName?: string;
   status?: 'waiting' | 'playing' | 'finished';
   // Add other fields your backend returns
 }
