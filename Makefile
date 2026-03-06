@@ -5,15 +5,13 @@ include make/config.mk
 all : volumes certs colima install build
 	$(D_COMPOSE) up -d
 
-dev: volumes colima build-dev
+dev: volumes colima install build-dev
 	$(D_COMPOSE_DEV) up -d
 
 ai: volumes certs colima
 	npm i
 	COMPOSE_PROFILES=ai $(D_COMPOSE) build
 	COMPOSE_PROFILES=ai $(D_COMPOSE) up -d
-
-re-ai: fclean ai
 
 volumes:
 	@mkdir -p $(DATABASE_PATH) $(UPLOADS_PATH)
@@ -94,30 +92,52 @@ nginx:
 nginx-nc:
 	$(D_COMPOSE) build --no-cache $(PROXY_SERVICE_NAME)
 	$(D_COMPOSE) up $(PROXY_SERVICE_NAME)
+nginx-dev:
+	$(D_COMPOSE_DEV) up -d --build $(PROXY_SERVICE_NAME)
+nginx-reload:
+	$(CONTAINER_CMD) exec -it $(PROXY_SERVICE_NAME) nginx -s reload
+
 redis:
 	$(D_COMPOSE) up -d --build $(REDIS_SERVICE_NAME)
+
 api:
 	$(D_COMPOSE) up -d --build $(API_GATEWAY_NAME)
+api-dev:
+	$(D_COMPOSE_DEV) up -d --build $(API_GATEWAY_NAME)
+
 auth:
 	$(D_COMPOSE) up -d --build $(AUTH_SERVICE_NAME)
 auth-nc:
 	$(D_COMPOSE) build --no-cache $(AUTH_SERVICE_NAME)
 	$(D_COMPOSE) up -d $(AUTH_SERVICE_NAME)
+auth-dev:
+	$(D_COMPOSE_DEV) up -d --build $(AUTH_SERVICE_NAME)
+
 user:
 	$(D_COMPOSE) build $(UM_SERVICE_NAME)
 	$(D_COMPOSE) up -d $(UM_SERVICE_NAME)
 user-nc:
 	$(D_COMPOSE) build --no-cache $(UM_SERVICE_NAME)
 	$(D_COMPOSE) up -d $(UM_SERVICE_NAME)
+user-dev:
+	$(D_COMPOSE_DEV) up -d --build $(UM_SERVICE_NAME)
+
 game:
 	$(D_COMPOSE) up -d --build $(GAME_SERVICE_NAME)
+game-dev:
+	$(D_COMPOSE_DEV) up -d --build $(GAME_SERVICE_NAME)
+
 block:
 	$(D_COMPOSE) up -d --build $(BK_SERVICE_NAME)
 block-nc:
 	$(D_COMPOSE) build --no-cache $(BK_SERVICE_NAME)
 	$(D_COMPOSE) up -d $(BK_SERVICE_NAME)
+block-dev:
+	$(D_COMPOSE_DEV) up -d --build $(BK_SERVICE_NAME)
+
 pong-ai:
 	COMPOSE_PROFILES=ai $(D_COMPOSE) up -d --build $(PONG_AI_SERVICE_NAME)
+
 build:
 	$(D_COMPOSE) build
 build-dev:
@@ -172,10 +192,6 @@ test-block:
 redis-cli:
 	$(CONTAINER_CMD) exec -it $(REDIS_SERVICE_NAME) redis-cli
 
-
-dev-nginx:
-	npm run dev --workspace proxy-service
-
 # --- Shell access ---
 
 # generic rule : replace % with service name
@@ -203,9 +219,13 @@ shell-pong-ai:
 USERS_DIR = ./srcs/users
 
 .PHONY: studio-users
-studio-users:
+users-showdb:
 	@echo "Launching Prisma Studio for Users DB..."
 	UM_DB_URL="file:../../data/database/um.db" npx prisma studio --config=$(USERS_DIR)/prisma.config.ts
+
+.PHONY: user-migrate-dev
+user-migrate-dev:
+	$(D_COMPOSE_DEV) exec ${UM_SERVICE_NAME} npx prisma migrate dev
 
 logs:
 	$(D_COMPOSE) logs -f
@@ -259,6 +279,8 @@ fclean: clean
 	@echo "Volume folder cleaned (structure preserved)"
 
 re : fclean all
+re-ai: fclean ai
+redev : fclean dev
 
 clean-pack:
 	@echo "Cleaning local build artifacts..."
@@ -282,4 +304,12 @@ endif
 	@echo "Remove certificates"
 	rm -rf make/scripts/certs/certs
 
-.PHONY : all ai re-ai clean fclean re check format core build volumes setup core nginx redis api auth user stop down logs logs-nginx logs-api logs-auth colima studio-user
+.PHONY : all dev ai re re-ai redev clean fclean reset-hard clean-pack \
+	volumes certs envs install build build-dev \
+	start start-dev stop down down-dev \
+	nginx nginx-nc nginx-dev nginx-reload redis \
+	api api-dev auth auth-nc auth-dev user user-nc user-dev game game-dev block block-nc block-dev pong-ai \
+	test test-user test-coverage test-coverage-user test-pong-ai test-block \
+	redis-cli shell-% shell-nginx shell-redis shell-api shell-auth shell-user shell-game shell-block shell-pong-ai \
+	logs logs-% logs-nginx logs-redis logs-api logs-auth logs-user logs-game logs-block logs-pong-ai show \
+	users-showdb user-migrate-dev

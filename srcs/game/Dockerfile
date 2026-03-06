@@ -3,6 +3,8 @@
 # ==========================
 FROM node:20-alpine AS builder
 
+RUN apk add --no-cache python3 make g++ wget
+
 WORKDIR /app
 
 # 1) Manifests nécessaires au calcul du graphe workspace
@@ -15,7 +17,7 @@ COPY srcs/shared/core/package*.json ./srcs/shared/core/
 COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 
 # 2) Installation déterministe (workspaces)
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # 3) Sources nécessaires au build
 COPY srcs/game ./srcs/game
@@ -24,7 +26,6 @@ COPY srcs/shared/core/src ./srcs/shared/core/src
 # 4) Build core puis game
 RUN npm run build --workspace srcs/shared/core
 RUN npm run build --workspace srcs/game
-
 
 # ==========================
 # Stage 2 — Runner
@@ -39,8 +40,9 @@ ENV NODE_ENV=production
 COPY package-lock.json ./package-lock.json
 COPY srcs/game/package.json ./package.json
 # audit and fund are done in builder
-RUN apk add --no-cache python3 make g++
-RUN npm install --omit=dev --no-audit --no-fund
+
+COPY --from=builder /app/node_modules ./node_modules
+RUN npm prune --omit=dev && npm cache clean --force
 
 # 6) Injecter le package interne @transcendence/core (compilé)
 RUN mkdir -p node_modules/@transcendence

@@ -15,8 +15,8 @@ COPY srcs/shared/core/package*.json ./srcs/shared/core/
 COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 
 # 2) Installation déterministe (workspaces)
-RUN apk add --no-cache python3 make g++
-RUN npm ci
+RUN apk add --no-cache python3 make g++ wget
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # 3) Sources minimales nécessaires au build
 COPY srcs/auth ./srcs/auth

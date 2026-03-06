@@ -16,16 +16,12 @@ export const profileApi = {
         data: ProfileSimpleDTO;
       };
       const profile = profileRes.data;
-      console.log(authRes);
-      console.log(profileRes);
-
       const fullProfile = {
         username: profile.username,
         avatarUrl: profile.avatarUrl,
         id: authUser.id,
         email: authUser.email,
       };
-      console.log(fullProfile);
       return fullProfile;
     } else {
       return null;

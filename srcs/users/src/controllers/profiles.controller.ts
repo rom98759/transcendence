@@ -12,7 +12,7 @@ import {
   USER_EVENT,
 } from '@transcendence/core';
 import { MultipartFile } from '@fastify/multipart';
-import { userBus } from '../events/user.bus';
+import { userBus } from '../events/user.bus.js';
 
 export class ProfileController {
   async createProfile(req: FastifyRequest, reply: FastifyReply) {

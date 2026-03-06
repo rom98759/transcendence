@@ -1,5 +1,5 @@
-import { DeepValues, ZodIssue } from '../errors/error-types';
-import { LOG_EVENTS, LOG_REASONS } from './logging';
+import { DeepValues, ZodIssue } from '../errors/error-types.js';
+import { LOG_EVENTS, LOG_REASONS } from './logging.js';
 
 export type EventValue = DeepValues<typeof LOG_EVENTS>;
 

@@ -4,8 +4,9 @@ import {
   FriendshipRequesterDTO,
   statusUpdateDTO,
 } from '@transcendence/core';
-import { Friendship } from '@prisma/client';
 import { prisma } from './prisma.js';
+import { Friendship } from '@prisma/client';
+import { FriendshipWithProfiles } from '../types/friend.js';
 
 export class FriendshipRepository {
   async findFriendshipBetween(userId: number, targetId: number): Promise<Friendship | null> {
@@ -45,7 +46,7 @@ export class FriendshipRepository {
     return requests;
   }
 
-  async findFriendshipsByUser(userId: number): Promise<FriendshipFullDTO[]> {
+  async findFriendshipsByUser(userId: number): Promise<FriendshipWithProfiles[]> {
     const requests = await prisma.friendship.findMany({
       where: { OR: [{ requesterId: userId }, { receiverId: userId }] },
       include: { requester: true, receiver: true },

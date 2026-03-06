@@ -31,7 +31,6 @@ api.interceptors.response.use(
     if (error.response) {
       const { data } = error.response;
       const errorPayload = data.error || data;
-      console.error(errorPayload);
       statusCode =
         error.response?.status ||
         (errorPayload.status as HttpStatus) ||
@@ -64,7 +63,6 @@ api.interceptors.response.use(
         meta.remainingAttempts = errorPayload.remainingAttempts;
       }
     }
-    console.error(message);
     const frontendError = new FrontendError(
       message,
       statusCode,

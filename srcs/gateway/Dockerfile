@@ -10,6 +10,8 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+RUN apk add --no-cache wget
+
 # 1) Manifests nécessaires au calcul du graphe workspace
 COPY package.json package-lock.json ./
 # les manisfest du service

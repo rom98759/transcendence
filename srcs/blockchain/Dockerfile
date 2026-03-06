@@ -6,7 +6,7 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Native deps for sqlite / crypto libs
-RUN apk add --no-cache python3 make g++
+RUN apk add --no-cache python3 make g++ wget
 
 # 1) Manifests nécessaires au calcul du graphe workspace
 # Copy ROOT workspace manifests
@@ -17,7 +17,7 @@ COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 COPY srcs/blockchain/package.json ./srcs/blockchain/package.json
 
 # 2) Installation déterministe (workspaces)
-RUN npm ci
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # 3) Sources minimales nécessaires au build
 COPY srcs/blockchain ./srcs/blockchain
