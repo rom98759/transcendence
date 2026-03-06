@@ -19,7 +19,6 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 # Copy build sources
 COPY srcs/users ./srcs/users
 COPY srcs/shared/core/src ./srcs/shared/core/src
-RUN ls -la /app/srcs/users/prisma.config.js
 
 # Prisma
 WORKDIR /app/srcs/users
