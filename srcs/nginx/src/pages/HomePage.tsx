@@ -49,6 +49,16 @@ export const HomePage = () => {
                 {t('game.tournament')}
               </CircleButton>
             </Link>
+            <Link to="/game/remote">
+              <CircleButton size={220} isMoving={true}>
+                {t('game.playRemote')}
+              </CircleButton>
+            </Link>
+            <Link to="/game/local">
+              <CircleButton size={280} isMoving={true}>
+                {t('game.playLocal')}
+              </CircleButton>
+            </Link>
             <Footer className="z-15"></Footer>
           </Scrollable>
         </div>
