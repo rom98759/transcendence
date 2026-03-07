@@ -19,9 +19,15 @@ export default defineConfig(({ mode }) => {
       hmr: {
         protocol: 'wss',
         host: 'localhost',
-        port: 4430,
+        port: 5173,
       },
       proxy: {
+        '/api/game': {
+          target: 'https://127.0.0.1:443',
+          changeOrigin: true,
+          secure: false,
+          ws: true,
+        },
         '/api': {
           target: 'https://127.0.0.1:443',
           secure: false,
