@@ -1,23 +1,26 @@
 import { Routes, Route } from 'react-router-dom';
 import TournamentLayout from '../components/organisms/TournamentLayout';
-import TournamentMenuPage from '../pages/TournamentMenuPage';
-import TournamentsListPage from '../pages/TournamentsListPage';
-import TournamentCreatePage from '../pages/TournamentCreatePage';
-import TournamentPage from '../pages/TournamentPage';
+import TournamentHubPage from '../pages/TournamentHubPage';
+import TournamentBracketPage from '../pages/TournamentBracketPage';
+import TournamentResultsPage from '../pages/TournamentResultsPage';
 import { TournamentGuard } from './TournamentGuard';
 
 /*
- * simplified page management with React Routes
+ * Route structure :
+ *   /tournaments            → Hub  (créer / rejoindre / liste)
+ *   /tournaments/:id        → Bracket live (polling adaptatif)
+ *   /tournaments/:id/results→ Résultats (podium + détails)
+ *
+ * TournamentGuard vérifie l'existence du tournoi pour :id et :id/results.
  */
 export default function TournamentRoutes() {
   return (
     <Routes>
       <Route element={<TournamentLayout />}>
-        <Route index element={<TournamentMenuPage />} />
-        <Route path="list" element={<TournamentsListPage />} />
-        <Route path="create" element={<TournamentCreatePage />} />
+        <Route index element={<TournamentHubPage />} />
         <Route element={<TournamentGuard />}>
-          <Route path=":id" element={<TournamentPage />} />
+          <Route path=":id" element={<TournamentBracketPage />} />
+          <Route path=":id/results" element={<TournamentResultsPage />} />
         </Route>
       </Route>
     </Routes>

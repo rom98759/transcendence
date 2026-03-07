@@ -290,7 +290,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
       // Vérifier que la session est encore valide
       const sessionExists = sessions.sessionsList?.some((s) => s.sessionId === id);
       if (!sessionExists) {
-        setConnectionError(t('game.error.session_not_found', 'Session not found or expired'));
+        setConnectionError(t('game.error.session_not_found'));
         setScreen('start');
         return;
       }
@@ -305,10 +305,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
           setConnectionError(null);
         })
         .catch((err) => {
-          const message =
-            err instanceof Error
-              ? err.message
-              : t('game.error.connection_failed', 'Failed to connect to session');
+          const message = err instanceof Error ? err.message : t('game.error.connection_failed');
           setConnectionError(message);
           setScreen('start');
           console.error('[JoinSession] Connection failed:', err);
@@ -351,28 +348,19 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
       await createSession('tournament');
       setScreen('playing');
     } catch {
-      await loadTournamentResults();
-      setScreen('tournament_results');
+      // Session creation failed — go to bracket page to see what's happening
+      navigate(`/tournaments/${tournamentId}`);
     }
-  }, [createSession, isTournamentMode, loadTournamentResults]);
+  }, [createSession, isTournamentMode, tournamentId, navigate]);
 
   const handleShowTournamentResults = useCallback(async () => {
-    if (!isTournamentMode) {
+    if (!isTournamentMode || !tournamentId) {
       await handleExit();
       return;
     }
-
-    if (tournamentResults.length === 0 && !tournamentResultsError) {
-      await loadTournamentResults();
-    }
-    setScreen('tournament_results');
-  }, [
-    isTournamentMode,
-    handleExit,
-    loadTournamentResults,
-    tournamentResults.length,
-    tournamentResultsError,
-  ]);
+    // Navigate to the bracket page — it auto-redirects to /results when FINISHED
+    navigate(`/tournaments/${tournamentId}`);
+  }, [isTournamentMode, tournamentId, handleExit, navigate]);
 
   // ── Dérivés pour les composants ────────────────────────────────────────────
   const isPlaying = lobby.phase === 'playing';
@@ -399,9 +387,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
   async function loadTournamentResults() {
     if (!tournamentId) {
       setTournamentResults([]);
-      setTournamentResultsError(
-        t('game.tournament_results.unavailable', 'Résultats indisponibles'),
-      );
+      setTournamentResultsError(t('game.tournament_results.unavailable'));
       return;
     }
 
@@ -441,16 +427,13 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
           username_winner:
             match.username_winner ??
             (typeof match.winner_id === 'number' ? playersById.get(match.winner_id) : null) ??
-            t('game.tournament_results.unknown_winner', 'Inconnu'),
+            t('game.tournament_results.unknown_winner'),
         }));
 
       setTournamentResults(results);
       setTournamentResultsError(null);
     } catch (err) {
-      const message =
-        err instanceof Error
-          ? err.message
-          : t('game.tournament_results.fetch_error', 'Impossible de charger les résultats.');
+      const message = err instanceof Error ? err.message : t('game.tournament_results.fetch_error');
       setTournamentResultsError(message);
       setTournamentResults([]);
     }
@@ -464,29 +447,24 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
 
     try {
       let nextSessionId: string | null = null;
-      let lastStatus: number | null = null;
 
       const maxAttempts = 5;
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         try {
-          const response = await api.get<MatchToPlayResponse>(
+          const response = await api.get<MatchToPlayResponse | null>(
             `/game/tournaments/${tournamentId}/match-to-play`,
           );
           if (response.data?.sessionId) {
             nextSessionId = response.data.sessionId;
             break;
           }
-        } catch (err: unknown) {
-          const status = (err as { response?: { status?: number } })?.response?.status ?? null;
-          lastStatus = status;
-
-          // 404 peut être transitoire juste après la fin de match (création final/petite finale)
-          if (status === 404 && attempt < maxAttempts) {
+          // Backend returns 200 null when no match — may be transitoire after a match ends
+          if (attempt < maxAttempts) {
             await wait(600);
             continue;
           }
-
-          // Erreur réseau/serveur: on retente quelques fois, puis on bascule résultats
+        } catch {
+          // Erreur réseau/serveur: on retente quelques fois
           if (attempt < maxAttempts) {
             await wait(600);
             continue;
@@ -499,18 +477,9 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
         return;
       }
 
+      // No more matches for this player — go to bracket (auto-redirects to /results if FINISHED)
       setNextMatchSessionId(null);
-      await loadTournamentResults();
-      setScreen('tournament_results');
-
-      if (lastStatus !== 404 && tournamentResults.length === 0) {
-        setTournamentResultsError(
-          t(
-            'game.tournament_results.next_match_error',
-            'Impossible de déterminer le prochain match de tournoi.',
-          ),
-        );
-      }
+      navigate(`/tournaments/${tournamentId}`);
     } finally {
       setIsResolvingTournamentNextMatch(false);
     }

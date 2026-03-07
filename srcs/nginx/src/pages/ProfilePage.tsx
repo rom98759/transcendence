@@ -102,26 +102,26 @@ export const ProfilePage = () => {
           </div>
 
           {isStatsLoading ? (
-            <p className="text-sm text-gray-500">Loading stats...</p>
+            <p className="text-sm text-gray-500">{t('stats.loading_stats')}</p>
           ) : mainStat ? (
             <>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div className="bg-gray-50 rounded-lg p-2 text-center">
-                  <div className="text-xs text-gray-500">Matches</div>
+                  <div className="text-xs text-gray-500">{t('stats.matches')}</div>
                   <div className="font-semibold text-gray-700">{mainStat.matches_played}</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 text-center">
-                  <div className="text-xs text-gray-500">Win rate</div>
+                  <div className="text-xs text-gray-500">{t('stats.match_win_rate')}</div>
                   <div className="font-semibold text-cyan-600">{mainStat.matchesWinRate}%</div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 text-center">
-                  <div className="text-xs text-gray-500">Tournaments</div>
+                  <div className="text-xs text-gray-500">{t('stats.tournaments')}</div>
                   <div className="font-semibold text-gray-700">
                     {mainStat.tournaments_won}/{mainStat.tournaments_played}
                   </div>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-2 text-center">
-                  <div className="text-xs text-gray-500">Points</div>
+                  <div className="text-xs text-gray-500">{t('stats.points')}</div>
                   <div className="font-semibold text-gray-700">
                     {mainStat.points_scored ?? 0}/{mainStat.points_conceded ?? 0}
                   </div>
@@ -178,7 +178,11 @@ export const ProfilePage = () => {
                           : 'text-amber-600'
                     }`}
                   >
-                    {match.result ?? 'PENDING'}
+                    {match.result === 'WIN'
+                      ? t('history.result_win')
+                      : match.result === 'LOSS'
+                        ? t('history.result_loss')
+                        : t('history.result_pending')}
                   </div>
                 </div>
               ))}

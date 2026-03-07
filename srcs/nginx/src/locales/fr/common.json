@@ -258,7 +258,8 @@
     "internal_error": "Erreur interne du serveur. Veuillez réessayer plus tard.",
     "friend_self_add": "Choisissez un autre utilisateur que vous-même",
     "friend_already": "Vous êtes déjà amis",
-    "required_field": "Champ requis"
+    "required_field": "Champ requis",
+    "must_accept_terms": "Vous devez accepter les conditions d'utilisation."
   },
   "navbar": {
     "home": "Accueil",
@@ -370,7 +371,7 @@
       "waiting": "prêt à démarrer",
       "playing": "en cours",
       "finished": "match terminé",
-      "paused:": "en pause"
+      "paused": "en pause"
     },
     "participate": "Participer",
     "create": "Créer",
@@ -407,14 +408,16 @@
       "winner_line": "Gagnant : {{winner}}",
       "loser_line": "Perdant : {{loser}}"
     },
+    "play": "Jouer",
     "exit": "Quitter",
     "play_again": "Rejouer",
     "new_game": "Nouvelle partie",
     "run": "Lancement du tournoi",
     "watch": "Regarder",
     "friends": "Amis",
-    "waitiing": "Attente...",
     "creating": "Création du tournoi...",
+    "waiting_players": "En attente des joueurs…",
+    "starting_tournament": "Démarrage du tournoi…",
     "tournament_full": "Ce tournoi est déjà complet (maximum 4 joueurs).",
     "winner": {
       "you_win": "Vous gagnez !",
@@ -443,6 +446,22 @@
         "finished": "Partie terminée",
         "disconnected": "Adversaire déconnecté"
       }
+    },
+    "tournament_results": {
+      "title": "Résultats du tournoi",
+      "tournament_id": "Tournoi",
+      "match_details": "Détails des matchs",
+      "no_results": "Aucun résultat de tournoi disponible.",
+      "winner": "Vainqueur",
+      "fetch_error": "Impossible de charger les résultats.",
+      "unavailable": "Résultats indisponibles",
+      "unknown_winner": "Inconnu"
+    },
+    "rounds": {
+      "semi_1": "Demi-finale 1",
+      "semi_2": "Demi-finale 2",
+      "little_final": "Petite finale",
+      "final": "Finale"
     },
     "error": {
       "session_not_found": "Session non trouvée ou expirée. Créez une nouvelle partie ou rafraîchissez la liste.",
@@ -553,6 +572,7 @@
   },
   "stats": {
     "title": "Statistiques des joueurs",
+    "leaderboard": "Classement général",
     "loading": "Chargement...",
     "loading_stats": "Chargement des statistiques...",
     "error_loading": "Échec du chargement des statistiques.",
@@ -606,6 +626,10 @@
     "semi1": "Demi-finale 1",
     "semi2": "Demi-finale 2",
     "little_final": "Petite finale",
-    "final": "Finale"
+    "final": "Finale",
+    "result_win": "Victoire",
+    "result_loss": "Défaite",
+    "result_pending": "En attente",
+    "tournament_number": "Tournoi #{{id}}"
   }
 }

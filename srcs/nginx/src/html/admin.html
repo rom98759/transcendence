@@ -1005,7 +1005,7 @@
 				const isProtected = isProtectedAccount(user.username);
 				// Permissions basées sur le rôle
 				const canDelete = canDeleteUsers() && user.id !== currentUser.id && !isProtected;
-				const canModify = canModifyUsers() && !isProtected;
+				const canModify = canModifyUsers() && !isProtected && user.id !== currentUser.id;
 				const showModifyButton = canModifyUsers(); // Admin seulement
 				const showDeleteButton = canDeleteUsers(); // Admin seulement
 
@@ -1114,6 +1114,12 @@
 			const user = users.find(u => u.id === userId);
 			if (!user) return;
 
+			// Empêcher l'admin de modifier son propre compte
+			if (userId === currentUser.id) {
+				showAlert('Vous ne pouvez pas modifier votre propre compte', 'error');
+				return;
+			}
+
 			const isProtected = isProtectedAccount(user.username);
 
 			document.getElementById('edit-user-id').value = user.id;
@@ -1171,6 +1177,13 @@
 			}
 
 			const userId = parseInt(document.getElementById('edit-user-id').value);
+
+			// Empêcher l'admin de modifier son propre compte
+			if (userId === currentUser.id) {
+				showAlert('Vous ne pouvez pas modifier votre propre compte', 'error');
+				return;
+			}
+
 			const username = document.getElementById('edit-username').value.trim();
 			const email = document.getElementById('edit-email').value.trim();
 			const roleElement = document.getElementById('edit-role');
@@ -1427,7 +1440,7 @@
 
 		// Protected accounts check
 		function isProtectedAccount(username) {
-			const protectedAccounts = ['admin', 'invite'];
+			const protectedAccounts = ['admin', 'invite', 'pong_ai'];
 			return protectedAccounts.includes(username.toLowerCase());
 		}
 

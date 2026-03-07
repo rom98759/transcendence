@@ -102,7 +102,7 @@ const StartGameScreen = ({
           {/* ── Colonne gauche : créer une partie ── */}
           <section className="flex flex-col items-center justify-center gap-8">
             <h2 className="text-black font-mono text-sm uppercase tracking-widest bg-white/80 border border-white/20 rounded-lg px-4 py-2">
-              {t('game.start.create_title', 'Créer une partie')}
+              {t('game.start.create_title')}
             </h2>
 
             <div className="flex flex-col items-center gap-2">
@@ -111,10 +111,10 @@ const StartGameScreen = ({
                 <CircleButton
                   onClick={onCreateAi}
                   disabled={isLoading}
-                  title={t('game.start.vs_ai', "Jouer contre l'IA")}
+                  title={t('game.start.vs_ai')}
                 >
                   <span className="text-center font-mono text-sm leading-tight px-1">
-                    {isLoading ? t('global.loading') : t('game.start.vs_ai', 'VS\nIA')}
+                    {isLoading ? t('global.loading') : t('game.start.vs_ai')}
                   </span>
                 </CircleButton>
               </div>
@@ -124,20 +124,20 @@ const StartGameScreen = ({
                 <CircleButton
                   onClick={onCreateLocal}
                   disabled={isLoading}
-                  title={t('game.start.local', 'Partie locale')}
+                  title={t('game.start.local')}
                 >
                   <span className="text-center font-mono text-sm leading-tight px-1">
-                    {isLoading ? t('global.loading') : t('game.start.local', 'Partie\nLocale')}
+                    {isLoading ? t('global.loading') : t('game.start.local')}
                   </span>
                 </CircleButton>
 
                 <CircleButton
                   onClick={onCreateRemote}
                   disabled={isLoading}
-                  title={t('game.start.remote', 'Partie en ligne')}
+                  title={t('game.start.remote')}
                 >
                   <span className="text-center font-mono text-sm leading-tight px-1">
-                    {isLoading ? t('global.loading') : t('game.start.remote', 'Partie\nRemote')}
+                    {isLoading ? t('global.loading') : t('game.start.remote')}
                   </span>
                 </CircleButton>
               </div>
@@ -148,7 +148,7 @@ const StartGameScreen = ({
           <section className="flex flex-col gap-4">
             {/* Header + titre */}
             <h2 className="text-black font-mono text-sm uppercase tracking-widest bg-white/80 border border-white/20 rounded-lg px-4 py-2">
-              {t('game.start.match_list', 'Liste des matchs')}
+              {t('game.start.match_list')}
             </h2>
 
             {/* Panel liste des sessions */}
@@ -156,15 +156,15 @@ const StartGameScreen = ({
               {/* Header coloré avec bouton refresh */}
               <div className="bg-blue-600/80 px-4 py-2 flex items-center justify-between">
                 <p className="text-white font-mono text-xs uppercase tracking-wider">
-                  {t('game.start.available_sessions', 'Sessions disponibles')}
+                  {t('game.start.available_sessions')}
                 </p>
                 {refetch && (
                   <button
                     onClick={refetch}
                     className="text-white font-mono text-xs uppercase tracking-wider hover:text-blue-200 transition-colors"
-                    title={t('global.refresh', 'Actualiser')}
+                    title={t('global.refresh')}
                   >
-                    {t('global.refresh', 'Actualiser')}
+                    {t('global.refresh')}
                   </button>
                 )}
               </div>
@@ -185,7 +185,7 @@ const StartGameScreen = ({
 
                 {!isLoadingSessions && !error && displayedSessions.length === 0 && (
                   <p className="text-gray-500 font-mono text-xs text-center py-8">
-                    {t('game.start.no_sessions', 'Aucune session disponible')}
+                    {t('game.start.no_sessions')}
                   </p>
                 )}
 

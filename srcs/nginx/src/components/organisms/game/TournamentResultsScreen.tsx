@@ -23,13 +23,15 @@ interface TournamentResultsScreenProps {
   matches: TournamentHistoryMatch[];
   error: string | null;
   onExit: () => void;
+  /** Hide the built-in NavBar (set true when rendered inside a layout that already has one). */
+  hideNavBar?: boolean;
 }
 
-const ROUND_LABELS: Record<string, string> = {
-  SEMI_1: 'Demi-finale 1',
-  SEMI_2: 'Demi-finale 2',
-  LITTLE_FINAL: 'Petite finale',
-  FINAL: 'Finale',
+const ROUND_KEYS: Record<string, string> = {
+  SEMI_1: 'game.rounds.semi_1',
+  SEMI_2: 'game.rounds.semi_2',
+  LITTLE_FINAL: 'game.rounds.little_final',
+  FINAL: 'game.rounds.final',
 };
 
 function resolveLoserName(match: TournamentHistoryMatch): string {
@@ -44,6 +46,7 @@ const TournamentResultsScreen = ({
   matches,
   error,
   onExit,
+  hideNavBar = false,
 }: TournamentResultsScreenProps) => {
   const { t } = useTranslation('common');
 
@@ -61,19 +64,21 @@ const TournamentResultsScreen = ({
 
   return (
     <div className="w-full h-full flex flex-col">
-      <div className="sticky top-0 z-50 w-full">
-        <NavBar />
-      </div>
+      {!hideNavBar && (
+        <div className="sticky top-0 z-50 w-full">
+          <NavBar />
+        </div>
+      )}
 
       <div className="flex-1 overflow-y-auto px-6 py-8 md:px-10">
         <div className="mx-auto w-full max-w-5xl flex flex-col gap-6">
           <section className="rounded-2xl border border-white/15 bg-slate-950/75 p-6">
             <div className="flex flex-col gap-2">
               <p className="text-white/50 font-mono text-xs uppercase tracking-[0.2em]">
-                {t('game.tournament_results.title', 'Résultats du tournoi')}
+                {t('game.tournament_results.title')}
               </p>
               <h2 className="text-white font-mono text-xl md:text-2xl">
-                {t('game.tournament_results.tournament_id', 'Tournoi')} #{tournamentId ?? '-'}
+                {t('game.tournament_results.tournament_id')} #{tournamentId ?? '-'}
               </h2>
             </div>
 
@@ -99,14 +104,14 @@ const TournamentResultsScreen = ({
 
           <section className="rounded-2xl border border-white/15 bg-slate-950/75 p-6">
             <p className="text-white/70 font-mono text-sm uppercase tracking-wider mb-4">
-              {t('game.tournament_results.match_details', 'Détails des matchs')}
+              {t('game.tournament_results.match_details')}
             </p>
 
             {error && <p className="text-red-300 font-mono text-xs mb-4">{error}</p>}
 
             {!error && matches.length === 0 && (
               <p className="text-gray-400 font-mono text-xs">
-                {t('game.tournament_results.no_results', 'Aucun résultat de tournoi disponible.')}
+                {t('game.tournament_results.no_results')}
               </p>
             )}
 
@@ -117,10 +122,7 @@ const TournamentResultsScreen = ({
                   className="rounded-xl border border-white/10 bg-slate-900/70 px-4 py-3 flex flex-col gap-2"
                 >
                   <p className="text-cyan-300 font-mono text-xs uppercase tracking-wider">
-                    {t(
-                      `game.tournament.round.${match.round.toLowerCase()}`,
-                      ROUND_LABELS[match.round] ?? match.round,
-                    )}
+                    {t(ROUND_KEYS[match.round] ?? `game.rounds.${match.round.toLowerCase()}`)}
                   </p>
 
                   <div className="flex items-center justify-between gap-4">
@@ -138,8 +140,7 @@ const TournamentResultsScreen = ({
                   </div>
 
                   <p className="text-emerald-300 font-mono text-xs">
-                    {t('game.tournament_results.winner', 'Vainqueur')}:{' '}
-                    {match.username_winner ?? '-'}
+                    {t('game.tournament_results.winner')}: {match.username_winner ?? '-'}
                   </p>
                 </div>
               ))}
@@ -148,7 +149,7 @@ const TournamentResultsScreen = ({
 
           <div className="flex flex-wrap items-center justify-center gap-3 pb-4">
             <Button id="exit-results-btn" variant="alert" type="button" onClick={onExit}>
-              {t('game.exit', 'Quitter')}
+              {t('game.exit')}
             </Button>
           </div>
         </div>

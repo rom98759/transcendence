@@ -31,12 +31,12 @@ export const NotFoundPage = () => {
       >
         <div className="flex flex-col items-center justify-center h-full gap-6">
           <h1 className="text-8xl font-bold font-quantico text-teal-400">404</h1>
-          <p className="text-xl text-gray-300">{t('global.not_found', 'Page not found')}</p>
+          <p className="text-xl text-gray-300">{t('global.not_found')}</p>
           <Link
             to={homePath}
             className="mt-4 px-6 py-3 bg-teal-600 hover:bg-teal-500 rounded-lg text-white transition-colors"
           >
-            {t('navbar.home', 'Home')}
+            {t('navbar.home')}
           </Link>
         </div>
       </Background>

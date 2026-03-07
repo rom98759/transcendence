@@ -41,7 +41,6 @@ export const useGameWebSocket = () => {
   const openWebSocket = useCallback(
     (sessionId: string, onMessage: (msg: any) => void): Promise<WebSocket> => {
       if (websocketRef.current?.readyState === WebSocket.OPEN) {
-        console.log('⚠️ WebSocket already open, returning existing connection');
         return Promise.resolve(websocketRef.current);
       }
 
@@ -52,7 +51,6 @@ export const useGameWebSocket = () => {
         let settled = false;
 
         const wsUrl = `${window.location.origin.replace(/^http/, 'ws')}/api/game/ws/${sessionId}`;
-        console.log(wsUrl);
 
         const ws = new WebSocket(wsUrl);
         websocketRef.current = ws;
@@ -71,7 +69,6 @@ export const useGameWebSocket = () => {
         }, 5000);
 
         ws.onopen = () => {
-          console.log('WS OPEN at:', wsUrl);
           if (settled) return;
           settled = true;
 
@@ -102,7 +99,6 @@ export const useGameWebSocket = () => {
         };
 
         ws.onclose = (e) => {
-          console.log('🔴 WebSocket closed', e.code, e.reason);
           clearTimeout(connectionTimeout);
           stopPingInterval();
           setConnected(false);

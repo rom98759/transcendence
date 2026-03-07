@@ -43,6 +43,9 @@ export const MyProfilePage = () => {
     queryFn: () => profileApi.getMe(),
   });
 
+  const PROTECTED_ACCOUNTS = ['admin', 'invite', 'pong_ai'];
+  const isProtectedAccount = PROTECTED_ACCOUNTS.includes(profile?.username?.toLowerCase() ?? '');
+
   const handleUsernameSave = (newUsername: string) => {
     if (!newUsername.trim()) {
       setUsernameError(t('errors.required_field'));
@@ -183,6 +186,7 @@ export const MyProfilePage = () => {
               isPending={isPendingUsername}
               onSave={handleUsernameSave}
               onCancel={() => setUsernameError(null)}
+              disabled={isProtectedAccount}
             />
 
             <EditableField
@@ -192,6 +196,7 @@ export const MyProfilePage = () => {
               isPending={isPendingEmail}
               onSave={handleEmailSave}
               onCancel={() => setEmailError(null)}
+              disabled={isProtectedAccount}
             />
           </div>
         </div>

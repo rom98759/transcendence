@@ -274,7 +274,8 @@
     "internal_error": "Putain, y'a un truc qui cloche chez nous. Reviens plus tard, on va régler ça entre nous.",
     "friend_self_add": "Tu peux pas t'ajouter toi-meme, vieux. Choisis un autre tandem.",
     "friend_already": "T'es déjà pote, mon vieux !",
-    "required_field": "C'est trop vide ici"
+    "required_field": "C'est trop vide ici",
+    "must_accept_terms": "Faut accepter les règles du jeu, mon gars."
   },
   "navbar": {
     "home": "Le bercail",
@@ -386,7 +387,7 @@
       "waiting": "on vous attend",
       "playing": "faites honneur au sport",
       "finished": "c'est plié",
-      "paused:": "temps mort"
+      "paused": "temps mort"
     },
     "participate": "Tu cherches des embrouilles!",
     "create": "Je vous mets au défi!",
@@ -423,14 +424,16 @@
       "winner_line": "Le champion : {{winner}}",
       "loser_line": "Le malamute : {{loser}}"
     },
+    "play": "C'est parti",
     "exit": "On se casse",
     "play_again": "Encore une, on est pas des mauviettes !",
     "new_game": "On remet ça !",
     "run": "Lancement de la Vendetta",
     "watch": "Regarder le combat",
     "friends": "Les potes",
-    "waitiing": "On t'attend...",
     "creating": "Création de la vendetta...",
+    "waiting_players": "On attend les gaillards…",
+    "starting_tournament": "On lance la vendetta…",
     "tournament_full": "Cette vendetta est complete(maximum 4 truands).",
     "winner": {
       "you_win": "T'as écrasé la machine, champion !",
@@ -459,6 +462,22 @@
         "finished": "La partie, c'est fini",
         "disconnected": "L'autre s'est barré"
       }
+    },
+    "tournament_results": {
+      "title": "Résultats de la Vendetta",
+      "tournament_id": "Vendetta",
+      "match_details": "Détails des combats",
+      "no_results": "Aucun résultat de vendetta pour l'instant.",
+      "winner": "Le boss",
+      "fetch_error": "On a pas réussi à charger les résultats, merde.",
+      "unavailable": "Résultats pas dispo",
+      "unknown_winner": "On sait pas"
+    },
+    "rounds": {
+      "semi_1": "Demi 1",
+      "semi_2": "Demi 2",
+      "little_final": "Les losers",
+      "final": "Le combat final"
     },
     "error": {
       "session_not_found": "La partie t'a fermé les portes. C'est vieux ou chelou. Crée-toi une nouvelle ou rafraîchis la liste.",
@@ -569,6 +588,7 @@
   },
   "stats": {
     "title": "Le palmarès des joueurs",
+    "leaderboard": "Le classement des gros boss",
     "loading": "On compile les stats, laisse nous faire...",
     "loading_stats": "On compile les stats, deux secondes...",
     "error_loading": "Merde, on a pas réussi à charger les stats.",
@@ -622,6 +642,10 @@
     "semi1": "Demi 1",
     "semi2": "Demi 2",
     "little_final": "Les losers",
-    "final": "Le combat final"
+    "final": "Le combat final",
+    "result_win": "Gagné",
+    "result_loss": "Perdu",
+    "result_pending": "En attente",
+    "tournament_number": "Vendetta #{{id}}"
   }
 }

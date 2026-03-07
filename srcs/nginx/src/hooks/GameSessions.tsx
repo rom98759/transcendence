@@ -36,7 +36,6 @@ export const useGameSessions = (autoFetch = true): UseGameSessionsReturn => {
       }
 
       const data = await response.json();
-      console.log('Backend response:', data);
 
       // Extract the sessions array from the response
       if (data.sessions && Array.isArray(data.sessions)) {

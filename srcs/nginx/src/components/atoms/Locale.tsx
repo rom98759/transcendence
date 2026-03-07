@@ -40,8 +40,8 @@ export const Locale = ({ className }: LocaleProps) => {
             <li key={code} className="w-full">
               <button
                 onClick={() => selectLanguage(code)}
-                className={`w-full text-center py-1 text-sm font-medium transition-transform hover:scale-110
-                  ${currentLang === code ? 'text-slate-900' : 'text-slate-300'}`}
+                className={`w-full text-center py-1 text-sm font-bold transition-transform hover:scale-110
+                  ${currentLang === code ? 'text-slate-900' : 'text-gray-400'}`}
               >
                 {flag} <span className="uppercase ml-1">{code}</span>
               </button>

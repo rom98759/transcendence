@@ -275,16 +275,73 @@ export function createGameController(
       } catch (err: unknown) {
         if (err instanceof AppError) {
           const isNoMatch = hasLogReason(err, LOG_REASONS.TOURNAMENT.NO_MATCH_TO_PLAY);
-          if (isNoMatch) return reply.code(404).send({ message: String(err.message) });
+          // Return 200 with null instead of 404 — more polling-friendly.
+          // The frontend polls this endpoint; a 404 pollutes the network tab.
+          if (isNoMatch) return reply.code(200).send(null);
         }
         throw err;
       }
+    },
+
+    /**
+     * GET /tournaments/:id/state
+     * Returns the full tournament state: status, players, all matches with scores.
+     * Used by the frontend to reconstruct the entire bracket in one call.
+     */
+    async getTournamentState(
+      req: FastifyRequest<{ Params: TournamentParams }>,
+      reply: FastifyReply,
+    ) {
+      const tourId = Number(req.params.id);
+      const state = tournamentRepo.getTournamentFullState(tourId);
+      if (!state.status) {
+        return reply.code(404).send({ message: 'Tournament not found' });
+      }
+      return reply.code(200).send(state);
+    },
+
+    /**
+     * GET /matches/:matchId/session
+     * Resolves a matchId to its session info (sessionId, tournamentId, round, status).
+     * Used by /game/:matchId to find the WS session to connect to.
+     */
+    async getMatchSession(req: FastifyRequest, reply: FastifyReply) {
+      const { matchId } = req.params as { matchId: string };
+      const id = Number(matchId);
+      if (!Number.isInteger(id) || id <= 0) {
+        return reply.code(400).send({ message: 'matchId must be a positive integer' });
+      }
+      const match = tournamentRepo.getMatchById(id);
+      if (!match) {
+        return reply.code(404).send({ message: 'Match not found' });
+      }
+      return reply.code(200).send({
+        matchId: match.id,
+        sessionId: match.sessionId,
+        tournamentId: match.tournament_id,
+        round: match.round,
+        player1: match.player1,
+        player2: match.player2,
+        username_player1: match.username_player1,
+        username_player2: match.username_player2,
+        score_player1: match.score_player1,
+        score_player2: match.score_player2,
+        winner_id: match.winner_id,
+        finished: match.winner_id !== null,
+      });
     },
 
     // ---- Stats / History ----
 
     async getTournamentStats(req: FastifyRequest, reply: FastifyReply) {
       const query = (req.query ?? {}) as StatsHistoryQuery;
+
+      // If no username or userId specified → global leaderboard (all players)
+      if (!query.username?.trim() && query.userId == null) {
+        return reply.code(200).send(tournamentRepo.getAllPlayersStats());
+      }
+
+      // Otherwise resolve to a specific user's stats
       const authUserId = req.user?.id ?? null;
       const { targetUserId, error, statusCode = 400 } = resolveTargetUserId(query, authUserId);
 

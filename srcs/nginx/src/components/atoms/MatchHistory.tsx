@@ -76,9 +76,14 @@ export const HistoryTableDesktop = ({ history }: { history: MatchHistory[] }) =>
           header: t('history.result'),
           cell: (m) => {
             if (m.result === 'WIN')
-              return <span className="font-medium text-emerald-600">WIN</span>;
-            if (m.result === 'LOSS') return <span className="font-medium text-rose-500">LOSS</span>;
-            return <span className="font-medium text-amber-600">PENDING</span>;
+              return (
+                <span className="font-medium text-emerald-600">{t('history.result_win')}</span>
+              );
+            if (m.result === 'LOSS')
+              return <span className="font-medium text-rose-500">{t('history.result_loss')}</span>;
+            return (
+              <span className="font-medium text-amber-600">{t('history.result_pending')}</span>
+            );
           },
         },
         {
@@ -126,7 +131,7 @@ export const HistoryListMobile = ({ history }: { history: MatchHistory[] }) => {
               {m.round ? (roundLabel[m.round] ?? m.round) : t('history.free_match')}
             </span>
             <span className="text-sm text-gray-500">
-              {m.tournament_id ? `Tournament #${m.tournament_id}` : ''}
+              {m.tournament_id ? t('history.tournament_number', { id: m.tournament_id }) : ''}
             </span>
           </div>
           <div className="flex justify-between items-center text-xs text-gray-500">
@@ -144,7 +149,12 @@ export const HistoryListMobile = ({ history }: { history: MatchHistory[] }) => {
           </div>
           {m.result && (
             <div className="text-sm font-semibold text-gray-700">
-              {t('history.result')}: {m.result}
+              {t('history.result')}:{' '}
+              {m.result === 'WIN'
+                ? t('history.result_win')
+                : m.result === 'LOSS'
+                  ? t('history.result_loss')
+                  : t('history.result_pending')}
             </div>
           )}
           {m.username_winner && (

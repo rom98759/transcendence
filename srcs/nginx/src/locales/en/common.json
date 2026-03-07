@@ -259,7 +259,8 @@
     "internal_error": "Internal server error. Please try again later.",
     "friend_self_add": "You cannot add yourself as a friend",
     "friend_already": "You are already friends",
-    "required_field": "Field is required"
+    "required_field": "Field is required",
+    "must_accept_terms": "You must accept the terms of service."
   },
   "navbar": {
     "home": "Home",
@@ -371,7 +372,7 @@
       "waiting": "waiting to start",
       "playing": "ongoing",
       "finished": "finished",
-      "paused:": "paused"
+      "paused": "paused"
     },
     "controls": {
       "left_paddle": "for left paddle",
@@ -409,13 +410,15 @@
       "winner_line": "Winner: {{winner}}",
       "loser_line": "Loser: {{loser}}"
     },
+    "play": "Play",
     "exit": "Exit",
     "play_again": "Play Again",
     "run": "Launch Tournament",
     "watch": "Watch",
     "friends": "Friends",
-    "waitiing": "Waiting...",
     "creating": "Creating tournament...",
+    "waiting_players": "Waiting for players…",
+    "starting_tournament": "Starting tournament…",
     "tournament_full": "This tournament is full(maximum 4 players).",
     "winner": {
       "you_win": "You Win!",
@@ -444,6 +447,22 @@
         "finished": "Game finished",
         "disconnected": "Opponent disconnected"
       }
+    },
+    "tournament_results": {
+      "title": "Tournament Results",
+      "tournament_id": "Tournament",
+      "match_details": "Match Details",
+      "no_results": "No tournament results available.",
+      "winner": "Winner",
+      "fetch_error": "Failed to load results.",
+      "unavailable": "Results unavailable",
+      "unknown_winner": "Unknown"
+    },
+    "rounds": {
+      "semi_1": "Semi-final 1",
+      "semi_2": "Semi-final 2",
+      "little_final": "Little Final",
+      "final": "Final"
     },
     "error": {
       "session_not_found": "Session not found or expired. Please create a new game or refresh the list.",
@@ -554,6 +573,7 @@
   },
   "stats": {
     "title": "Player Statistics",
+    "leaderboard": "Global Leaderboard",
     "loading": "Loading...",
     "loading_stats": "Loading stats...",
     "error_loading": "Failed to load stats.",
@@ -607,6 +627,10 @@
     "semi1": "Semi-final 1",
     "semi2": "Semi-final 2",
     "little_final": "3rd Place",
-    "final": "Final"
+    "final": "Final",
+    "result_win": "Win",
+    "result_loss": "Loss",
+    "result_pending": "Pending",
+    "tournament_number": "Tournament #{{id}}"
   }
 }

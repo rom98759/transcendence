@@ -29,3 +29,44 @@ export interface TournamentResultDTO {
   player3: number;
   player4: number;
 }
+
+/* ===========================
+ * Tournament full state (bracket reconstruction)
+ * =========================== */
+export interface TournamentMatchDTO {
+  id: number;
+  round: string;
+  player1: number;
+  player2: number;
+  score_player1: number;
+  score_player2: number;
+  winner_id: number | null;
+  sessionId: string | null;
+  username_player1: string | null;
+  username_player2: string | null;
+  username_winner: string | null;
+}
+
+export interface TournamentFullStateDTO {
+  status: 'PENDING' | 'STARTED' | 'FINISHED';
+  players: PlayerDTO[];
+  matches: TournamentMatchDTO[];
+}
+
+/* ===========================
+ * Match session resolution (matchId -> sessionId)
+ * =========================== */
+export interface MatchSessionDTO {
+  matchId: number;
+  sessionId: string | null;
+  tournamentId: number | null;
+  round: string | null;
+  player1: number;
+  player2: number;
+  username_player1: string | null;
+  username_player2: string | null;
+  score_player1: number;
+  score_player2: number;
+  winner_id: number | null;
+  finished: boolean;
+}

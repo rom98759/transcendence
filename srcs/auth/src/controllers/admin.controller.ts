@@ -54,6 +54,7 @@ export async function updateUserHandler(
   req: FastifyRequest,
   reply: FastifyReply,
 ) {
+  const authUser = (req as any).authUser;
   const targetUserId = Number((req.params as any).id);
 
   if (!targetUserId || isNaN(targetUserId)) {
@@ -61,6 +62,16 @@ export async function updateUserHandler(
       error: {
         message: 'Invalid user ID',
         code: 'INVALID_USER_ID',
+      },
+    });
+  }
+
+  // Empêcher l'auto-modification
+  if (targetUserId === authUser.id) {
+    return reply.code(HTTP_STATUS.FORBIDDEN).send({
+      error: {
+        message: ERROR_MESSAGES.SELF_UPDATE_FORBIDDEN,
+        code: ERROR_RESPONSE_CODES.SELF_UPDATE_FORBIDDEN,
       },
     });
   }

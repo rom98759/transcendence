@@ -66,7 +66,6 @@ const GameOverScreen = ({
     }
     return t('game.gameover.wins', {
       winner: winnerName,
-      defaultValue: `Victoire de ${winnerName}`,
     });
   };
 
@@ -79,7 +78,7 @@ const GameOverScreen = ({
       if (isTournamentProgressLoading) {
         return (
           <p className="text-gray-300 font-mono text-sm animate-pulse text-center">
-            {t('game.gameover.resolving_next_match', 'Analyse du prochain match...')}
+            {t('game.gameover.resolving_next_match')}
           </p>
         );
       }
@@ -87,7 +86,7 @@ const GameOverScreen = ({
       if (onNextMatch) {
         return (
           <Button id="next-match-btn" variant="primary" type="button" onClick={onNextMatch}>
-            {t('game.gameover.next_match', 'Match suivant')}
+            {t('game.gameover.next_match')}
           </Button>
         );
       }
@@ -95,14 +94,14 @@ const GameOverScreen = ({
       if (onViewResults) {
         return (
           <Button id="results-btn" variant="secondary" type="button" onClick={onViewResults}>
-            {t('game.gameover.view_results', 'Voir les résultats')}
+            {t('game.gameover.view_results')}
           </Button>
         );
       }
 
       return (
         <Button id="results-btn" variant="secondary" type="button" onClick={onExit}>
-          {t('game.gameover.view_results', 'Voir les résultats')}
+          {t('game.gameover.view_results')}
         </Button>
       );
     }
@@ -141,7 +140,7 @@ const GameOverScreen = ({
         >
           {/* Titre */}
           <p className="text-white/40 font-mono text-xs uppercase tracking-[0.3em]">
-            {t('game.gameover.title', 'Résultat final')}
+            {t('game.gameover.title')}
           </p>
 
           {/* Résultat (propre + explicite gagnant/perdant) */}
@@ -154,13 +153,11 @@ const GameOverScreen = ({
               <p className="font-mono text-base text-center" style={{ color: winnerColor }}>
                 {t('game.gameover.winner_line', {
                   winner: winnerName,
-                  defaultValue: `Gagnant : ${winnerName}`,
                 })}
               </p>
               <p className="font-mono text-base text-center" style={{ color: loserColor }}>
                 {t('game.gameover.loser_line', {
                   loser: loserName,
-                  defaultValue: `Perdant : ${loserName}`,
                 })}
               </p>
             </div>

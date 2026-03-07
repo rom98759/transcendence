@@ -21,8 +21,8 @@ export const HomePage = () => {
 
   const menuItems = [
     { to: '/game/pong-ai', label: 'game.playWithAI', size: 220 },
-    { to: '/game/simple-game', label: 'game.playWithFriends', size: 280 },
-    { to: '/game/tournament', label: 'game.tournament', size: 250 },
+    { to: '/friends', label: 'game.playWithFriends', size: 280 },
+    { to: '/tournaments', label: 'game.tournament', size: 250 },
     { to: '/game/remote', label: 'game.playRemote', size: 220 },
     { to: '/game/local', label: 'game.playLocal', size: 280 },
   ];
@@ -60,7 +60,6 @@ export const HomePage = () => {
               })}
             </Scrollable>
           </main>
-
           <Footer />
         </div>
       </Background>

@@ -18,7 +18,7 @@ type tournamentsProps = {
 const statusLabel: Record<Tournament['status'], string> = {
   WAITING: 'game.waiting',
   IN_PROGRESS: 'game.in_progress',
-  FINISHED: 'finished',
+  FINISHED: 'game.finished',
 };
 
 const statusColor: Record<Tournament['status'], string> = {
@@ -112,13 +112,18 @@ export function TournamentListMobile({ tournaments, onJoin }: tournamentsProps) 
             {tour.status === 'IN_PROGRESS' && (
               <button
                 onClick={() => onJoin(tour.id)}
-                className="px-4 py-2 rounded-full bg-teal-500 text-white text-sm"
+                className="px-4 py-2 rounded-full bg-cyan-500 text-white text-sm"
               >
                 {t('game.watch')}
               </button>
             )}
-            {tour.status !== 'FINISHED' && (
-              <span className="text-sm text-gray-400">{t('game.unavailable')}</span>
+            {tour.status === 'FINISHED' && (
+              <button
+                onClick={() => onJoin(tour.id)}
+                className="px-4 py-2 rounded-full bg-gray-500 text-white text-sm"
+              >
+                {t('game.watch')}
+              </button>
             )}
           </div>
         </>

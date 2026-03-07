@@ -113,6 +113,9 @@ export type {
   MatchToPlayDTO,
   TournamentDTO,
   TournamentResultDTO,
+  TournamentMatchDTO,
+  TournamentFullStateDTO,
+  MatchSessionDTO,
 } from './schemas/game.schema.js';
 
 //=================================

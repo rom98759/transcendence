@@ -55,6 +55,14 @@ export async function gameRoutes(
     { preHandler: app.recoveryHeaders },
     ctrl.getMatchToPlay,
   );
+  app.get<{ Params: TournamentParams }>(
+    '/tournaments/:id/state',
+    { preHandler: app.recoveryHeaders },
+    ctrl.getTournamentState,
+  );
+
+  // ---- Match resolution (matchId -> sessionId) ----
+  app.get('/matches/:matchId/session', { preHandler: app.recoveryHeaders }, ctrl.getMatchSession);
 
   // ---- Stats / History ----
   app.get('/stats', { preHandler: app.recoveryHeaders }, ctrl.getTournamentStats);

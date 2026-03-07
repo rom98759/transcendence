@@ -80,7 +80,7 @@ const GameStatusBar = ({
       {sessionsData && (
         <div className="bg-white/5 backdrop-blur text-center rounded-lg p-4 mx-auto">
           {sessionsData.isLoadingSessions && <p>{t('game.loading_sessions')}</p>}
-          {sessionsData.error && <p>Error: {sessionsData.error}</p>}
+          {sessionsData.error && <p>{sessionsData.error}</p>}
           <button className="rounded-lg" onClick={sessionsData.refetch}>
             {t('game.refresh_sessions')}
           </button>

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Pencil } from 'lucide-react';
 import Button from '../atoms/Button';
 import { Input } from '../atoms/Input';
+import { useTranslation } from 'react-i18next';
 
 interface EditableFieldProps {
   label: string;
@@ -10,6 +11,7 @@ interface EditableFieldProps {
   onCancel?: () => void;
   error?: string | null;
   isPending?: boolean;
+  disabled?: boolean;
 }
 
 export const EditableField = ({
@@ -19,7 +21,9 @@ export const EditableField = ({
   onCancel,
   error,
   isPending = false,
+  disabled = false,
 }: EditableFieldProps) => {
+  const { t } = useTranslation();
   const [isEditing, setIsEditing] = useState(false);
   const [localValue, setLocalValue] = useState(value);
   useEffect(() => {
@@ -56,18 +60,20 @@ export const EditableField = ({
         />
 
         <Button onClick={handleSave} variant="primary" className="px-2 py-2" disabled={isPending}>
-          Save
+          {t('global.save')}
         </Button>
 
         <Button onClick={handleCancel} variant="secondary" className="px-2 py-2">
-          Cancel
+          {t('global.cancel')}
         </Button>
       </div>
     </div>
   ) : (
     <div className="flex flex-row justify-between items-center mt-4">
       <p className="mr-3 ts-form-title">{value}</p>
-      <Pencil className="cursor-pointer" color="white" onClick={() => setIsEditing(true)} />
+      {!disabled && (
+        <Pencil className="cursor-pointer" color="white" onClick={() => setIsEditing(true)} />
+      )}
     </div>
   );
 };
