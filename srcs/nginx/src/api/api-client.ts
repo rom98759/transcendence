@@ -48,7 +48,7 @@ api.interceptors.response.use(
         details = [
           {
             field: errorPayload.details.field || undefined,
-            message: errorPayload.details.message || message || '',
+            message: message || '',
             reason: errorPayload.code || 'validation_error',
           },
         ];
