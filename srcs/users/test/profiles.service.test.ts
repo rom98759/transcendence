@@ -10,7 +10,9 @@ vi.mock('../src/data/profiles.data.js', () => ({
   profileRepository: {
     createProfile: vi.fn(),
     findProfileByUsername: vi.fn(),
+    findProfilesByUsernameQuery: vi.fn(),
     findProfileById: vi.fn(),
+    updateProfileUsername: vi.fn(),
     updateProfileAvatar: vi.fn(),
     storeOnUploadVolume: vi.fn(),
     deleteProfile: vi.fn(),
@@ -95,6 +97,33 @@ describe('ProfileService', () => {
     });
   });
 
+  describe('getByUsernameQuery', () => {
+    it('returns mapped profiles matching the query', async () => {
+      const secondProfile = { ...mockUserProfile, authId: 2, username: 'tata' };
+      vi.mocked(profileRepository.findProfilesByUsernameQuery).mockResolvedValue([
+        mockUserProfile,
+        secondProfile,
+      ]);
+
+      const result = await profileService.getByUsernameQuery('ta');
+
+      expect(profileRepository.findProfilesByUsernameQuery).toHaveBeenCalledWith('ta');
+      expect(result).toEqual([
+        { username: mockUserProfile.username, avatarUrl: mockUserProfile.avatarUrl },
+        { username: secondProfile.username, avatarUrl: secondProfile.avatarUrl },
+      ]);
+    });
+
+    it('returns empty array when no profile matches', async () => {
+      vi.mocked(profileRepository.findProfilesByUsernameQuery).mockResolvedValue([]);
+
+      const result = await profileService.getByUsernameQuery('zz');
+
+      expect(profileRepository.findProfilesByUsernameQuery).toHaveBeenCalledWith('zz');
+      expect(result).toEqual([]);
+    });
+  });
+
   describe('getProfileById', () => {
     it('returns the profile when found', async () => {
       vi.mocked(profileRepository.findProfileById).mockResolvedValue(mockUserProfile);
@@ -167,6 +196,45 @@ describe('ProfileService', () => {
     });
   });
 
+  describe('updateUsername', () => {
+    it('updates profile username when new username is available', async () => {
+      const updatedProfile = { username: 'tata', avatarUrl: null } satisfies ProfileDTO;
+      vi.mocked(profileRepository.findProfileByUsername)
+        .mockResolvedValueOnce(mockUserProfile)
+        .mockResolvedValueOnce(null);
+      vi.mocked(profileRepository.updateProfileUsername).mockResolvedValue(updatedProfile);
+
+      const result = await profileService.updateUsername('toto', 'tata');
+
+      expect(profileRepository.findProfileByUsername).toHaveBeenNthCalledWith(1, 'toto');
+      expect(profileRepository.findProfileByUsername).toHaveBeenNthCalledWith(2, 'tata');
+      expect(profileRepository.updateProfileUsername).toHaveBeenCalledWith(1, 'tata');
+      expect(result).toEqual(updatedProfile);
+    });
+
+    it('returns existing profile when username does not change', async () => {
+      vi.mocked(profileRepository.findProfileByUsername).mockResolvedValue(mockUserProfile);
+
+      const result = await profileService.updateUsername('toto', 'toto');
+
+      expect(profileRepository.updateProfileUsername).not.toHaveBeenCalled();
+      expect(result).toEqual(mockUserProfile);
+    });
+
+    it('throws AppError when target username is already taken', async () => {
+      const conflictingProfile = { ...mockUserProfile, authId: 2, username: 'tata' };
+      vi.mocked(profileRepository.findProfileByUsername)
+        .mockResolvedValueOnce(mockUserProfile)
+        .mockResolvedValueOnce(conflictingProfile);
+
+      await expect(profileService.updateUsername('toto', 'tata')).rejects.toMatchObject({
+        code: ERR_DEFS.RESOURCE_CONFLICT.code,
+        statusCode: ERR_DEFS.RESOURCE_CONFLICT.statusCode,
+      });
+      expect(profileRepository.updateProfileUsername).not.toHaveBeenCalled();
+    });
+  });
+
   describe('deleteByUsername', () => {
     it('calls repo for delete when found', async () => {
       vi.mocked(profileRepository.findProfileByUsername).mockResolvedValue(mockUserProfile);
@@ -177,6 +245,28 @@ describe('ProfileService', () => {
       expect(profileRepository.findProfileByUsername).toHaveBeenCalledWith('toto');
       expect(profileRepository.deleteProfile).toHaveBeenCalledWith(mockUserProfile.authId);
       expect(result).toEqual(mockUserProfile);
+    });
+  });
+
+  describe('deleteById', () => {
+    it('deletes profile when id exists', async () => {
+      vi.mocked(profileRepository.findProfileById).mockResolvedValue(mockUserProfile);
+      vi.mocked(profileRepository.deleteProfile).mockResolvedValue(mockSimpleProfileDTO);
+
+      await profileService.deleteById(mockUserProfile.authId);
+
+      expect(profileRepository.findProfileById).toHaveBeenCalledWith(mockUserProfile.authId);
+      expect(profileRepository.deleteProfile).toHaveBeenCalledWith(mockUserProfile.authId);
+    });
+
+    it('throws AppError when profile id does not exist', async () => {
+      vi.mocked(profileRepository.findProfileById).mockResolvedValue(null);
+
+      await expect(profileService.deleteById(999)).rejects.toMatchObject({
+        code: ERR_DEFS.RESOURCE_NOT_FOUND.code,
+        statusCode: ERR_DEFS.RESOURCE_NOT_FOUND.statusCode,
+      });
+      expect(profileRepository.deleteProfile).not.toHaveBeenCalled();
     });
   });
 });

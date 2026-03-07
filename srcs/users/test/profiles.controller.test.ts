@@ -16,8 +16,10 @@ vi.mock('../src/services/profiles.service.js', () => ({
     getProfileByIdOrThrow: vi.fn(),
     getByUsernameQuery: vi.fn(),
     createProfile: vi.fn(),
+    updateUsername: vi.fn(),
     updateAvatar: vi.fn(),
     deleteByUsername: vi.fn(),
+    deleteById: vi.fn(),
   },
 }));
 
@@ -229,6 +231,39 @@ describe('Profile Controller unit tests', () => {
     });
   });
 
+  describe('PATCH /:username/username', () => {
+    test('Should return 200 if username updated', async () => {
+      const updatedProfile = { username: 'tata', avatarUrl: null };
+      vi.spyOn(profileService, 'updateUsername').mockResolvedValue(updatedProfile as ProfileDTO);
+
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/toto/username',
+        headers: authHeaders,
+        payload: { newUsername: 'tata' },
+      });
+
+      expect(profileService.updateUsername).toHaveBeenCalledWith('toto', 'tata');
+      expect(response.statusCode).toBe(200);
+      expect(JSON.parse(response.payload)).toEqual(updatedProfile);
+    });
+
+    test('Should return 500 if updateUsername throws server side error', async () => {
+      vi.spyOn(profileService, 'updateUsername').mockRejectedValue(
+        new AppError(ERR_DEFS.SERVICE_GENERIC, {}),
+      );
+
+      const response = await app.inject({
+        method: 'PATCH',
+        url: '/toto/username',
+        headers: authHeaders,
+        payload: { newUsername: 'tata' },
+      });
+
+      expect(response.statusCode).toBe(500);
+    });
+  });
+
   describe('DELETE /username/:username', () => {
     test('Should return 200 if no service error', async () => {
       vi.spyOn(profileService, 'deleteByUsername').mockResolvedValue(mockProfileDTO as ProfileDTO);
@@ -249,6 +284,34 @@ describe('Profile Controller unit tests', () => {
         method: 'DELETE',
         url: '/Toto',
         headers: authHeaders,
+      });
+
+      expect(response.statusCode).toBe(404);
+    });
+  });
+
+  describe('DELETE /users/:userId', () => {
+    test('Should return 204 when profile is deleted by id', async () => {
+      vi.spyOn(profileService, 'deleteById').mockResolvedValue();
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: '/users/1',
+      });
+
+      expect(profileService.deleteById).toHaveBeenCalledWith(1);
+      expect(response.statusCode).toBe(204);
+      expect(response.body).toBe('');
+    });
+
+    test('Should return 404 if profile id is not found', async () => {
+      vi.spyOn(profileService, 'deleteById').mockRejectedValue(
+        new AppError(ERR_DEFS.RESOURCE_NOT_FOUND, {}),
+      );
+
+      const response = await app.inject({
+        method: 'DELETE',
+        url: '/users/999',
       });
 
       expect(response.statusCode).toBe(404);
