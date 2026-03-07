@@ -134,24 +134,84 @@ make ai       # Build only the AI opponent service (for local development/testin
 
 > See also our [project wiki](https://github.com/codastream/transcendence/wiki) for in-depth articles on each tool.
 
-| Tool                                                 | Wiki Link                                                             | Related Module                       | Interested People       | Status |
-| ---------------------------------------------------- | --------------------------------------------------------------------- | ------------------------------------ | ----------------------- | ------ |
-| [Fastify](https://fastify.dev/docs/latest/)          | [Wiki](https://github.com/codastream/transcendence/wiki/Fastify)      | Web - Backend (Minor)                |                         |        |
-| [React](https://react.dev/)                          | [Wiki](https://github.com/codastream/transcendence/wiki/React)        | Web - Frontend (Major)               |                         | 👷     |
-| [Tailwind CSS](https://tailwindcss.com/docs)         | [Wiki](https://github.com/codastream/transcendence/wiki/Tailwind-CSS) | Web - Frontend                       |                         | 👷     |
-| [SQLite](https://github.com/WiseLibs/better-sqlite3) | [Wiki](https://github.com/codastream/transcendence/wiki/SQLite)       | -                                    |                         |        |
-| [Prisma](https://www.prisma.io/docs/)                | [Wiki](https://github.com/codastream/transcendence/wiki/Prisma)       | Database - ORM (Minor)               |                         | 👷     |
-| [WebSockets](https://github.com/websockets/ws)       | [Wiki](https://github.com/codastream/transcendence/wiki/WebSockets)   | Real-time / User Interaction (Major) | @codastream             |        |
-| [ELK](https://www.elastic.co/guide/index.html)       | [Wiki](https://github.com/codastream/transcendence/wiki/ELK)          | DevOps - ELK (Major)                 |                         | 👷     |
-| [Prometheus](https://prometheus.io/docs/)            | [Wiki](https://github.com/codastream/transcendence/wiki/Prometheus)   | DevOps - Monitoring (Major)          | @codastream             |        |
-| [Grafana](https://grafana.com/docs/)                 | [Wiki](https://github.com/codastream/transcendence/wiki/Grafana)      | DevOps - Monitoring (Major)          | @codastream             |        |
-| [Solidity](https://docs.soliditylang.org/)           | [Wiki](https://github.com/codastream/transcendence/wiki/Solidity)     | Blockchain (Major)                   | @codastream             |        |
-| [Hardhat](https://hardhat.org/docs)                  | [Wiki](https://github.com/codastream/transcendence/wiki/Hardhat)      | Blockchain (Major)                   | @codastream             |        |
-| [Docker](https://docs.docker.com/)                   | [Wiki](https://github.com/codastream/transcendence/wiki/Docker)       | -                                    | @codastream (dev setup) |        |
-| [Vitest](https://vitest.dev/)                        | [Wiki](https://github.com/codastream/transcendence/wiki/Vitest)       | -                                    |                         | 👷     |
-| [ESLint](https://eslint.org/)                        | [Wiki](https://github.com/codastream/transcendence/wiki/ESLint)       | -                                    |                         |        |
-| [TypeScript](https://www.typescriptlang.org/docs/)   | [Wiki](https://github.com/codastream/transcendence/wiki/TypeScript)   | -                                    |                         | 👷     |
-| [Zod](https://zod.dev/)                              | [Wiki](https://github.com/codastream/transcendence/wiki/Zod)          | -                                    |                         | 👷     |
+#### 🏗️ Architecture
+
+| Tool / Concept                                                    | Docs                                                    | Wiki                                                                     | Related Module                    |
+| ----------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------ | --------------------------------- |
+| Microservices                                                     | —                                                       | [Wiki](https://github.com/codastream/transcendence/wiki/Gateway-Service) | Backend as microservices (Major)  |
+| [Fastify](https://fastify.dev/docs/latest/)                       | [Docs](https://fastify.dev/docs/latest/)                | [Wiki](https://github.com/codastream/transcendence/wiki/Fastify)         | Web - Backend (Minor)             |
+| [Nginx](https://nginx.org/en/docs/)                               | [Docs](https://nginx.org/en/docs/)                      | —                                                                        | Reverse proxy & HTTPS termination |
+| [Redis](https://redis.io/docs/)                                   | [Docs](https://redis.io/docs/)                          | —                                                                        | Session cache & pub/sub           |
+| [NPM Workspaces](https://docs.npmjs.com/cli/using-npm/workspaces) | [Docs](https://docs.npmjs.com/cli/using-npm/workspaces) | [Wiki](https://github.com/codastream/transcendence/wiki/NPM-workspaces)  | Monorepo management               |
+
+#### 🌐 Web - Frontend
+
+| Tool                                         | Docs                                 | Wiki                                                                  | Related Module               |
+| -------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------- | ---------------------------- |
+| [React](https://react.dev/)                  | [Docs](https://react.dev/)           | [Wiki](https://github.com/codastream/transcendence/wiki/React)        | Web - Frontend (Major)       |
+| [Tailwind CSS](https://tailwindcss.com/docs) | [Docs](https://tailwindcss.com/docs) | [Wiki](https://github.com/codastream/transcendence/wiki/Tailwind-CSS) | Design system (Minor)        |
+| [Vite](https://vitejs.dev/)                  | [Docs](https://vitejs.dev/)          | —                                                                     | Frontend build tool          |
+| [i18next](https://www.i18next.com/)          | [Docs](https://www.i18next.com/)     | —                                                                     | Internationalization (Minor) |
+
+#### 🌐 Web - Backend
+
+| Tool                                           | Docs                                                      | Wiki                                                                                  | Related Module                       |
+| ---------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------ |
+| [WebSockets](https://github.com/websockets/ws) | [RFC 6455](https://datatracker.ietf.org/doc/html/rfc6455) | [Wiki](https://github.com/codastream/transcendence/wiki/WebSockets)                   | Real-time / User Interaction (Major) |
+| [Pino](https://getpino.io/)                    | [Docs](https://getpino.io/)                               | [Wiki](https://github.com/codastream/transcendence/wiki/Logging-and-Error-management) | Logging                              |
+
+#### 🔐 Security & Auth
+
+| Tool / Concept                                       | Docs                                                      | Wiki                                                                               | Related Module                |
+| ---------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------- |
+| OAuth 2.0                                            | [RFC 6749](https://datatracker.ietf.org/doc/html/rfc6749) | [Wiki](https://github.com/codastream/transcendence/wiki/OAuth-2.0)                 | Remote authentication (Minor) |
+| JWT                                                  | [RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519) | —                                                                                  | Session management            |
+| [otplib](https://github.com/yeojz/otplib) (TOTP)     | [Docs](https://github.com/yeojz/otplib)                   | [Wiki](https://github.com/codastream/transcendence/wiki/Two-factor-authentication) | Two-Factor Auth (Minor)       |
+| [bcrypt](https://github.com/kelektiv/node.bcrypt.js) | [Docs](https://github.com/kelektiv/node.bcrypt.js)        | —                                                                                  | Password hashing              |
+| mTLS                                                 | —                                                         | —                                                                                  | Inter-service authentication  |
+
+#### 💾 Database
+
+| Tool                                                 | Docs                                                                       | Wiki                                                            | Related Module |
+| ---------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------- | -------------- |
+| [SQLite](https://github.com/WiseLibs/better-sqlite3) | [Docs](https://github.com/WiseLibs/better-sqlite3/blob/master/docs/api.md) | [Wiki](https://github.com/codastream/transcendence/wiki/SQLite) | Persistence    |
+| [Prisma](https://www.prisma.io/docs/)                | [Docs](https://www.prisma.io/docs/)                                        | [Wiki](https://github.com/codastream/transcendence/wiki/Prisma) | ORM (Minor)    |
+
+#### ⛓️ Blockchain
+
+| Tool                                           | Docs                                   | Wiki                                                                   | Related Module          |
+| ---------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------- | ----------------------- |
+| [Solidity](https://docs.soliditylang.org/)     | [Docs](https://docs.soliditylang.org/) | [Wiki](https://github.com/codastream/transcendence/wiki/Solidity)      | Blockchain (Major)      |
+| [Hardhat](https://hardhat.org/docs)            | [Docs](https://hardhat.org/docs)       | [Wiki](https://github.com/codastream/transcendence/wiki/Hardhat)       | Blockchain (Major)      |
+| [Avalanche](https://docs.avax.network/)        | [Docs](https://docs.avax.network/)     | [Wiki](https://github.com/codastream/transcendence/wiki/Avalanche)     | On-chain storage        |
+| [OpenZeppelin](https://docs.openzeppelin.com/) | [Docs](https://docs.openzeppelin.com/) | [Wiki](https://github.com/codastream/transcendence/wiki/Open-Zeppelin) | Smart contract security |
+
+#### 🤖 AI & ML
+
+| Tool / Concept                       | Docs                                                           | Wiki                                                                   | Related Module         |
+| ------------------------------------ | -------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------- |
+| [Python](https://docs.python.org/3/) | [Docs](https://docs.python.org/3/)                             | [Wiki](https://github.com/codastream/transcendence/wiki/Python)        | AI Opponent (Major)    |
+| PPO Algorithm                        | [Stable Baselines3](https://stable-baselines3.readthedocs.io/) | [Wiki](https://github.com/codastream/transcendence/wiki/PPO-Algorithm) | Reinforcement learning |
+
+#### 🛠️ Dev Tools & Quality
+
+| Tool                                                 | Docs                                         | Wiki                                                                    | Related Module     |
+| ---------------------------------------------------- | -------------------------------------------- | ----------------------------------------------------------------------- | ------------------ |
+| [TypeScript](https://www.typescriptlang.org/docs/)   | [Docs](https://www.typescriptlang.org/docs/) | [Wiki](https://github.com/codastream/transcendence/wiki/TypeScript)     | Language           |
+| [Zod](https://zod.dev/)                              | [Docs](https://zod.dev/)                     | [Wiki](https://github.com/codastream/transcendence/wiki/Zod)            | Schema validation  |
+| [ESLint](https://eslint.org/)                        | [Docs](https://eslint.org/)                  | [Wiki](https://github.com/codastream/transcendence/wiki/ESLint)         | Linting            |
+| [Prettier](https://prettier.io/)                     | [Docs](https://prettier.io/)                 | —                                                                       | Formatting         |
+| [Vitest](https://vitest.dev/)                        | [Docs](https://vitest.dev/)                  | [Wiki](https://github.com/codastream/transcendence/wiki/Vitest)         | Testing            |
+| [Docker](https://docs.docker.com/)                   | [Docs](https://docs.docker.com/)             | [Wiki](https://github.com/codastream/transcendence/wiki/Docker)         | Containerization   |
+| [GitHub Actions](https://docs.github.com/en/actions) | [Docs](https://docs.github.com/en/actions)   | [Wiki](https://github.com/codastream/transcendence/wiki/GitHub-Actions) | CI/CD              |
+| [Husky](https://typicode.github.io/husky/)           | [Docs](https://typicode.github.io/husky/)    | —                                                                       | Git hooks          |
+| [Commitlint](https://commitlint.js.org/)             | [Docs](https://commitlint.js.org/)           | —                                                                       | Commit conventions |
+
+#### 🎮 Hardware
+
+| Tool                                                                   | Docs                                                   | Wiki                                                   | Related Module |
+| ---------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------ | -------------- |
+| [LED Score Controller](https://github.com/rom98759/Transcendance_LEDS) | [Repo](https://github.com/rom98759/Transcendance_LEDS) | [Wiki](https://github.com/rom98759/Transcendance_LEDS) | IoT (Minor)    |
 
 How AI was used: we asked for explanation on how different libraries and tools work. We also used AI for debugging purposes and in case of blocking on a certain problem. Copilot was helpful with pull request reviews.
 
