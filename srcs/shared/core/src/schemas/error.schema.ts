@@ -1,7 +1,7 @@
 import z from 'zod';
 
 export const SimpleErrorWithMessageSchema = z.object({
-  statusCode: z.number().int().describe('HTTP code'),
+  statusCode: z.number().int().gte(100).lte(599).describe('HTTP code'),
   errorCode: z.string().describe('Internal error code (for dev use)'),
   message: z.string().optional().describe('User friendly message'),
 });
