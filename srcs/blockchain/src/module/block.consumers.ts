@@ -9,6 +9,7 @@ import {
 import { AppLogger } from '../core/logger.js';
 import { env } from '../config/env.js';
 import type { Redis } from 'ioredis';
+import * as db from '../core/database.js';
 
 const STREAM = 'tournament.results';
 const GROUP = 'blockchain-group';
@@ -165,8 +166,9 @@ async function recoverPending(app: FastifyInstance, redis: any): Promise<void> {
 }
 
 async function addSubTournament(logger: AppLogger, tournament: BlockTournamentInput) {
+  let rowSnapId: number | undefined;
   try {
-    const rowSnapId = addTournamentSnapDB(logger, tournament);
+    rowSnapId = addTournamentSnapDB(logger, tournament);
     const blockchainReady = env.BLOCKCHAIN_READY;
     if (blockchainReady) {
       const dataStored = await addTournamentBlockchain(logger, tournament, rowSnapId);
@@ -174,10 +176,14 @@ async function addSubTournament(logger: AppLogger, tournament: BlockTournamentIn
     }
   } catch (err: any) {
     const event = errorEventMap[err.code];
+    console.error(`==================== code: ${err.code}, id: ${rowSnapId}`);
     if (event) {
       logger.error({ event, err });
     } else {
       logger.error({ event: 'unknown_error', err });
+    }
+    if (err.code === 'BLOCKCHAIN_INSERT_TOURNAMENT_ERR' && rowSnapId !== undefined) {
+      db.updateDupTournament(rowSnapId, 'BLOCKCHAIN_DUPLICATE');
     }
     logger.error({ tournament: tournament.tour_id, err: err?.message || err });
   }

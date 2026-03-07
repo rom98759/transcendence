@@ -14,10 +14,14 @@ export async function registerRoutes(app: FastifyInstance) {
 
 async function blockRoutes(app: FastifyInstance) {
   app.get('/blockchain', listTournamentView);
-  app.get('/tournaments', listTournament);
-  app.post('/tournaments', { schema: { body: blockSchema } }, addTournament);
-  app.get('/tournaments/:tour_id', { schema: { params: blockIdSchema } }, getTournamentView);
-  app.post('/tournamentspub', async (req, _reply) => {
+  app.get('/blockchain/tournaments', listTournament);
+  app.post('/blockchain/tournaments', { schema: { body: blockSchema } }, addTournament);
+  app.get(
+    '/blockchain/tournaments/:tour_id',
+    { schema: { params: blockIdSchema } },
+    getTournamentView,
+  );
+  app.post('/blockchain/tournamentspub', async (req, _reply) => {
     await app.redis.xadd('tournament.results', '*', 'data', JSON.stringify(req.body));
     return { status: 'published' };
   });

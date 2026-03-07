@@ -134,6 +134,22 @@ export function updateTournament(data: SnapshotRow) {
   }
 }
 
+export function updateDupTournament(tour_id: number, verify_status: string) {
+  try {
+    const updateDupTournamentStmt = db.prepare(`
+    UPDATE snapshot
+    SET verify_status = ?
+    WHERE tour_id = ?`);
+    updateDupTournamentStmt.run(verify_status, tour_id);
+  } catch (err) {
+    const error: any = new Error(
+      `Error storing Duplicate Tournament in DB: ${(err as any)?.message || String(err)}`,
+    );
+    error.code = 'DB_REGISTER_DUPLICATE_ERROR';
+    throw error;
+  }
+}
+
 export function truncateSnapshot(): void {
   try {
     truncateSnapshotStmt.run();

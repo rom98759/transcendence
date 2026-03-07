@@ -44,8 +44,9 @@ export async function addTournament(
   reply: FastifyReply,
 ) {
   const data = request.body as BlockTournamentInput;
+  let rowSnapId: number | undefined;
   try {
-    const rowSnapId = addTournamentSnapDB(this.log, data);
+    rowSnapId = addTournamentSnapDB(this.log, data);
     const blockchainReady = env.BLOCKCHAIN_READY;
     if (blockchainReady) {
       const dataStored = await addTournamentBlockchain(this.log, data, rowSnapId);
@@ -54,10 +55,15 @@ export async function addTournament(
     }
   } catch (err: any) {
     const event = errorEventMap[err.code];
+    console.error(`Error event: ${event}, code: ${err.code}, message: ${err.message}`);
+    this.log.warn({ event, err });
     if (event) {
       this.log.error({ event, err });
     } else {
       this.log.error({ event: 'unknown_error', err });
+    }
+    if (event === errorEventMap.BLOCKCHAIN_INSERT_TOURNAMENT_ERR && rowSnapId !== undefined) {
+      db.updateDupTournament(rowSnapId, 'BLOCKCHAIN_DUPLICATE');
     }
     this.log.error({ tournament: data.tour_id, err: err?.message || err });
     return reply.code(406).send({ error: { message: err.message, code: err.code } });

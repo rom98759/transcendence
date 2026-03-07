@@ -54,6 +54,7 @@ COPY --from=builder /app/srcs/shared/core/dist ./node_modules/@transcendence/cor
 
 # 7) Artifacts runtime du service
 COPY --from=builder /app/srcs/blockchain/dist ./dist
+COPY srcs/blockchain/src/abi/GameStorage.json ./dist/abi/GameStorage.json
 
 # Copy static assets (not compiled by tsc)
 COPY --from=builder /app/srcs/blockchain/src/views ./dist/views

@@ -50,6 +50,10 @@
         <p class="text-red-700 font-semibold">
           ✖ Snapshot mismatch — data integrity compromised
         </p>
+       <% } else if (snapshot.verify_status === "BLOCKCHAIN_DUPLICATE") { %>
+        <p class="text-red-700 font-semibold">
+          ✖ Blockchain duplicate — data integrity compromised
+        </p>
       <% } else { %>
         <p class="text-gray-700">
           Verification pending

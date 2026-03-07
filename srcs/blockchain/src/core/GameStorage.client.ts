@@ -29,7 +29,7 @@ export function getGameStorage(logger: AppLogger): ethers.Contract | null {
     }
   }
 
-  const abiPath = path.resolve(process.cwd(), 'src/abi/GameStorage.json');
+  const abiPath = path.resolve(process.cwd(), 'dist/abi/GameStorage.json');
   const artifact = JSON.parse(fs.readFileSync(abiPath, 'utf-8'));
   const GameStorageAbi = artifact.abi;
   if (!Array.isArray(GameStorageAbi)) {
