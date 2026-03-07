@@ -18,24 +18,25 @@ export interface MatchHistory {
   result?: 'WIN' | 'LOSS' | 'PENDING';
 }
 
-const roundLabel: Record<string, string> = {
-  SEMI_1: 'Semi-final 1',
-  SEMI_2: 'Semi-final 2',
-  LITTLE_FINAL: '3rd Place',
-  FINAL: 'Final',
-};
-
 export const HistoryTableDesktop = ({ history }: { history: MatchHistory[] }) => {
   const { t } = useTranslation();
+
+  const roundLabel: Record<string, string> = {
+    SEMI_1: t('history.semi1'),
+    SEMI_2: t('history.semi2'),
+    LITTLE_FINAL: t('history.little_final'),
+    FINAL: t('history.final'),
+  };
+
   return (
     <DataTable<MatchHistory>
-      title={t('history.title', 'Match History')}
+      title={t('history.title')}
       rowKey={(m) => m.id}
       rows={history}
-      emptyMessage={t('history.empty', 'No matches yet.')}
+      emptyMessage={t('history.empty')}
       columns={[
         {
-          header: t('history.date', 'Date'),
+          header: t('history.date'),
           cell: (m) => (
             <span className="text-xs text-gray-500">{new Date(m.created_at).toLocaleString()}</span>
           ),
@@ -72,9 +73,10 @@ export const HistoryTableDesktop = ({ history }: { history: MatchHistory[] }) =>
           ),
         },
         {
-          header: t('history.result', 'Result'),
+          header: t('history.result'),
           cell: (m) => {
-            if (m.result === 'WIN') return <span className="font-medium text-emerald-600">WIN</span>;
+            if (m.result === 'WIN')
+              return <span className="font-medium text-emerald-600">WIN</span>;
             if (m.result === 'LOSS') return <span className="font-medium text-rose-500">LOSS</span>;
             return <span className="font-medium text-amber-600">PENDING</span>;
           },
@@ -104,11 +106,19 @@ export const HistoryTableDesktop = ({ history }: { history: MatchHistory[] }) =>
 
 export const HistoryListMobile = ({ history }: { history: MatchHistory[] }) => {
   const { t } = useTranslation();
+
+  const roundLabel: Record<string, string> = {
+    SEMI_1: t('history.semi1'),
+    SEMI_2: t('history.semi2'),
+    LITTLE_FINAL: t('history.little_final'),
+    FINAL: t('history.final'),
+  };
+
   return (
     <DataCardList<MatchHistory>
       rows={history}
       rowKey={(m) => m.id}
-      emptyMessage={t('history.empty', 'No matches yet.')}
+      emptyMessage={t('history.empty')}
       renderCard={(m) => (
         <>
           <div className="flex justify-between items-center">
@@ -121,7 +131,9 @@ export const HistoryListMobile = ({ history }: { history: MatchHistory[] }) => {
           </div>
           <div className="flex justify-between items-center text-xs text-gray-500">
             <span>{new Date(m.created_at).toLocaleString()}</span>
-            <span>{m.opponent_username ? `${t('history.opponent', 'Opponent')}: ${m.opponent_username}` : ''}</span>
+            <span>
+              {m.opponent_username ? `${t('history.opponent')}: ${m.opponent_username}` : ''}
+            </span>
           </div>
           <div className="flex justify-between items-center">
             <span className="font-bold text-gray-700">{m.username_player1}</span>
@@ -132,7 +144,7 @@ export const HistoryListMobile = ({ history }: { history: MatchHistory[] }) => {
           </div>
           {m.result && (
             <div className="text-sm font-semibold text-gray-700">
-              {t('history.result', 'Result')}: {m.result}
+              {t('history.result')}: {m.result}
             </div>
           )}
           {m.username_winner && (

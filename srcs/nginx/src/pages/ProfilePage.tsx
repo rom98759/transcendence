@@ -84,19 +84,19 @@ export const ProfilePage = () => {
 
         <div className="bg-white/70 rounded-2xl p-5 border border-cyan-200 shadow-xl">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 mb-4">
-            <h3 className="font-semibold text-gray-700">Game insights</h3>
+            <h3 className="font-semibold text-gray-700">{t('profile.game_insights')}</h3>
             <div className="flex gap-3 text-sm justify-center md:justify-end">
               <Link
                 to={`/stats?username=${encodeURIComponent(profile.username)}`}
                 className="text-cyan-700 hover:underline"
               >
-                Voir stats
+                {t('profile.view_stats')}
               </Link>
               <Link
                 to={`/history?username=${encodeURIComponent(profile.username)}`}
                 className="text-cyan-700 hover:underline"
               >
-                Voir history
+                {t('profile.view_history')}
               </Link>
             </div>
           </div>
@@ -130,7 +130,7 @@ export const ProfilePage = () => {
 
               <div>
                 <div className="flex justify-between text-xs text-gray-500 mb-1">
-                  <span>Match performance</span>
+                  <span>{t('profile.match_performance')}</span>
                   <span>{mainStat.matchesWinRate}%</span>
                 </div>
                 <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -142,16 +142,16 @@ export const ProfilePage = () => {
               </div>
             </>
           ) : (
-            <p className="text-sm text-gray-500">No stats available.</p>
+            <p className="text-sm text-gray-500">{t('profile.no_stats_available')}</p>
           )}
         </div>
 
         <div className="bg-white/70 rounded-2xl p-5 border border-cyan-200 shadow-xl mb-8">
-          <h3 className="font-semibold text-gray-700 mb-3">Recent matches</h3>
+          <h3 className="font-semibold text-gray-700 mb-3">{t('profile.recent_matches')}</h3>
           {isHistoryLoading ? (
-            <p className="text-sm text-gray-500">Loading history...</p>
+            <p className="text-sm text-gray-500">{t('profile.loading_history')}</p>
           ) : history.length === 0 ? (
-            <p className="text-sm text-gray-500">No recent matches.</p>
+            <p className="text-sm text-gray-500">{t('profile.no_recent_matches')}</p>
           ) : (
             <div className="space-y-2">
               {history.map((match) => (

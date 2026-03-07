@@ -18,7 +18,7 @@ export default function TournamentCreatePage() {
         console.log(res.id);
         navigate(`/tournaments/${res.id}`);
       } catch (err) {
-        setError('Failed to create tournament');
+        setError(t('game.error.failed_create_tournament'));
       }
     }
     createTournament();
