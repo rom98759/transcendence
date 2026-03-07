@@ -553,6 +553,7 @@
   },
   "stats": {
     "title": "Player Statistics",
+    "leaderboard": "Global Leaderboard",
     "loading": "Loading...",
     "loading_stats": "Loading stats...",
     "error_loading": "Failed to load stats.",

@@ -19,7 +19,13 @@ export interface PlayerStat {
   last_match_at?: number | null;
 }
 
-export const StatsTableDesktop = ({ stats }: { stats: PlayerStat[] }) => {
+export const StatsTableDesktop = ({
+  stats,
+  showRank = false,
+}: {
+  stats: PlayerStat[];
+  showRank?: boolean;
+}) => {
   const { t } = useTranslation();
   return (
     <DataTable<PlayerStat>
@@ -28,6 +34,16 @@ export const StatsTableDesktop = ({ stats }: { stats: PlayerStat[] }) => {
       rows={stats}
       emptyMessage={t('stats.empty')}
       columns={[
+        ...(showRank
+          ? [
+              {
+                header: '#',
+                cell: (_row: PlayerStat, index: number) => (
+                  <span className="font-bold text-gray-500">{index + 1}</span>
+                ),
+              },
+            ]
+          : []),
         {
           header: t('stats.player'),
           cell: (row) => <span className="font-bold text-gray-700">{row.username}</span>,
@@ -78,16 +94,25 @@ export const StatsTableDesktop = ({ stats }: { stats: PlayerStat[] }) => {
   );
 };
 
-export const StatsListMobile = ({ stats }: { stats: PlayerStat[] }) => {
+export const StatsListMobile = ({
+  stats,
+  showRank = false,
+}: {
+  stats: PlayerStat[];
+  showRank?: boolean;
+}) => {
   const { t } = useTranslation();
   return (
     <DataCardList<PlayerStat>
       rows={stats}
       rowKey={(row) => row.player_id}
       emptyMessage={t('stats.empty')}
-      renderCard={(row) => (
+      renderCard={(row, index) => (
         <>
-          <div className="font-semibold text-gray-700 text-base">{row.username}</div>
+          <div className="font-semibold text-gray-700 text-base">
+            {showRank && <span className="text-gray-400 mr-2">#{(index ?? 0) + 1}</span>}
+            {row.username}
+          </div>
           <div className="grid grid-cols-2 gap-2 text-sm">
             {(
               [

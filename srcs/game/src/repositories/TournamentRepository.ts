@@ -54,6 +54,7 @@ export class TournamentRepository {
   private countUnfinishedMatchesStmt;
   private getMatchByRoundStmt;
   private getTournamentStatsStmt;
+  private getAllPlayersStatsStmt;
   private getBlockchainPlayersStmt;
   private getTournamentStateStmt;
   private getMatchByIdFullStmt;
@@ -248,6 +249,110 @@ export class TournamentRepository {
         END AS matchesWinRate,
         last_match_at
       FROM base
+    `);
+    this.getAllPlayersStatsStmt = db.prepare(`
+      WITH base AS (
+        SELECT
+          p.id AS player_id,
+          COALESCE(p.username, 'unknown') AS username,
+          (
+            SELECT COUNT(DISTINCT tp.tournament_id)
+            FROM tournament_player tp
+            WHERE tp.player_id = p.id
+          ) AS tournaments_played,
+          (
+            SELECT COUNT(DISTINCT tp.tournament_id)
+            FROM tournament_player tp
+            WHERE tp.player_id = p.id AND tp.final_position = 1
+          ) AS tournaments_won,
+          (
+            SELECT COUNT(DISTINCT tp.tournament_id)
+            FROM tournament_player tp
+            WHERE tp.player_id = p.id AND tp.final_position > 1
+          ) AS tournaments_lost,
+          (
+            SELECT COUNT(*)
+            FROM match m
+            WHERE m.player1 = p.id OR m.player2 = p.id
+          ) AS matches_played,
+          (
+            SELECT COUNT(*)
+            FROM match m
+            WHERE (m.player1 = p.id OR m.player2 = p.id) AND m.winner_id = p.id
+          ) AS matches_won,
+          (
+            SELECT COUNT(*)
+            FROM match m
+            WHERE (m.player1 = p.id OR m.player2 = p.id)
+              AND m.winner_id IS NOT NULL
+              AND m.winner_id <> p.id
+          ) AS matches_lost,
+          (
+            SELECT COALESCE(
+              SUM(
+                CASE
+                  WHEN m.player1 = p.id THEN COALESCE(m.score_player1, 0)
+                  WHEN m.player2 = p.id THEN COALESCE(m.score_player2, 0)
+                  ELSE 0
+                END
+              ),
+              0
+            )
+            FROM match m
+            WHERE m.player1 = p.id OR m.player2 = p.id
+          ) AS points_scored,
+          (
+            SELECT COALESCE(
+              SUM(
+                CASE
+                  WHEN m.player1 = p.id THEN COALESCE(m.score_player2, 0)
+                  WHEN m.player2 = p.id THEN COALESCE(m.score_player1, 0)
+                  ELSE 0
+                END
+              ),
+              0
+            )
+            FROM match m
+            WHERE m.player1 = p.id OR m.player2 = p.id
+          ) AS points_conceded,
+          (
+            SELECT MAX(m.created_at)
+            FROM match m
+            WHERE m.player1 = p.id OR m.player2 = p.id
+          ) AS last_match_at
+        FROM player p
+        WHERE EXISTS (SELECT 1 FROM match m WHERE m.player1 = p.id OR m.player2 = p.id)
+      )
+      SELECT
+        player_id,
+        username,
+        tournaments_played,
+        tournaments_won,
+        tournaments_lost,
+        matches_played,
+        matches_won,
+        matches_lost,
+        points_scored,
+        points_conceded,
+        CASE
+          WHEN matches_played = 0 THEN 0.0
+          ELSE ROUND(points_scored * 1.0 / matches_played, 2)
+        END AS avg_points_scored,
+        CASE
+          WHEN matches_played = 0 THEN 0.0
+          ELSE ROUND(points_conceded * 1.0 / matches_played, 2)
+        END AS avg_points_conceded,
+        CASE
+          WHEN tournaments_played = 0 THEN 0.0
+          ELSE ROUND((tournaments_won * 100.0) / tournaments_played, 2)
+        END AS tournamentsWinRate,
+        CASE
+          WHEN matches_played = 0 THEN 0.0
+          ELSE ROUND((matches_won * 100.0) / matches_played, 2)
+        END AS matchesWinRate,
+        last_match_at
+      FROM base
+      ORDER BY matchesWinRate DESC, matches_won DESC, points_scored DESC
     `);
     this.getBlockchainPlayersStmt = db.prepare(`
       SELECT tp.player_id, tp.final_position
@@ -543,6 +648,19 @@ export class TournamentRepository {
       throw new AppError(
         ERR_DEFS.DB_SELECT_ERROR,
         { details: [{ field: 'getTournamentStats' }] },
+        err,
+      );
+    }
+  }
+
+  /** Returns stats for ALL players who have played at least one match, sorted by win rate. */
+  getAllPlayersStats(): TournamentStatRow[] {
+    try {
+      return this.getAllPlayersStatsStmt.all() as TournamentStatRow[];
+    } catch (err: unknown) {
+      throw new AppError(
+        ERR_DEFS.DB_SELECT_ERROR,
+        { details: [{ field: 'getAllPlayersStats' }] },
         err,
       );
     }

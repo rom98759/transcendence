@@ -552,6 +552,7 @@
   },
   "stats": {
     "title": "Statistiques des joueurs",
+    "leaderboard": "Classement général",
     "loading": "Chargement...",
     "loading_stats": "Chargement des statistiques...",
     "error_loading": "Échec du chargement des statistiques.",

@@ -568,6 +568,7 @@
   },
   "stats": {
     "title": "Le palmarès des joueurs",
+    "leaderboard": "Le classement des gros boss",
     "loading": "On compile les stats, laisse nous faire...",
     "loading_stats": "On compile les stats, deux secondes...",
     "error_loading": "Merde, on a pas réussi à charger les stats.",

@@ -335,6 +335,13 @@ export function createGameController(
 
     async getTournamentStats(req: FastifyRequest, reply: FastifyReply) {
       const query = (req.query ?? {}) as StatsHistoryQuery;
+
+      // If no username or userId specified → global leaderboard (all players)
+      if (!query.username?.trim() && query.userId == null) {
+        return reply.code(200).send(tournamentRepo.getAllPlayersStats());
+      }
+
+      // Otherwise resolve to a specific user's stats
       const authUserId = req.user?.id ?? null;
       const { targetUserId, error, statusCode = 400 } = resolveTargetUserId(query, authUserId);
 
