@@ -392,10 +392,13 @@
       "no_sessions": "No sessions available"
     },
     "gameover": {
-      "wins": "wins",
+      "wins": "{{winner}} wins",
       "title": "Game Over",
+      "resolving_next_match": "Analyzing next match...",
       "next_match": "Next match",
-      "view_results": "View results"
+      "view_results": "View results",
+      "winner_line": "Winner: {{winner}}",
+      "loser_line": "Loser: {{loser}}"
     },
     "exit": "Exit",
     "play_again": "Play Again",

@@ -391,9 +391,12 @@
     },
     "gameover": {
       "title": "Game Over",
-      "wins": "a remporté la partie",
+      "wins": "{{winner}} a remporté la partie",
+      "resolving_next_match": "Analyse du prochain match...",
       "next_match": "Match suivant",
-      "view_results": "Voir les résultats"
+      "view_results": "Voir les résultats",
+      "winner_line": "Gagnant : {{winner}}",
+      "loser_line": "Perdant : {{loser}}"
     },
     "exit": "Quitter",
     "play_again": "Rejouer",
