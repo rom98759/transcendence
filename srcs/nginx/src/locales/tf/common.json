@@ -407,9 +407,12 @@
     },
     "gameover": {
       "title": "C'est plié",
-      "wins": "t'as éclaboussé de sa classe",
+      "wins": "{{winner}} t'as éclaboussé de sa classe",
+      "resolving_next_match": "On voit qui se mange qui au prochain round...",
       "next_match": "Le prochain round",
-      "view_results": "Voir les résultats"
+      "view_results": "Voir les résultats",
+      "winner_line": "Le champion : {{winner}}",
+      "loser_line": "Le malamute : {{loser}}"
     },
     "exit": "On se casse",
     "play_again": "Encore une, on est pas des mauviettes !",

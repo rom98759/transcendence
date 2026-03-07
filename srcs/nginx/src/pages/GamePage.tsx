@@ -553,7 +553,7 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
         {screen === 'start' && (
           <StartGameScreen
             isLoading={isLoading}
-            sessionsData={activeMode === 'remote' ? sessions : null}
+            sessionsData={sessions}
             onCreateAi={handleCreateAi}
             onCreateLocal={handleCreateLocal}
             onCreateRemote={handleCreateRemote}

@@ -40,7 +40,7 @@ export function startGameLoop(
   const interval = setInterval(() => {
     const status = session.game.status;
 
-    if (status === 'playing' || status === 'waiting') {
+    if (status === 'playing') {
       broadcastToSession(session, {
         type: 'state',
         data: session.game.getState(),

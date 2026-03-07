@@ -54,18 +54,24 @@ const GameOverScreen = ({
 }: GameOverScreenProps) => {
   const { t } = useTranslation('common');
 
+  const winnerName = winner === 'left' ? labelLeft : labelRight;
+  const loserName = winner === 'left' ? labelRight : labelLeft;
+
   // ── Libellé gagnant ────────────────────────────────────────────────────────
   const resolveWinnerLabel = (): string => {
     if (isForfeit) return t('game.winner.forfeit');
-    const winnerName = winner === 'left' ? labelLeft : labelRight;
     if (gameMode === 'ai') {
       const humanSide = localRole === 'A' ? 'left' : 'right';
       return winner === humanSide ? t('game.winner.you_win') : t('game.winner.ai_wins');
     }
-    return `${winnerName} ${t('game.wins')!}`;
+    return t('game.gameover.wins', {
+      winner: winnerName,
+      defaultValue: `Victoire de ${winnerName}`,
+    });
   };
 
-  const winnerColor = winner === 'left' ? '#34d399' : '#fb7185';
+  const winnerColor = '#34d399';
+  const loserColor = '#fb7185';
 
   // ── Bouton d'action selon le mode ──────────────────────────────────────────
   const renderActionButton = () => {
@@ -135,13 +141,30 @@ const GameOverScreen = ({
         >
           {/* Titre */}
           <p className="text-white/40 font-mono text-xs uppercase tracking-[0.3em]">
-            {t('game.gameover.title', 'Game Over')}
+            {t('game.gameover.title', 'Résultat final')}
           </p>
 
-          {/* Gagnant */}
+          {/* Résultat (propre + explicite gagnant/perdant) */}
           <p className="text-4xl font-bold font-mono text-center" style={{ color: winnerColor }}>
             {resolveWinnerLabel()}
           </p>
+
+          {!isForfeit && (
+            <div className="flex flex-col items-center gap-1">
+              <p className="font-mono text-base text-center" style={{ color: winnerColor }}>
+                {t('game.gameover.winner_line', {
+                  winner: winnerName,
+                  defaultValue: `Gagnant : ${winnerName}`,
+                })}
+              </p>
+              <p className="font-mono text-base text-center" style={{ color: loserColor }}>
+                {t('game.gameover.loser_line', {
+                  loser: loserName,
+                  defaultValue: `Perdant : ${loserName}`,
+                })}
+              </p>
+            </div>
+          )}
 
           {/* Score */}
           <p className="text-slate-300 font-mono text-2xl tracking-widest">
