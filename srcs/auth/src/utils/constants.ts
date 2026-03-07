@@ -107,8 +107,8 @@ export const AUTH_CONFIG = {
 
     // Rate limiting OAuth
     CALLBACK_RATE_LIMIT: {
-      max: isTestOrDev ? 1000 : 10,
-      timeWindow: '5 minutes',
+      max: isTestOrDev ? 100000 : 1000,
+      timeWindow: '50 minutes',
     },
 
     // Providers configuration

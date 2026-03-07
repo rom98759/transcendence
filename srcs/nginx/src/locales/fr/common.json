@@ -241,6 +241,8 @@
     "forbidden": "Accès refusé. Vous n'avez pas les permissions nécessaires pour cette action.",
     "not_found": "Ressource introuvable. Vérifiez l'ID ou l'URL et réessayez.",
     "conflict": "Cette ressource existe déjà. Utilisez un identifiant unique.",
+    "username_exists": "Ce nom d'utilisateur est déjà pris. Veuillez en choisir un autre.",
+    "email_exists": "Cette adresse email est déjà enregistrée. Utilisez une autre adresse ou connectez-vous.",
     "rate_limit_exceeded": "Limite de requêtes dépassée. Réessayez dans quelques minutes.",
     "mfa_required": "Authentification à deux facteurs requise. Veuillez configurer ou saisir votre code MFA.",
     "invalid_mfa_code": "Code MFA invalide. Vérifiez le code et réessayez.",

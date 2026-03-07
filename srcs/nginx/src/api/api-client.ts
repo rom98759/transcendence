@@ -41,14 +41,14 @@ api.interceptors.response.use(
       if (Array.isArray(errorPayload?.details)) {
         details = errorPayload.details.map((d: any) => ({
           field: d.field || undefined,
-          message: message || '',
+          message: d.message || message || '',
           reason: d.reason || errorPayload.code || 'validation_error',
         }));
       } else if (errorPayload?.details && typeof errorPayload.details === 'object') {
         details = [
           {
             field: errorPayload.details.field || undefined,
-            message: message || '',
+            message: errorPayload.details.message || message || '',
             reason: errorPayload.code || 'validation_error',
           },
         ];

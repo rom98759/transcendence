@@ -115,7 +115,7 @@ async function signupAction(prevState: SignupState | null, formData: FormData) {
 
           if (d.field && validFields.includes(d.field)) {
             const key = d.field as keyof NonNullable<SignupState['errors']>;
-            nextState.errors![key] = d.message || i18next.t(`errors.${ERROR_CODES.CONFLICT}`);
+            nextState.errors![key] = d.message || i18next.t(`errors.${err.code}`);
           } else {
             nextState.errors!.form = d.message || err.message;
           }
