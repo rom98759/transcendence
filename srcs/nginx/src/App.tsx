@@ -47,6 +47,10 @@ export const App = () => {
           <Route path="/home" element={<HomePage />} />
 
           <Route path="/game/remote" element={<GamePage sessionId={null} gameMode="remote" />} />
+          <Route
+            path="/game/remote/:username"
+            element={<GamePage sessionId={null} gameMode="remote" />}
+          />
           <Route path="/game/local" element={<GamePage sessionId={null} gameMode="local" />} />
           <Route path="/game/pong-ai" element={<GamePage sessionId={null} gameMode="ai" />} />
           <Route

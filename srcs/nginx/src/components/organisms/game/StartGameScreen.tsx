@@ -21,6 +21,7 @@ interface StartGameScreenProps {
   onCreateLocal: () => void;
   onCreateRemote: () => void;
   onJoinSession: (sessionId: string) => void;
+  friendNameFilter?: string;
   connectionError?: string | null;
 }
 
@@ -60,6 +61,7 @@ const StartGameScreen = ({
   onCreateRemote,
   onJoinSession,
   connectionError,
+  friendNameFilter,
 }: StartGameScreenProps) => {
   const { t } = useTranslation('common');
 
@@ -76,6 +78,11 @@ const StartGameScreen = ({
       refetch();
     }
   }, [refetch]);
+
+  // Filtrer les sessions créées par l'ami si le filtre s'applique
+  const displayedSessions = friendNameFilter
+    ? sessionsList.filter((s) => s.sessionName?.includes(friendNameFilter))
+    : sessionsList;
 
   return (
     <div className="w-full flex-1 flex flex-col">
@@ -176,14 +183,14 @@ const StartGameScreen = ({
                   <p className="text-red-400 font-mono text-xs text-center py-4">{error}</p>
                 )}
 
-                {!isLoadingSessions && !error && sessionsList.length === 0 && (
+                {!isLoadingSessions && !error && displayedSessions.length === 0 && (
                   <p className="text-gray-500 font-mono text-xs text-center py-8">
                     {t('game.start.no_sessions', 'Aucune session disponible')}
                   </p>
                 )}
 
                 {!isLoadingSessions &&
-                  sessionsList.map((session: GameSession) => (
+                  displayedSessions.map((session: GameSession) => (
                     <SessionItem key={session.sessionId} session={session} onJoin={onJoinSession} />
                   ))}
               </div>

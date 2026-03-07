@@ -13,8 +13,10 @@ import UserSearchContainer from '../components/molecules/UserSearchContainer';
 import { friendApi } from '../api/friend-api';
 import { useEffect, useState } from 'react';
 import { authApi } from '../api/auth-api';
+import { useNavigate } from 'react-router-dom';
 
 export const FriendsPage = () => {
+  const navigate = useNavigate();
   const { t } = useTranslation();
   const [friends, setFriends] = useState<FriendshipUnifiedDTO[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
@@ -67,7 +69,7 @@ export const FriendsPage = () => {
   const handleUserAction = async (action: UserActions, targetUser: ProfileSimpleDTO) => {
     try {
       if (action === UserActions.PLAY) {
-        console.log('play');
+        navigate(`/game/remote/${targetUser.username}`);
       }
       if (action === UserActions.ADD) {
         await friendApi.addFriend(targetUser.username);
