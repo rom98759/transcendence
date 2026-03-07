@@ -475,7 +475,7 @@ erDiagram
 
 ## Modules:
 
-> **Total: 32 pts** (minimum required: 14 pts)
+> **Total: 33 pts** (minimum required: 14 pts)
 
 | #   | Category         | Module                                                       | Type  | Points |
 | --- | ---------------- | ------------------------------------------------------------ | ----- | ------ |
