@@ -18,6 +18,8 @@ export const ERROR_CODES = {
   // 404 - 409 Resources
   NOT_FOUND: 'not_found',
   CONFLICT: 'conflict',
+  USERNAME_EXISTS: 'username_exists',
+  EMAIL_EXISTS: 'email_exists',
 
   // 429 Limits
   RATE_LIMIT_EXCEEDED: 'rate_limit_exceeded',

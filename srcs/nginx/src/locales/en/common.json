@@ -242,6 +242,8 @@
     "forbidden": "Access denied. You do not have the necessary permissions for this action.",
     "not_found": "Resource not found. Please verify the ID or URL and try again.",
     "conflict": "This identifier already exists. Please use a unique identifier.",
+    "username_exists": "This username is already taken. Please choose another one.",
+    "email_exists": "This email address is already registered. Please use a different email or log in.",
     "rate_limit_exceeded": "Rate limit exceeded. Please try again in a few minutes",
     "mfa_required": "Multi-factor authentication required. Please set up or enter your MFA code",
     "invalid_mfa_code": "Invalid MFA code. Please check the code and try again",

@@ -184,8 +184,10 @@ export const ERROR_MESSAGES = {
   // 2FA errors
   TWO_FA_NOT_ENABLED: '2FA is not enabled for this user',
 
-  // Self-action errors
+  // Deletion errors
   SELF_DELETION_FORBIDDEN: 'Cannot delete your own account',
+
+  // Self-action errors
   SELF_UPDATE_FORBIDDEN: 'Cannot modify your own account from admin panel',
 
   // Generic

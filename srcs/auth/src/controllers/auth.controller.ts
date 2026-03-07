@@ -68,8 +68,12 @@ export async function registerHandler(
     return reply.code(HTTP_STATUS.BAD_REQUEST).send({
       error: {
         message: "Données d'inscription invalides",
-        code: 'VALIDATION_ERROR',
-        details: validation.error.issues,
+        code: ERROR_CODES.VALIDATION_ERROR,
+        details: validation.error.issues.map((issue: any) => ({
+          field: issue.path?.[0] || 'general',
+          message: issue.message,
+          reason: issue.code || 'validation_error',
+        })),
         fields: fieldErrors,
       },
     });
@@ -84,7 +88,7 @@ export async function registerHandler(
       return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: 'Username is already taken',
-          code: ERROR_CODES.CONFLICT,
+          code: ERROR_CODES.USERNAME_EXISTS,
           details: [{ field: 'username' }],
         },
       });
@@ -94,7 +98,7 @@ export async function registerHandler(
       return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: 'Email is already taken',
-          code: ERROR_CODES.CONFLICT,
+          code: ERROR_CODES.EMAIL_EXISTS,
           details: [{ field: 'email' }],
         },
       });
@@ -154,7 +158,7 @@ export async function registerHandler(
       return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: err.message || 'Username is already taken',
-          code: ERROR_CODES.CONFLICT,
+          code: ERROR_CODES.USERNAME_EXISTS,
           details: [{ field: 'username' }],
         },
       });
@@ -163,7 +167,7 @@ export async function registerHandler(
       return reply.code(HTTP_STATUS.CONFLICT).send({
         error: {
           message: err.message || 'Email is already taken',
-          code: ERROR_CODES.CONFLICT,
+          code: ERROR_CODES.EMAIL_EXISTS,
           details: [{ field: 'email' }],
         },
       });

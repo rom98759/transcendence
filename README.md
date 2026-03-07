@@ -487,7 +487,7 @@ erDiagram
 | 6   | User Management  | Advanced permissions system (admin / moderator)              | Major | 2      |
 | 7   | User Management  | Remote authentication (OAuth 2.0 — Google & 42)              | Minor | 1      |
 | 8   | User Management  | Two-Factor Authentication (TOTP / 2FA)                       | Minor | 1      |
-| 9   | User Management  | Game statistics & match history (TBD)                        | Minor | 1      |
+| 9   | User Management  | Game statistics & match history                              | Minor | 1      |
 | 10  | Gaming & UX      | Complete web-based game (Pong)                               | Major | 2      |
 | 11  | Gaming & UX      | Remote players (real-time multiplayer)                       | Major | 2      |
 | 12  | Gaming & UX      | Tournament system                                            | Minor | 1      |
@@ -496,9 +496,9 @@ erDiagram
 | 15  | Blockchain       | Store tournament scores on Blockchain (Solidity)             | Major | 2      |
 | 16  | Database         | A public API to interact with the database                   | Major | 2      |
 | 17  | Database         | ORM (Prisma)                                                 | Minor | 1      |
-| 18  | Security         | GDPR compliance features (TBD)                               | Minor | 1      |
+| 18  | Security         | GDPR compliance features                                     | Minor | 1      |
 | 19  | Accessibility    | Internationalization (i18n) — support for multiple languages | Minor | 1      |
-| 20  | Accessibility    | Support for additional browsers (TBD)                        | Minor | 1      |
+| 20  | Accessibility    | Support for additional browsers                              | Minor | 1      |
 | 21  | Module of choice | LED panel implementation (IoT)                               | Minor | 1      |
 |     |                  | **Major modules × 10**                                       |       | **20** |
 |     |                  | **Minor modules × 12**                                       |       | **13** |
