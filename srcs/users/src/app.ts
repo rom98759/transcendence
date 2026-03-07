@@ -111,7 +111,17 @@ export async function buildApp() {
           description: 'User API',
           version: '0.0.1',
         },
-        servers: [{ url: `http://localhost:8080` }],
+        servers: [{ url: `https://localhost:4430/api/users`, description: 'Local server' }],
+        components: {
+          securitySchemes: {
+            clientCert: {
+              type: 'apiKey',
+              name: 'x-client-cert',
+              in: 'header',
+              description: 'Certificat client (PEM format)',
+            },
+          },
+        },
       },
       transform: jsonSchemaTransform,
     });

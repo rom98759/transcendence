@@ -53,7 +53,7 @@ describe('ProfileService', () => {
     });
   });
 
-  describe('getByUsername', () => {
+  describe('getProfileByUsername', () => {
     it('returns the profile when found', async () => {
       vi.mocked(profileRepository.findProfileByUsername).mockResolvedValue(mockUserProfile);
 
@@ -74,11 +74,11 @@ describe('ProfileService', () => {
     });
   });
 
-  describe('getProfileByUsername', () => {
+  describe('getProfileWithIdByUsername', () => {
     it('returns the whole profile when found', async () => {
       vi.mocked(profileRepository.findProfileByUsername).mockResolvedValue(mockUserProfile);
 
-      const result = await profileService.getProfileByUsername('toto');
+      const result = await profileService.getProfileWithIdByUsername('toto');
 
       expect(profileRepository.findProfileByUsername).toHaveBeenCalledWith('toto');
       expect(result).toEqual(mockFullProfileDTO1);
@@ -87,7 +87,7 @@ describe('ProfileService', () => {
     it('throws AppError when profile does not exist', async () => {
       vi.mocked(profileRepository.findProfileByUsername).mockResolvedValue(null);
 
-      await expect(profileService.getProfileByUsername('unknown')).rejects.toMatchObject({
+      await expect(profileService.getProfileWithIdByUsername('unknown')).rejects.toMatchObject({
         code: ERR_DEFS.RESOURCE_NOT_FOUND.code,
         statusCode: ERR_DEFS.RESOURCE_NOT_FOUND.statusCode,
       });
@@ -95,7 +95,7 @@ describe('ProfileService', () => {
     });
   });
 
-  describe('getById', () => {
+  describe('getProfileById', () => {
     it('returns the profile when found', async () => {
       vi.mocked(profileRepository.findProfileById).mockResolvedValue(mockUserProfile);
 
