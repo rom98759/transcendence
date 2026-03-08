@@ -2,7 +2,7 @@
 
 @font-face {
   font-family: 'Quantico';
-  src: url('../assets/fonts/Quantico-Regular.tff') format('tff');
+  src: url('../assets/fonts/Quantico-Regular.ttf') format('ttf');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -10,7 +10,7 @@
 
 @font-face {
   font-family: 'Quantico';
-  src: url('../assets/fonts/Quantico-Italic.tff') format('tff');
+  src: url('../assets/fonts/Quantico-Italic.ttf') format('ttf');
   font-weight: 400;
   font-style: italic;
   font-display: swap;
@@ -18,7 +18,7 @@
 
 @font-face {
   font-family: 'Quantico';
-  src: url('../assets/fonts/Quantico-Bold.tff') format('tff');
+  src: url('../assets/fonts/Quantico-Bold.ttf') format('ttf');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -26,7 +26,7 @@
 
 @font-face {
   font-family: 'Quantico';
-  src: url('../assets/fonts/Quantico-BoldItalic.tff') format('tff');
+  src: url('../assets/fonts/Quantico-BoldItalic.ttf') format('ttf');
   font-weight: 700;
   font-style: italic;
   font-display: swap;
