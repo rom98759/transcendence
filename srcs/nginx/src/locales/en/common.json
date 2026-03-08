@@ -260,6 +260,7 @@
     "stats": "Stats",
     "stats_history": "History",
     "profile": "Profile",
+    "profile_public": "Public profile",
     "profile_logout": "Logout",
     "profile_login": "Login"
   },

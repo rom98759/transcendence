@@ -15,10 +15,8 @@ export const NavBar = () => {
 
   const playItems = [
     { label: t('navbar.play_friend'), to: '/friends' },
-    { label: t('navbar.play_ai'), to: '/game/pong-ai' },
+    { label: t('navbar.play'), to: '/game' },
     { label: t('navbar.play_tournament'), to: '/tournaments' },
-    { label: t('navbar.play_remote'), to: '/game/remote' },
-    { label: t('navbar.play_local'), to: '/game/local' },
   ];
 
   const statsItems = [
@@ -27,7 +25,8 @@ export const NavBar = () => {
   ];
 
   const profileItems = [
-    { label: t('navbar.profile'), to: myPublicProfilePath },
+    { label: t('navbar.profile_public'), to: myPublicProfilePath },
+    { label: t('navbar.profile'), to: '/me' },
     { label: t('faq.title'), to: '/faq' },
     { label: t('navbar.profile_logout'), onClick: () => logout() },
   ];

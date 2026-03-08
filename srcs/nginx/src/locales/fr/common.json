@@ -259,6 +259,7 @@
     "stats": "Stats",
     "stats_history": "Historique",
     "profile": "Profil",
+    "profile_public": "Profil public",
     "profile_logout": "Se déconnecter",
     "profile_login": "Se connecter"
   },

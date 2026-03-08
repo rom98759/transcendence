@@ -266,7 +266,8 @@
     "play_tournament": "La compét'",
     "stats": "Ton palmarès",
     "stats_history": "Ton historique",
-    "profile": "Ton pedigree",
+    "profile_public": "Ton pedigree",
+    "profile": "Retape ton profil",
     "profile_logout": "Allez, on se tire",
     "profile_login": "Viens te connecter"
   },

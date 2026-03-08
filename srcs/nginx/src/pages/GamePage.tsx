@@ -63,12 +63,6 @@ const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, 
 interface GamePageProps {
   /** Session pré-sélectionnée (mode tournament : fournie par TournamentPage) */
   sessionId: string | null;
-  /**
-   * Mode initial. En mode tournament, sessionId est fourni et on démarre
-   * directement sur l'écran de jeu. Pour tous les autres modes, on démarre
-   * sur l'écran de démarrage.
-   */
-  gameMode: GameMode;
 }
 
 // ── Constantes ───────────────────────────────────────────────────────────────
@@ -77,12 +71,16 @@ const BG_COLORS = { start: '#00ff9f', end: '#0088ff' };
 
 // ── Composant ────────────────────────────────────────────────────────────────
 
-export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
+export const GamePage = ({ sessionId }: GamePageProps) => {
   const { t } = useTranslation('common');
   const navigate = useNavigate();
   const location = useLocation();
   const { tournamentId } = useParams<{ tournamentId?: string }>();
   const { username: targetFriend } = useParams<{ username?: string }>();
+
+  // ── Déduction du gameMode depuis l'URL
+  const gameModeFromUrl = tournamentId ? 'tournament' : targetFriend ? 'remote' : null;
+  const [gameMode, setGameMode] = useState<GameMode | null>(gameModeFromUrl);
 
   // ── Hooks ──────────────────────────────────────────────────────────────────
   const {
@@ -266,18 +264,21 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
 
   /** Créer une partie locale → écran de jeu */
   const handleCreateLocal = useCallback(async () => {
+    setGameMode('local');
     await createSession('local');
     setScreen('playing');
   }, [createSession]);
 
   /** Créer une partie IA → écran de jeu */
   const handleCreateAi = useCallback(async () => {
+    setGameMode('ai');
     await createSession('ai');
     setScreen('playing');
   }, [createSession]);
 
   /** Créer une partie remote → écran de jeu */
   const handleCreateRemote = useCallback(async () => {
+    setGameMode('remote');
     await createSession('remote');
     setScreen('playing');
   }, [createSession]);
@@ -495,19 +496,27 @@ export const GamePage = ({ sessionId, gameMode }: GamePageProps) => {
   }, [isTournamentMode, isLoading, currentSessionId]);
 
   useEffect(() => {
-    if (isTournamentMode) return;
-
-    const targetPath =
-      activeMode === 'remote'
-        ? '/game/remote'
-        : activeMode === 'ai'
-          ? '/game/pong-ai'
-          : '/game/local';
-
-    if (location.pathname !== targetPath) {
-      navigate(targetPath, { replace: true });
+    // Routes simplifiées : pas besoin de naviguer pour local/ai
+    // Rester sur /game et laisser gameMode être géré par l'état local
+    if (!isTournamentMode && !targetFriend) {
+      return;
     }
-  }, [activeMode, isTournamentMode, location.pathname, navigate]);
+
+    // Vérifier que la route actuelle correspond au gameMode
+    const shouldBeOnTournamentRoute = isTournamentMode && tournamentId;
+    const shouldBeOnRemoteRoute = targetFriend && gameMode === 'remote';
+
+    if (
+      shouldBeOnTournamentRoute &&
+      !location.pathname.includes(`/game/tournament/${tournamentId}`)
+    ) {
+      navigate(`/game/tournament/${tournamentId}`, { replace: true });
+    }
+
+    if (shouldBeOnRemoteRoute && !location.pathname.includes(`/game/remote/${targetFriend}`)) {
+      navigate(`/game/remote/${targetFriend}`, { replace: true });
+    }
+  }, [gameMode, isTournamentMode, targetFriend, tournamentId, location.pathname, navigate]);
 
   // ── Rendu ──────────────────────────────────────────────────────────────────
   return (
