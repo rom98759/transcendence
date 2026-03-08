@@ -37,24 +37,30 @@ make envs
 
 # → Fill in your 42 OAuth2 credentials in srcs/.env.auth and srcs/.env.nginx
 
-# 3. Build and launch all services
+# 3. Install dependencies
+
+npm install
+
+# 4. Build and launch all services
 
 make
 
-# 4. Stop all services
+# 5. Stop all services
 
 make down
 
-# 5. Build AI opponent service separately (optional)
+# 6. Build AI opponent service separately (optional)
 
 make ai
 
-# 6. Run tests
+# 7. Run tests
 
 make test
 ```
 
 The app will be available at: **https://localhost:4430**
+
+> **Note:** The HTTPS certificate is self-signed for local development. Most browsers will show a security warning when you first access the app. You need to manually accept or bypass this warning to proceed. This is expected and safe for local testing.
 
 ### Setup Details
 
@@ -130,7 +136,7 @@ make re       # Full clean rebuild (fclean + all)
 make ai       # Build only the AI opponent service (for local development/testing)
 ```
 
-## Ressources
+## Resources
 
 > See also our [project wiki](https://github.com/codastream/transcendence/wiki) for in-depth articles on each tool.
 
@@ -223,6 +229,7 @@ We used GitHub Issues to track tasks and features. We held regular meetings to d
 | Blockchain       | Solidity, Hardhat, Ethereum                   |
 | DevOps           | Docker, Docker Compose, Nginx, GitHub Actions |
 | Code quality     | ESLint, Prettier, Husky, Commitlint           |
+| AI & ML          | Python, Stable Baselines3, NumPy, PyTorch     |
 
 ---
 
@@ -436,6 +443,7 @@ erDiagram
 | Game settings  | Configurable game parameters            |
 | Match history  | Record of past games                    |
 | Player stats   | Performance statistics                  |
+| AI opponent    | Play against a machine-learned bot      |
 
 ### Tournaments — `@jhervoch`
 
@@ -537,3 +545,5 @@ Module of choice justification: We chose to implement a LED panel for scores as 
 ### npolack — Scrum Master
 
 - **Game Engine**: Real-time Pong gameplay over WebSockets, game session management (create/list/delete), configurable game settings, player stats
+
+> README file was created and maintained by `@lisambet` with contributions from the team.
