@@ -233,38 +233,34 @@ We used GitHub Issues to track tasks and features. We held regular meetings to d
 
 ---
 
-## Database Schema:
+## Database Schemes
 
-Two decoupled SQLite databases — one per service. `authId` in the Users DB is a soft reference
-to `users.id` in the Auth DB, resolved at runtime via inter-service API calls.
+The key architectural pattern is "copy on write" - Auth is the source of truth for identity, but Game and Blockchain store snapshots of that data at the time of the event, ensuring historical records remain valid even if a user later changes their username or avatar.
+
+### Cross-Service Data Relationships
 
 ```
-┌─────────────────────────────────────┐     ┌─────────────────────────────────────┐
-│         AUTH SERVICE (SQLite)       │     │       USERS SERVICE (Prisma)        │
-│                                     │     │                                     │
-│  users                              │     │  UserProfile                        │
-│  ├── id            INTEGER  PK      │────▶│  ├── authId       Int  UNIQUE       │
-│  ├── username      TEXT     UNIQUE  │     │  ├── username     String  UNIQUE    │
-│  ├── email         TEXT     UNIQUE  │     │  ├── email        String? UNIQUE    │
-│  ├── password      TEXT             │     │  ├── avatarUrl    String?           │
-│  ├── role          TEXT             │     │  └── createdAt    DateTime          │
-│  ├── is_2fa_enabled INTEGER         │     │                                     │
-│  ├── totp_secret   TEXT?            │     │  Friendship                         │
-│  ├── google_id     TEXT?   UNIQUE   │     │  ├── id           Int  PK           │
-│  ├── school42_id   TEXT?   UNIQUE   │     │  ├── requesterId  Int  → authId     │
-│  └── created_at    DATETIME         │     │  ├── receiverId   Int  → authId     │
-│                                     │     │  ├── status       String            │
-│  login_tokens                       │     │  └── nickname[Requester|Receiver]   │
-│  ├── token         TEXT     PK      │     │                                     │
-│  ├── user_id       INT  → users.id  │     │  UNIQUE(requesterId, receiverId)    │
-│  └── expires_at    DATETIME         │     └─────────────────────────────────────┘
-│                                     │
-│  totp_setup_secrets                 │     ┌─────────────────────────────────────┐
-│  ├── token         TEXT     PK      │     │         REDIS (session store)       │
-│  ├── user_id       INT  → users.id  │     │                                     │
-│  ├── secret        TEXT             │     │  online:{userId}  → status + TTL    │
-│  └── expires_at    DATETIME         │     │  session:{token}  → JWT payload     │
-└─────────────────────────────────────┘     └─────────────────────────────────────┘
+[Auth DB] ──── users.id ────────────────────────────────────────────┐
+     │                                                               │
+     ├── login_tokens.token ──→ [Redis] session:{token}             │
+     └── users.id ───────────→ [Redis] online:{userId}              │
+                                                                     ▼
+                                                          [Users DB] UserProfile.authId
+                                                               │
+                                                    Friendship.requesterId / receiverId
+
+[Auth DB] users.username / avatar_url
+     │  (copied at game session creation via API call)
+     ▼
+[Game DB] player.username / player.avatar
+     │
+     ├── match.player1 / player2 / winner_id
+     ├── tournament.creator_id
+     ├── tournament_player.player_id
+     │
+     └── tournament.id ──→ [Blockchain DB] snapshot.tour_id
+                               snapshot.player1/2/3/4
+                               snapshot.tx_hash / block_number (immutable)
 ```
 
 ### Auth Service Schema
