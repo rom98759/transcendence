@@ -1,12 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Quantico:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import 'tailwindcss';
+
+@font-face {
+  font-family: 'Quantico';
+  src: url('../assets/fonts/Quantico-Regular.ttf') format('ttf');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quantico';
+  src: url('../assets/fonts/Quantico-Italic.ttf') format('ttf');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quantico';
+  src: url('../assets/fonts/Quantico-Bold.ttf') format('ttf');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Quantico';
+  src: url('../assets/fonts/Quantico-BoldItalic.ttf') format('ttf');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
+
 @theme {
   --font-quantico: 'Quantico', sans-serif;
 }
 
 @layer components {
   .ts-form-title {
-    @apply text-gray-500 font-bold;
+    color: var(--color-gray-500);
+    font-weight: var(--font-weight-bold);
   }
 
   .no-scrollbar {
@@ -18,22 +51,3 @@
     }
   }
 }
-
-/* @keyframes float-random {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  33% {
-    transform: translate(var(--x-off), var(--y-off));
-  }
-  66% {
-    transform: translate(var(--x-neg), var(--y-pos));
-  }
-}
-
-.floating-child {
-  display: inline-block;
-  animation: float-random var(--duration, 3s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-} */

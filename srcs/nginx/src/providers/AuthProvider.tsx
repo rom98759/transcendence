@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         error.statusCode === HTTP_STATUS.UNAUTHORIZED &&
         !isLoggingOut.current
       ) {
+        sessionStorage.setItem('auth_checked', 'false');
         setUser(null);
         setPending2FAState(null);
       }
@@ -47,6 +48,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // ── Vérification de session au boot ─────────────────────────────────────
   useEffect(() => {
     const checkAuth = async () => {
+      const wasChecked = sessionStorage.getItem('auth_checked');
+
+      if (wasChecked === 'false') {
+        setUser(null);
+        setIsAuthChecked(true);
+        return;
+      }
       try {
         const me = await authApi.me();
         if (me) {
@@ -94,6 +102,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const login = useCallback((userData: ProfileSimpleDTO) => {
     setUser(userData);
+    sessionStorage.setItem('auth_checked', 'true');
     if (!userData.avatarUrl && userData.username) {
       profileApi
         .getProfileByUsername(userData.username)
@@ -115,6 +124,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch {
       // Cookie potentiellement déjà expiré — on nettoie quand même
     } finally {
+      sessionStorage.setItem('auth_checked', 'false');
       setUser(null);
       setPending2FAState(null);
       isLoggingOut.current = false;

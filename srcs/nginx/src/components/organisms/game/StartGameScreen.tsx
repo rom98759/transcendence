@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { CircleButton } from '../../atoms/CircleButtonSimple';
 import type { UseGameSessionsReturn, GameSession } from '../../../hooks/GameSessions';
 import { NavBar } from '../../molecules/NavBar';
+import Scrollable from '../../atoms/Scrollable';
 
 interface StartGameScreenProps {
   isLoading: boolean;
@@ -100,107 +101,113 @@ const StartGameScreen = ({
         </div>
       )}
 
-      <div className="flex-1 flex items-center justify-center px-12 py-8">
-        <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-24">
-          {/* ── Colonne gauche : créer une partie ── */}
-          <section className="flex flex-col items-center justify-center gap-8">
-            <h2 className="text-black font-mono text-sm uppercase tracking-widest bg-white/80 border border-white/20 rounded-lg px-4 py-2">
-              {t('game.start.create_title')}
-            </h2>
+      <Scrollable disableMaxWidth={true}>
+        <div className="flex flex-row items-center justify-center px-12 py-8">
+          <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-24">
+            {/* ── Colonne gauche : créer une partie ── */}
+            <section className="flex flex-col items-center justify-center gap-8">
+              <h2 className="text-black font-mono text-sm uppercase tracking-widest bg-white/80 border border-white/20 rounded-lg px-4 py-2">
+                {t('game.start.create_title')}
+              </h2>
 
-            <div className="flex flex-col items-center gap-2">
-              {/* Sommet : bouton AI */}
-              <div className="flex justify-center">
-                <CircleButton
-                  onClick={onCreateAi}
-                  disabled={isLoading}
-                  title={t('game.start.vs_ai')}
-                >
-                  <span className="text-center font-mono text-sm leading-tight px-1">
-                    {isLoading ? t('global.loading') : t('game.start.vs_ai')}
-                  </span>
-                </CircleButton>
-              </div>
-
-              {/* Base : Local + Remote */}
-              <div className="flex flex-row justify-center">
-                <CircleButton
-                  onClick={onCreateLocal}
-                  disabled={isLoading}
-                  title={t('game.start.local')}
-                >
-                  <span className="text-center font-mono text-sm leading-tight px-1">
-                    {isLoading ? t('global.loading') : t('game.start.local')}
-                  </span>
-                </CircleButton>
-
-                <CircleButton
-                  onClick={onCreateRemote}
-                  disabled={isLoading}
-                  title={t('game.start.remote')}
-                >
-                  <span className="text-center font-mono text-sm leading-tight px-1">
-                    {isLoading ? t('global.loading') : t('game.start.remote')}
-                  </span>
-                </CircleButton>
-              </div>
-            </div>
-          </section>
-
-          {/* ── Colonne droite : rejoindre une session ── */}
-          <section className="flex flex-col gap-4">
-            {/* Header + titre */}
-            <h2 className="text-black font-mono text-sm uppercase tracking-widest bg-white/80 border border-white/20 rounded-lg px-4 py-2">
-              {t('game.start.match_list')}
-            </h2>
-
-            {/* Panel liste des sessions */}
-            <div className="flex flex-col rounded-xl overflow-hidden border border-white/10">
-              {/* Header coloré avec bouton refresh */}
-              <div className="bg-blue-600/80 px-4 py-2 flex items-center justify-between">
-                <p className="text-white font-mono text-xs uppercase tracking-wider">
-                  {t('game.start.available_sessions')}
-                </p>
-                {refetch && (
-                  <button
-                    onClick={refetch}
-                    className="text-white font-mono text-xs uppercase tracking-wider hover:text-blue-200 transition-colors"
-                    title={t('global.refresh')}
+              <div className="flex flex-col items-center gap-2">
+                {/* Sommet : bouton AI */}
+                <div className="flex justify-center">
+                  <CircleButton
+                    onClick={onCreateAi}
+                    disabled={isLoading}
+                    title={t('game.start.vs_ai')}
                   >
-                    {t('global.refresh')}
-                  </button>
-                )}
-              </div>
-
-              {/* Corps scrollable */}
-              <div className="bg-slate-900/80 flex flex-col gap-2 p-3 min-h-48 max-h-72 overflow-y-auto">
-                {isLoadingSessions && (
-                  <div className="flex items-center justify-center flex-1 py-8">
-                    <span className="animate-pulse text-gray-400 font-mono text-sm">
-                      {t('global.loading')}
+                    <span className="text-center font-mono text-sm leading-tight px-1">
+                      {isLoading ? t('global.loading') : t('game.start.vs_ai')}
                     </span>
-                  </div>
-                )}
+                  </CircleButton>
+                </div>
 
-                {error && !isLoadingSessions && (
-                  <p className="text-red-400 font-mono text-xs text-center py-4">{error}</p>
-                )}
+                {/* Base : Local + Remote */}
+                <div className="flex flex-row justify-center">
+                  <CircleButton
+                    onClick={onCreateLocal}
+                    disabled={isLoading}
+                    title={t('game.start.local')}
+                  >
+                    <span className="text-center font-mono text-sm leading-tight px-1">
+                      {isLoading ? t('global.loading') : t('game.start.local')}
+                    </span>
+                  </CircleButton>
 
-                {!isLoadingSessions && !error && displayedSessions.length === 0 && (
-                  <p className="text-gray-500 font-mono text-xs text-center py-8">
-                    {t('game.start.no_sessions')}
-                  </p>
-                )}
-
-                {!isLoadingSessions &&
-                  displayedSessions.map((session: GameSession) => (
-                    <SessionItem key={session.sessionId} session={session} onJoin={onJoinSession} />
-                  ))}
+                  <CircleButton
+                    onClick={onCreateRemote}
+                    disabled={isLoading}
+                    title={t('game.start.remote')}
+                  >
+                    <span className="text-center font-mono text-sm leading-tight px-1">
+                      {isLoading ? t('global.loading') : t('game.start.remote')}
+                    </span>
+                  </CircleButton>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
+
+            {/* ── Colonne droite : rejoindre une session ── */}
+            <section className="flex flex-col gap-4">
+              {/* Header + titre */}
+              <h2 className="text-black font-mono text-sm uppercase tracking-widest bg-white/80 border border-white/20 rounded-lg px-4 py-2">
+                {t('game.start.match_list')}
+              </h2>
+
+              {/* Panel liste des sessions */}
+              <div className="flex flex-col rounded-xl overflow-hidden border border-white/10">
+                {/* Header coloré avec bouton refresh */}
+                <div className="bg-blue-600/80 px-4 py-2 flex items-center justify-between">
+                  <p className="text-white font-mono text-xs uppercase tracking-wider">
+                    {t('game.start.available_sessions')}
+                  </p>
+                  {refetch && (
+                    <button
+                      onClick={refetch}
+                      className="text-white font-mono text-xs uppercase tracking-wider hover:text-blue-200 transition-colors"
+                      title={t('global.refresh')}
+                    >
+                      {t('global.refresh')}
+                    </button>
+                  )}
+                </div>
+
+                {/* Corps scrollable */}
+                <div className="bg-slate-900/80 flex flex-col gap-2 p-3 min-h-48 max-h-72 overflow-y-auto">
+                  {isLoadingSessions && (
+                    <div className="flex items-center justify-center flex-1 py-8">
+                      <span className="animate-pulse text-gray-400 font-mono text-sm">
+                        {t('global.loading')}
+                      </span>
+                    </div>
+                  )}
+
+                  {error && !isLoadingSessions && (
+                    <p className="text-red-400 font-mono text-xs text-center py-4">{error}</p>
+                  )}
+
+                  {!isLoadingSessions && !error && displayedSessions.length === 0 && (
+                    <p className="text-gray-500 font-mono text-xs text-center py-8">
+                      {t('game.start.no_sessions')}
+                    </p>
+                  )}
+
+                  {!isLoadingSessions &&
+                    displayedSessions.map((session: GameSession) => (
+                      <SessionItem
+                        key={session.sessionId}
+                        session={session}
+                        onJoin={onJoinSession}
+                      />
+                    ))}
+                </div>
+              </div>
+            </section>
+          </div>
         </div>
-      </div>
+      </Scrollable>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { ERR_DEFS, type ProfileCreateInDTO, type ProfileDTO } from '@transcendence/core';
+import { ERR_DEFS, ProfileSimpleDTO, type ProfileDTO } from '@transcendence/core';
 import { UserProfile } from '@prisma/client';
 
 vi.mock('../src/utils/decorators.js', () => ({
@@ -198,7 +198,7 @@ describe('ProfileService', () => {
 
   describe('updateUsername', () => {
     it('updates profile username when new username is available', async () => {
-      const updatedProfile = { username: 'tata', avatarUrl: null } satisfies ProfileDTO;
+      const updatedProfile = { username: 'tata', avatarUrl: null } satisfies ProfileSimpleDTO;
       vi.mocked(profileRepository.findProfileByUsername)
         .mockResolvedValueOnce(mockUserProfile)
         .mockResolvedValueOnce(null);

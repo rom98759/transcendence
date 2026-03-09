@@ -98,12 +98,10 @@ const Arena = ({ className = '', gameStateRef, currentMode = 'ocean' }: ArenaPro
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) {
-      console.log('No canvas ref');
       return;
     }
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-      console.log('No canvas context');
       return;
     }
 

@@ -2,6 +2,7 @@ import { NavBar } from '../components/molecules/NavBar';
 import WelcomeHalo from '../components/atoms/welcome/WelcomeHalo';
 import Background from '../components/atoms/Background';
 import { useState } from 'react';
+import { Footer } from '../components/molecules/Footer';
 
 const colors = {
   start: '#00ff9f',
@@ -39,6 +40,7 @@ export const WelcomePage = ({ defaultMode = 'login' }: WelcomePageProps) => {
               onToggleForm={() => setIsRegister(!isRegister)}
             />
           </div>
+          <Footer className="w-full mt-6" />
         </div>
       </Background>
     </div>

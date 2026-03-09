@@ -157,13 +157,15 @@ npx hardhat ignition deploy ignition/modules/GameStorage.ts --network localhost
 ### Conf to deploy contract on live net work fuji
 
 > hardhat.config.ts your wallet account private key is needed
+> npm install --save-dev @nomicfoundation/hardhat-keystore
 
 ```solidity
 import hardhatToolboxViemPlugin from "@nomicfoundation/hardhat-toolbox-viem";
 import { configVariable, defineConfig } from "hardhat/config";
+import hardhatKeystore from '@nomicfoundation/hardhat-keystore';
 
 export default defineConfig({
-  plugins: [hardhatToolboxViemPlugin],
+  plugins: [hardhatToolboxViemPlugin, hardhatKeystore],
   solidity: {
     version: "0.8.28",
   },
@@ -187,6 +189,11 @@ npx hardhat keystore set FUJI_RPC_URL
 
 ```bash
 npx hardhat ignition deploy ignition/modules/GameStorage.ts --network fuji
+#if you want to redeploy
+# option 1
+npx hardhat ignition deploy ignition/modules/GameStorage.ts --network fuji --deployment-id GameStorage-v2
+# option 2
+rm -rf ignition/deployments
 ```
 
 ### Verify your code

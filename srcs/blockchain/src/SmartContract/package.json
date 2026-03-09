@@ -7,6 +7,7 @@
     "@nomicfoundation/hardhat-ethers-chai-matchers": "^3.0.2",
     "@nomicfoundation/hardhat-ignition": "^3.0.6",
     "@nomicfoundation/hardhat-ignition-viem": "^3.0.6",
+    "@nomicfoundation/hardhat-keystore": "^3.0.5",
     "@nomicfoundation/hardhat-mocha": "^3.0.8",
     "@nomicfoundation/hardhat-network-helpers": "^3.0.3",
     "@nomicfoundation/hardhat-toolbox-viem": "^5.0.1",

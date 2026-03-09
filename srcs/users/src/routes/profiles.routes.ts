@@ -23,9 +23,9 @@ export const healthCheckSchema = {
 } as const;
 
 export const createProfileSchema = {
-  tags: ['users'],
+  tags: ['internal', 'users'],
   summary: 'Create user profile',
-  description: 'Creates a new user profile linked to an authId',
+  description: 'Creates a new user profile linked to an authId.',
   body: ProfileCreateInSchema,
   response: {
     201: ProfileSimpleSchema,
@@ -94,7 +94,7 @@ const updateProfileAvatarSchema = {
 } as const;
 
 const deleteProfileSchema = {
-  tags: ['users'],
+  tags: ['internal', 'users'],
   summary: 'Delete a profile',
   description: 'Delete a profile',
   params: UserNameSchema,
@@ -106,7 +106,7 @@ const deleteProfileSchema = {
 } as const;
 
 const deleteProfileByIdSchema = {
-  tags: ['users'],
+  tags: ['internal', 'users'],
   summary: 'Delete a profile by user ID',
   description: 'Delete a profile by user ID (internal service use)',
   params: z.object({

@@ -41,7 +41,7 @@ cd transcendence
 
 make envs
 
-# → Fill in your 42 OAuth2 credentials in srcs/.env.auth and srcs/.env.nginx
+# → Fill in your 42 OAuth2 credentials in srcs/.env.oauth and srcs/.env.nginx
 
 # 3. Install dependencies
 

@@ -23,17 +23,17 @@
     "error": "Erreur d'authentification",
     "back_to_login": "Retour à la connexion",
     "error_config": "Configuration OAuth manquante pour {{provider}}",
-    "invalid_provider": "Provider OAuth invalide",
+    "invalid_provider": "Fournisseur OAuth invalide",
     "authorization_denied": "Autorisation refusée par l'utilisateur",
     "missing_code": "Code d'autorisation manquant",
-    "invalid_state": "État CSRF invalide - problème de sécurité potentiel",
+    "invalid_state": "État CSRF invalide — problème de sécurité potentiel",
     "callback_failed": "Échec de l'authentification OAuth"
   },
   "fieldtype": {
     "email": "courriel",
     "username": "pseudo",
     "password": "mot de passe",
-    "username-email": "pseudo ou email",
+    "username-email": "pseudo ou e-mail",
     "username-choose": "choisissez un pseudo",
     "password-choose": "choisissez un mot de passe sécurisé"
   },
@@ -66,7 +66,7 @@
     "provider": "Fournisseur : {{companyName}} ({{address}})",
     "contact_info": "Contact : {{email}} | Téléphone : {{phone}}",
     "agreement": "1. Acceptation des conditions",
-    "agreement-text": "En utilisant {{serviceName}} (les « Services »), vous acceptez de vous conformer à ces Conditions Générales. Si vous n'êtes pas d'accord, ne pas utiliser les Services.",
+    "agreement-text": "En utilisant {{serviceName}} (les « Services »), vous acceptez de vous conformer à ces Conditions Générales. Si vous n'êtes pas d'accord, n'utilisez pas les Services.",
     "ip": "2. Propriété intellectuelle",
     "ip-text": "Tout le contenu, les marques déposées et les logiciels des Services sont la propriété de {{companyName}} ou lui sont concédés sous licence. Vous pouvez utiliser les Services à des fins personnelles et non commerciales uniquement. Toute copie, redistribution ou ingénierie inverse est interdite sans autorisation écrite.",
     "responsibilities": "3. Responsabilités de l'utilisateur",
@@ -78,7 +78,7 @@
     "termination": "6. Résiliation",
     "termination-text": "Nous nous réservons le droit de suspendre ou de résilier votre accès en cas de violation de ces Conditions, sans préavis.",
     "disclaimers": "7. Exclusions de garantie et responsabilité",
-    "disclaimers-text": "Les Services sont fournis « en l'état » sans garantie. Nous ne sommes pas responsables des dommages résultant de votre utilisation des Services. Vous acceptez d'indemniser {{companyName}} pour toute réclamation résultant de vos actions.",
+    "disclaimers-text": "Les Services sont fournis « en l'état », sans garantie. Nous ne sommes pas responsables des dommages résultant de votre utilisation des Services. Vous acceptez d'indemniser {{companyName}} pour toute réclamation résultant de vos actions.",
     "privacy": "8. Politique de confidentialité",
     "privacy-text": "Vos données sont traitées conformément à notre {{privacyPolicyLink}}.",
     "law": "9. Loi applicable et litiges",
@@ -89,9 +89,7 @@
   "privacy_policy": {
     "title": "Politique de Confidentialité",
     "last_updated": "Dernière mise à jour : 24 février 2026",
-
     "intro": "{{companyName}} (« nous », « notre » ou « nos ») s'engage à protéger votre vie privée. Cette Politique de Confidentialité explique comment nous collectons, utilisons, divulguons et protégeons vos informations lorsque vous utilisez nos services.",
-
     "summary": {
       "title": "Résumé des points clés",
       "description": "Ce résumé présente les points clés de notre Politique de Confidentialité. Cliquez sur les liens ci-dessous pour accéder directement à la section qui vous intéresse.",
@@ -120,9 +118,7 @@
         "description": "Selon votre localisation géographique, la législation applicable en matière de confidentialité peut vous accorder certains droits concernant vos informations personnelles."
       }
     },
-
     "table_of_contents": "Table des matières",
-
     "toc": {
       "info_collect": "1. Quelles informations collectons-nous ?",
       "info_use": "2. Comment traitons-nous vos informations ?",
@@ -137,7 +133,6 @@
       "policy_updates": "11. Apportons-nous des mises à jour à cet avis ?",
       "contact": "12. Comment nous contacter concernant cet avis ?"
     },
-
     "info_collect": {
       "title": "1. Quelles informations collectons-nous ?",
       "personal_info": {
@@ -149,12 +144,10 @@
         "description": "Nous collectons automatiquement certaines informations lorsque vous visitez, utilisez ou naviguez sur nos Services. Ces informations ne révèlent pas votre identité spécifique, mais peuvent inclure des informations sur votre appareil et votre utilisation, telles que votre adresse IP, les caractéristiques de votre navigateur et de votre appareil, votre système d'exploitation et d'autres informations techniques."
       }
     },
-
     "info_use": {
       "title": "2. Comment traitons-nous vos informations ?",
       "description": "Nous traitons vos informations personnelles pour diverses raisons, en fonction de la manière dont vous interagissez avec nos Services, notamment pour fournir, améliorer et administrer nos Services, communiquer avec vous, assurer la sécurité et prévenir la fraude, et nous conformer à la loi."
     },
-
     "who_share": {
       "title": "3. Quand et avec qui partageons-nous vos informations personnelles ?",
       "description": "Nous pouvons partager vos informations dans des situations spécifiques décrites dans cette section et/ou avec les tiers suivants :",
@@ -162,48 +155,39 @@
       "affiliates": "Affiliés : Nous pouvons partager vos informations avec nos affiliés, auquel cas nous exigeons de ces affiliés qu'ils respectent cette Politique de Confidentialité.",
       "business_partners": "Partenaires commerciaux : Nous pouvons partager vos informations avec nos partenaires commerciaux afin de vous proposer certains produits, services ou promotions."
     },
-
     "cookies": {
       "title": "4. Utilisons-nous des cookies et d'autres technologies de suivi ?",
       "description": "Nous pouvons utiliser des cookies et des technologies de suivi similaires pour collecter et stocker vos informations. Ces technologies nous aident à maintenir la sécurité de nos Services, à prévenir les plantages et à analyser l'utilisation."
     },
-
     "social_logins": {
       "title": "5. Comment gérons-nous vos connexions via les réseaux sociaux ?",
       "description": "Si vous choisissez de vous inscrire ou de vous connecter à nos Services en utilisant un compte de réseau social, nous pouvons avoir accès à certaines informations vous concernant depuis votre fournisseur de réseau social."
     },
-
     "intl_transfers": {
       "title": "6. Vos informations sont-elles transférées à l'international ?",
       "description": "Vos informations peuvent être transférées, stockées et traitées dans des pays autres que le vôtre. Nous prendrons toutes les mesures nécessaires pour protéger vos informations personnelles conformément à cette Politique de Confidentialité et à la législation applicable."
     },
-
     "info_retain": {
       "title": "7. Combien de temps conservons-nous vos informations ?",
       "description": "Nous ne conserverons vos informations personnelles que pendant la durée nécessaire aux fins décrites dans cette Politique de Confidentialité, sauf si une période de conservation plus longue est requise ou autorisée par la loi."
     },
-
     "info_minors": {
       "title": "8. Collectons-nous des informations concernant les mineurs ?",
-      "description": "Nous ne collectons pas sciemment de données ou ne ciblons pas les mineurs de moins de 18 ans. Si nous apprenons que des informations personnelles concernant des utilisateurs de moins de 18 ans ont été collectées, nous désactiverons le compte et prendrons des mesures raisonnables pour supprimer rapidement ces données."
+      "description": "Nous ne collectons pas sciemment de données et ne ciblons pas les mineurs de moins de 18 ans. Si nous apprenons que des informations personnelles concernant des utilisateurs de moins de 18 ans ont été collectées, nous désactiverons le compte et prendrons des mesures raisonnables pour supprimer rapidement ces données."
     },
-
     "privacy_rights": {
       "title": "9. Quels sont vos droits en matière de confidentialité ?",
       "description": "Selon votre localisation géographique, la législation applicable en matière de confidentialité peut vous accorder certains droits concernant vos informations personnelles.",
       "withdraw_consent": "Si nous nous appuyons sur votre consentement pour traiter vos informations personnelles, vous avez le droit de retirer votre consentement à tout moment. Vous pouvez retirer votre consentement en nous contactant à l'adresse {{email}}."
     },
-
     "dnt": {
       "title": "10. Contrôles pour les fonctionnalités \" Ne pas suivre \"",
       "description": "La plupart des navigateurs web et certains systèmes d'exploitation mobiles incluent une fonctionnalité ou un paramètre \" Ne pas suivre \" (\" DNT \") que vous pouvez activer pour signaler votre préférence de confidentialité. À ce stade, aucune norme technologique uniforme pour la reconnaissance et la mise en œuvre des signaux DNT n'a été finalisée."
     },
-
     "policy_updates": {
       "title": "11. Apportons-nous des mises à jour à cet avis ?",
-      "description": "Nous pouvons mettre à jour cette Politique de Confidentialité de temps en temps. La version mise à jour sera indiquée par une date de \" Révision \" mise à jour en haut de cette Politique de Confidentialité."
+      "description": "Nous pouvons mettre à jour cette Politique de Confidentialité de temps à autre. La version mise à jour sera indiquée par une date de \" Révision \" mise à jour en haut de cette Politique de Confidentialité."
     },
-
     "contact": {
       "title": "12. Comment nous contacter concernant cet avis ?",
       "description": "Si vous avez des questions ou des commentaires concernant cet avis, vous pouvez nous contacter par courrier à l'adresse suivante : {{address}}, ou par e-mail à l'adresse : {{email}}."
@@ -215,7 +199,7 @@
     "too_small": "La valeur doit être plus longue",
     "too_big": "La valeur doit être plus courte",
     "invalid_string": {
-      "email": "L'adresse email est incorrecte.",
+      "email": "L'adresse e-mail est incorrecte.",
       "url": "L'URL est invalide."
     },
     "invalid_type": "Type invalide"
@@ -236,13 +220,13 @@
   "errors": {
     "validation_mandatory": "Ce champ est obligatoire.",
     "validation_error": "Format invalide. Veuillez vérifier les champs soumis et réessayer.",
-    "unauthorized": "Authentification requise. Veuillez vous connecter pour accéder à cette ressource",
-    "invalid_credentials": "Identifiants invalides. Vérifiez votre email/nom d'utilisateur et mot de passe et réessayez.",
+    "unauthorized": "Authentification requise. Veuillez vous connecter pour accéder à cette ressource.",
+    "invalid_credentials": "Identifiants invalides. Vérifiez votre e-mail/nom d'utilisateur et mot de passe et réessayez.",
     "forbidden": "Accès refusé. Vous n'avez pas les permissions nécessaires pour cette action.",
     "not_found": "Ressource introuvable. Vérifiez l'ID ou l'URL et réessayez.",
     "conflict": "Cette ressource existe déjà. Utilisez un identifiant unique.",
     "username_exists": "Ce nom d'utilisateur est déjà pris. Veuillez en choisir un autre.",
-    "email_exists": "Cette adresse email est déjà enregistrée. Utilisez une autre adresse ou connectez-vous.",
+    "email_exists": "Cette adresse e-mail est déjà enregistrée. Utilisez une autre adresse ou connectez-vous.",
     "rate_limit_exceeded": "Limite de requêtes dépassée. Réessayez dans quelques minutes.",
     "mfa_required": "Authentification à deux facteurs requise. Veuillez configurer ou saisir votre code MFA.",
     "invalid_mfa_code": "Code MFA invalide. Vérifiez le code et réessayez.",
@@ -252,20 +236,20 @@
     "login_session_expired": "Session de connexion expirée. Veuillez vous reconnecter.",
     "setup_session_expired": "Session de configuration expirée. Veuillez réinitialiser la configuration.",
     "too_many_attempts": "Trop de tentatives échouées. Veuillez vous reconnecter.",
-    "token_missing": "Token d'authentification manquant.",
+    "token_missing": "Jeton d'authentification manquant.",
     "totp_already_enabled": "La 2FA est déjà activée sur ce compte.",
     "2fa_not_enabled": "La 2FA n'est pas activée sur ce compte.",
     "user_not_found_2fa": "Utilisateur introuvable.",
     "missing_user_name": "Nom d'utilisateur requis.",
     "internal_error": "Erreur interne du serveur. Veuillez réessayer plus tard.",
-    "friend_self_add": "Choisissez un autre utilisateur que vous-même",
-    "friend_already": "Vous êtes déjà amis",
+    "friend_self_add": "Choisissez un autre utilisateur que vous-même.",
+    "friend_already": "Vous êtes déjà amis.",
     "required_field": "Champ requis",
     "must_accept_terms": "Vous devez accepter les conditions d'utilisation."
   },
   "navbar": {
     "home": "Accueil",
-    "about": "A propos",
+    "about": "À propos",
     "play": "Jouer",
     "play_friend": "Jouer contre un ami",
     "play_ai": "Jouer contre l'IA",
@@ -275,6 +259,7 @@
     "stats": "Stats",
     "stats_history": "Historique",
     "profile": "Profil",
+    "profile_public": "Profil public",
     "profile_logout": "Se déconnecter",
     "profile_login": "Se connecter"
   },
@@ -284,10 +269,10 @@
     "2fa": "2FA",
     "update_avatar": "Changer d'avatar",
     "update_username": "Mettre à jour le pseudo",
-    "update_email": "Mettre à jour l'email",
+    "update_email": "Mettre à jour l'e-mail",
     "delete": "Supprimer le compte",
     "delete_confirm_title": "Supprimer le compte ?",
-    "delete_confirm_text": "Êtes-vous sûr de vouloir supprimer votre profil ? Aucune récupération ne sera possible",
+    "delete_confirm_text": "Êtes-vous sûr de vouloir supprimer votre profil ? Aucune récupération ne sera possible.",
     "game_insights": "Aperçu du jeu",
     "view_stats": "Voir stats",
     "view_history": "Voir historique",
@@ -363,8 +348,8 @@
     "player_b": "joueur B",
     "info_controls": "afficher les commandes",
     "info_controls_mask": "masquer les commandes",
-    "loading_sessions": "chargement des sessions..",
-    "refresh_sessions": "mise à jour des sessions..",
+    "loading_sessions": "chargement des sessions...",
+    "refresh_sessions": "mise à jour des sessions...",
     "controls": {
       "left_paddle": "pour la raquette de gauche",
       "right_paddle": "pour la raquette de droite"
@@ -389,8 +374,8 @@
     "finished": "Terminé",
     "no_tournament": "Aucun tournoi disponible",
     "final": "Finale",
-    "semi_final": "Demi-Finale",
-    "little_final": "Petite-Finale",
+    "semi_final": "Demi-finale",
+    "little_final": "Petite finale",
     "start_button": "Jouer",
     "start": {
       "create_title": "Créer une partie",
@@ -468,7 +453,7 @@
     "error": {
       "session_not_found": "Session non trouvée ou expirée. Créez une nouvelle partie ou rafraîchissez la liste.",
       "connection_failed": "Impossible de se connecter à la session. La session peut avoir expiré ou le serveur est indisponible. Veuillez réessayer.",
-      "websocket_error": "Erreur de connexion. Vérifie ta connexion Internet et réessaye.",
+      "websocket_error": "Erreur de connexion. Vérifiez votre connexion Internet et réessayez.",
       "invalid_session": "Session invalide. Créez une nouvelle partie.",
       "server_error": "Erreur serveur. Veuillez réessayer dans quelques instants.",
       "failed_create_tournament": "Échec de la création du tournoi. Veuillez réessayer."
@@ -483,7 +468,7 @@
         "title": "Connexion & Accès",
         "q1": {
           "q": "Je n'arrive pas à me connecter — 'Identifiants invalides'. Que faire ?",
-          "a": "Vérifiez votre nom d'utilisateur/email et votre mot de passe (attention à la casse). Si vous vous êtes inscrit via OAuth (Google/42), reconnectez-vous avec le même provider."
+          "a": "Vérifiez votre nom d'utilisateur/e-mail et votre mot de passe (attention à la casse). Si vous vous êtes inscrit via OAuth (Google/42), reconnectez-vous avec le même fournisseur."
         },
         "q2": {
           "q": "Ma session a expiré et j'ai été déconnecté sans prévenir.",
@@ -525,7 +510,7 @@
         "title": "Compte & Profil",
         "q1": {
           "q": "Comment changer mon avatar ?",
-          "a": "Rendez-vous sur votre page de profil (/me) et cliquez sur votre avatar ou sur le bouton 'Changer d'avatar'. Vous pouvez téléverser une image (JPEG, PNG, WebP). Si l'upload échoue, essayez avec un fichier plus léger."
+          "a": "Rendez-vous sur votre page de profil (/me) et cliquez sur votre avatar ou sur le bouton 'Changer d'avatar'. Vous pouvez téléverser une image (JPEG, PNG, WebP). Si le téléversement échoue, essayez avec un fichier plus léger."
         },
         "q2": {
           "q": "Quelles sont les règles pour le nom d'utilisateur ?",
@@ -533,7 +518,7 @@
         },
         "q3": {
           "q": "J'obtiens 'Cette ressource existe déjà' lors de l'inscription.",
-          "a": "Le nom d'utilisateur ou l'email que vous avez choisi est déjà utilisé. Choisissez un autre pseudo. Si vous avez déjà un compte, utilisez la page de connexion."
+          "a": "Le nom d'utilisateur ou l'e-mail que vous avez choisi est déjà utilisé. Choisissez un autre pseudo. Si vous avez déjà un compte, utilisez la page de connexion."
         }
       },
       "game": {

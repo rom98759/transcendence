@@ -7,8 +7,9 @@ import { error } from 'node:console';
 
 function getProxyHeaders(request: FastifyRequest): HeadersInit {
   const internalHeaders = getInternalHeaders(request);
+  const contentType = request.headers['content-type'];
   return {
-    'Content-Type': request.headers['content-type'] || 'application/json',
+    ...(contentType ? { 'Content-Type': contentType } : {}),
     ...internalHeaders,
   };
 }
@@ -35,6 +36,10 @@ export function registerGameRoutes(app: FastifyInstance) {
       request,
       reply,
       `${GATEWAY_CONFIG.SERVICES.GAME}/del/${sessionId}`,
+      {
+        method: 'DELETE',
+        headers: getProxyHeaders(request),
+      },
     );
     return res;
   });

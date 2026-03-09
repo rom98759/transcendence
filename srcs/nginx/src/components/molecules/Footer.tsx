@@ -17,6 +17,7 @@ export const Footer = ({ className = '' }: FooterProps) => {
           {t('privacy_policy.title')}
         </Link>
         <Link to="/tos">{t('tos.title')}</Link>
+        <Link to="/faq">{t('faq.title')}</Link>
       </footer>
     </div>
   );

@@ -20,14 +20,15 @@ export const HomePage = () => {
   const { t } = useTranslation();
 
   const menuItems = [
-    { to: '/game/pong-ai', label: 'game.playWithAI', size: 220 },
-    { to: '/friends', label: 'game.playWithFriends', size: 280 },
-    { to: '/tournaments', label: 'game.tournament', size: 250 },
-    { to: '/game/remote', label: 'game.playRemote', size: 220 },
-    { to: '/game/local', label: 'game.playLocal', size: 280 },
+    { to: '/game', label: 'navbar.play', size: 140 },
+    { to: '/friends', label: 'friends.friends', size: 140 },
+    { to: '/stats', label: 'navbar.stats', size: 140 },
+    { to: '/me', label: 'navbar.profile', size: 140 },
+    { to: '/history', label: 'navbar.stats_history', size: 140 },
+    { to: '/tournaments', label: 'navbar.play_tournament', size: 140 },
   ];
-
-  const isOdd = menuItems.length % 2 !== 0;
+  const radius = 'clamp(145px, 14vw, 230px)';
+  const angleStep = (2 * Math.PI) / menuItems.length;
 
   return (
     <div className="w-full h-screen overflow-hidden">
@@ -36,28 +37,31 @@ export const HomePage = () => {
           <NavBar />
 
           <main className="grow overflow-hidden">
-            <Scrollable
-              className="h-full md:grid md:grid-cols-2 md:place-items-center md:gap-x-12 md:gap-y-12 lg:gap-8"
-              isAnimated={true}
-            >
-              {menuItems.map((item, index) => {
-                const isCentered = isOdd && index === menuItems.length - 1;
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className={
-                      isCentered
-                        ? 'md:col-span-2 flex justify-center w-full'
-                        : 'flex justify-center w-full'
-                    }
-                  >
-                    <CircleButton size={item.size} isMoving={true}>
-                      {t(item.label)}
-                    </CircleButton>
-                  </Link>
-                );
-              })}
+            <Scrollable className="h-full flex items-center justify-center" isAnimated={true}>
+              <div className="relative -translate-y-4 md:-translate-y-6 w-[min(90vw,470px)] h-[min(72vh,470px)] md:w-[min(86vw,620px)] md:h-[min(78vh,620px)]">
+                {menuItems.map((item, index) => {
+                  const angle = -Math.PI / 2 + index * angleStep;
+                  const x = `calc(${Math.cos(angle)} * ${radius})`;
+                  const y = `calc(${Math.sin(angle)} * ${radius})`;
+
+                  return (
+                    <div
+                      key={item.to}
+                      className="absolute -translate-x-1/2 -translate-y-1/2"
+                      style={{
+                        left: `calc(50% + ${x})`,
+                        top: `calc(50% + ${y})`,
+                      }}
+                    >
+                      <Link to={item.to} className="inline-flex items-center justify-center">
+                        <CircleButton size={item.size} isMoving={true} className="m-1 p-3">
+                          {t(item.label)}
+                        </CircleButton>
+                      </Link>
+                    </div>
+                  );
+                })}
+              </div>
             </Scrollable>
           </main>
           <Footer />

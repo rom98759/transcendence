@@ -67,7 +67,6 @@ const UserSearchContainer = ({ isSearch, actions, onAction }: UserSearchContaine
     setQuery('');
   };
   useOutsideClick(containerRef, () => {
-    console.log('outside click');
     if (selectedUser) {
       resetSearch();
     }

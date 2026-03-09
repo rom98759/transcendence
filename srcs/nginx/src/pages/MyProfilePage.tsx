@@ -81,7 +81,6 @@ export const MyProfilePage = () => {
     },
     onError: (error: any) => {
       if (error instanceof FrontendError) {
-        console.log('Erreur capturée :', error);
         const fieldError = error.details?.find((d: any) => d.field === 'username');
         const msg = fieldError?.message || error.message;
         setUsernameError(msg);
@@ -102,7 +101,6 @@ export const MyProfilePage = () => {
     },
     onError: (error) => {
       if (error instanceof FrontendError) {
-        console.log('Erreur capturée :', error);
         const fieldError = error.details?.find((d: any) => d.field === 'email');
         const msg = fieldError?.message || error.message;
         setEmailError(msg);

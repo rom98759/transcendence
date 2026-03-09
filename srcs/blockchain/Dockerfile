@@ -43,8 +43,9 @@ RUN apk add --no-cache wget
 # 5) Installer UNIQUEMENT les dépendances runtime du workspace users
 COPY package-lock.json ./package-lock.json
 COPY srcs/blockchain/package.json ./package.json
-# audit and fund are done in builder
-RUN npm install --omit=dev --no-audit --no-fund
+
+COPY --from=builder /app/node_modules ./node_modules
+RUN npm prune --omit=dev
 
 # 6) Injecter le package interne @transcendence/core (compilé)
 RUN mkdir -p node_modules/@transcendence

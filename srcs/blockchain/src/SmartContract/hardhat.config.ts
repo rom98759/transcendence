@@ -1,9 +1,9 @@
 import { defineConfig, configVariable } from 'hardhat/config';
 import hardhatIgnitionViemPlugin from '@nomicfoundation/hardhat-ignition-viem';
-import { env } from '../config/env.js';
+import hardhatKeystore from '@nomicfoundation/hardhat-keystore';
 
 export default defineConfig({
-  plugins: [hardhatIgnitionViemPlugin],
+  plugins: [hardhatIgnitionViemPlugin, hardhatKeystore],
   solidity: {
     version: '0.8.28',
   },
@@ -13,8 +13,8 @@ export default defineConfig({
     },
     fuji: {
       type: 'http',
-      url: env.AVALANCHE_RPC_URL,
-      accounts: [configVariable('BLOCKCHAIN_PRIVATE_KEY')],
+      url: configVariable('FUJI_RPC_URL'),
+      accounts: [configVariable('FUJI_PRIVATE_KEY')],
     },
   },
 });

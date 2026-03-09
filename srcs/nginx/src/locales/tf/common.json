@@ -14,7 +14,7 @@
   },
   "oauth": {
     "continue_google": "Passe par Google",
-    "continue_42": "Passe par 42 c'est la référence",
+    "continue_42": "Passe par 42, c'est la référence",
     "or_separator": "OU BIEN",
     "connecting": "On s'branche...",
     "processing": "On vérifie tes papiers...",
@@ -26,7 +26,7 @@
     "invalid_provider": "C'est quoi ce provider ? On connaît pas",
     "authorization_denied": "T'as refusé l'autorisation, du coup on peut rien faire",
     "missing_code": "Y'a pas de code, mon gars. C'est louche",
-    "invalid_state": "État CSRF foireux - on dirait une embrouille",
+    "invalid_state": "État CSRF foireux — on dirait une embrouille",
     "callback_failed": "Raté l'authentification, mon vieux"
   },
   "fieldtype": {
@@ -35,17 +35,17 @@
     "password": "le code secret (faut pas le balancer à tout le monde, hein)",
     "username-email": "ton blaze ou ton adresse mail",
     "username-choose": "choisis-toi un blaze qui en jette",
-    "password-choose": "trouve toi un code secret (pas '1234', hein, on est pas des amateurs)"
+    "password-choose": "trouve-toi un code secret (pas '1234', hein, on n'est pas des amateurs)"
   },
   "form": {
     "processing": "On gère ça, mon pote…"
   },
   "search": {
     "no_results": "nada",
-    "user": "voir les gars qui trainent"
+    "user": "voir les gars qui traînent"
   },
   "global": {
-    "loading": "Laisse nous gérer ça...",
+    "loading": "Laisse-nous gérer ça...",
     "not_found": "Que dalle",
     "disabled": "pas enclenché, le machin",
     "confirm": "je suis sûr",
@@ -58,55 +58,41 @@
   "address": "1, Avenue des Frères Lebrun",
   "email": "ping@patapong.com",
   "governingLaw": "la loi française, mon vieux",
-  "arbitrationLocation": "Poitiers, France - on a choisi exprès, c'est central",
+  "arbitrationLocation": "Poitiers, France — on a choisi exprès, c'est central",
   "privacyPolicyLink": "/privacy",
   "tos": {
     "title": "LES RÈGLES DU JEU",
-    "last_updated": "Dernière mise à jour : 24 février 2026 - Faut suivre, hein",
-
+    "last_updated": "Dernière mise à jour : 24 février 2026 — Faut suivre, hein",
     "provider": "C'est {{companyName}} ({{address}}) qui tient la barre",
-
-    "contact_info": "Pour nous joindre : {{email}} | Téléphone : {{phone}} - On répond, mais faut pas abuser",
-
+    "contact_info": "Pour nous joindre : {{email}} | Téléphone : {{phone}} — On répond, mais faut pas abuser",
     "agreement": "1. LE CONTRAT, MON P'TIT",
     "agreement-text": "Dès que t'utilises {{serviceName}} (nos « Services »), t'acceptes nos règles. Si ça te va pas, dégage. C'est simple.",
-
     "ip": "2. LE MATOS, C'EST À NOUS",
-    "ip-text": "Tout ce qu'y a sur nos Services, c'est à nous : le contenu, les marques, les logiciels. T'as le droit de t'en servir pour toi, mais pas pour en faire du fric. Et surtout, pas de copie, de redistribution ou de bidouille sans notre feu vert écrit. On est pas des enfants de chœur.",
-
+    "ip-text": "Tout ce qu'il y a sur nos Services, c'est à nous : le contenu, les marques, les logiciels. T'as le droit de t'en servir pour toi, mais pas pour en faire du fric. Et surtout, pas de copie, de redistribution ou de bidouille sans notre feu vert écrit. On n'est pas des enfants de chœur.",
     "responsibilities": "3. TES OBLIGATIONS, MON GAZIER",
-    "responsibilities-text": "Faut nous filer des infos justes et complètes. Tout ce qui se passe sur ton compte, c'est pour ta pomme. Interdit de : Emmerder les gens, tricher ou faire des coups tordus, Foutre le bordel dans nos Services ou contourner nos sécurités, Balancer des virus, du spam ou des saloperies du genre, Piquer le boulot des autres. T'as compris ?",
-
+    "responsibilities-text": "Faut nous filer des infos justes et complètes. Tout ce qui se passe sur ton compte, c'est pour ta pomme. Interdit de : emmerder les gens, tricher ou faire des coups tordus, foutre le bordel dans nos Services ou contourner nos sécurités, balancer des virus, du spam ou des saloperies du genre, piquer le boulot des autres. T'as compris ?",
     "user_content": "4. TES TRUCS À TOI",
     "user_content-text": "Ce que tu balances sur nos Services, ça reste à toi. Mais on a le droit de s'en servir, partout dans le monde. T'es prévenu : ton contenu doit être légal, original et pas volé. Sinon, ça va chauffer.",
-
     "purchases": "5. LES SOUS, C'EST LES SOUS",
-    "purchases-text": "Quand t'achètes, c'est définitif - pas de remboursement. Faut nous donner les bonnes infos de paiement. Et les prix, ça peut changer sans prévenir. C'est la vie.",
-
+    "purchases-text": "Quand t'achètes, c'est définitif — pas de remboursement. Faut nous donner les bonnes infos de paiement. Et les prix, ça peut changer sans prévenir. C'est la vie.",
     "termination": "6. SI ON TE VIRE",
     "termination-text": "Si t'abuses, on peut te couper l'accès sans prévenir. C'est notre droit. T'es pas content ? Tant pis.",
-
     "disclaimers": "7. ON SE DÉDOUANE (FAUT BIEN)",
-    "disclaimers-text": "Nos Services, c'est comme une bagnole d'occasion : on te les donne en l'état, sans garantie. Si t'as un problème en les utilisant, c'est pour ta gueule. Et si t'as fait une connerie, t'assumes - nous, on est couverts.",
-
+    "disclaimers-text": "Nos Services, c'est comme une bagnole d'occasion : on te les donne en l'état, sans garantie. Si t'as un problème en les utilisant, c'est pour ta gueule. Et si t'as fait une connerie, t'assumes — nous, on est couverts.",
     "privacy": "8. TES DONNÉES, ON EN PREND SOIN (ENFIN, À PEU PRÈS)",
     "privacy-text": "On gère tes données comme il faut. Tout est expliqué dans notre {{privacyPolicyLink}}. Lis-la, c'est pour ton bien.",
-
     "law": "9. LA LOI, C'EST LA LOI",
     "law-text": "Ici, c'est le {{governingLaw}} qui commande. Si y'a un litige, on règle ça à {{arbitrationLocation}}. Pas la peine de râler, c'est comme ça.",
-
     "contact": "10. TU VEUX NOUS PARLER ?",
     "contact-text": "T'as un problème ? Contacte-nous : {{companyName}}, {{address}}, {{email}}, {{phone}}. Mais dérange pas pour rien, hein."
   },
   "privacy_policy": {
     "title": "POLITIQUE DE CONFIDENTIALITÉ",
-    "last_updated": "Dernière mise à jour : 24 février 2026 - C'est pas la peine de chipoter, c'est la date qu'il faut retenir",
-
+    "last_updated": "Dernière mise à jour : 24 février 2026 — C'est pas la peine de chipoter, c'est la date qu'il faut retenir",
     "intro": "{{companyName}} (« nous », « notre » ou « la maison », si vous préférez), on n'est pas des enfants de chœur, mais on respecte vos petites affaires. Ce document, c'est la manière dont on gère vos données quand vous utilisez nos services. C'est clair, net et sans bavure.",
-
     "summary": {
       "title": "EN BREF, POUR CEUX QUI ONT LA FLEMME",
-      "description": "Voici l'essentiel, comme un bon résumé de film avant la séance. Cliquez sur les liens si vous voulez les détails. Mais attention, après, vous pourrez pas dire qu'on vous a pas prévenus.",
+      "description": "Voici l'essentiel, comme un bon résumé de film avant la séance. Cliquez sur les liens si vous voulez les détails. Mais attention, après, vous ne pourrez pas dire qu'on ne vous a pas prévenus.",
       "personal_info": {
         "title": "Qu'est-ce qu'on sait sur vous ?",
         "description": "On ramasse ce que vous nous donnez quand vous vous inscrivez, quand vous nous écrivez ou quand vous utilisez nos services. C'est pas plus compliqué que ça."
@@ -117,7 +103,7 @@
       },
       "third_party": {
         "title": "On glane des infos ailleurs ?",
-        "description": "Parfois, oui. Des bases de données publiques, des partenaires... On est pas des ermites. Mais toujours dans les règles."
+        "description": "Parfois, oui. Des bases de données publiques, des partenaires... On n'est pas des ermites. Mais toujours dans les règles."
       },
       "how_process": {
         "title": "À quoi servent vos données ?",
@@ -125,14 +111,14 @@
       },
       "share_info": {
         "title": "À qui on refile vos infos ?",
-        "description": "À personne, sauf obligation. Si on vend la boîte, si on travaille avec des associés, ou si la loi l'exige. Mais on fait pas dans la dénonciation."
+        "description": "À personne, sauf obligation. Si on vend la boîte, si on travaille avec des associés, ou si la loi l'exige. Mais on ne fait pas dans la dénonciation."
       },
       "your_rights": {
         "title": "Quels sont vos droits ?",
         "description": "Ça dépend où vous êtes. Mais en général, vous pouvez voir vos données, les corriger, ou nous demander de les effacer. C'est comme un bon contrat : ça se discute."
       }
     },
-    "table_of_contents": "SOMMAIRE - POUR S'Y RETROUVER",
+    "table_of_contents": "SOMMAIRE — POUR S'Y RETROUVER",
     "toc": {
       "info_collect": "1. Qu'est-ce qu'on collecte comme infos ?",
       "info_use": "2. À quoi ça sert, tout ça ?",
@@ -160,68 +146,58 @@
     },
     "info_use": {
       "title": "2. À QUOI ÇA SERT, TOUT ÇA ?",
-      "description": "À vous fournir un service qui tient la route. À l'améliorer. À vous parler quand c'est nécessaire. À éviter les arnaques. Et à rester dans les clous de la loi. On fait pas dans le superflu."
+      "description": "À vous fournir un service qui tient la route. À l'améliorer. À vous parler quand c'est nécessaire. À éviter les arnaques. Et à rester dans les clous de la loi. On ne fait pas dans le superflu."
     },
-
     "who_share": {
       "title": "3. AVEC QUI ON PARTAGE VOS DONNÉES ?",
       "description": "Avec personne, en principe. Sauf si :",
-      "business_transfers": "- On vend la boîte ou qu'on fusionne. Là, faut bien passer le relais.",
-      "affiliates": "- On travaille avec des associés. Mais ils doivent respecter les mêmes règles que nous.",
-      "business_partners": "- On a des partenariats qui vous concernent. Mais toujours avec votre intérêt en tête."
+      "business_transfers": "— On vend la boîte ou on fusionne. Là, faut bien passer le relais.",
+      "affiliates": "— On travaille avec des associés. Mais ils doivent respecter les mêmes règles que nous.",
+      "business_partners": "— On a des partenariats qui vous concernent. Mais toujours avec votre intérêt en tête."
     },
-
     "cookies": {
       "title": "4. ET LES BISCUITS ?",
-      "description": "Oui, on te refile un biscuit Pour que le site marche bien, pour analyser un peu le trafic, pour vous reconnaître quand vous revenez. Rien de bien sorcier. Et vous pouvez toujours les refuser si ça vous chante."
+      "description": "Oui, on te refile un biscuit pour que le site marche bien, pour analyser un peu le trafic, pour vous reconnaître quand vous revenez. Rien de bien sorcier. Et vous pouvez toujours les refuser si ça vous chante."
     },
-
     "social_logins": {
       "title": "5. SI VOUS VOUS CONNECTEZ AVEC FACEBOOK OU AUTRE...",
-      "description": "Si vous utilisez un compte social pour vous connecter, on accède à quelques infos de votre profil. Juste ce qu'il faut pour que ça marche. On est pas des fouineurs."
+      "description": "Si vous utilisez un compte social pour vous connecter, on accède à quelques infos de votre profil. Juste ce qu'il faut pour que ça marche. On n'est pas des fouineurs."
     },
-
     "intl_transfers": {
       "title": "6. VOS DONNÉES VOYAGENT-ELLES À L'ÉTRANGER ?",
       "description": "Possible. Vos données peuvent être stockées ou traitées ailleurs que dans votre pays. Mais on veille à ce qu'elles soient toujours bien protégées, où qu'elles aillent."
     },
-
     "info_retain": {
       "title": "7. ON LES GARDE COMBIEN DE TEMPS, CES FICHIERS ?",
       "description": "Le temps nécessaire, pas une seconde de plus. Sauf si la loi nous oblige à les garder plus longtemps. Après, on efface. Proprement."
     },
-
     "info_minors": {
       "title": "8. ET POUR LES MINEURS, ON FAIT COMMENT ?",
-      "description": "On ne collecte rien sur les moins de 18 ans. Si on découvre qu'on a des données de mineurs, on les supprime illico. C'est non-négociable."
+      "description": "On ne collecte rien sur les moins de 18 ans. Si on découvre qu'on a des données de mineurs, on les supprime illico. C'est non négociable."
     },
-
     "privacy_rights": {
       "title": "9. VOS DROITS, C'EST QUOI EXACTEMENT ?",
       "description": "Selon où vous êtes, vous pouvez :",
       "rights_list": [
-        "- Voir quelles données on a sur vous",
-        "- Les corriger si elles sont fausses",
-        "- Nous demander de les effacer",
-        "- Retirer votre consentement si vous nous l'avez donné"
+        "— Voir quelles données on a sur vous",
+        "— Les corriger si elles sont fausses",
+        "— Nous demander de les effacer",
+        "— Retirer votre consentement si vous nous l'avez donné"
       ],
       "contact_for_rights": "Pour ça, contactez-nous. On réglera ça entre adultes."
     },
-
     "dnt": {
       "title": "10. LE FAMEUX « NE PAS PISTER »...",
-      "description": "Votre navigateur a peut-être une option « Ne pas pister ». Pour l'instant, c'est comme un panneau 'Priére de ne pas marcher sur la pelouse' : tout le monde le voit, mais personne ne sait vraiment quoi en faire. Si ça change, on vous préviendra."
+      "description": "Votre navigateur a peut-être une option « Ne pas pister ». Pour l'instant, c'est comme un panneau 'Prière de ne pas marcher sur la pelouse' : tout le monde le voit, mais personne ne sait vraiment quoi en faire. Si ça change, on vous préviendra."
     },
-
     "policy_updates": {
       "title": "11. ON CHANGE SOUVENT CETTE POLITIQUE ?",
       "description": "On la met à jour quand c'est nécessaire. La date en haut de page sera modifiée. C'est comme un bon contrat : ça évolue, mais on vous préviendra."
     },
-
     "contact": {
       "title": "12. COMMENT NOUS JOINDRE SI VOUS AVEZ UN PROBLÈME ?",
       "description": "Pour toute question ou réclamation, deux solutions :",
-      "contact_methods": ["- Nous écrire à {{address}}", "- Nous envoyer un mail à {{email}}"],
+      "contact_methods": ["— Nous écrire à {{address}}", "— Nous envoyer un mail à {{email}}"],
       "final_note": "On répondra. Promis. On est des professionnels."
     }
   },
@@ -253,9 +229,9 @@
     "validation_mandatory": "Balance l'info",
     "validation_error": "T'as tout foiré, mon pote. Vérifie tes papiers et recommence, sinon ça va barder.",
     "unauthorized": "Faut te pointer correctement, sinon t'entres pas.",
-    "invalid_credentials": "T'as dû te gourer dans ton blaze ou ton code. Revoie ta copie.",
+    "invalid_credentials": "T'as dû te gourer dans ton blaze ou ton code. Revois ta copie.",
     "forbidden": "Là, mon pote, t'as pas le niveau. Faut une autorisation et t'es pas sur la liste",
-    "not_found": "On a rien trouvé, mon vieux. T'es sûr de l'adresse ou du numéro ?",
+    "not_found": "On n'a rien trouvé, mon vieux. T'es sûr de l'adresse ou du numéro ?",
     "conflict": "Y'a déjà un gars avec ce blaze ou cette adresse. Trouve-toi un truc unique, sinon ça va chauffer.",
     "username_exists": "Ce blaze est déjà pris, mon gars. Trouve-toi un autre pseudo.",
     "email_exists": "Cette adresse est déjà dans le système. Prends-en une autre ou connecte-toi.",
@@ -266,15 +242,15 @@
     "invalid_code_format": "6 chiffres pile, pas moins, pas plus.",
     "missing_parameters": "Y'a des trucs qui manquent. Recommence.",
     "login_session_expired": "Ta session a cramé, reviens te connecter.",
-    "setup_session_expired": "T'as mis trop de temps, la session de config a claqé. Recommence depuis le début.",
-    "too_many_attempts": "T'as tout raté, vieux. Repart de zéro.",
+    "setup_session_expired": "T'as mis trop de temps, la session de config a claqué. Recommence depuis le début.",
+    "too_many_attempts": "T'as tout raté, vieux. Repars de zéro.",
     "token_missing": "Ton jeton d'auth, il est où ?",
     "totp_already_enabled": "Le double contrôle est déjà en place sur ce compte.",
-    "2fa_not_enabled": "Le double contrôle est pas activé sur ce compte.",
+    "2fa_not_enabled": "Le double contrôle n'est pas activé sur ce compte.",
     "user_not_found_2fa": "On te trouve nulle part, étrange.",
     "missing_user_name": "Ton blaze, il est où ?",
     "internal_error": "Putain, y'a un truc qui cloche chez nous. Reviens plus tard, on va régler ça entre nous.",
-    "friend_self_add": "Tu peux pas t'ajouter toi-meme, vieux. Choisis un autre tandem.",
+    "friend_self_add": "Tu peux pas t'ajouter toi-même, vieux. Choisis un autre tandem.",
     "friend_already": "T'es déjà pote, mon vieux !",
     "required_field": "C'est trop vide ici",
     "must_accept_terms": "Faut accepter les règles du jeu, mon gars."
@@ -282,15 +258,16 @@
   "navbar": {
     "home": "Le bercail",
     "about": "C'est quoi ce b%@#*l ?",
-    "play": "C'est parti!",
+    "play": "C'est parti !",
     "play_friend": "Affronter un pote",
     "play_ai": "Se frotter au machin",
     "play_remote": "Se battre en ligne",
     "play_local": "Se taper la cloche en local",
-    "play_tournament": "La compét",
+    "play_tournament": "La compét'",
     "stats": "Ton palmarès",
     "stats_history": "Ton historique",
-    "profile": "Ton pedigree",
+    "profile_public": "Ton pedigree",
+    "profile": "Retape ton profil",
     "profile_logout": "Allez, on se tire",
     "profile_login": "Viens te connecter"
   },
@@ -298,12 +275,12 @@
     "profile": "Pedigree",
     "my_profile": "Ton compte",
     "2fa": "Double contrôle",
-    "update_avatar": "Se faire retirer le portrait",
+    "update_avatar": "Se faire tirer le portrait",
     "update_username": "Changer le blaze",
-    "update_email": "Changer le courrier'",
+    "update_email": "Changer le courrier",
     "delete": "Se faire oublier",
     "delete_confirm_title": "On t'oublie ?",
-    "delete_confirm_text": "Tu quittes le navire ? Sois sûr de toi mon pote, y'aura pas de retour en arrière..",
+    "delete_confirm_text": "Tu quittes le navire ? Sois sûr de toi mon pote, y'aura pas de retour en arrière...",
     "game_insights": "Le compte de tes exploits",
     "view_stats": "Voir tes stats",
     "view_history": "Voir ton historique",
@@ -370,13 +347,13 @@
   "game": {
     "playWithAI": "Défie le machin",
     "playWithFriends": "Affronte tes potes",
-    "playRemote": "Joue a 2 sur cette becane",
+    "playRemote": "Joue à 2 sur cette bécane",
     "playLocal": "Joue avec tes potes en remote",
     "tournament": "Vendetta",
     "game": "La mort ou la vie",
     "ambience": "Atmosphère",
-    "loading_sessions": "on s'en occupe..",
-    "refresh_sessions": "il y a besoin de rafraîchir tout ça..",
+    "loading_sessions": "on s'en occupe...",
+    "refresh_sessions": "il y a besoin de rafraîchir tout ça...",
     "player_a": "machin",
     "player_b": "truc",
     "info_controls": "comment ça marche ce truc ?",
@@ -391,9 +368,9 @@
       "finished": "c'est plié",
       "paused": "temps mort"
     },
-    "participate": "Tu cherches des embrouilles!",
-    "create": "Je vous mets au défi!",
-    "tournament_available": "Vendetta disponibles",
+    "participate": "Tu cherches des embrouilles !",
+    "create": "Je vous mets au défi !",
+    "tournament_available": "Vendettas disponibles",
     "name": "Blase",
     "players": "Nb truands",
     "status": "Statut",
@@ -405,21 +382,21 @@
     "finished": "Terminé",
     "no_tournament": "Aucune vendetta disponible",
     "final": "Combat final",
-    "semi_final": "On prends du Galon",
-    "little_final": "Les loosers c'est ici",
+    "semi_final": "On prend du galon",
+    "little_final": "Les losers c'est ici",
     "start_button": "C'est parti",
     "start": {
       "create_title": "On organise une partie",
       "vs_ai": "Défie le machin",
       "local": "Partie sur cette bécane",
       "remote": "Partie en ligne avec les potes",
-      "match_list": "Liste des baston",
-      "available_sessions": "Les parties dispo",
+      "match_list": "Liste des bastons",
+      "available_sessions": "Les parties dispos",
       "no_sessions": "Y'a rien pour l'instant"
     },
     "gameover": {
       "title": "C'est plié",
-      "wins": "{{winner}} t'as éclaboussé de sa classe",
+      "wins": "{{winner}} t'a éclaboussé de sa classe",
       "resolving_next_match": "On voit qui se mange qui au prochain round...",
       "next_match": "Le prochain round",
       "view_results": "Voir les résultats",
@@ -428,7 +405,7 @@
     },
     "play": "C'est parti",
     "exit": "On se casse",
-    "play_again": "Encore une, on est pas des mauviettes !",
+    "play_again": "Encore une, on n'est pas des mauviettes !",
     "new_game": "On remet ça !",
     "run": "Lancement de la Vendetta",
     "watch": "Regarder le combat",
@@ -436,7 +413,7 @@
     "creating": "Création de la vendetta...",
     "waiting_players": "On attend les gaillards…",
     "starting_tournament": "On lance la vendetta…",
-    "tournament_full": "Cette vendetta est complete(maximum 4 truands).",
+    "tournament_full": "Cette vendetta est complète (maximum 4 truands).",
     "winner": {
       "you_win": "T'as écrasé la machine, champion !",
       "ai_wins": "Le machin t'a mis une raclée, vieux.",
@@ -451,7 +428,7 @@
     "lobby": {
       "waiting_player": "On attend...",
       "you": "toi",
-      "ready": "Ché prêt",
+      "ready": "Ch'uis prêt",
       "not_ready": "Pas là",
       "btn_ready": "C'est bon pour moi !",
       "info_waiting_player2": "Lobby : on attend le 2e joueur pour lancer la partie.",
@@ -460,7 +437,7 @@
         "connecting": "On se connecte...",
         "waiting_players": "On attend le 2ème gaillard...",
         "ready_check": "Les deux sont là — faut confirmer, vite !",
-        "playing": "La parties est lancée",
+        "playing": "La partie est lancée",
         "finished": "La partie, c'est fini",
         "disconnected": "L'autre s'est barré"
       }
@@ -471,8 +448,8 @@
       "match_details": "Détails des combats",
       "no_results": "Aucun résultat de vendetta pour l'instant.",
       "winner": "Le boss",
-      "fetch_error": "On a pas réussi à charger les résultats, merde.",
-      "unavailable": "Résultats pas dispo",
+      "fetch_error": "On n'a pas réussi à charger les résultats, merde.",
+      "unavailable": "Résultats pas dispos",
       "unknown_winner": "On sait pas"
     },
     "rounds": {
@@ -482,9 +459,9 @@
       "final": "Le combat final"
     },
     "error": {
-      "session_not_found": "La partie t'a fermé les portes. C'est vieux ou chelou. Crée-toi une nouvelle ou rafraîchis la liste.",
+      "session_not_found": "La partie t'a fermé les portes. C'est vieux ou chelou. Crée-en une nouvelle ou rafraîchis la liste.",
       "connection_failed": "T'arrives pas à te brancher sur la session. Elle s'est peut-être barrée ou le serveur fait la gueule. Réessaye.",
-      "websocket_error": "Ouille! Y'a comme un petit truc qui déraille. Vérifies ta connexion avant de relancer.",
+      "websocket_error": "Ouille ! Y'a comme un petit truc qui déraille. Vérifie ta connexion avant de relancer.",
       "invalid_session": "C'te session, c'est des conneries. Crée une nouvelle partie.",
       "server_error": "Ça pète sur le serveur. Attends un petit peu que ça se tasse.",
       "failed_create_tournament": "On a foiré la création du tournoi. Retente ta chance, mon gars."
@@ -507,25 +484,25 @@
         },
         "q3": {
           "q": "On me dit 'Trop de tentatives' et je peux plus rentrer.",
-          "a": "Le serveur te bloque temporairement après plusieurs ratées, c'est pas pour t'embêter — c'est pour protéger le compte. Attends quelques minutes et reviens à la charge depuis la page de connexion."
+          "a": "Le serveur te bloque temporairement après plusieurs ratés, c'est pas pour t'embêter — c'est pour protéger le compte. Attends quelques minutes et reviens à la charge depuis la page de connexion."
         },
         "q4": {
-          "q": "Je m'étais inscrit via Google / 42 mais le bouton marche plus.",
+          "q": "Je m'étais inscrit via Google / 42 mais le bouton ne marche plus.",
           "a": "Assure-toi d'autoriser les pop-ups et les cookies tiers sur ce site. Vérifie aussi que ton compte chez Google ou 42 est toujours en vie et que l'appli a les droits nécessaires."
         }
       },
       "twofa": {
         "title": "Double Sécurité (2FA) — Le Verrou de Pro",
         "q1": {
-          "q": "C'est quoi la 2FA et j'suis obligé d'l'activer ?",
+          "q": "C'est quoi la 2FA et suis-je obligé de l'activer ?",
           "a": "La double authentification, c'est comme une deuxième porte blindée pour ton compte. Après le mot de passe, on te demande un code à 6 chiffres via une appli (Google Authenticator, Authy…). C'est pas obligatoire mais franchement, fais-le, coco."
         },
         "q2": {
-          "q": "Mon code 2FA, il passe jamais. C'est nul.",
+          "q": "Mon code 2FA, il ne passe jamais. C'est nul.",
           "a": "C'est souvent une histoire de décalage d'horloge sur ton téléphone. Les codes TOTP vivent 30 secondes.\n• Active la date/heure automatique sur ton tel.\n• Vérifie que c'est le bon compte dans l'appli.\n• Saisis le code juste après qu'il vient de changer."
         },
         "q3": {
-          "q": "J'ai perdu accès à mon appli d'auth. Je suis coincé ?",
+          "q": "J'ai perdu l'accès à mon appli d'auth. Je suis coincé ?",
           "a": "Ouais c'est chaud. Y'a pas de récupération automatique si la 2FA est verrouillée. Faut contacter un admin avec une preuve d'identité. Retiens ça : garde tes codes de secours quelque part."
         },
         "q4": {
@@ -570,8 +547,8 @@
       "errors": {
         "title": "Erreurs que t'as pas demandées",
         "q1": {
-          "q": "'Limite de requêtes dépassée', kesako ?",
-          "a": "T'as trop tiré sur la corde en peu de temps. Le serveur fait une pause pour protéger la boutique. Attends quelques minutes et reviens. Arrête de spam le bouton aussi."
+          "q": "'Limite de requêtes dépassée', kèsako ?",
+          "a": "T'as trop tiré sur la corde en peu de temps. Le serveur fait une pause pour protéger la boutique. Attends quelques minutes et reviens. Arrête de spammer le bouton aussi."
         },
         "q2": {
           "q": "J'ai une erreur 403. T'as le droit de m'éjecter comme ça ?",
@@ -579,7 +556,7 @@
         },
         "q3": {
           "q": "J'ai une erreur 404. C'est où ce truc ?",
-          "a": "La page ou la ressource demandée, elle existe pas. Vérifie l'URL ou utilise le menu pour trouver ce que tu cherches."
+          "a": "La page ou la ressource demandée n'existe pas. Vérifie l'URL ou utilise le menu pour trouver ce que tu cherches."
         },
         "q4": {
           "q": "'Erreur interne du serveur'. C'est moi ou c'est vous ?",
@@ -591,9 +568,9 @@
   "stats": {
     "title": "Le palmarès des joueurs",
     "leaderboard": "Le classement des gros boss",
-    "loading": "On compile les stats, laisse nous faire...",
+    "loading": "On compile les stats, laisse-nous faire...",
     "loading_stats": "On compile les stats, deux secondes...",
-    "error_loading": "Merde, on a pas réussi à charger les stats.",
+    "error_loading": "Merde, on n'a pas réussi à charger les stats.",
     "empty": "Y'a personne pour l'instant, c'est le désert ici.",
     "player": "Le gars",
     "stats_for": "Stats de {{username}}",
