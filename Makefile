@@ -2,21 +2,19 @@ include make/config.mk
 
 # === Global ===
 
-all : volumes certs colima install build
+all: volumes certs colima install
+	COMPOSE_PROFILES=ai $(D_COMPOSE) build
+	COMPOSE_PROFILES=ai $(D_COMPOSE) up -d
+
+no-ai : volumes certs colima install build
 	$(D_COMPOSE) up -d
 
 dev: volumes certs colima install build-dev
 	$(D_COMPOSE_DEV) up -d
 
-ai: volumes certs colima
-	npm i
-	COMPOSE_PROFILES=ai $(D_COMPOSE) build
-	COMPOSE_PROFILES=ai $(D_COMPOSE) up -d
-
 volumes:
 	@mkdir -p $(DATABASE_PATH) $(UPLOADS_PATH)
 	@chmod -R 777 $(VOLUMES_PATH)
-# 	@docker run --rm -v $(VOLUMES_PATH):/tmp/v alpine sh -c "chown -R 1001:204 /tmp/v && chmod -R 775 /tmp/v"
 
 start :
 	$(D_COMPOSE) start
