@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "@types/ws": "^8.18.1",
+    "@types/ws": "^8.18.2",
     "concurrently": "^9.2.1",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
-    "@fastify/http-proxy": "^11.4.1",
+    "@fastify/http-proxy": "^11.6.5",
     "@fastify/jwt": "^10.0.0",
     "@fastify/rate-limit": "^10.1.1",
     "@fastify/reply-from": "^12.5.0",
@@ -31,7 +31,7 @@
     "@transcendence/core": "^1.1.0",
     "dotenv": "^16.4.7",
     "envalid": "^8.0.0",
-    "fastify": "^5.6.2",
+    "fastify": "^5.12.7",
     "fastify-type-provider-zod": "^6.1.0",
     "zod": "^4.2.1"
   }
