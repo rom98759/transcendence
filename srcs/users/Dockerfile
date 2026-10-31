@@ -3,6 +3,8 @@
 # ==========================
 FROM node:20-alpine AS builder
 
+# Build-only toolchain; Alpine apk pins break on every repository update.
+# hadolint ignore=DL3018
 RUN apk add --no-cache python3 make g++ wget
 
 WORKDIR /app
@@ -13,8 +15,9 @@ COPY srcs/users/package.json ./srcs/users/package.json
 COPY srcs/shared/core/package*.json ./srcs/shared/core/
 COPY srcs/shared/core/tsconfig.json ./srcs/shared/core/tsconfig.json
 
-# Install
-RUN --mount=type=cache,target=/root/.npm npm ci
+# Install (the users node_modules dir only exists when npm nests deps there)
+RUN --mount=type=cache,target=/root/.npm npm ci \
+    && mkdir -p srcs/users/node_modules
 
 # Copy build sources
 COPY srcs/users ./srcs/users
@@ -39,6 +42,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 COPY --from=builder /app/node_modules ./node_modules
+# Workspace-local deps (versions conflicting with the root) must win over hoisted ones.
+COPY --from=builder /app/srcs/users/node_modules ./node_modules
 
 # Remove symlink @transcendence/core to later get real artifact
 RUN rm -rf ./node_modules/@transcendence/core
