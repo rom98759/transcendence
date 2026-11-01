@@ -190,3 +190,6 @@ docs/welcomPage.jpg
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+# Redis dumps
+dump.rdb
