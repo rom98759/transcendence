@@ -91,7 +91,6 @@ export class ProfileRepository {
   async deleteOldFile(publicUrl: string): Promise<void> {
     const fileName = publicUrl.replace('/uploads/', '');
     const fullPath = path.join('/app/uploads', fileName);
-    console.log(`${fullPath} : full path`);
     try {
       if (existsSync(fullPath)) {
         await unlink(fullPath);

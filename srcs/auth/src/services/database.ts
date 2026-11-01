@@ -645,7 +645,7 @@ export function cleanExpiredTokens(): void {
   try {
     const result = cleanExpiredTokensStmt.run();
     if (result.changes > 0) {
-      console.log(`Cleaned ${result.changes} expired login tokens`);
+      logger.info({ event: 'tokens_cleaned', count: result.changes });
     }
   } catch (err) {
     const error: any = new Error(
@@ -780,7 +780,7 @@ export function cleanExpiredTotpSecrets(): void {
   try {
     const result = cleanExpiredTotpSecretsStmt.run();
     if (result.changes > 0) {
-      console.log(`Cleaned ${result.changes} expired TOTP setup secrets`);
+      logger.info({ event: 'totp_secrets_cleaned', count: result.changes });
     }
   } catch (err) {
     const error: any = new Error(

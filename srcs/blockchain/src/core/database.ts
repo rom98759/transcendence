@@ -19,7 +19,6 @@ try {
 }
 
 export const db = new Database(DB_PATH);
-console.log('Using SQLite file:', DB_PATH);
 
 // Create table
 try {

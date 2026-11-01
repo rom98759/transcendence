@@ -206,7 +206,7 @@ app.register(moderatorRoutes, { prefix: '/admin' });
 (async () => {
   try {
     const address = await app.listen({ host: '0.0.0.0', port: authenv.AUTH_SERVICE_PORT });
-    console.log(`Auth service listening at ${address}`);
+    logger.info({ event: 'service_listening', address });
 
     await initAdminUser();
     await initInviteUser();
@@ -233,7 +233,6 @@ app.register(moderatorRoutes, { prefix: '/admin' });
     });
   } catch (error: any) {
     logger.error({ event: 'service_startup_failed', err: error?.message || error });
-    console.error(error);
     (globalThis as any).process?.exit?.(1);
   }
 })();

@@ -97,7 +97,7 @@ start();
 
 // ── 10. Graceful Shutdown ───────────────────────────────────────────────────
 process.on('SIGTERM', () => {
-  console.log('Shutting down game service...');
+  fastify.log.info('Shutting down game service...');
   clearInterval(sessionCleanupTimer);
 
   for (const [, session] of sessionStore.entries()) {
