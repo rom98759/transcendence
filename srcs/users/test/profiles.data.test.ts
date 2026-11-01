@@ -62,10 +62,10 @@ const mockDataProfile: UserProfile = {
   username: 'toto',
   createdAt: new Date(),
   avatarUrl: '/uploads/avatar.png',
-  email: 'toto@mail.org',
 };
 
 const mockProfile: ProfileDTO = {
+  authId: 1,
   username: 'toto',
   avatarUrl: '/uploads/avatar.png',
 };

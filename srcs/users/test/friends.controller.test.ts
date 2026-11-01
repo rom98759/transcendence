@@ -14,13 +14,7 @@ vi.mock('../src/services/friends.service.js', () => ({
 }));
 
 import { friendshipService } from '../src/services/friends.service.js';
-import {
-  AppError,
-  ERR_DEFS,
-  FriendshipFullDTO,
-  FriendshipUnifiedDTO,
-  LOG_RESOURCES,
-} from '@transcendence/core';
+import { AppError, ERR_DEFS, FriendshipFullDTO, FriendshipUnifiedDTO } from '@transcendence/core';
 
 const authHeaders = { 'x-user-id': '1', 'x-user-name': 'toto' };
 

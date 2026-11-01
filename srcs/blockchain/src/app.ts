@@ -6,17 +6,19 @@ import { startTournamentConsumer } from './module/block.consumers.js';
 import fs from 'fs';
 
 export async function buildApp() {
-  const app = Fastify({
-    https: {
-      key: fs.readFileSync('/etc/certs/blockchain-service.key'),
-      cert: fs.readFileSync('/etc/certs/blockchain-service.crt'),
-      ca: fs.readFileSync('/etc/ca/ca.crt'),
+  // Tests run over plain HTTP so they do not depend on the container's mTLS certificates
+  const https =
+    process.env.NODE_ENV === 'test'
+      ? null
+      : {
+          key: fs.readFileSync('/etc/certs/blockchain-service.key'),
+          cert: fs.readFileSync('/etc/certs/blockchain-service.crt'),
+          ca: fs.readFileSync('/etc/ca/ca.crt'),
+          requestCert: true,
+          rejectUnauthorized: false,
+        };
 
-      requestCert: true,
-      rejectUnauthorized: false,
-    },
-    logger: true,
-  });
+  const app = Fastify({ https, logger: true });
 
   app.addHook('onReady', async () => {
     startTournamentConsumer(app);
@@ -29,6 +31,7 @@ export async function buildApp() {
   });
 
   app.addHook('onRequest', (request, reply, done) => {
+    if (!https) return done();
     const socket = request.raw.socket as any;
     // Autorise les healthchecks locaux sans mTLS
     if (socket.remoteAddress === '127.0.0.1' || socket.remoteAddress === '::1') {

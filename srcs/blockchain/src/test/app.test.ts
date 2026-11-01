@@ -17,7 +17,7 @@ const app = await buildApp();
 describe('TEST blockchain without Smart Contract', () => {
   test('Blockchain page respond', async () => {
     await app.ready();
-    await supertest(app.server).get('/').expect(200);
+    await supertest(app.server).get('/blockchain').expect(200);
   });
 
   test('with HTTP injection: GET list Tournament', async () => {
@@ -25,13 +25,13 @@ describe('TEST blockchain without Smart Contract', () => {
     for (const data of tournamentsData) {
       await app.inject({
         method: 'POST',
-        url: '/tournaments',
+        url: '/blockchain/tournaments',
         body: data,
       });
     }
     const response = await app.inject({
       method: 'GET',
-      url: '/tournaments',
+      url: '/blockchain/tournaments',
     });
     expect(response.statusCode).toBe(200);
     const body = JSON.parse(response.body);
@@ -50,12 +50,12 @@ describe('TEST blockchain without Smart Contract', () => {
     db.truncateSnapshot();
     await app.inject({
       method: 'POST',
-      url: '/tournaments',
+      url: '/blockchain/tournaments',
       body: tournamentData,
     });
     const response = await app.inject({
       method: 'GET',
-      url: '/tournaments/5',
+      url: '/blockchain/tournaments/5',
     });
     expect(response.statusCode).toBe(200);
     const html = response.payload;
@@ -66,7 +66,7 @@ describe('TEST blockchain without Smart Contract', () => {
     db.truncateSnapshot();
     const response = await app.inject({
       method: 'POST',
-      url: '/tournaments',
+      url: '/blockchain/tournaments',
       body: badtournamentData,
     });
 
@@ -81,12 +81,12 @@ describe('TEST blockchain without Smart Contract', () => {
     db.truncateSnapshot();
     await app.inject({
       method: 'POST',
-      url: '/tournaments',
+      url: '/blockchain/tournaments',
       body: tournamentData,
     });
     const response = await app.inject({
       method: 'POST',
-      url: '/tournaments',
+      url: '/blockchain/tournaments',
       body: tournamentData,
     });
 
@@ -100,7 +100,7 @@ describe('TEST blockchain without Smart Contract', () => {
     db.truncateSnapshot();
     const response = await app.inject({
       method: 'POST',
-      url: '/tournaments',
+      url: '/blockchain/tournaments',
       body: tournamentData,
     });
     if (!blockchainReady) expect(response.statusCode).toBe(200);
@@ -113,7 +113,7 @@ describe.runIf(blockchainReady)('TEST blockchain with Smart Contract', () => {
     db.truncateSnapshot();
     const response = await app.inject({
       method: 'POST',
-      url: '/tournamentspub',
+      url: '/blockchain/tournamentspub',
       body: tournamentBlockData,
     });
 

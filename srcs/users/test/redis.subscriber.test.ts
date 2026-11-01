@@ -80,6 +80,8 @@ describe('initRedisSubscriber', () => {
 
   it('streams USER_UPDATED event on USER_EVENT.UPDATED', async () => {
     vi.mocked(profileService.getProfileByIdOrThrow).mockResolvedValue({
+      id: 1,
+      createdAt: new Date(),
       authId: 1,
       username: 'toto',
       avatarUrl: '/uploads/avatar.png',
@@ -116,6 +118,8 @@ describe('initRedisSubscriber', () => {
 
   it('logs error when USER_UPDATED stream fails', async () => {
     vi.mocked(profileService.getProfileByIdOrThrow).mockResolvedValue({
+      id: 5,
+      createdAt: new Date(),
       authId: 5,
       username: 'alice',
       avatarUrl: null,
