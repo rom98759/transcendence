@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import Button from '../atoms/Button';
+import { AlertMessage } from '../atoms/AlertMessage';
 import { useTranslation } from 'react-i18next';
 
 // Props
@@ -11,16 +12,18 @@ interface FileUploaderProps {
 const FileUploader = ({ onFileSelect, className = '' }: FileUploaderProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isOver, setIsOver] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
   const handleFile = (files: FileList | null) => {
     const file = files?.[0];
     if (!file) return;
 
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
-      alert('unsupported format'); // TODO modal
+      setError(t('file_uploader.unsupported_format'));
       return;
     }
 
+    setError(null);
     onFileSelect(file);
   };
 
@@ -55,6 +58,7 @@ const FileUploader = ({ onFileSelect, className = '' }: FileUploaderProps) => {
         {isOver ? t('file_uploader.drop') : t('file_uploader.drag')}
       </p>
       <p className="text-xs text-gray-400 mt-1">jpg, png (min 64 x 64)</p>
+      <AlertMessage type="error" message={error} className="mt-3" />
     </div>
   );
 };

@@ -327,6 +327,7 @@
     "play": "jouer"
   },
   "file_uploader": {
+    "unsupported_format": "Format non supporté : utilisez une image JPG ou PNG",
     "file_choose": "Choisir un fichier",
     "drop": "Déposer",
     "drag": "Ou le faire glisser jusqu'ici"

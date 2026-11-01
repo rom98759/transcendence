@@ -328,6 +328,7 @@
     "play": "play"
   },
   "file_uploader": {
+    "unsupported_format": "Unsupported format: use a JPG or PNG image",
     "file_choose": "Choose a file",
     "drop": "Drop it",
     "drag": "Or drag and drop it here"

@@ -335,6 +335,7 @@
     "play": "on s'amuse"
   },
   "file_uploader": {
+    "unsupported_format": "Format pourri, ramène du JPG ou du PNG",
     "file_choose": "Fais ton choix mon gars",
     "drop": "Allez, lâche le bouton !",
     "drag": "Ou bien ramène ton image ici"
