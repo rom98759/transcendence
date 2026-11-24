@@ -37,7 +37,7 @@
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
     "envalid": "^8.1.1",
-    "i18next": "^25.7.4",
+    "i18next": "^27.2.7",
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-intervalplural-postprocessor": "^3.0.0",
     "react": "^19.2.3",
